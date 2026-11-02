@@ -5,6 +5,8 @@ Histórias em detalhe ficam em `docs/stories/` quando crescerem; aqui fica o
 índice priorizado.
 
 Deriva de `docs/ROADMAP.md`. Formato de história e DoD: `AGENTS.md` §5 e §6.
+Critérios musicais (referência de afinação, tolerância em cents, alcance de
+detecção, tempo) derivam de `docs/MUSIC.md` (dono: `musician`).
 
 ## Pronto para desenvolvimento (topo)
 
@@ -55,6 +57,17 @@ que eu não reconfigure a cada sessão.
 
 Critérios de aceite (rascunho): salvar/restaurar backend, dispositivo, sample
 rate, buffer e cadeia de plugins entre execuções.
+
+### [CM-005] Metrônomo de estudo — valor: M — tamanho: M — status: draft
+Como um aluno, eu quero um metrônomo configurável, para que eu possa praticar no
+tempo e no compasso certos.
+
+Critérios de aceite (derivados de `docs/MUSIC.md`, dono: musician):
+- BPM ajustável de 20 a 300, com acento audivelmente distinto no tempo forte.
+- Subdivisões: 1/4, 1/8, tercinas, 1/16.
+- Compassos: 2/4, 3/4, 4/4, 6/8, 12/8 e métricas ímpares (5/4, 7/8).
+
+Dependências: nenhuma. Bloqueio: confirmar se haverá detecção de tempo tocado.
 
 ## Não priorizado / ideias
 

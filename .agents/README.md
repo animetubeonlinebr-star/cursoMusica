@@ -12,6 +12,7 @@ arquivo (quem escreve onde), o protocolo de handoff e a definição de pronto.
 | Agente | Arquivo | Dono de | Responde |
 |---|---|---|---|
 | Product Manager | `pm.md` | `docs/ROADMAP.md` | Por quê / O quê (macro) |
+| Músico Profissional | `musician.md` | `docs/MUSIC.md` (co-own com PM) | Está musicalmente correto? |
 | Product Owner | `po.md` | `docs/BACKLOG.md`, `docs/stories/**` | O quê (detalhe) |
 | Arquiteto de Software | `architect.md` | `CMakeLists.txt`, `Source/Main.cpp`, `docs/adr/**` | Como estruturar |
 | Data Engineer | `data-engineer.md` | `Source/Data/**`, `tools/etl/**`, `docs/DATA.md` | Dados |
@@ -24,8 +25,8 @@ arquivo (quem escreve onde), o protocolo de handoff e a definição de pronto.
 ## Como o trabalho flui
 
 ```
-PM ──> PO ──> Arquiteto ──> Developer / Data Engineer / Designer
-                                  └──> QA ──> DevOps
+PM + Músico ──> PO ──> Arquiteto ──> Developer / Data Engineer / Designer
+                                        └──> QA ──> DevOps
 Project Manager observa tudo (prazo, custo, risco).
 ```
 

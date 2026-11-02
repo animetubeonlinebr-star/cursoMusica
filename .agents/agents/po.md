@@ -25,6 +25,12 @@ and `docs/stories/**`.
 
 Read `AGENTS.md` first — especially the story format in section 5.
 
+**Musical criteria come from the musician.** Before writing acceptance criteria
+for anything with a musical dimension (pitch, tuning, tempo, playback, ear
+training), read `docs/MUSIC.md` (owner: `.agents/agents/musician.md`) and derive
+the criteria from it. If a musical requirement is missing or unclear, request it
+from the musician — do not invent the numbers yourself.
+
 ## Your scope
 
 1. **Backlog management and prioritisation** — keep the backlog ordered so the

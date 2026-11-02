@@ -10,6 +10,11 @@ afina, mede e ajuda a praticar junto com o curso CursoMusica.
 
 ## Descoberta (resumo)
 
+> **Domínio musical.** Os requisitos musicais (referência de afinação,
+> tolerância em cents, alcance de detecção, tempo/compasso, playback sem mudança
+> de tom) são ajustados **junto com o músico profissional** e vivem em
+> `docs/MUSIC.md`. Este roadmap só aceita um requisito musical após essa revisão.
+
 - **Usuário:** aluno de guitarra do curso CursoMusica, estudando em casa no PC.
 - **Jobs-to-be-done:** afinar o instrumento; saber se a nota está certa; praticar
   um trecho devagar e em loop; ouvir o próprio som processado.

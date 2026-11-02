@@ -60,6 +60,7 @@ quando precisa, ele **pede** ao dono (ver protocolo de handoff, seção 5).
 | `Source/Data/**`, `tools/etl/**` | `data-engineer` | todos |
 | `.github/workflows/**`, `Dockerfile*`, `deploy/**` | `devops` | todos |
 | `docs/ROADMAP.md` | `pm` | todos |
+| `docs/MUSIC.md` | `musician` (co-own com `pm`) | todos |
 | `docs/BACKLOG.md`, `docs/stories/**` | `po` | todos |
 | `docs/PLAN.md`, `docs/STATUS.md`, `docs/RISKS.md` | `project-manager` | todos |
 | `tests/**`, `docs/QA.md` | `qa` | todos |
@@ -74,6 +75,7 @@ build entrega a linha exata de `target_sources` ao dono.
 | Agente | Arquivo | Dono de | Pergunta que responde |
 |---|---|---|---|
 | Product Manager | `.agents/agents/pm.md` | `docs/ROADMAP.md`, KPIs | **Por quê / O quê** (macro) |
+| Músico Profissional | `.agents/agents/musician.md` | `docs/MUSIC.md` (co-own com PM) | **Está musicalmente correto?** |
 | Product Owner | `.agents/agents/po.md` | `docs/BACKLOG.md`, histórias | **O quê** (detalhe, critérios de aceite) |
 | Arquiteto de Software | `.agents/agents/architect.md` | `CMakeLists.txt`, `Source/Main.cpp`, decisões técnicas | **Como estruturar** |
 | Data Engineer | `.agents/agents/data-engineer.md` | `Source/Data/**`, `tools/etl/**` | **Dados: capturar, limpar, governar** |
@@ -89,7 +91,7 @@ O trabalho flui em uma esteira. Cada etapa tem **entrada**, **saída** e um
 **artefato verificável** que destrava a próxima.
 
 ```
-PM (ROADMAP, KPIs)
+PM + Músico (ROADMAP + MUSIC: o quê, musicalmente correto, KPIs)
    └─> PO (BACKLOG, histórias + critérios de aceite)
           └─> Arquiteto (decisões técnicas, ADR, esqueleto de build)
                  └─> Developer / Data Engineer / Designer (código)
@@ -101,14 +103,16 @@ PM (ROADMAP, KPIs)
 Regras do handoff:
 
 1. **Nada entra em desenvolvimento sem critérios de aceite** escritos pelo PO.
-2. **Nada entra em build sem decisão de arquitetura** quando toca estrutura,
+2. **Nada com dimensão musical entra sem revisão do músico** — o PM e o músico
+   ajustam o requisito juntos; a verdade musical fica em `docs/MUSIC.md`.
+3. **Nada entra em build sem decisão de arquitetura** quando toca estrutura,
    dependência ou contrato entre módulos.
-3. **Nada é considerado pronto sem evidência** (teste, build, log) anexada pelo
+4. **Nada é considerado pronto sem evidência** (teste, build, log) anexada pelo
    QA/DevOps.
-4. Ao terminar uma etapa, o agente **escreve o artefato no seu arquivo** e
+5. Ao terminar uma etapa, o agente **escreve o artefato no seu arquivo** e
    **adiciona uma linha no Registro de decisões** (seção 7) com: data, agente,
    decisão, impacto.
-5. Conflito de escopo se resolve **a favor do dono do arquivo**; quem discorda
+6. Conflito de escopo se resolve **a favor do dono do arquivo**; quem discorda
    abre uma nota em `docs/RISKS.md` (dono: Project Manager).
 
 ### Formato de uma história de usuário (padrão do PO)
@@ -145,6 +149,7 @@ Uma entrega só é "pronta" quando:
 | 2026-11-02 | orquestrador | Framework multi-agente criado; `AGENTS.md` vira memória compartilhada; donos de arquivo definidos na seção 3 | Todos os agentes passam a operar por este contrato |
 | 2026-11-02 | pm | Roadmap inicial em `docs/ROADMAP.md` (v0.1 → v1.0) | PO pode derivar o backlog |
 | 2026-11-02 | po | Backlog inicial em `docs/BACKLOG.md` priorizado por valor | Destrava arquitetura e desenvolvimento |
+| 2026-11-02 | musician + pm | Agente músico profissional criado; requisitos musicais revisados juntos e fixados em `docs/MUSIC.md` (A4=440, tolerância ±5 cents, detecção 80–1400 Hz, playback 25–100% sem mudança de tom) | PO passa a derivar critérios de aceite musicais de `docs/MUSIC.md` |
 
 ## 8. Convenções de código
 
