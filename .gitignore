@@ -1,0 +1,5 @@
+build/
+External/JUCE/
+External/asio/
+.agent_tmp/
+*.user
