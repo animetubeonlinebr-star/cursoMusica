@@ -41,6 +41,7 @@ target_sources(CursoMusica PRIVATE
     Source/Course/ExerciseEvaluator.cpp
     Source/Course/TempoGrid.cpp
     Source/Course/PracticeSession.cpp
+    Source/Course/QuizSession.cpp
     Source/Course/ProgressStore.cpp
     Source/Course/ModuleCatalog.cpp
     Source/UI/Design/LookAndFeel.cpp
@@ -140,6 +141,7 @@ target_sources(CursoMusicaTests PRIVATE
     Source/Course/ExerciseEvaluator.cpp
     Source/Course/TempoGrid.cpp
     Source/Course/PracticeSession.cpp
+    Source/Course/QuizSession.cpp
     Source/Course/ModuleCatalog.cpp)
 
 target_include_directories(CursoMusicaTests PRIVATE Source)

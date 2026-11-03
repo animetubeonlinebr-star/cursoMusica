@@ -4,6 +4,8 @@
 #include "UI/Design/Theme.h"
 #include "UI/PracticePanel.h"
 
+#include <functional>
+
 namespace cursomusica
 {
 
@@ -11,30 +13,39 @@ namespace th = cursomusica::theme;
 
 namespace
 {
-    int lessonHeight (const LessonBlock& lesson)
+    // Concrete root of the subject tree; the modules hang from it. The root
+    // itself is not shown (TreeView::setRootItemVisible(false)).
+    class SubjectRootItem final : public juce::TreeViewItem
     {
-        int height = 22; // block title
-        for (const auto& paragraph : lesson.paragraphs)
-            height += juce::jmax (20, 18 * (paragraph.length() / 78 + 1));
-        return height + th::spacing::sm;
-    }
+    public:
+        bool mightContainSubItems() override { return true; }
+    };
 
-    int exerciseHeight (const Exercise& exercise)
+    // Lays out a wrapped run of text and returns the height it needs.
+    int textHeight (const juce::Font& font, const juce::String& text, int width)
     {
-        int height = 20; // id + title
-        height += juce::jmax (18, 18 * (exercise.goal.length() / 78 + 1));
-        return height + th::spacing::sm;
+        juce::AttributedString s;
+        s.setFont (font);
+        s.setText (text);
+
+        juce::TextLayout layout;
+        layout.createLayout (s, (float) juce::jmax (40, width));
+        return juce::jmax (18, juce::roundToInt (layout.getHeight()));
     }
 }
 
-// Renders the selected module: explanation blocks first, then the gate
-// challenge (REQ-003). The exercises follow in a later story.
-class ModuleComponent::ModuleContentView final : public juce::Component
+// Central pane: explains the current selection. With no topic selected it shows
+// the module overview (objective, CAGED, rhythm, practice track, gate); with a
+// topic selected it shows that topic's detailed explanation; with an exercise
+// demonstrated it shows the exercise card (REQ-003).
+class ModuleComponent::ContentView final : public juce::Component
 {
 public:
-    void setModule (const CourseModule* module)
+    void setSelection (const CourseModule* module, const LessonBlock* topic, const Exercise* exercise)
     {
         current = module;
+        currentTopic = topic;
+        currentExercise = exercise;
         repaint();
     }
 
@@ -46,32 +57,38 @@ public:
 
     int getRequiredHeight() const
     {
+        if (current == nullptr)
+            return 400;
+
+        const int width = juce::jmax (320, getWidth() - 2 * th::spacing::lg);
         int height = 150; // header, meta line and objective
-        if (current != nullptr)
-        {
-            for (const auto& lesson : current->lessons)
-                height += lessonHeight (lesson);
 
-            height += 30; // exercises heading
-            for (const auto& exercise : current->exercises)
-                height += exerciseHeight (exercise);
+        if (currentExercise != nullptr)
+            return height + exerciseDetailHeight (width) + 40;
 
-            // Each CAGED shape paints on two lines (name, then bass/region).
-            if (! current->caged.empty())
-                height += 24 + 40 * (int) current->caged.size() + th::spacing::sm;
+        if (currentTopic != nullptr)
+            return height + topicDetailHeight (width) + 40;
 
-            if (! current->rhythm.empty())
-                height += 24 + 20 * (int) current->rhythm.size() + th::spacing::sm;
+        for (const auto& lesson : current->lessons)
+            height += 22 + lessonSummaryHeight (lesson, width);
 
-            if (current->practice.patternId.isNotEmpty())
-                height += 24 + 20 + 20 + 20 * (int) current->practice.guitarists.size()
-                          + th::spacing::sm;
+        height += 30;
+        for (const auto& exercise : current->exercises)
+            height += 22 + textHeight (th::type::makeFont (th::type::body), exercise.goal, width);
 
-            height += 22 + 40; // gate challenge heading + body
+        if (! current->caged.empty())
+            height += 24 + 40 * (int) current->caged.size() + th::spacing::sm;
 
-            if (! current->sources.isEmpty())
-                height += th::spacing::sm + 24 + 18 * (int) current->sources.size();
-        }
+        if (! current->rhythm.empty())
+            height += 24 + 20 * (int) current->rhythm.size() + th::spacing::sm;
+
+        if (current->practice.patternId.isNotEmpty())
+            height += 24 + 20 + 20 + 20 * (int) current->practice.guitarists.size() + th::spacing::sm;
+
+        height += 22 + 40;
+
+        if (! current->sources.isEmpty())
+            height += th::spacing::sm + 24 + 18 * (int) current->sources.size();
 
         return juce::jmax (height, 400);
     }
@@ -84,9 +101,10 @@ public:
         {
             g.setColour (th::colour::textSecondary);
             g.setFont (th::type::makeFont (th::type::body));
-            g.drawText (lockedMessage.isNotEmpty() ? lockedMessage
-                                                   : juce::String::fromUTF8 ("Selecione um módulo à esquerda."),
-                        bounds, juce::Justification::centred, false);
+            g.drawFittedText (lockedMessage.isNotEmpty()
+                                  ? lockedMessage
+                                  : juce::String::fromUTF8 ("Selecione um módulo à esquerda."),
+                              bounds, juce::Justification::centred, 3);
             return;
         }
 
@@ -95,22 +113,92 @@ public:
         g.setColour (th::colour::textPrimary);
         g.setFont (th::type::makeFont (th::type::title, true));
         g.drawFittedText (juce::String::fromUTF8 ("Módulo ") + juce::String (m.number) + " — " + m.title,
-                          bounds.removeFromTop (34), juce::Justification::centredLeft, 1);
+                          bounds.removeFromTop (34), juce::Justification::centredLeft, 2);
 
-        g.setColour (th::colour::accentAlt);
-        g.setFont (th::type::makeFont (th::type::caption, true));
-        g.drawText (juce::String::fromUTF8 ("NÍVEL ") + juce::String (m.level)
-                        + juce::String::fromUTF8 ("   ·   BPM META ") + juce::String (m.targetBpm)
-                        + juce::String::fromUTF8 ("   ·   GATE 90%"),
-                    bounds.removeFromTop (20), juce::Justification::centredLeft, false);
+        paintMetaLine (g, bounds.removeFromTop (20), m);
+        bounds.removeFromTop (th::spacing::xs);
 
         g.setColour (th::colour::textSecondary);
         g.setFont (th::type::makeFont (th::type::body));
-        g.drawFittedText (m.objective, bounds.removeFromTop (40),
-                          juce::Justification::topLeft, 2);
+        g.drawFittedText (m.objective, bounds.removeFromTop (44), juce::Justification::topLeft, 3);
 
         bounds.removeFromTop (th::spacing::md);
 
+        if (currentExercise != nullptr)
+            paintExercise (g, bounds, *currentExercise);
+        else if (currentTopic != nullptr)
+            paintTopic (g, bounds, *currentTopic);
+        else
+            paintOverview (g, bounds, m);
+    }
+
+private:
+    int lessonSummaryHeight (const LessonBlock& lesson, int width) const
+    {
+        int height = 22;
+        for (const auto& paragraph : lesson.paragraphs)
+            height += textHeight (th::type::makeFont (th::type::body), paragraph, width);
+        return height + th::spacing::sm;
+    }
+
+    int topicDetailHeight (int width) const
+    {
+        int height = 28 + th::spacing::sm; // topic title
+        for (const auto& item : currentTopic->detail)
+            height += itemHeight (item, width);
+        return height;
+    }
+
+    int exerciseDetailHeight (int width) const
+    {
+        int height = 30; // id + title
+        height += 20 + textHeight (th::type::makeFont (th::type::body), currentExercise->goal, width) + 8;
+        height += 20 + textHeight (th::type::makeFont (th::type::body), currentExercise->check, width) + 8;
+
+        if (! currentExercise->quiz.empty())
+            height += 22;
+        for (const auto& q : currentExercise->quiz)
+        {
+            height += textHeight (th::type::makeFont (th::type::body, true), q.prompt, width) + 6;
+            for (const auto& option : q.options)
+                height += textHeight (th::type::makeFont (th::type::body), option, width - 24) + 2;
+            height += th::spacing::sm;
+        }
+        return height;
+    }
+
+    int itemHeight (const ContentItem& item, int width) const
+    {
+        switch (item.kind)
+        {
+            case ContentKind::heading:   return 24 + th::spacing::xs;
+            case ContentKind::paragraph: return textHeight (th::type::makeFont (th::type::body), item.text, width) + 6;
+            case ContentKind::bullet:    return textHeight (th::type::makeFont (th::type::body), item.text, width - 18) + 4;
+            case ContentKind::callout:   return textHeight (th::type::makeFont (th::type::body), item.text, width - 20) + 16;
+            case ContentKind::table:     return 22 + 20 * (int) item.rows.size() + th::spacing::sm;
+        }
+        return 20;
+    }
+
+    void paintMetaLine (juce::Graphics& g, juce::Rectangle<int> area, const CourseModule& m)
+    {
+        juce::String text;
+        if (currentExercise != nullptr)
+            text = currentExercise->id + " — " + currentExercise->title;
+        else if (currentTopic != nullptr)
+            text = juce::String::fromUTF8 ("Tópico ") + currentTopic->id + " — " + currentTopic->title;
+        else
+            text = juce::String::fromUTF8 ("NÍVEL ") + juce::String (m.level)
+                     + juce::String::fromUTF8 ("   ·   BPM META ") + juce::String (m.targetBpm)
+                     + juce::String::fromUTF8 ("   ·   GATE 90%");
+
+        g.setColour (th::colour::accentAlt);
+        g.setFont (th::type::makeFont (th::type::caption, true));
+        g.drawText (text, area, juce::Justification::centredLeft, false);
+    }
+
+    void paintOverview (juce::Graphics& g, juce::Rectangle<int> bounds, const CourseModule& m)
+    {
         for (const auto& lesson : m.lessons)
         {
             g.setColour (th::colour::accent);
@@ -122,11 +210,10 @@ public:
             g.setFont (th::type::makeFont (th::type::body));
             for (const auto& paragraph : lesson.paragraphs)
             {
-                const int height = juce::jmax (20, 18 * (paragraph.length() / 78 + 1));
+                const int height = textHeight (th::type::makeFont (th::type::body), paragraph, bounds.getWidth());
                 g.drawFittedText (paragraph, bounds.removeFromTop (height),
-                                  juce::Justification::topLeft, 3);
+                                  juce::Justification::topLeft, 4);
             }
-
             bounds.removeFromTop (th::spacing::sm);
         }
 
@@ -146,10 +233,9 @@ public:
 
                 g.setColour (th::colour::textSecondary);
                 g.setFont (th::type::makeFont (th::type::body));
-                const int height = juce::jmax (18, 18 * (exercise.goal.length() / 78 + 1));
+                const int height = textHeight (th::type::makeFont (th::type::body), exercise.goal, bounds.getWidth());
                 g.drawFittedText (exercise.goal, bounds.removeFromTop (height),
                                   juce::Justification::topLeft, 2);
-
                 bounds.removeFromTop (th::spacing::sm);
             }
         }
@@ -173,7 +259,6 @@ public:
                                 + "   ·   " + shape.region,
                             bounds.removeFromTop (20), juce::Justification::centredLeft, false);
             }
-
             bounds.removeFromTop (th::spacing::sm);
         }
 
@@ -194,7 +279,6 @@ public:
                 g.drawText (cell.value + juce::String::fromUTF8 ("   ·   ") + cell.syllable,
                             bounds.removeFromTop (20), juce::Justification::centredLeft, false);
             }
-
             bounds.removeFromTop (th::spacing::sm);
         }
 
@@ -221,7 +305,6 @@ public:
                 g.drawText (juce::String::fromUTF8 ("Referência: ") + guitarist,
                             bounds.removeFromTop (20), juce::Justification::centredLeft, false);
             }
-
             bounds.removeFromTop (th::spacing::sm);
         }
 
@@ -241,7 +324,6 @@ public:
         if (! m.sources.isEmpty())
         {
             bounds.removeFromTop (th::spacing::sm);
-
             g.setColour (th::colour::textPrimary);
             g.setFont (th::type::makeFont (th::type::body, true));
             g.drawText (juce::String::fromUTF8 ("Apostilas (curadoria — REQ-006)"),
@@ -250,69 +332,289 @@ public:
             g.setColour (th::colour::textSecondary);
             g.setFont (th::type::makeFont (th::type::caption));
             for (const auto& source : m.sources)
-                g.drawText (source, bounds.removeFromTop (18),
-                            juce::Justification::centredLeft, false);
+                g.drawText (source, bounds.removeFromTop (18), juce::Justification::centredLeft, false);
         }
     }
 
-private:
+    void paintTopic (juce::Graphics& g, juce::Rectangle<int> bounds, const LessonBlock& topic)
+    {
+        g.setColour (th::colour::accent);
+        g.setFont (th::type::makeFont (th::type::title, true));
+        g.drawFittedText (topic.id + ". " + topic.title, bounds.removeFromTop (28),
+                          juce::Justification::centredLeft, 1);
+        bounds.removeFromTop (th::spacing::sm);
+
+        for (const auto& item : topic.detail)
+            paintItem (g, bounds, item);
+    }
+
+    void paintItem (juce::Graphics& g, juce::Rectangle<int>& bounds, const ContentItem& item)
+    {
+        const int width = bounds.getWidth();
+
+        switch (item.kind)
+        {
+            case ContentKind::heading:
+            {
+                bounds.removeFromTop (th::spacing::xs);
+                g.setColour (th::colour::accentAlt);
+                g.setFont (th::type::makeFont (th::type::body, true));
+                g.drawFittedText (item.text, bounds.removeFromTop (22), juce::Justification::centredLeft, 1);
+                break;
+            }
+            case ContentKind::paragraph:
+            {
+                g.setColour (th::colour::textSecondary);
+                g.setFont (th::type::makeFont (th::type::body));
+                const int height = textHeight (th::type::makeFont (th::type::body), item.text, width);
+                g.drawFittedText (item.text, bounds.removeFromTop (height), juce::Justification::topLeft, 6);
+                bounds.removeFromTop (6);
+                break;
+            }
+            case ContentKind::bullet:
+            {
+                const int height = textHeight (th::type::makeFont (th::type::body), item.text, width - 18);
+                auto row = bounds.removeFromTop (height);
+                g.setColour (th::colour::accent);
+                g.setFont (th::type::makeFont (th::type::body, true));
+                g.drawText (juce::String::fromUTF8 ("•"), row.removeFromLeft (16),
+                            juce::Justification::topLeft, false);
+                g.setColour (th::colour::textSecondary);
+                g.setFont (th::type::makeFont (th::type::body));
+                g.drawFittedText (item.text, row, juce::Justification::topLeft, 6);
+                bounds.removeFromTop (4);
+                break;
+            }
+            case ContentKind::callout:
+            {
+                const int height = textHeight (th::type::makeFont (th::type::body), item.text, width - 20) + 12;
+                auto box = bounds.removeFromTop (height);
+                g.setColour (th::colour::accentMuted.withAlpha (0.35f));
+                g.fillRoundedRectangle (box.toFloat(), th::radius::sm);
+                g.setColour (th::colour::textPrimary);
+                g.setFont (th::type::makeFont (th::type::body));
+                g.drawFittedText (item.text, box.reduced (10, 6), juce::Justification::centredLeft, 4);
+                bounds.removeFromTop (th::spacing::xs);
+                break;
+            }
+            case ContentKind::table:
+            {
+                auto area = bounds.removeFromTop (22 + 20 * (int) item.rows.size());
+                const int columns = juce::jmax (1, item.columns.size());
+                const int columnWidth = area.getWidth() / columns;
+
+                auto header = area.removeFromTop (22);
+                g.setColour (th::colour::surfaceRaised);
+                g.fillRoundedRectangle (header.toFloat(), th::radius::sm);
+                g.setFont (th::type::makeFont (th::type::caption, true));
+                for (int c = 0; c < columns; ++c)
+                {
+                    g.setColour (th::colour::accentAlt);
+                    g.drawText (c < item.columns.size() ? item.columns[c] : juce::String(),
+                                header.removeFromLeft (columnWidth).reduced (8, 0),
+                                juce::Justification::centredLeft, false);
+                }
+
+                g.setFont (th::type::makeFont (th::type::caption));
+                for (const auto& row : item.rows)
+                {
+                    auto line = area.removeFromTop (20);
+                    for (int c = 0; c < columns; ++c)
+                    {
+                        g.setColour (th::colour::textSecondary);
+                        g.drawText (c < row.size() ? row[c] : juce::String(),
+                                    line.removeFromLeft (columnWidth).reduced (8, 0),
+                                    juce::Justification::centredLeft, false);
+                    }
+                }
+                bounds.removeFromTop (th::spacing::sm);
+                break;
+            }
+        }
+    }
+
+    void paintExercise (juce::Graphics& g, juce::Rectangle<int> bounds, const Exercise& exercise)
+    {
+        g.setColour (th::colour::accent);
+        g.setFont (th::type::makeFont (th::type::title, true));
+        g.drawFittedText (exercise.id + " — " + exercise.title, bounds.removeFromTop (28),
+                          juce::Justification::centredLeft, 1);
+        bounds.removeFromTop (th::spacing::sm);
+
+        g.setColour (th::colour::textPrimary);
+        g.setFont (th::type::makeFont (th::type::body, true));
+        g.drawText (juce::String::fromUTF8 ("Objetivo"), bounds.removeFromTop (20),
+                    juce::Justification::centredLeft, false);
+        g.setColour (th::colour::textSecondary);
+        g.setFont (th::type::makeFont (th::type::body));
+        g.drawFittedText (exercise.goal,
+                          bounds.removeFromTop (textHeight (th::type::makeFont (th::type::body), exercise.goal, bounds.getWidth())),
+                          juce::Justification::topLeft, 3);
+        bounds.removeFromTop (th::spacing::sm);
+
+        g.setColour (th::colour::textPrimary);
+        g.setFont (th::type::makeFont (th::type::body, true));
+        g.drawText (juce::String::fromUTF8 ("Como o app verifica"), bounds.removeFromTop (20),
+                    juce::Justification::centredLeft, false);
+        g.setColour (th::colour::textSecondary);
+        g.setFont (th::type::makeFont (th::type::body));
+        g.drawFittedText (exercise.check,
+                          bounds.removeFromTop (textHeight (th::type::makeFont (th::type::body), exercise.check, bounds.getWidth())),
+                          juce::Justification::topLeft, 3);
+        bounds.removeFromTop (th::spacing::md);
+
+        if (exercise.quiz.empty())
+            return;
+
+        g.setColour (th::colour::accentAlt);
+        g.setFont (th::type::makeFont (th::type::body, true));
+        g.drawText (juce::String::fromUTF8 ("Questionário"), bounds.removeFromTop (22),
+                    juce::Justification::centredLeft, false);
+
+        for (const auto& q : exercise.quiz)
+        {
+            g.setColour (th::colour::textPrimary);
+            g.setFont (th::type::makeFont (th::type::body, true));
+            g.drawFittedText (q.prompt,
+                              bounds.removeFromTop (textHeight (th::type::makeFont (th::type::body, true), q.prompt, bounds.getWidth())),
+                              juce::Justification::topLeft, 2);
+
+            g.setFont (th::type::makeFont (th::type::body));
+            for (const auto& option : q.options)
+            {
+                auto row = bounds.removeFromTop (textHeight (th::type::makeFont (th::type::body), option, bounds.getWidth() - 24));
+                g.setColour (th::colour::textSecondary);
+                g.drawFittedText (option, row.reduced (16, 0), juce::Justification::topLeft, 2);
+                bounds.removeFromTop (2);
+            }
+            bounds.removeFromTop (th::spacing::sm);
+        }
+    }
+
     const CourseModule* current = nullptr;
+    const LessonBlock* currentTopic = nullptr;
+    const Exercise* currentExercise = nullptr;
     juce::String lockedMessage;
 };
 
-class ModuleComponent::ModuleListModel final : public juce::ListBoxModel
+// A topic (explanation block) under a module. Selecting it loads its detail.
+class ModuleComponent::TopicTreeItem final : public juce::TreeViewItem
 {
 public:
-    std::function<void (int)> onSelectionChanged;
-    std::function<bool (int)> isUnlocked;
+    TopicTreeItem (ModuleComponent& owner, int moduleNumber, int topicIndex,
+                   juce::String topicId, juce::String topicTitle)
+        : ownerRef (owner), module (moduleNumber), index (topicIndex),
+          id (std::move (topicId)), title (std::move (topicTitle))
+    {}
 
-    int getNumRows() override
+    bool mightContainSubItems() override { return false; }
+    int getItemHeight() const override { return 24; }
+
+    void itemSelectionChanged (bool isNowSelected) override
     {
-        return (int) ModuleCatalog::getModules().size();
+        if (isNowSelected)
+            ownerRef.selectTopic (module, index);
     }
 
-    void paintListBoxItem (int row, juce::Graphics& g, int width, int height, bool selected) override
+    void paintItem (juce::Graphics& g, int width, int height) override
     {
-        const auto& modules = ModuleCatalog::getModules();
-        if (row < 0 || row >= (int) modules.size())
+        g.setColour (isSelected() ? th::colour::textPrimary : th::colour::textSecondary);
+        g.setFont (th::type::makeFont (th::type::body, isSelected()));
+        g.drawFittedText (id + ". " + title, 4, 0, width - 8, height,
+                          juce::Justification::centredLeft, 1);
+    }
+
+private:
+    ModuleComponent& ownerRef;
+    int module = 0;
+    int index = 0;
+    juce::String id;
+    juce::String title;
+};
+
+// A module node in the left menu. Expanding it reveals its topics.
+class ModuleComponent::SubjectTreeItem final : public juce::TreeViewItem
+{
+public:
+    SubjectTreeItem (ModuleComponent& owner, const CourseModule& module)
+        : ownerRef (owner), number (module.number), title (module.title),
+          implemented (module.implemented)
+    {
+        setOpen (false);
+
+        if (implemented)
+            for (int i = 0; i < (int) module.lessons.size(); ++i)
+                addSubItem (new TopicTreeItem (owner, number, i, module.lessons[(size_t) i].id,
+                                               module.lessons[(size_t) i].title));
+    }
+
+    int getModuleNumber() const noexcept { return number; }
+    bool isImplemented() const noexcept { return implemented; }
+
+    bool mightContainSubItems() override { return implemented; }
+
+    int getItemHeight() const override { return 46; }
+
+    void itemOpennessChanged (bool isNowOpen) override
+    {
+        if (isNowOpen)
+            ownerRef.selectTopic (number, 0);
+    }
+
+    void itemClicked (const juce::MouseEvent&) override
+    {
+        if (! implemented)
             return;
 
-        const auto& m = modules[(size_t) row];
-        const bool unlocked = isUnlocked == nullptr || isUnlocked (m.number);
+        if (isOpen())
+            setOpen (false);
+        else
+            ownerRef.selectTopic (number, 0);
+    }
 
-        if (selected)
+    void itemSelectionChanged (bool isNowSelected) override
+    {
+        if (isNowSelected)
+            ownerRef.showModule (number);
+    }
+
+    void paintItem (juce::Graphics& g, int width, int height) override
+    {
+        const bool unlocked = ownerRef.progressStore.isModuleUnlocked (number);
+        const bool isSel = isSelected();
+
+        if (isSel)
         {
             g.setColour (th::colour::accentMuted);
             g.fillRoundedRectangle (juce::Rectangle<float> (0.0f, 0.0f, (float) width, (float) height).reduced (2.0f),
                                     th::radius::sm);
         }
 
-        g.setColour (selected ? th::colour::textPrimary
-                              : (unlocked ? th::colour::textSecondary : th::colour::textDisabled));
+        g.setColour (isSel ? th::colour::textPrimary
+                            : (unlocked ? th::colour::textSecondary : th::colour::textDisabled));
         g.setFont (th::type::makeFont (th::type::body, true));
-        const auto label = juce::String::fromUTF8 ("Módulo ") + juce::String (m.number)
-                             + (m.implemented ? juce::String()
-                                              : juce::String::fromUTF8 ("  ·  em preparação"));
-        g.drawText (label, 12, 4, width - 20, 20, juce::Justification::centredLeft, false);
+        g.drawText (juce::String::fromUTF8 ("Módulo ") + juce::String (number)
+                        + (implemented ? juce::String() : juce::String::fromUTF8 ("  ·  em preparação")),
+                    8, 4, width - 16, 20, juce::Justification::centredLeft, false);
 
-        g.setColour (m.implemented ? th::colour::textSecondary : th::colour::accentMuted);
+        g.setColour (implemented ? th::colour::textSecondary : th::colour::accentMuted);
         g.setFont (th::type::makeFont (th::type::caption));
-        g.drawFittedText (m.title, 12, 24, width - 20, 20, juce::Justification::centredLeft, 1);
+        g.drawFittedText (title, 8, 24, width - 16, 20, juce::Justification::centredLeft, 1);
 
         if (! unlocked)
         {
             g.setColour (th::colour::textDisabled);
             g.setFont (th::type::makeFont (th::type::caption, true));
-            g.drawText (juce::String::fromUTF8 ("bloqueado"),
-                        width - 90, 4, 78, 20, juce::Justification::centredRight, false);
+            g.drawText (juce::String::fromUTF8 ("bloqueado"), width - 90, 4, 78, 20,
+                        juce::Justification::centredRight, false);
         }
     }
 
-    void selectedRowsChanged (int lastRow) override
-    {
-        if (onSelectionChanged != nullptr)
-            onSelectionChanged (lastRow);
-    }
+private:
+    ModuleComponent& ownerRef;
+    int number = 0;
+    juce::String title;
+    bool implemented = false;
 };
 
 ModuleComponent::ModuleComponent (AudioEngine& engine)
@@ -323,7 +625,7 @@ ModuleComponent::ModuleComponent (AudioEngine& engine)
     titleLabel.setColour (juce::Label::textColourId, th::colour::textPrimary);
     addAndMakeVisible (titleLabel);
 
-    subtitleLabel.setText (juce::String::fromUTF8 ("Explicação antes do desafio, progressão linear"),
+    subtitleLabel.setText (juce::String::fromUTF8 ("Assunto à esquerda, explicação no centro, prática à direita"),
                            juce::dontSendNotification);
     subtitleLabel.setFont (th::type::makeFont (th::type::body));
     subtitleLabel.setColour (juce::Label::textColourId, th::colour::textSecondary);
@@ -332,7 +634,6 @@ ModuleComponent::ModuleComponent (AudioEngine& engine)
     closeButton.onClick = [this] { if (onCloseRequested != nullptr) onCloseRequested(); };
     addAndMakeVisible (closeButton);
 
-    // Collapse/expand the side panels so the lesson content can use the width.
     listToggle.setClickingTogglesState (true);
     listToggle.setToggleState (true, juce::dontSendNotification);
     listToggle.onClick = [this] { setListVisible (listToggle.getToggleState()); };
@@ -343,16 +644,14 @@ ModuleComponent::ModuleComponent (AudioEngine& engine)
     practiceToggle.onClick = [this] { setPracticeVisible (practiceToggle.getToggleState()); };
     addAndMakeVisible (practiceToggle);
 
-    listModel = std::make_unique<ModuleListModel>();
-    listModel->onSelectionChanged = [this] (int row) { showModule (row + 1); };
-    listModel->isUnlocked = [this] (int number) { return progressStore.isModuleUnlocked (number); };
+    subjectTree.setRootItemVisible (false);
+    subjectTree.setDefaultOpenness (false);
+    subjectTree.setMultiSelectEnabled (false);
+    subjectTree.setIndentSize (14);
+    subjectTree.setColour (juce::TreeView::backgroundColourId, th::colour::surface);
+    addAndMakeVisible (subjectTree);
 
-    moduleList.setModel (listModel.get());
-    moduleList.setRowHeight (48);
-    moduleList.setColour (juce::ListBox::backgroundColourId, th::colour::surface);
-    addAndMakeVisible (moduleList);
-
-    contentView = std::make_unique<ModuleContentView>();
+    contentView = std::make_unique<ContentView>();
     contentViewport.setViewedComponent (contentView.get(), false);
     contentViewport.setScrollBarsShown (true, false);
     addAndMakeVisible (contentViewport);
@@ -361,8 +660,9 @@ ModuleComponent::ModuleComponent (AudioEngine& engine)
     practicePanel->onGateResult = [this] (int moduleNumber, bool passed)
     {
         progressStore.recordGateResult (moduleNumber, passed);
-        refreshModuleList();
+        refreshSubjectTree();
     };
+    practicePanel->onExerciseSelected = [this] (const Exercise* exercise) { showExercise (exercise); };
     addAndMakeVisible (*practicePanel);
 
     hintLabel.setFont (th::type::makeFont (th::type::caption));
@@ -373,8 +673,12 @@ ModuleComponent::ModuleComponent (AudioEngine& engine)
         juce::dontSendNotification);
     addAndMakeVisible (hintLabel);
 
-    // Open on the first module so the explanation is visible immediately.
-    moduleList.selectRow (0);
+    buildTree();
+
+    // Open on the first module so its topics are visible immediately.
+    if (subjectRoot != nullptr && subjectRoot->getNumSubItems() > 0)
+        if (auto* first = subjectRoot->getSubItem (0))
+            first->setSelected (true, true);
 
     startTimerHz (20); // drains detected notes while an exercise runs
 }
@@ -382,6 +686,17 @@ ModuleComponent::ModuleComponent (AudioEngine& engine)
 ModuleComponent::~ModuleComponent()
 {
     stopTimer();
+    subjectTree.setRootItem (nullptr);
+}
+
+void ModuleComponent::buildTree()
+{
+    subjectRoot = std::make_unique<SubjectRootItem>();
+
+    for (const auto& module : ModuleCatalog::getModules())
+        subjectRoot->addSubItem (new SubjectTreeItem (*this, module));
+
+    subjectTree.setRootItem (subjectRoot.get());
 }
 
 void ModuleComponent::timerCallback()
@@ -390,17 +705,16 @@ void ModuleComponent::timerCallback()
         practicePanel->poll();
 }
 
-void ModuleComponent::refreshModuleList()
+void ModuleComponent::refreshSubjectTree()
 {
-    moduleList.updateContent();
-    moduleList.repaint();
+    subjectTree.repaint();
 }
 
 void ModuleComponent::setListVisible (bool shouldBeVisible)
 {
     listVisible = shouldBeVisible;
     listToggle.setToggleState (shouldBeVisible, juce::dontSendNotification);
-    moduleList.setVisible (shouldBeVisible);
+    subjectTree.setVisible (shouldBeVisible);
     listToggle.setButtonText (shouldBeVisible ? juce::String::fromUTF8 ("Módulos")
                                               : juce::String::fromUTF8 ("> Módulos"));
     resized();
@@ -425,12 +739,14 @@ void ModuleComponent::showModule (int number)
                                      + juce::String::fromUTF8 (" bloqueado.\nConclua o gate do módulo ")
                                      + juce::String (juce::jmax (1, number - 1))
                                      + juce::String::fromUTF8 (" com ≥90% para abrir."));
-    contentView->setModule (unlocked ? module : nullptr);
-    contentView->setSize (contentViewport.getMaximumVisibleWidth(),
-                          contentView->getRequiredHeight());
+
+    selection = {};
+    selection.module = unlocked ? module : nullptr;
 
     if (practicePanel != nullptr)
         practicePanel->setModule (unlocked ? module : nullptr);
+
+    updateContent();
 
     if (! unlocked && module != nullptr)
     {
@@ -448,6 +764,37 @@ void ModuleComponent::showModule (int number)
             "Progressão linear: conclua o gate (≥90%) do módulo atual para abrir o próximo."),
             juce::dontSendNotification);
     }
+}
+
+void ModuleComponent::selectTopic (int moduleNumber, int topicIndex)
+{
+    const auto* module = ModuleCatalog::findModule (moduleNumber);
+    if (module == nullptr || ! progressStore.isModuleUnlocked (moduleNumber))
+        return;
+
+    if (topicIndex < 0 || topicIndex >= (int) module->lessons.size())
+        return;
+
+    selection.module = module;
+    selection.topic = &module->lessons[(size_t) topicIndex];
+    selection.exercise = nullptr;
+
+    if (practicePanel != nullptr)
+        practicePanel->setTopicFilter (module->lessons[(size_t) topicIndex].id);
+
+    updateContent();
+}
+
+void ModuleComponent::showExercise (const Exercise* exercise)
+{
+    selection.exercise = exercise;
+    updateContent();
+}
+
+void ModuleComponent::updateContent()
+{
+    contentView->setSelection (selection.module, selection.topic, selection.exercise);
+    contentView->setSize (contentViewport.getMaximumVisibleWidth(), contentView->getRequiredHeight());
 }
 
 void ModuleComponent::paint (juce::Graphics& g)
@@ -474,22 +821,21 @@ void ModuleComponent::resized()
 
     bounds.removeFromTop (th::spacing::md);
 
-    // Either side panel can be collapsed to give the lesson content the width.
+    // Either side pane can be collapsed to give the centre the width.
     if (listVisible)
     {
-        moduleList.setBounds (bounds.removeFromLeft (260));
+        subjectTree.setBounds (bounds.removeFromLeft (260));
         bounds.removeFromLeft (th::spacing::md);
     }
 
     if (practiceVisible)
     {
-        practicePanel->setBounds (bounds.removeFromRight (320));
+        practicePanel->setBounds (bounds.removeFromRight (340));
         bounds.removeFromRight (th::spacing::md);
     }
 
     contentViewport.setBounds (bounds);
-    contentView->setSize (contentViewport.getMaximumVisibleWidth(),
-                          contentView->getRequiredHeight());
+    contentView->setSize (contentViewport.getMaximumVisibleWidth(), contentView->getRequiredHeight());
 }
 
 } // namespace cursomusica

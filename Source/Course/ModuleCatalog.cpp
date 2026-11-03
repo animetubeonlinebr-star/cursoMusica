@@ -17,6 +17,23 @@ namespace
         return b;
     }
 
+    // Attaches the rich explanation unfolded in the central panel.
+    LessonBlock detail (LessonBlock b, std::vector<ContentItem> items)
+    {
+        b.detail = std::move (items);
+        return b;
+    }
+
+    QuizQuestion question (const char* prompt, std::initializer_list<const char*> options, int correctIndex)
+    {
+        QuizQuestion q;
+        q.prompt = juce::String::fromUTF8 (prompt);
+        for (auto* o : options)
+            q.options.add (juce::String::fromUTF8 (o));
+        q.correctIndex = correctIndex;
+        return q;
+    }
+
     Exercise exercise (juce::String id, juce::String title, juce::String goal, juce::String check)
     {
         Exercise e;
@@ -53,11 +70,141 @@ namespace
         m.implemented = true;
 
         m.lessons = {
-            block ("A", juce::String::fromUTF8 ("Partes da guitarra e do violão"), {
+            detail (block ("A", juce::String::fromUTF8 ("Partes da guitarra e do violão"), {
                 "Corpo, braço, cavalete (ponte), rastilho, pestana (nut), tarraxas, "
                 "trastes, casas, cordas (6ª a 1ª), captadores, volume e tom.",
                 "No violão: a boca, o tampo e as cordas de nylon — som mais doce e "
                 "menor tensão que as cordas de aço da guitarra."
+            }), {
+                ContentItem::paragraph (juce::String::fromUTF8 (
+                    "A guitarra e o violão são instrumentos de cordas. Compartilham a "
+                    "construção geral, mas diferem na forma de produzir e amplificar o som: "
+                    "o violão usa a caixa de ressonância; a guitarra elétrica depende de "
+                    "captação e amplificação.")),
+                ContentItem::heading (juce::String::fromUTF8 ("O corpo")),
+                ContentItem::paragraph (juce::String::fromUTF8 (
+                    "Parte principal e mais volumosa. É nele que ficam os componentes que "
+                    "produzem e controlam o som.")),
+                ContentItem::bullet (juce::String::fromUTF8 (
+                    "No violão: a caixa de ressonância amplifica naturalmente a vibração das "
+                    "cordas. A vibração é transmitida ao cavalete e ao tampo, movimentando o "
+                    "ar dentro da caixa.")),
+                ContentItem::bullet (juce::String::fromUTF8 (
+                    "Na guitarra elétrica: corpo geralmente maciço; sustenta ponte, "
+                    "captadores e controles, e depende do sistema de captação para soar.")),
+                ContentItem::callout (juce::String::fromUTF8 (
+                    "Para memorizar: o corpo é a estrutura principal; no violão acústico, "
+                    "também é a caixa de ressonância.")),
+                ContentItem::heading (juce::String::fromUTF8 ("O braço")),
+                ContentItem::paragraph (juce::String::fromUTF8 (
+                    "Parte alongada que liga o corpo às tarraxas. Sobre ele ficam a escala, "
+                    "os trastes e as casas. É onde a mão de execução posiciona os dedos.")),
+                ContentItem::bullet (juce::String::fromUTF8 (
+                    "Pressionar a corda numa casa muda o comprimento vibrante e, portanto, a "
+                    "altura da nota.")),
+                ContentItem::bullet (juce::String::fromUTF8 (
+                    "Corda solta = nota mais grave; avançar pelas casas deixa a nota "
+                    "progressivamente mais aguda.")),
+                ContentItem::callout (juce::String::fromUTF8 (
+                    "Para memorizar: o braço permite posicionar os dedos e modificar as notas.")),
+                ContentItem::heading (juce::String::fromUTF8 ("O cavalete ou ponte")),
+                ContentItem::paragraph (juce::String::fromUTF8 (
+                    "Sustenta as cordas sobre o corpo e transmite as vibrações ao tampo.")),
+                ContentItem::heading (juce::String::fromUTF8 ("O rastilho")),
+                ContentItem::paragraph (juce::String::fromUTF8 (
+                    "Encaixado no cavalete, serve de apoio às cordas no lado do corpo.")),
+                ContentItem::bullet (juce::String::fromUTF8 ("Determina a altura das cordas em relação ao corpo.")),
+                ContentItem::bullet (juce::String::fromUTF8 ("Ajuda a transmitir vibrações e participa da entonação.")),
+                ContentItem::callout (juce::String::fromUTF8 (
+                    "Altura inadequada deixa o instrumento desconfortável de tocar.")),
+                ContentItem::heading (juce::String::fromUTF8 ("A pestana")),
+                ContentItem::paragraph (juce::String::fromUTF8 (
+                    "Pequena peça na extremidade superior do braço, junto à cabeça, com sulcos "
+                    "que mantêm as cordas separadas e posicionadas.")),
+                ContentItem::bullet (juce::String::fromUTF8 ("Mantém o espaçamento entre as cordas.")),
+                ContentItem::bullet (juce::String::fromUTF8 ("Determina a altura das cordas no início do braço.")),
+                ContentItem::bullet (juce::String::fromUTF8 ("Apoia as cordas quando tocadas soltas.")),
+                ContentItem::callout (juce::String::fromUTF8 (
+                    "Pestana fica no início da escala (junto às tarraxas); rastilho fica no "
+                    "cavalete, sobre o corpo. Funções parecidas, posições diferentes.")),
+                ContentItem::heading (juce::String::fromUTF8 ("As tarraxas")),
+                ContentItem::paragraph (juce::String::fromUTF8 (
+                    "Ficam na cabeça do instrumento e afinam as cordas; cada corda tem a sua.")),
+                ContentItem::bullet (juce::String::fromUTF8 ("Aumentar a tensão deixa a nota mais aguda.")),
+                ContentItem::bullet (juce::String::fromUTF8 ("Diminuir a tensão deixa a nota mais grave.")),
+                ContentItem::callout (juce::String::fromUTF8 (
+                    "Para memorizar: as tarraxas controlam a tensão e a afinação das cordas.")),
+                ContentItem::heading (juce::String::fromUTF8 ("Os trastes e as casas")),
+                ContentItem::paragraph (juce::String::fromUTF8 (
+                    "Trastes são as barras metálicas transversais sobre a escala; casas são os "
+                    "espaços entre dois trastes. Não confunda: traste é a barra, casa é o espaço.")),
+                ContentItem::bullet (juce::String::fromUTF8 (
+                    "Cada casa corresponde a um semitom na afinação convencional.")),
+                ContentItem::table (juce::StringArray { "Posição", "Nota (corda Mi)" },
+                    { juce::StringArray { "Corda solta", "Mi" },
+                      juce::StringArray { "1ª casa", "Fá" },
+                      juce::StringArray { "2ª casa", "Fá sustenido" },
+                      juce::StringArray { "3ª casa", "Sol" },
+                      juce::StringArray { "4ª casa", "Sol sustenido" },
+                      juce::StringArray { "5ª casa", "Lá" } }),
+                ContentItem::callout (juce::String::fromUTF8 (
+                    "Para memorizar: as casas são os espaços onde posicionamos os dedos.")),
+                ContentItem::heading (juce::String::fromUTF8 ("As cordas: nylon e aço")),
+                ContentItem::paragraph (juce::String::fromUTF8 (
+                    "A corda vibra e produz uma frequência que depende do comprimento vibrante, "
+                    "da tensão e da massa por unidade de comprimento. O par guitarra/violão "
+                    "costuma ter seis cordas.")),
+                ContentItem::bullet (juce::String::fromUTF8 (
+                    "Nylon (violão clássico): toque mais macio, menor tensão, timbre mais "
+                    "suave — associado a clássico, MPB e bossa nova.")),
+                ContentItem::bullet (juce::String::fromUTF8 (
+                    "Aço (guitarra e violões de aço): timbre mais brilhante, mais agudos, "
+                    "toque mais rígido e maior tensão; essencial para os captadores magnéticos.")),
+                ContentItem::table (juce::StringArray { "Característica", "Nylon", "Aço" },
+                    { juce::StringArray { "Timbre", "Mais suave", "Mais brilhante" },
+                      juce::StringArray { "Toque", "Geralmente mais macio", "Geralmente mais firme" },
+                      juce::StringArray { "Uso tradicional", "Violão clássico", "Guitarra e violão de aço" },
+                      juce::StringArray { "Material", "Polímeros sintéticos", "Metal" },
+                      juce::StringArray { "Captação magnética", "Não adequada", "Adequada" } }),
+                ContentItem::callout (juce::String::fromUTF8 (
+                    "Nunca coloque cordas de aço num violão feito para nylon: a tensão pode "
+                    "danificar o instrumento.")),
+                ContentItem::heading (juce::String::fromUTF8 ("Os captadores")),
+                ContentItem::paragraph (juce::String::fromUTF8 (
+                    "Componentes eletrônicos das guitarras: transformam a vibração das cordas "
+                    "metálicas em sinal elétrico, que segue para o amplificador.")),
+                ContentItem::bullet (juce::String::fromUTF8 (
+                    "Single coil: uma bobina; som mais brilhante e definido, sujeito a ruído.")),
+                ContentItem::bullet (juce::String::fromUTF8 (
+                    "Humbucker: duas bobinas; som mais encorpado, boa resposta com distorção e "
+                    "menos ruído.")),
+                ContentItem::heading (juce::String::fromUTF8 ("Controle de volume e de tom")),
+                ContentItem::bullet (juce::String::fromUTF8 (
+                    "Volume: regula a intensidade do sinal enviado pelo instrumento.")),
+                ContentItem::bullet (juce::String::fromUTF8 (
+                    "Tom (tone): na maioria das guitarras passivas, reduz os agudos — tom aberto "
+                    "soa brilhante, tom fechado soa mais escuro e suave.")),
+                ContentItem::heading (juce::String::fromUTF8 ("Resumo dos componentes")),
+                ContentItem::table (juce::StringArray { "Componente", "Função principal" },
+                    { juce::StringArray { "Corpo", "Estrutura principal do instrumento" },
+                      juce::StringArray { "Braço", "Sustenta a escala e permite posicionar os dedos" },
+                      juce::StringArray { "Cavalete/ponte", "Sustenta as cordas e transmite vibrações" },
+                      juce::StringArray { "Rastilho", "Apoia as cordas no cavalete" },
+                      juce::StringArray { "Pestana", "Organiza e apoia as cordas no início do braço" },
+                      juce::StringArray { "Tarraxas", "Regulam a tensão e a afinação" },
+                      juce::StringArray { "Trastes", "Determinam os pontos de apoio das cordas" },
+                      juce::StringArray { "Casas", "Espaços onde posicionamos os dedos" },
+                      juce::StringArray { "Cordas", "Produzem as vibrações sonoras" },
+                      juce::StringArray { "Captadores", "Transformam vibrações em sinais elétricos" },
+                      juce::StringArray { "Volume", "Regula a intensidade do sinal" },
+                      juce::StringArray { "Tom", "Modifica a característica tonal do sinal" } }),
+                ContentItem::heading (juce::String::fromUTF8 ("Como tudo funciona em conjunto")),
+                ContentItem::bullet (juce::String::fromUTF8 (
+                    "Guitarra: toque na corda → vibração → captador gera sinal elétrico → "
+                    "circuito e controles → amplificador → alto-falante.")),
+                ContentItem::bullet (juce::String::fromUTF8 (
+                    "Violão: toque na corda → vibração → cavalete transmite ao corpo → tampo e "
+                    "caixa de ressonância movimentam o ar → som projetado naturalmente.")),
             }),
             block ("B", juce::String::fromUTF8 ("Notas musicais"), {
                 "Sete nomes naturais: Dó Ré Mi Fá Sol Lá Si (C D E F G A B).",
@@ -122,9 +269,9 @@ namespace
         };
 
         m.exercises = {
-            exercise ("EX-1.1", juce::String::fromUTF8 ("Cordas soltas"),
-                      juce::String::fromUTF8 ("Nomear as 6 cordas soltas e a nota de cada uma."),
-                      juce::String::fromUTF8 ("Pergunta com resposta esperada.")),
+            exercise ("EX-1.1", juce::String::fromUTF8 ("Questionário: conhecendo o instrumento"),
+                      juce::String::fromUTF8 ("Responder ao teste de aprendizagem do Módulo 1, uma questão por vez."),
+                      juce::String::fromUTF8 ("Acerto ≥90% nas questões do questionário.")),
             exercise ("EX-1.2", juce::String::fromUTF8 ("Corda 6ª e casa 5"),
                       juce::String::fromUTF8 ("Tocar a 6ª solta (Mi) e a casa 5 (Lá)."),
                       juce::String::fromUTF8 ("Detector: E2 solto e A2 na 5ª casa.")),
@@ -148,6 +295,54 @@ namespace
                       juce::String::fromUTF8 ("on_grid_ratio ≥ 0,75 nas batidas (REQ-015).")),
         };
 
+        // Topic each exercise belongs to, so the right panel follows the topic
+        // selected on the left (empty -> module-wide).
+        m.exercises[0].lessonId = "A";   // quiz on the instrument parts
+        m.exercises[1].lessonId = "D";   // notes on the fretboard
+        m.exercises[2].lessonId = "B";   // natural notes / scale
+        m.exercises[3].lessonId = "F";   // chords / CAGED
+        m.exercises[4].lessonId = "E";   // barre chords
+        m.exercises[5].lessonId = "F";   // CAGED shapes
+        m.exercises[6].lessonId = "H";   // chord symbols
+        m.exercises[7].lessonId = "I";   // rhythm on the grid
+
+        // EX-1.1 is the learning quiz of the module (Questionario_m1). Questions
+        // are answered one at a time; the gate is the same 90% (REQ-009).
+        m.exercises[0].quiz = {
+            question ("Qual é a principal função das tarraxas?",
+                      { "Modificar o volume",
+                        "Regular a tensão e a afinação das cordas",
+                        "Amplificar o som",
+                        "Sustentar os trastes" }, 1),
+            question ("Qual é a diferença entre trastes e casas?",
+                      { "São exatamente a mesma coisa",
+                        "Trastes são espaços e casas são barras",
+                        "Trastes são barras metálicas e casas são os espaços entre elas",
+                        "Trastes controlam o volume" }, 2),
+            question ("Qual componente transforma a vibração das cordas metálicas em sinal elétrico?",
+                      { "Pestana", "Rastilho", "Captador", "Cavalete" }, 2),
+            question ("Qual é a função da pestana?",
+                      { "Regular o tom",
+                        "Apoiar e organizar as cordas no início do braço",
+                        "Amplificar o som",
+                        "Controlar o volume" }, 1),
+            question ("Qual característica é geralmente associada às cordas de nylon?",
+                      { "Timbre mais suave e toque geralmente mais macio",
+                        "Produção obrigatória de sinal magnético",
+                        "Maior brilho em todas as situações",
+                        "Uso exclusivo em guitarras elétricas" }, 0),
+            question ("Qual é a função do controle de tom?",
+                      { "Afinar as cordas",
+                        "Modificar a característica tonal do sinal",
+                        "Alterar o comprimento do braço",
+                        "Prender as cordas" }, 1),
+            question ("Como o violão acústico amplifica naturalmente o som?",
+                      { "Por meio dos captadores magnéticos",
+                        "Por meio das tarraxas",
+                        "Por meio da caixa de ressonância",
+                        "Por meio do controle de volume" }, 2),
+        };
+
         // Playable specs for the exercises the app can verify with the detector.
         m.exercises[1].targets = notes ({ "E2", "A2" });                    // EX-1.2
         m.exercises[2].targets = notes ({ "C4", "D4", "E4", "F4", "G4", "A4", "B4", "C5" }); // EX-1.3
@@ -161,6 +356,7 @@ namespace
             juce::String::fromUTF8 ("Tocar C – G – Am – F a 60 BPM, na grade do metrônomo."),
             juce::String::fromUTF8 ("Acordes reconhecidos e alinhados à grade (≥ 0,75).")));
         gate.isGate = true;
+        gate.lessonId = "I";   // the gate is played on the metronome grid
         gate.chordProgression = {
             { 0, 4, 7 },   // C
             { 7, 11, 2 },  // G
