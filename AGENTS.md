@@ -32,13 +32,53 @@ lock-free; análise pesada (YIN) em thread dedicada.
 > modular**: ensina (explicação antes do desafio), demonstra com áudio, gera
 > desafios, mede tudo e **avalia improvisação** (notas de repouso × tensão). O
 > aluno avança por níveis com **gate de 90% de acerto** e faz tudo dentro do
-> software. Requisitos rastreáveis: `docs/REQUIREMENTS.md` (REQ-001..REQ-014).
+> software. Requisitos rastreáveis: `docs/REQUIREMENTS.md` (REQ-001..REQ-016).
 
-> **Nota de branch.** O código do aplicativo JUCE está hoje em
-> `feature/juce-audio-app` (ainda não mesclado em `main`). O mapa de
-> propriedade da seção 3 descreve o projeto-alvo: quando essa branch for
-> mesclada, os donos passam a valer diretamente. Enquanto isso, trabalhe na
-> branch do app para código e nesta branch para o framework de agentes.
+> **Afinador como ferramenta transversal.** O afinador é um **menu próprio**,
+> acessível a qualquer momento, **fora dos módulos** — não é etapa de curso. Abre
+> uma janela onde o aluno escolhe o *pitch* de referência (padrão **A = 440 Hz**,
+> editável).
+
+**Estrutura de diretórios (código do app):**
+
+```
+CMakeLists.txt
+External/JUCE/            # dependência (não editar)
+Source/
+  Main.cpp                # entry point JUCEApplication
+  MainComponent.h/.cpp    # janela principal, compõe os painéis e o menu
+  Audio/                  # ENGINE (dono: developer)
+    AudioEngine.h/.cpp    # device I/O, callback RT, análise em thread dedicada
+    PitchDetector.h/.cpp  # YIN monofônico, allocation-free
+    PluginHost.h/.cpp     # format manager, scan VST3, instanciação
+    PluginChain.h/.cpp    # cadeia de plugins na entrada (RT-safe)
+  UI/                     # INTERFACE (dono: designer)
+    Design/Theme.h        # tokens de design (fonte única de verdade)
+    Design/LookAndFeel.*  Design/Panel.*  Design/DESIGN.md
+    LevelMeter.*  TunerDisplay.*
+    DevicePanel.*  TransportPanel.*
+    SettingsComponent.*   # menu de configuração (dispositivo + VST3)
+.agents/agents/           # sub-agentes
+docs/                     # requisitos, música, planos, ADRs
+deploy/windows/           # instalador NSIS (REQ-014)
+```
+
+**Menu de configuração** (`Source/UI/SettingsComponent.*`), aberto pelo botão
+**Settings** no cabeçalho:
+
+- **Áudio:** `juce::AudioDeviceSelectorComponent` sobre o `AudioDeviceManager` —
+  backend (ASIO/WASAPI), entrada, saída, taxa, buffer e roteamento.
+- **VST3:** **Scan** em thread de fundo, lista de disponíveis, **Add to input
+  chain**, lista da cadeia, **Remove** e **Open editor**.
+
+O sinal capturado passa pelos plugins **antes** da análise, então o afinador e o
+medidor refletem o que os plugins produzem. `PluginChain` mantém o contrato de
+tempo real: a thread de áudio lê um array de ponteiros por índice atômico (sem
+locks); a propriedade fica na message thread; mudança estrutural aplica → publica
+índice → espera o callback reportar o índice processado → libera as instâncias
+antigas.
+
+## Estado atual (mantenha isto atualizado)
 
 - [x] Estrutura CMake e dependência JUCE
 - [x] Engine de áudio em tempo real (callback mínimo, FIFO lock-free)
