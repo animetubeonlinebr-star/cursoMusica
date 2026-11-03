@@ -23,25 +23,28 @@ O requisito acrescenta duas coisas que afetam o modelo de progressão:
 2. **BPM meta por desafio.** Cada desafio declara `target_bpm`. O sistema mede o
    **maior BPM em que o aluno executou o desafio dentro da tolerância**
    (`achieved_bpm`) e compara com a meta.
-3. **Como medir o andamento atingido.** O tempo é derivado da grade de
+3. **O BPM meta sobe progressivamente ao longo do currículo.** Não há salto para
+   uma velocidade não construída: o alvo cresce módulo a módulo (60 → 140),
+   terminando na velocidade de performance. Do módulo 15 ao 20 a subida é de
+   **+4 BPM por módulo**. Tabela completa em `docs/MUSIC.md`.
+4. **Como medir o andamento atingido.** O tempo é derivado da grade de
    subdivisão do metrônomo e do alinhamento das notas detectadas: o aluno precisa
    tocar as notas na grade (tolerância de janela definida pelo musician) no BPM
    alvo. Não é "tocar rápido", é "tocar certo no tempo".
-4. **O alvo de alinhamento cresce com o módulo.** Módulos 1–14 exigem
+5. **O alvo de alinhamento cresce com o módulo.** Módulos 1–14 exigem
    `on_grid_ratio` na faixa **0,75–0,82** (precisão com respiração natural —
    exigir 0,90 cedo torna a execução robótica); do módulo 15 ao 20 a exigência
-   sobe **linearmente** até **0,90** (precisão de performance). Racional completo
-   em `docs/MUSIC.md`.
-5. **A grade modela a síncope.** Em bossa/samba a síncope desloca a grade de
+   sobe **progressivamente** (0,82 → 0,90). Racional completo em `docs/MUSIC.md`.
+6. **A grade modela a síncope.** Em bossa/samba a síncope desloca a grade de
    propósito; a tolerância precisa refletir isso, senão o aluno é penalizado por
    tocar certo (R-13).
-6. **O metrônomo é o árbitro.** O BPM vem do metrônomo do próprio app (REQ-015),
+7. **O metrônomo é o árbitro.** O BPM vem do metrônomo do próprio app (REQ-015),
    então a medição é determinística e não depende de tempo externo.
-7. **Currículo ancorado em standards.** Cada nível 1–7 cita o(s) standard(s) que
+8. **Currículo ancorado em standards.** Cada nível 1–7 cita o(s) standard(s) que
    materializam o conceito (`docs/MUSIC.md` §"Standards como laboratório
    progressivo"). O standard é usado como progressão de estudo, nunca como
    gravação.
-8. **Sem regressão do ADR 0003.** O override de teste (REQ-013) continua
+9. **Sem regressão do ADR 0003.** O override de teste (REQ-013) continua
    liberando o acesso, mas **ambos** os gates seguem sendo calculados e
    registrados.
 

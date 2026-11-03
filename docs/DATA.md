@@ -126,9 +126,10 @@ BPM meta** para avançar. O BPM vem do metrônomo do próprio app.
 ## Cálculo do gate de andamento
 
 ```
-target_grid(module) = 0.75..0.82        # módulos 1–14: faixa de estudo
-target_grid(module) = 0.82..0.90        # módulos 15–19: rampa linear
-target_grid(module) = 0.90              # módulos 20+: performance
+target_bpm(module)  = 60..140               # sobe progressivamente (ver MUSIC.md)
+target_grid(module) = 0.75..0.82            # módulos 1–14: faixa de estudo
+target_grid(module) = 0.82..0.90            # módulos 15–20: rampa progressiva
+target_grid(module) = 0.90                  # módulos 21+: performance
 
 bpm_passed(module) = achieved_bpm >= target_bpm AND on_grid_ratio >= target_grid(module)
 gate_passed(module) = accuracy >= 0.90 AND bpm_passed
@@ -136,9 +137,11 @@ gate_passed(module) = accuracy >= 0.90 AND bpm_passed
 
 Regras:
 
-- O alvo de `on_grid_ratio` **cresce com o módulo** (rampa linear do 15 ao 20),
-  refletindo a pedagogia: primeiro a precisão rítmica com respiração (75–82%),
-  depois a precisão de performance (90%).
+- **Tanto o BPM meta quanto o alvo de `on_grid_ratio` crescem com o módulo.**
+  Nada de salto para uma velocidade não construída: o aluno constrói o tempo
+  junto com o currículo (60 → 140 BPM; +4 BPM por módulo do 15 ao 20).
+- O alvo de `on_grid_ratio` reflete a pedagogia: primeiro a precisão rítmica com
+  respiração (75–82%), depois a precisão de performance (90%).
 - `achieved_bpm` só conta se `on_grid_ratio` atingir o alvo do módulo.
 - Síncope brasileira (bossa/samba) exige que a grade modele o deslocamento —
   senão o aluno é penalizado por tocar certo (ver `docs/MUSIC.md`, R-13).

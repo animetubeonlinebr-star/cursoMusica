@@ -160,17 +160,45 @@ Progressão **linear**: o módulo N+1 só é liberado após o gate do módulo N
 O aluno pratica com metrônomo e precisa **atingir o BPM meta** do desafio para
 avançar (segundo eixo de gate, além dos 90% — ADR 0004).
 
-### BPM meta sugerido por nível
+### Mapa módulo → nível
 
-| Nível | BPM meta inicial | Observação |
-|---|---|---|
-| 1 — vamp/1 acorde | 60 | foco em ouvir o centro, sem pressa |
-| 2 — vamp/2 acordes | 70 | movimento entre centros |
-| 3 — II–V–I | 80 | resolução no tempo |
-| 4 — turnarounds | 90 | antecipar a volta |
-| 5 — blues | 100 | swing e forma de 12 |
-| 6 — standards com modulação | 120 | mudança de tom em tempo |
-| 7 — repertório | 140 | contexto real |
+O currículo tem **20 módulos** agrupados nos 7 modelos progressivos:
+
+| Módulos | Nível / modelo |
+|---|---|
+| 1–2 | 1 — Vamp de 1 acorde |
+| 3–4 | 2 — Vamps de 2 acordes |
+| 5–7 | 3 — II–V–I |
+| 8–10 | 4 — Turnarounds |
+| 11–14 | 5 — Blues (12 compassos) |
+| 15–17 | 6 — Standards com modulação |
+| 18–20 | 7 — Repertório |
+
+### BPM meta progressivo por módulo
+
+O BPM **aumenta progressivamente** ao longo do currículo — nunca "pula" para uma
+velocidade que o aluno não construiu. A subida é mais fina nos módulos
+avançados (15–20), onde a exigência é maior.
+
+| Módulo | BPM meta | Módulo | BPM meta |
+|---|---|---|---|
+| 1 | 60 | 11 | 100 |
+| 2 | 64 | 12 | 104 |
+| 3 | 68 | 13 | 108 |
+| 4 | 72 | 14 | 112 |
+| 5 | 76 | 15 | 120 |
+| 6 | 80 | 16 | 124 |
+| 7 | 84 | 17 | 128 |
+| 8 | 88 | 18 | 132 |
+| 9 | 92 | 19 | 136 |
+| 10 | 96 | 20 | 140 |
+
+O degrau maior no módulo 15 (112 → 120) marca a entrada no **nível 6**
+(modulação), onde o tempo de performance começa a ser cobrado. Do 15 ao 20 a
+subida é de **+4 BPM por módulo**, chegando à meta de repertório (140).
+
+> Estes valores são uma **proposta do musician**; ajustáveis por módulo conforme
+> o material real de cada desafio.
 
 ### Tolerância rítmica e alvo de `on_grid_ratio` (75–82%)
 
@@ -198,12 +226,16 @@ engessado** — o pulso fica firme e o *swing/groove* natural do estilo sobreviv
 | Módulos | Alvo de `on_grid_ratio` |
 |---|---|
 | 1–14 | 0,75 a 0,82 (faixa de estudo) |
-| 15–19 | sobe linearmente de 0,82 até 0,90 |
-| 20+ | 0,90 (precisão de performance) |
+| 15 | 0,82 |
+| 16 | 0,84 |
+| 17 | 0,85 |
+| 18 | 0,87 |
+| 19 | 0,88 |
+| 20 | 0,90 (precisão de performance) |
 
-A rampa é **linear** do módulo 15 ao 20 e só começa depois que a base está
-consolidada — é o aluno "afinando o relógio interno" antes de exigir precisão de
-palco. Tocar rápido e fora do tempo continua **não** contando.
+Do módulo 15 ao 20 a exigência sobe **progressivamente**, em paralelo com o BPM
+meta: o aluno "afina o relógio interno" antes de exigir precisão de palco. Tocar
+rápido e fora do tempo continua **não** contando.
 
 ## Patterns de guitarristas (REQ-007, REQ-010)
 

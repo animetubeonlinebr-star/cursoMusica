@@ -29,7 +29,9 @@ Dono: **qa**. Estratégia de teste, execuções e defeitos. Evidência obrigató
 - **Metrônomo/BPM meta (REQ-015)** → atingir a meta libera o eixo de andamento;
   meta−1 BPM não libera; tocar rápido fora da grade não conta como atingido.
 - **Rampa de `on_grid_ratio` (ADR 0004)** → módulo 14 exige ≤0,82; módulo 20 exige
-  0,90; a transição 15–19 é linear (ex.: 17 ≈ 0,85).
+  0,90; a transição 15–20 é progressiva (ex.: 17 ≈ 0,85, 19 ≈ 0,88).
+- **BPM meta progressivo (ADR 0004)** → cada módulo tem seu BPM; o 15→20 sobe
+  +4 BPM por módulo (120 → 140). Nenhum módulo exige velocidade não construída.
 - **Síncope brasileira** → em bossa/samba, tocar na síncope correta **não** pode
   ser contado como fora da grade (R-13).
 - **Catálogo de patterns (REQ-016)** → cada ID `PTN-*` é citável por um módulo e

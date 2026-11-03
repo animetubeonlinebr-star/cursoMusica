@@ -167,6 +167,7 @@ Uma entrega só é "pronta" quando:
 | 2026-11-02 | musician + pm | Faixa de `on_grid_ratio` fixada em **0,75–0,82** (precisão com respiração; 90% cedo engessa a execução), com **rampa linear até 0,90 do módulo 15 ao 20** | Corrige a calibração do gate de andamento (ADR 0004, R-13) |
 | 2026-11-02 | musician | Análise harmônica por música registrada em `docs/MUSIC.md` (Maiden Voyage, Cantaloupe Island, Só Danço Samba, Equinox, Incompatibilidade de Gênios, 500 Miles High, Spain) com encadeamentos verificados e mapeamento música → nível | Currículo por standards passa a ser executável por módulo |
 | 2026-11-02 | musician | Síncope brasileira exige grade própria na medição de tempo; `PTN-R-BOSSA` ligado a Só Danço Samba e Incompatibilidade de Gênios | Evita penalizar o aluno por tocar certo no estilo (R-13) |
+| 2026-11-02 | musician + pm | **Confirmado: o BPM meta sobe progressivamente do módulo 15 ao 20** (120 → 140, +4 BPM/módulo), em paralelo com a rampa de `on_grid_ratio` (0,82 → 0,90); mapa módulo → nível (20 módulos nos 7 modelos) fixado | Currículo passa a ter velocidade e precisão crescentes, sem saltos |
 
 ## 8. Convenções de código
 

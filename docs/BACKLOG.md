@@ -134,8 +134,11 @@ que eu só avance quando tocar certo na velocidade exigida.
 Critérios de aceite (derivados de `docs/MUSIC.md`, dono: musician):
 - Cada desafio tem `target_bpm`; o sistema mede o maior BPM executado dentro da
   tolerância rítmica (`achieved_bpm`).
-- O alvo de `on_grid_ratio` é **0,75–0,82** nos módulos 1–14, sobe **linearmente**
-  até **0,90** do 15 ao 20, e é **0,90** a partir do 20.
+- O **BPM meta sobe progressivamente** (60 → 140, +4 BPM por módulo do 15 ao 20):
+  nenhum módulo exige velocidade que o aluno não construiu.
+- O alvo de `on_grid_ratio` é **0,75–0,82** nos módulos 1–14 e sobe
+  **progressivamente** até **0,90** no módulo 20 (0,82 → 0,84 → 0,85 → 0,87 →
+  0,88 → 0,90).
 - Atingir `target_bpm` (com alinhamento à grade) → eixo de andamento aprovado;
   ficar 1 BPM abaixo → não aprova.
 - Tocar rápido e fora do tempo **não** conta como BPM atingido.
