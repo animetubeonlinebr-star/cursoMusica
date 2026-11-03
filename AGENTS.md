@@ -98,7 +98,7 @@ antigas.
 - [ ] Playback com controle de velocidade e loop
 - [ ] Avaliação de improvisação (repouso × tensão, REQ-010/REQ-011/REQ-012)
 - [ ] ASIO SDK no Windows (licença Steinberg, download separado)
-- [ ] Empacotamento / instalador
+- [~] Empacotamento / instalador: `release.yml` compila no `windows-2022` com `TEST_UNLOCK_ALL=ON` e publica `instalador/Instalador CursoMusica.exe` na branch `test` (CM-010/CM-013)
 
 ## 3. Mapa de propriedade de arquivos (contrato de escrita)
 
@@ -222,6 +222,7 @@ Uma entrega só é "pronta" quando:
 | 2026-11-02 | architect + developer | **ADR 0005** (conteúdo do curso é código compilado, sem dependência nova) e **REQ-018**; criados `Source/Course/Module.h`, `ModuleCatalog.*` e `Source/UI/ModuleComponent.*` (explicação antes do desafio, REQ-003) | Módulo 1 jogável dentro do app; build Linux validada sem avisos |
 | 2026-11-02 | data-engineer + developer + musician | **Módulo 1 fechado**: motor de medição (`NoteMath`, `ExerciseEvaluator`, `TempoGrid`, `PracticeSession`), metrônomo RT-safe (CM-014), painel de prática e gate de progressão linear com persistência (`ProgressStore`, `ProgressionRule`); 50 checagens unitárias verdes no CI; pattern/links REQ-007 exibidos no módulo | Aluno conclui o Módulo 1 dentro do app e o Módulo 2 desbloqueia ao atingir ≥90%; gate auditável e testado |
 | 2026-11-02 | musician + developer | **Revisão das apostilas (CM-012)**: PDFs sob LFS baixados e lidos (OCR nos digitalizados); mapa bloco → fonte em `docs/MUSIC.md` §1.1; lacuna fechada com o **bloco I — Rítmica** (pulsação, figuras, contagem TÁ/TÁ-KI, do cap. "Rítmica" de `pdf-fraseado-melodico`) e **EX-1.8**; `CourseModule::sources` + `rhythm` no modelo, exibidos na UI (seções "Apostilas" e "Rítmica e contagem"); corrigido `getRequiredHeight` (CAGED/prática subestimavam a altura e cortavam o fim do módulo); suíte em **85 checagens verdes** | Conteúdo do Módulo 1 lastreado na fonte e completo; fim do módulo deixa de ser cortado na UI |
+| 2026-11-03 | devops | **Instalador de teste de ponta a ponta (CM-010/CM-013)**: `TEST_UNLOCK_ALL` virou opção de CMake e ativa `ProgressStore::unlockAll` (ADR 0003 item 7); `installer.nsi` gera `Instalador CursoMusica.exe` via staging `deploy/windows/dist/app` (makensis não resolve `..`) com runtime opcional (`/DRUNTIME`); `release.yml` roda em push da branch `test` no `windows-2022` (MSVC + Ninja) e publica o `.exe` em `instalador/` (artifact do run; commit sob `commit_installer=true`) | Validação passa a ter um instalador Windows real, com tudo liberado, entregue na raiz do projeto da branch de teste |
 
 ## 8. Convenções de código
 
