@@ -10,10 +10,13 @@ do repositório (commits, CI, resultados de QA), nunca de otimismo.
   (blocos A–I, incluindo rítmica/contagem), vê CAGED, trilha de prática
   (`PTN-R-PALM`, guitarristas citados, REQ-007), os exercícios EX-1.1–EX-1.8 e o
   desafio de gate; as apostilas curadas são citadas na seção "Apostilas"
-  (REQ-006). O motor de medição (`NoteMath`, `ExerciseEvaluator`, `TempoGrid`,
+  (REQ-006). A execução é por **seleção de tópico**: o menu de módulos é
+  expansível, o tópico escolhido carrega a explicação detalhada no centro e
+  filtra os exercícios à direita; o **EX-1.1** é um questionário de 7 questões
+  (`QuizSession`, gate 90%). O motor de medição (`NoteMath`, `ExerciseEvaluator`, `TempoGrid`,
   `PracticeSession`) e o metrônomo RT-safe (CM-014) medem a execução; ao atingir
   **≥90%** o Módulo 2 desbloqueia e o resultado é persistido (`ProgressStore`).
-- **Métricas:** suíte de lógica pura com **85 checagens, 100% verdes**, rodando no
+- **Métricas:** suíte de lógica pura com **122 checagens, 100% verdes**, rodando no
   CI (`ctest` no job Linux). Velocity/Lead Time ainda sem baseline.
 - **Blockers:** nenhum para M1. Pendente para M2+: decisão D4 (estratégia de
   síntese) — owner: architect.
