@@ -98,7 +98,7 @@ antigas.
 - [ ] Playback com controle de velocidade e loop
 - [ ] Avaliação de improvisação (repouso × tensão, REQ-010/REQ-011/REQ-012)
 - [ ] ASIO SDK no Windows (licença Steinberg, download separado)
-- [~] Empacotamento / instalador: `release.yml` compila no `windows-2022` com `TEST_UNLOCK_ALL=ON` e publica `instalador/Instalador CursoMusica.exe` na branch `test` (CM-010/CM-013)
+- [x] Empacotamento / instalador: `instalador/Instalador CursoMusica.exe` (PE32) publicado na branch `test` pelo `release.yml` (`windows-2022`, `TEST_UNLOCK_ALL=ON`); instala escolhendo o diretório (CM-010/CM-013)
 
 ## 3. Mapa de propriedade de arquivos (contrato de escrita)
 

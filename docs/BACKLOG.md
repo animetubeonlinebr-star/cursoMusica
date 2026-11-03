@@ -95,7 +95,7 @@ Critérios de aceite:
 
 Dependências: nenhuma. Owner: devops.
 
-### [CM-010] Instalador Windows com seleção de diretório — valor: H — tamanho: M — status: in-progress
+### [CM-010] Instalador Windows com seleção de diretório — valor: H — tamanho: M — status: done
 Requisito: REQ-014 (e REQ-013 para a branch de teste).
 Como um aluno, eu quero um instalador `.exe` que me deixe escolher onde instalar,
 para que o app fique pronto para uso sem passos manuais.
@@ -239,7 +239,7 @@ Critérios de aceite (rascunho):
 
 Dependências: CM-011. Owner: musician.
 
-### [CM-013] Instalador de teste por módulo com acesso liberado — valor: M — tamanho: M — status: in-progress
+### [CM-013] Instalador de teste por módulo com acesso liberado — valor: M — tamanho: M — status: done
 Requisitos: REQ-013.
 Como o time de validação, eu quero um instalador por módulo na branch de teste,
 com tudo liberado, para que eu veja o módulo novo sem desbloquear os anteriores.
