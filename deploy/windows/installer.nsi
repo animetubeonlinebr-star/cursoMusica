@@ -12,13 +12,16 @@ Unicode true
 
 ; NSIS resolves File/OutFile relative to different directories depending on the
 ; platform (the script's directory on Linux, the current directory on Windows),
-; so the callers pass absolute paths with /DAPPDIR= and /DOUTDIR=. The defaults
-; below are only for a quick local run from deploy/windows.
-!ifndef APPDIR
-!define APPDIR "dist/app"
+; so the callers pass absolute paths with -DAPPEXE= and -DOUTFILE=. The defaults
+; below are only for a local run from the repository root.
+!ifndef APPEXE
+!define APPEXE "build/CursoMusica_artefacts/Release/Curso Musica Studio.exe"
 !endif
-!ifndef OUTDIR
-!define OUTDIR "dist"
+!ifndef OUTFILE
+!define OUTFILE "instalador/Instalador CursoMusica.exe"
+!endif
+!ifndef RUNTIMEDIR
+!define RUNTIMEDIR "build/runtime"
 !endif
 
 !define APP_NAME "CursoMusica"
@@ -28,8 +31,8 @@ Unicode true
 !define COMPANY "CursoMusica"
 
 Name "${APP_NAME}"
-; Built here, then copied to <repo>/instalador/Instalador CursoMusica.exe.
-OutFile "${OUTDIR}/Instalador CursoMusica.exe"
+; The deliverable name the team asked for: "Instalador CursoMusica.exe".
+OutFile "${OUTFILE}"
 ; Default install directory; the MUI Directory page lets the user change it
 ; (REQ-014). InstallDir points at %ProgramFiles% by default.
 InstallDir "$PROGRAMFILES64\${APP_NAME}"
@@ -52,12 +55,12 @@ Section "CursoMusica" SecMain
     ; Application and runtime dependencies (JUCE app + bundled libraries from
     ; ADR 0002: FluidSynth, libsndfile, SoundFont/samples). Everything needed so
     ; the app is ready to use after install (REQ-014).
-    File "${APPDIR}/${APP_EXE}"
+    File "${APPEXE}"
 
     ; Bundled runtime (SoundFont/samples/DLLs) when the build produced it; the
-    ; installer still succeeds when it did not (the build passes /DRUNTIME).
+    ; installer still succeeds when it did not (the build passes -DRUNTIME).
 !ifdef RUNTIME
-    File /r "${APPDIR}/runtime/*.*"
+    File /r "${RUNTIMEDIR}/*.*"
 !endif
 
     ; Remember the chosen directory for upgrades and uninstall.
