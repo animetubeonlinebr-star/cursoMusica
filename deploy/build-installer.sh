@@ -19,18 +19,17 @@ if [[ ! -f "$app" ]]; then
     exit 1
 fi
 
-stage="deploy/windows/dist/app"
-rm -rf "$stage"
+stage="$root/deploy/windows/dist/app"
+outdir="$root/instalador"
+rm -rf "$root/deploy/windows/dist"
 mkdir -p "$stage"
 cp "$app" "$stage/Curso Musica Studio.exe"
-nsis_defines=()
+nsis_defines=("-DAPPDIR=$stage" "-DOUTDIR=$outdir")
 if [[ -d build/runtime ]]; then
     cp -r build/runtime "$stage/runtime"
-    nsis_defines+=("/DRUNTIME")
+    nsis_defines+=("-DRUNTIME")
 fi
 
 makensis "${nsis_defines[@]}" deploy/windows/installer.nsi
 
-mkdir -p instalador
-cp "deploy/windows/dist/Instalador CursoMusica.exe" "instalador/Instalador CursoMusica.exe"
 echo "Installer written to instalador/Instalador CursoMusica.exe"

@@ -60,19 +60,20 @@ jobs:
         run: |
           # choco updates the machine PATH, which this process does not see.
           $env:Path += ";C:\Program Files (x86)\NSIS"
-          # Stage the app next to the script (NSIS resolves paths relative to
-          # the .nsi and does not accept "..") and build the installer.
-          $stage = "deploy/windows/dist/app"
+          # NSIS resolves File/OutFile against the current directory on Windows,
+          # so pass absolute paths. Staging keeps the layout the .nsi expects.
+          $stage = Join-Path $PWD "deploy/windows/dist/app"
+          $outdir = Join-Path $PWD "instalador"
           New-Item -ItemType Directory -Force -Path $stage | Out-Null
+          New-Item -ItemType Directory -Force -Path $outdir | Out-Null
           Copy-Item "build/CursoMusica_artefacts/Release/Curso Musica Studio.exe" "$stage/Curso Musica Studio.exe"
-          $defines = @()
+          $defines = @("-DAPPDIR=$stage", "-DOUTDIR=$outdir")
           if (Test-Path "build/runtime") {
             Copy-Item -Recurse "build/runtime" "$stage/runtime"
-            $defines += "/DRUNTIME"
+            $defines += "-DRUNTIME"
           }
           makensis @defines deploy/windows/installer.nsi
-          New-Item -ItemType Directory -Force -Path "instalador" | Out-Null
-          Copy-Item "deploy/windows/dist/Instalador CursoMusica.exe" "instalador/Instalador CursoMusica.exe"
+          Get-ChildItem "instalador"
 
       - name: Upload installer artifact
         uses: actions/upload-artifact@v4

@@ -10,6 +10,17 @@
 Unicode true
 !include "MUI2.nsh"
 
+; NSIS resolves File/OutFile relative to different directories depending on the
+; platform (the script's directory on Linux, the current directory on Windows),
+; so the callers pass absolute paths with /DAPPDIR= and /DOUTDIR=. The defaults
+; below are only for a quick local run from deploy/windows.
+!ifndef APPDIR
+!define APPDIR "dist/app"
+!endif
+!ifndef OUTDIR
+!define OUTDIR "dist"
+!endif
+
 !define APP_NAME "CursoMusica"
 ; The executable keeps the JUCE PRODUCT_NAME ("Curso Musica Studio").
 !define APP_EXE "Curso Musica Studio.exe"
@@ -18,7 +29,7 @@ Unicode true
 
 Name "${APP_NAME}"
 ; Built here, then copied to <repo>/instalador/Instalador CursoMusica.exe.
-OutFile "dist/Instalador CursoMusica.exe"
+OutFile "${OUTDIR}/Instalador CursoMusica.exe"
 ; Default install directory; the MUI Directory page lets the user change it
 ; (REQ-014). InstallDir points at %ProgramFiles% by default.
 InstallDir "$PROGRAMFILES64\${APP_NAME}"
@@ -41,12 +52,12 @@ Section "CursoMusica" SecMain
     ; Application and runtime dependencies (JUCE app + bundled libraries from
     ; ADR 0002: FluidSynth, libsndfile, SoundFont/samples). Everything needed so
     ; the app is ready to use after install (REQ-014).
-    File "dist/app/${APP_EXE}"
+    File "${APPDIR}/${APP_EXE}"
 
     ; Bundled runtime (SoundFont/samples/DLLs) when the build produced it; the
     ; installer still succeeds when it did not (the build passes /DRUNTIME).
 !ifdef RUNTIME
-    File /r "dist/app/runtime/*.*"
+    File /r "${APPDIR}/runtime/*.*"
 !endif
 
     ; Remember the chosen directory for upgrades and uninstall.
