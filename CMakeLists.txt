@@ -31,6 +31,10 @@ target_sources(CursoMusica PRIVATE
     Source/Audio/PluginHost.cpp
     Source/Audio/PluginChain.cpp
     Source/Audio/TuningSettings.cpp
+    Source/Audio/Metronome.cpp
+    Source/Course/NoteMath.cpp
+    Source/Course/ExerciseEvaluator.cpp
+    Source/Course/TempoGrid.cpp
     Source/Course/ModuleCatalog.cpp
     Source/UI/Design/LookAndFeel.cpp
     Source/UI/Design/Panel.cpp
@@ -106,3 +110,35 @@ target_link_libraries(CursoMusica
     PUBLIC
         juce::juce_recommended_config_flags
         juce::juce_recommended_warning_flags)
+
+# ---------------------------------------------------------------------------
+# Unit tests for the pure course logic (no audio device, no UI).
+#
+# The tests link the pure sources directly instead of the GUI app, so they run
+# headless on the build machine and in CI. Owned by the QA agent.
+# ---------------------------------------------------------------------------
+enable_testing()
+
+juce_add_console_app(CursoMusicaTests
+    PRODUCT_NAME "CursoMusicaTests")
+
+target_sources(CursoMusicaTests PRIVATE
+    tests/TestMain.cpp
+    Source/Course/NoteMath.cpp
+    Source/Course/ExerciseEvaluator.cpp
+    Source/Course/TempoGrid.cpp)
+
+target_include_directories(CursoMusicaTests PRIVATE Source)
+
+target_compile_definitions(CursoMusicaTests PRIVATE
+    JUCE_USE_CURL=0
+    JUCE_WEB_BROWSER=0)
+
+target_link_libraries(CursoMusicaTests
+    PRIVATE
+        juce::juce_core
+    PUBLIC
+        juce::juce_recommended_config_flags
+        juce::juce_recommended_warning_flags)
+
+add_test(NAME course_logic COMMAND CursoMusicaTests)

@@ -172,6 +172,7 @@ void AudioEngine::audioDeviceAboutToStart (juce::AudioIODevice* device)
 
     pitchDetector.prepare (sr);
     audioFifo.reset();
+    metronome.prepare (sr);
 
     // Allocate the plugin scratch buffer once, on the device-open (non-audio) thread.
     pluginBuffer.setSize (2, juce::jmax (block, 2048), false, true, true);
@@ -198,6 +199,16 @@ void AudioEngine::audioDeviceIOCallbackWithContext (const float* const* inputCha
     for (int ch = 0; ch < numOutputChannels; ++ch)
         if (outputChannelData[ch] != nullptr)
             juce::FloatVectorOperations::clear (outputChannelData[ch], numSamples);
+
+    // Metronome plays on its own, independent of the input signal.
+    if (outputChannelData[0] != nullptr && numOutputChannels > 0)
+    {
+        juce::AudioBuffer<float> outputView (outputChannelData, numOutputChannels, numSamples);
+        metronome.process (outputView, numSamples);
+    }
+
+    const double blockSeconds = numSamples / juce::jmax (1.0, currentSampleRate.load());
+    elapsedSeconds.store (elapsedSeconds.load() + blockSeconds);
 
     const float* in = (numInputChannels > 0 && inputChannelData[0] != nullptr) ? inputChannelData[0] : nullptr;
 
@@ -262,7 +273,9 @@ void AudioEngine::run()
 
         if (filled == analysisBlockSize)
         {
-            detectedFrequencyHz.store (pitchDetector.processBlock (scratch.data(), analysisBlockSize));
+            const float hz = pitchDetector.processBlock (scratch.data(), analysisBlockSize);
+            detectedFrequencyHz.store (hz);
+            publishDetectedNote (hz);
             filled = 0;
         }
         else
@@ -284,6 +297,56 @@ void AudioEngine::pushSamplesToFifo (const float* data, int numSamples) noexcept
         std::copy_n (data + size1, size2, fifoBuffer.begin() + start2);
 
     audioFifo.finishedWrite (size1 + size2);
+}
+
+void AudioEngine::publishDetectedNote (float frequencyHz) noexcept
+{
+    const int midi = music::analyseFrequency (frequencyHz, 440.0).midi;
+
+    // Only queue a note when a new, stable note starts: skip silence and the
+    // repeated frames of the note already sounding.
+    if (midi <= 0)
+    {
+        lastQueuedMidi = -1;
+        return;
+    }
+
+    const double now = elapsedSeconds.load();
+    if (midi == lastQueuedMidi && (now - lastNoteTime) < 0.05)
+        return;
+
+    lastQueuedMidi = midi;
+    lastNoteTime = now;
+
+    const int write = noteWriteIndex.load();
+    const int next = (write + 1) % noteQueueSize;
+    if (next == noteReadIndex.load())
+        return; // queue full: drop rather than block the analysis thread
+
+    noteQueue[(std::size_t) write] = { now, midi,
+                                       music::analyseFrequency (frequencyHz, 440.0).cents };
+    noteWriteIndex.store (next);
+}
+
+void AudioEngine::drainNoteEvents (std::vector<course::NoteEvent>& out)
+{
+    int read = noteReadIndex.load();
+    const int write = noteWriteIndex.load();
+
+    while (read != write)
+    {
+        out.push_back (noteQueue[(std::size_t) read]);
+        read = (read + 1) % noteQueueSize;
+    }
+
+    noteReadIndex.store (read);
+}
+
+void AudioEngine::resetNoteCapture()
+{
+    noteReadIndex.store (noteWriteIndex.load());
+    lastQueuedMidi = -1;
+    elapsedSeconds.store (0.0);
 }
 
 } // namespace cursomusica
