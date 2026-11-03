@@ -28,7 +28,7 @@ Dependências: `AudioEngine` (getters já existem, ver `Source/Audio/AudioEngine
 Notas técnicas (architect): consumir só os getters públicos e atomics; nenhuma
 chamada bloqueante na UI.
 
-### [CM-017] Módulo 1 jogável: ambientação, instrumento e organização musical — valor: H — tamanho: L — status: in progress
+### [CM-017] Módulo 1 jogável: ambientação, instrumento e organização musical — valor: H — tamanho: L — status: done
 Requisito: REQ-003, REQ-006, REQ-007, REQ-008. Conteúdo em `docs/MUSIC.md` §Módulo 1.
 Como um aluno iniciante, eu quero estudar o Módulo 1 dentro do app (explicação
 antes do desafio), para que eu aprenda as partes do instrumento, as notas, o
@@ -48,8 +48,10 @@ Critérios de aceite:
 Pronto quando (DoD):
 - [x] Conteúdo espelhado de `docs/MUSIC.md` para o catálogo (ADR 0005).
 - [x] Build compila sem avisos novos.
-- [ ] Medição real dos exercícios (depende de CM-008).
-- [ ] Teste automatizado no CI (depende de CM-002).
+- [x] Medição real dos exercícios (CM-008 — `PracticeSession`, `ExerciseEvaluator`, `TempoGrid`).
+- [x] Gate de progressão linear com ≥90% e persistência do desbloqueio (REQ-002/REQ-009).
+- [x] Teste automatizado no CI (CM-002 — 50 checagens, `ctest` no job Linux).
+- [x] Pattern e links de guitarristas exibidos no módulo (REQ-007).
 
 ### [CM-016] Afinador transversal com pitch de referência editável — valor: H — tamanho: S — status: done
 Requisito: REQ-017. Deriva de `docs/MUSIC.md` (referência A4, tolerância ±5 cents).
@@ -73,7 +75,7 @@ Pronto quando (DoD):
 - [x] `AGENTS.md`, `docs/REQUIREMENTS.md` e este backlog atualizados.
 - [ ] Teste automatizado no CI (pendente: CM-002).
 
-### [CM-002] Pipeline de CI para build e testes — valor: H — tamanho: M — status: ready
+### [CM-002] Pipeline de CI para build e testes — valor: H — tamanho: M — status: done
 Requisito: REQ-009 (base para medir), DoD.
 Como o time de desenvolvimento, eu quero que cada PR compile e rode os testes
 automaticamente, para que nenhum erro bobo chegue à main.
@@ -84,6 +86,8 @@ Critérios de aceite:
 - Dado o build sem o ASIO SDK, quando o CI roda, então o build passa (ASIO é
   opcional por design).
 - Dado um PR que quebra o build, quando o CI termina, então o check fica vermelho.
+- Dado o alvo `CursoMusicaTests`, quando o CI roda, então `ctest` executa a suíte
+  de lógica pura e falha o job se algum teste quebrar.
 
 Dependências: nenhuma. Owner: devops.
 

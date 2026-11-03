@@ -36,6 +36,9 @@ jobs:
       - name: Build
         run: cmake --build build
 
+      - name: Run tests
+        run: ctest --test-dir build --output-on-failure
+
   windows-build:
     name: Windows build (target platform)
     # Only on main and tags: Windows minutes are limited (see AGENTS.md).

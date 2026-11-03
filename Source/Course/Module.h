@@ -4,6 +4,9 @@
 
 #include <vector>
 
+#include "Course/ExerciseEvaluator.h"
+#include "Course/TempoGrid.h"
+
 namespace cursomusica
 {
 
@@ -19,12 +22,23 @@ struct LessonBlock
 };
 
 // A practice item with an automatic check (REQ-008, REQ-009).
+//
+// `targets` (ordered notes) and `chordPitchClasses` are the playable specs the
+// evaluator uses; an exercise with neither is shown as text only.
 struct Exercise
 {
     juce::String id;      // "EX-1.1"
     juce::String title;
     juce::String goal;
     juce::String check;   // how the app verifies it
+
+    std::vector<course::TargetNote> targets;
+    std::vector<int> chordPitchClasses;
+    std::vector<std::vector<int>> chordProgression; // ordered chords (the gate)
+    bool isGate = false;
+    int targetBpm = 0;            // 0 -> inherit the module's target BPM
+    float onGridTarget = 0.0f;    // 0 -> inherit the module's alignment target
+    course::TempoGrid::Subdivision subdivision = course::TempoGrid::Subdivision::quarter;
 };
 
 // The pattern and link a module must cite (REQ-007, REQ-010).

@@ -44,6 +44,8 @@ makensis deploy/windows/installer.nsi
 
 ## Pendências
 
+- Instalador de teste do **Módulo 1** (`module=1`, `unlock_all=true`) a publicar
+  quando o workflow `release.yml` estiver no ar (CM-010).
 - Assinatura de código (R-12): sem certificado, o Windows mostra aviso.
 - Confirmar licenças de redistribuição das dependências (R-09) antes de
   distribuir publicamente.

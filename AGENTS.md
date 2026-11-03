@@ -87,9 +87,16 @@ antigas.
 - [x] Telas iniciais (layout, sem funcionalidade de estudo)
 - [x] Menu de configuração: dispositivos, entrada, saída, buffer
 - [x] Host VST3 com scan, cadeia na entrada e editor de plugin
+- [x] Afinador transversal com referência A4 editável (REQ-017)
+- [x] Módulo 1 jogável no app: explicação A–H, CAGED, trilha de prática, exercícios e gate (REQ-003/REQ-007/REQ-018)
+- [x] Motor de medição: NoteMath, ExerciseEvaluator (LCS + acordes), TempoGrid, PracticeSession (CM-008)
+- [x] Metrônomo RT-safe com BPM meta e grade (CM-014)
+- [x] Gate de progressão linear: módulo N+1 só abre com ≥90% no gate de N; progresso persistido (REQ-002/REQ-009)
+- [x] Testes unitários da lógica pura (50 checagens) rodando no CI
 - [x] Build validada no Linux: binário gerado, UI renderiza
 - [ ] Ligar UI principal à engine (nível e afinação reais em vez de dummy)
 - [ ] Playback com controle de velocidade e loop
+- [ ] Avaliação de improvisação (repouso × tensão, REQ-010/REQ-011/REQ-012)
 - [ ] ASIO SDK no Windows (licença Steinberg, download separado)
 - [ ] Empacotamento / instalador
 
@@ -213,6 +220,7 @@ Uma entrega só é "pronta" quando:
 | 2026-11-02 | pm + musician + developer + designer | **REQ-017: afinador transversal** (menu próprio, fora dos módulos) com pitch de referência A4 editável (padrão 440 Hz, faixa 400–480, persistido); implementado em `TunerComponent.*` + `TuningSettings.*`; presets incluem 415 Hz barroco (MUSIC.md) | Aluno afina a qualquer momento, em qualquer referência; build Linux validada sem avisos |
 | 2026-11-02 | musician + pm | **Módulo 1 especificado** em `docs/MUSIC.md` (blocos A–H: partes do instrumento, notas, sustenidos/bemóis, braço, pestana, CAGED, tonalidades, cifrado; exercícios EX-1.1–EX-1.7; desafio de gate `C–G–Am–F` a 60 BPM; patterns `PTN-R-PALM`/`PTN-M-3`; links citados) | PO pode derivar a história; developer implementa o catálogo |
 | 2026-11-02 | architect + developer | **ADR 0005** (conteúdo do curso é código compilado, sem dependência nova) e **REQ-018**; criados `Source/Course/Module.h`, `ModuleCatalog.*` e `Source/UI/ModuleComponent.*` (explicação antes do desafio, REQ-003) | Módulo 1 jogável dentro do app; build Linux validada sem avisos |
+| 2026-11-02 | data-engineer + developer + musician | **Módulo 1 fechado**: motor de medição (`NoteMath`, `ExerciseEvaluator`, `TempoGrid`, `PracticeSession`), metrônomo RT-safe (CM-014), painel de prática e gate de progressão linear com persistência (`ProgressStore`, `ProgressionRule`); 50 checagens unitárias verdes no CI; pattern/links REQ-007 exibidos no módulo | Aluno conclui o Módulo 1 dentro do app e o Módulo 2 desbloqueia ao atingir ≥90%; gate auditável e testado |
 
 ## 8. Convenções de código
 

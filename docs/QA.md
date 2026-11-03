@@ -49,6 +49,7 @@ Dono: **qa**. Estratégia de teste, execuções e defeitos. Evidência obrigató
 
 | Data | Escopo (SHA/branch) | Resultado | Evidência |
 |---|---|---|---|
+| 2026-11-02 | `feat/measurement-engine` (Módulo 1) | **50/50 checagens verdes** (`ctest` no CI). Smoke manual em Xvfb: módulos 2+ bloqueados com aviso; após registrar `highestPassedModule=1`, o Módulo 2 abre; trilha de prática exibe `PTN-R-PALM` + "Referência: Juninho Afram" | `CursoMusicaTests`, job Linux do CI; capturas do smoke |
 | 2026-11-02 | `feat/multi-agent-framework` | Build não aplicável (só docs/agentes neste ciclo); sem suíte ainda | — |
 
 ## Defeitos
@@ -59,5 +60,9 @@ Dono: **qa**. Estratégia de teste, execuções e defeitos. Evidência obrigató
 
 ## Pendências
 
-- Suíte de testes automatizados ainda não existe (depende de M2 no `docs/PLAN.md`).
+- Suíte de testes cobre a lógica pura (medição, tempo, progressão). Ainda faltam
+  testes de `PitchDetector` (YIN), FIFO lock-free e `PluginChain` (dependem de
+  harness de áudio com buffer sintético).
 - Teste de latência real pendente de máquina Windows (risco R-02).
+- `ProgressStore` ainda não tem teste unitário (usa `PropertiesFile`; a regra pura
+  `ProgressionRule` já está coberta). Candidato a teste de integração headless.

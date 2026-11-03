@@ -21,6 +21,7 @@ namespace colour
     inline const juce::Colour accentAlt     { 0xff45a8c4 }; // cyan
     inline const juce::Colour textPrimary   { 0xfff8f8f8 };
     inline const juce::Colour textSecondary { 0xffb8b8c0 };
+    inline const juce::Colour textDisabled  { 0xff6a6a74 };
     inline const juce::Colour border        { 0xff343841 };
     inline const juce::Colour danger        { 0xfff05058 };
     inline const juce::Colour success       { 0xff30d080 };

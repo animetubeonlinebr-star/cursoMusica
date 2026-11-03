@@ -66,7 +66,7 @@ void MainComponent::showModules()
 {
     if (modules == nullptr)
     {
-        modules = std::make_unique<ModuleComponent>();
+        modules = std::make_unique<ModuleComponent> (audioEngine);
         modules->onCloseRequested = [this] { hideModules(); };
         addAndMakeVisible (*modules);
     }

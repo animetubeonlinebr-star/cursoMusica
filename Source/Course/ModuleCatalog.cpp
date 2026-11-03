@@ -1,5 +1,7 @@
 #include "Course/ModuleCatalog.h"
 
+#include "Course/NoteMath.h"
+
 namespace cursomusica
 {
 
@@ -17,7 +19,24 @@ namespace
 
     Exercise exercise (juce::String id, juce::String title, juce::String goal, juce::String check)
     {
-        return { std::move (id), std::move (title), std::move (goal), std::move (check) };
+        Exercise e;
+        e.id = std::move (id);
+        e.title = std::move (title);
+        e.goal = std::move (goal);
+        e.check = std::move (check);
+        return e;
+    }
+
+    // Builds an ordered list of target notes from pitch names ("E2", "C4").
+    std::vector<course::TargetNote> notes (std::initializer_list<const char*> names)
+    {
+        std::vector<course::TargetNote> out;
+        for (auto* name : names)
+        {
+            const auto text = juce::String (name);
+            out.push_back ({ music::noteNameToMidi (text), text });
+        }
+        return out;
     }
 
     CourseModule makeModule1()
@@ -112,6 +131,25 @@ namespace
             exercise ("EX-1.7", juce::String::fromUTF8 ("Cifrado e tonalidade"),
                       juce::String::fromUTF8 ("Dado Dm7, G7, C7M, dizer o campo harmônico e tocar as tríades."),
                       juce::String::fromUTF8 ("Detecção de acorde e resposta.")),
+        };
+
+        // Playable specs for the exercises the app can verify with the detector.
+        m.exercises[1].targets = notes ({ "E2", "A2" });                    // EX-1.2
+        m.exercises[2].targets = notes ({ "C4", "D4", "E4", "F4", "G4", "A4", "B4", "C5" }); // EX-1.3
+        m.exercises[3].chordPitchClasses = { 0, 4, 7 };                     // EX-1.4, first C
+        m.exercises[4].chordPitchClasses = { 5, 9, 0 };                     // EX-1.5, F barre
+
+        // The gate is a chord progression played on the grid (REQ-009, REQ-015).
+        auto& gate = m.exercises.emplace_back (exercise (
+            "GATE-1", juce::String::fromUTF8 ("Desafio de gate — vamp C–G–Am–F"),
+            juce::String::fromUTF8 ("Tocar C – G – Am – F a 60 BPM, na grade do metrônomo."),
+            juce::String::fromUTF8 ("Acordes reconhecidos e alinhados à grade (≥ 0,75).")));
+        gate.isGate = true;
+        gate.chordProgression = {
+            { 0, 4, 7 },   // C
+            { 7, 11, 2 },  // G
+            { 9, 0, 4 },   // Am
+            { 5, 9, 0 },   // F
         };
 
         m.gateChallenge = juce::String::fromUTF8 (

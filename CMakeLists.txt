@@ -35,6 +35,8 @@ target_sources(CursoMusica PRIVATE
     Source/Course/NoteMath.cpp
     Source/Course/ExerciseEvaluator.cpp
     Source/Course/TempoGrid.cpp
+    Source/Course/PracticeSession.cpp
+    Source/Course/ProgressStore.cpp
     Source/Course/ModuleCatalog.cpp
     Source/UI/Design/LookAndFeel.cpp
     Source/UI/Design/Panel.cpp
@@ -42,6 +44,7 @@ target_sources(CursoMusica PRIVATE
     Source/UI/TunerDisplay.cpp
     Source/UI/TunerComponent.cpp
     Source/UI/ModuleComponent.cpp
+    Source/UI/PracticePanel.cpp
     Source/UI/DevicePanel.cpp
     Source/UI/TransportPanel.cpp
     Source/UI/SettingsComponent.cpp)
@@ -126,7 +129,8 @@ target_sources(CursoMusicaTests PRIVATE
     tests/TestMain.cpp
     Source/Course/NoteMath.cpp
     Source/Course/ExerciseEvaluator.cpp
-    Source/Course/TempoGrid.cpp)
+    Source/Course/TempoGrid.cpp
+    Source/Course/PracticeSession.cpp)
 
 target_include_directories(CursoMusicaTests PRIVATE Source)
 

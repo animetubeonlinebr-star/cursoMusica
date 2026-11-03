@@ -6,6 +6,8 @@
 
 #include "Course/ExerciseEvaluator.h"
 #include "Course/NoteMath.h"
+#include "Course/PracticeSession.h"
+#include "Course/ProgressionRule.h"
 #include "Course/TempoGrid.h"
 
 // Minimal dependency-free test runner for the pure course logic (QA).
@@ -124,6 +126,66 @@ namespace
         const double none = TempoGrid::achievedBpm ({ 0.5, 1.5 }, TempoGrid::Subdivision::quarter, candidates, 0.9);
         checkClose (none, 0.0, 1e-9, "notes off the grid reach no BPM");
     }
+
+    void testPracticeSession()
+    {
+        std::cout << "PracticeSession\n";
+        using namespace cursomusica::course;
+
+        // A note-sequence exercise: E2 then A2, at 60 BPM.
+        cursomusica::Exercise sequence;
+        sequence.id = "EX-1.2";
+        sequence.targets = { { 40, "E2" }, { 45, "A2" } };
+
+        PracticeSession session;
+        session.start (sequence, 60, 0.75f);
+        check (session.isRunning(), "session starts running");
+        check (session.getTargetBpm() == 60, "inherits the module BPM");
+
+        session.consume ({ { 0.0, 40, 0.0f }, { 1.0, 45, 0.0f } });
+        session.finish();
+
+        const auto& state = session.getState();
+        check (state.matched == 2, "both notes matched");
+        checkClose (state.accuracy, 1.0, 1e-9, "100% accuracy");
+        checkClose (state.onGridRatio, 1.0, 1e-9, "both notes on the grid");
+        check (state.passed, "a clean run passes both gates");
+
+        // A chord progression (the gate): C then G, each covered in turn.
+        cursomusica::Exercise gate;
+        gate.id = "GATE-1";
+        gate.chordProgression = { { 0, 4, 7 }, { 7, 11, 2 } };
+
+        PracticeSession gateSession;
+        gateSession.start (gate, 60, 0.75f);
+        gateSession.consume ({ { 0.0, 60, 0.0f }, { 0.1, 64, 0.0f }, { 0.2, 67, 0.0f },
+                               { 1.0, 67, 0.0f }, { 1.1, 71, 0.0f }, { 1.2, 62, 0.0f } });
+        gateSession.finish();
+
+        const auto& gateState = gateSession.getState();
+        check (gateState.matched == 2, "both chords recognised in order");
+        check (gateState.passed, "gate progression passes at 60 BPM");
+
+        // Out-of-tune playing must fail the accuracy gate.
+        PracticeSession sloppy;
+        sloppy.start (sequence, 60, 0.75f);
+        sloppy.consume ({ { 0.0, 40, 80.0f }, { 1.0, 45, 0.0f } });
+        sloppy.finish();
+        check (! sloppy.getState().accuracyPassed, "detuned note fails the accuracy gate");
+    }
+}
+
+void testProgression()
+{
+    using namespace cursomusica::course::progress;
+
+    check (isUnlocked (1, 0), "module 1 is always unlocked");
+    check (! isUnlocked (2, 0), "module 2 is locked until module 1 is passed");
+    check (isUnlocked (2, 1), "passing module 1 unlocks module 2");
+    check (! isUnlocked (3, 1), "module 3 stays locked after only module 1");
+    check (isUnlocked (3, 2), "passing module 2 unlocks module 3");
+    check (highestUnlocked (0) == 1, "nothing passed unlocks only module 1");
+    check (highestUnlocked (4) == 5, "passing up to module 4 unlocks module 5");
 }
 
 int main()
@@ -131,6 +193,8 @@ int main()
     testNoteMath();
     testEvaluator();
     testTempoGrid();
+    testPracticeSession();
+    testProgression();
 
     std::cout << "\n" << (checks - failures) << "/" << checks << " checks passed\n";
     if (failures > 0)
