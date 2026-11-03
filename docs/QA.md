@@ -22,6 +22,17 @@ Dono: **qa**. Estratégia de teste, execuções e defeitos. Evidência obrigató
 - **Plugin VST3 instável** → a cadeia isola a falha; a UI continua responsiva.
 - **Buffer mínimo (64)** → sem xruns em carga típica.
 - **Migração de schema em dados existentes** → dados antigos continuam legíveis.
+- **Gate de 90% (REQ-009)** → 90,0% libera; 89,9% não libera; amostra pequena
+  (1/1) não vale como aprovação.
+- **Tensão não pedida (REQ-012)** → conta como erro; tensão pedida é aceita.
+- **Nota de repouso identificada corretamente (REQ-011)** → nota do acorde e nota
+  de fora classificadas de forma distinta e explicável.
+- **Conversão partitura → áudio (REQ-004)** → mesma entrada produz o mesmo áudio;
+  oitava correta (guitarra transpositora).
+- **Override de teste (REQ-013)** → instalador de teste abre tudo liberado, mas o
+  cálculo real de acerto permanece correto.
+- **Instalador Windows (REQ-014)** → instala em `C:\` e `D:\`; abre pronto; o
+  desinstalador remove arquivos e atalhos.
 
 ## Execuções
 

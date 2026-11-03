@@ -28,6 +28,12 @@ lock-free; análise pesada (YIN) em thread dedicada.
 
 ## 2. Estado atual (mantenha isto atualizado)
 
+> **Visão de produto (atualizada).** O CursoMusica é uma **plataforma de estudo
+> modular**: ensina (explicação antes do desafio), demonstra com áudio, gera
+> desafios, mede tudo e **avalia improvisação** (notas de repouso × tensão). O
+> aluno avança por níveis com **gate de 90% de acerto** e faz tudo dentro do
+> software. Requisitos rastreáveis: `docs/REQUIREMENTS.md` (REQ-001..REQ-014).
+
 > **Nota de branch.** O código do aplicativo JUCE está hoje em
 > `feature/juce-audio-app` (ainda não mesclado em `main`). O mapa de
 > propriedade da seção 3 descreve o projeto-alvo: quando essa branch for
@@ -59,7 +65,7 @@ quando precisa, ele **pede** ao dono (ver protocolo de handoff, seção 5).
 | `CMakeLists.txt`, `Source/Main.cpp` | `architect` | todos |
 | `Source/Data/**`, `tools/etl/**` | `data-engineer` | todos |
 | `.github/workflows/**`, `Dockerfile*`, `deploy/**` | `devops` | todos |
-| `docs/ROADMAP.md` | `pm` | todos |
+| `docs/ROADMAP.md`, `docs/REQUIREMENTS.md` | `pm` | todos |
 | `docs/MUSIC.md` | `musician` (co-own com `pm`) | todos |
 | `docs/BACKLOG.md`, `docs/stories/**` | `po` | todos |
 | `docs/PLAN.md`, `docs/STATUS.md`, `docs/RISKS.md` | `project-manager` | todos |
@@ -74,7 +80,7 @@ build entrega a linha exata de `target_sources` ao dono.
 
 | Agente | Arquivo | Dono de | Pergunta que responde |
 |---|---|---|---|
-| Product Manager | `.agents/agents/pm.md` | `docs/ROADMAP.md`, KPIs | **Por quê / O quê** (macro) |
+| Product Manager | `.agents/agents/pm.md` | `docs/ROADMAP.md`, `docs/REQUIREMENTS.md`, KPIs | **Por quê / O quê** (macro) |
 | Músico Profissional | `.agents/agents/musician.md` | `docs/MUSIC.md` (co-own com PM) | **Está musicalmente correto?** |
 | Product Owner | `.agents/agents/po.md` | `docs/BACKLOG.md`, histórias | **O quê** (detalhe, critérios de aceite) |
 | Arquiteto de Software | `.agents/agents/architect.md` | `CMakeLists.txt`, `Source/Main.cpp`, decisões técnicas | **Como estruturar** |
@@ -150,6 +156,10 @@ Uma entrega só é "pronta" quando:
 | 2026-11-02 | pm | Roadmap inicial em `docs/ROADMAP.md` (v0.1 → v1.0) | PO pode derivar o backlog |
 | 2026-11-02 | po | Backlog inicial em `docs/BACKLOG.md` priorizado por valor | Destrava arquitetura e desenvolvimento |
 | 2026-11-02 | musician + pm | Agente músico profissional criado; requisitos musicais revisados juntos e fixados em `docs/MUSIC.md` (A4=440, tolerância ±5 cents, detecção 80–1400 Hz, playback 25–100% sem mudança de tom) | PO passa a derivar critérios de aceite musicais de `docs/MUSIC.md` |
+| 2026-11-02 | pm + musician | Requisitos de sistema formalizados em `docs/REQUIREMENTS.md` (REQ-001..REQ-014): plataforma modular, progressão linear com níveis, gate de 90%, desafios, áudio obrigatório, notas de repouso/tensão, curadoria de apostilas/links/patterns, repertório, instalador Windows | PO deriva o backlog; architect decide a stack; data-engineer modela a medição |
+| 2026-11-02 | architect | ADR 0002 (pugixml, midifile, FluidSynth/RtAudio, libsndfile fora da thread de áudio) e ADR 0003 (progressão linear, gate de 90%, avaliação explicável, override de teste) | Novas dependências e modelo de curso definidos |
+| 2026-11-02 | data-engineer | Schema v2 de medição (`attempt`, `note_event`, `module_result`, uso de pattern/link) e cálculo determinístico do gate | Motor de progressão passa a ser auditável |
+| 2026-11-02 | devops | Workflow de release com instalador Windows (REQ-014) e instaladores de teste por módulo (REQ-013) | Cada módulo tem artefato instalável na branch de teste |
 
 ## 8. Convenções de código
 

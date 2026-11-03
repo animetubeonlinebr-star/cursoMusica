@@ -95,3 +95,93 @@ precisão nas notas graves e tempo de resposta. Ver `docs/adr/` e
 - Quais afinações alternativas entram no v1 (drop D, DADGAD, meio-tom)?
 - O metrônomo deve ter detecção de tempo tocado ou só geração?
 - Mostrar a nota escrita (com bemol) ou sempre sustenido? (depende do tom)
+
+---
+
+# Notas de repouso, tensão e improvisação
+
+Esta seção atende a REQ-011, REQ-012 e REQ-010 (`docs/REQUIREMENTS.md`).
+
+## Notas de repouso × notas de tensão
+
+Para um dado acorde, classificamos a altura tocada em três estados:
+
+| Estado | Definição | Exemplo em Cmaj7 |
+|---|---|---|
+| **Repouso** | nota do acorde ou da escala estável no contexto | C, E, G, B |
+| **Tensão ativa** | tensão que resolve no contexto (9, 11, 13, 6, ♭9, ♯11) | D, F#, A em contexto de dominante |
+| **Tensão não pedida** | tensão **fora** do contexto pedido pelo exercício | qualquer nota de fora do centro |
+
+**Regra de aceitação (REQ-012):** uma nota de tensão só é aceita se o *estado de
+improviso* a pedir (ex.: "resolva com ♭9 no V7", "use a escala alterada",
+"toque tensão e resolva em repouso"). Fora desse estado, tensão não pedida
+conta como erro.
+
+**Matemática da classificação:** a nota é comparada ao acorde pela sua **classe
+de altura** (pitch class, 0–11) e pela sua distância em semitons à fundamental do
+acorde, com o campo harmônico em vigor:
+
+- repouso se a classe de altura ∈ {fundamental, 3ª, 5ª, 7ª} do acorde, ajustado
+  pela escala do centro;
+- tensão ativa se a classe ∈ {9, 11, 13} e o exercício pedir tensão;
+- erro caso contrário (ou tensão fora de contexto).
+
+O sistema deve também aceitar **aproximação cromática** como gesto legítimo
+(nota de passagem) sem contá-la como erro, desde que resolva no tempo forte.
+
+## Modelos progressivos de improvisação (ordem obrigatória)
+
+Progressão **linear**: o módulo N+1 só é liberado após o gate do módulo N
+(≥ 90%, REQ-009). Progressão **baseada em níveis**: cada modelo é um nível.
+
+| Nível | Modelo | Objetivo musical | Notas de repouso |
+|---|---|---|---|
+| 1 | Vamps de 1 acorde (estatismo modal) | ouvir o centro e a cor do modo | fundamental, 3ª, 5ª, 7ª |
+| 2 | Vamps de 2 acordes (movimento modal interno) | perceber o movimento entre dois centros | notas comuns aos dois campos |
+| 3 | II–V–I (célula fundamental) | ouvir a função e a resolução | 3ª e 7ª guiam (voice leading) |
+| 4 | Turnarounds (ciclos repetitivos) | reconhecer o ciclo e antecipar a volta | repouso no I ao fechar o ciclo |
+| 5 | Blues (12 compassos) | forma, swing e o blues scale | I, IV, V e a blue note |
+| 6 | Standards com modulação | acompanhar mudança de tom | repouso segue o tom vigente |
+| 7 | Uso de músicas (repertório real) | aplicar tudo em contexto | idem, por trecho |
+
+## Patterns de guitarristas (REQ-007, REQ-010)
+
+Cada módulo deve citar **≥1 link** e **≥1 pattern**. Sugestões por referência
+(sempre citando a fonte, sem copiar material protegido):
+
+| Guitarrista | Foco de pattern sugerido |
+|---|---|
+| John Petrucci | alternate picking mecânico; sequências de 3 e 4 notas |
+| Guthrie Govan | fusão de escalas, híbrido legato/palhetada |
+| Richie Kotzen | bends expressivos, pentatônica com fraseado vocal |
+| Greg Howe | fusão, pentatônicas deslocadas, legato amplo |
+| Steve Vai | modos exóticos, arpejos e "luthier" de frases |
+| Joe Satriani | escalas modais sobre vamps, legato cantável |
+| Juninho Afram | fraseado de rock nacional, melodismo |
+| Edu Ardanuy | pentatônica brasileira, licks de rock/hard |
+| Kiko Loureiro | fusão brasileira + metal, ritmos de síncope |
+
+## Verificação do uso de link/pattern (REQ-010)
+
+O módulo registra, por exercício, qual link e qual pattern foram ensinados. A
+avaliação de improvisação confere:
+
+- o aluno **abriu/estudou** o link (telemetria local, opt-in);
+- o **pattern foi usado**: detectado por assinatura musical (grau da escala,
+  intervalo, direção) dentro do trecho improvisado;
+- sem esses dois itens, o exercício não conta como concluído.
+
+## Conversão de partitura para áudio (REQ-004)
+
+Toda partitura exibida deve ter áudio. O caminho musical:
+
+1. partitura (XML/MusicXML) → eventos de nota (altura, duração, dinâmica);
+2. eventos → MIDI (programa por instrumento: guitarra, baixo, bateria);
+3. MIDI → síntese/samples (FluidSynth com SoundFont, ou samples `.wav`);
+4. conferência: a altura MIDI ↔ a frequência em cents deve bater com a tabela de
+   afinação desta seção.
+
+Ponto de atenção: **transposição**. A guitarra é instrumento transpositor (soa
+uma oitava abaixo do escrito). A conversão precisa respeitar isso para o áudio
+soar na oitava correta.
+

@@ -49,3 +49,60 @@ Migração v1 inicial; toda mudança vem com rollback documentado.
 
 - Pipeline ainda não implementado (depende de M2/M5 no `docs/PLAN.md`).
 - Decisão de telemetria (D3) pendente com o PM.
+
+---
+
+# Medição e progressão (REQ-009, REQ-002, REQ-010)
+
+Todo processo do sistema é mensurado (REQ-009). O aluno passa de módulo com
+**≥ 90% de acerto**; a progressão é **linear** e **baseada em níveis**
+(ADR 0003). Tudo é local, determinístico e auditável.
+
+## Schema adicional (migração v2)
+
+| Tabela | Colunas | Chaves | Versão |
+|---|---|---|---|
+| `module` | id, level, title, explanation_ref | PK id, UNIQUE level | v2 |
+| `challenge` | id, module_id, kind, prompt_ref | PK id, FK module_id | v2 |
+| `attempt` | id, challenge_id, started_at, ended_at, score, passed | PK id, FK challenge_id | v2 |
+| `note_event` | id, attempt_id, at, hz, pitch_class, cents, verdict | PK id, FK attempt_id | v2 |
+| `pattern_use` | id, attempt_id, pattern_ref, detected | PK id, FK attempt_id | v2 |
+| `link_use` | id, attempt_id, link_ref, opened | PK id, FK attempt_id | v2 |
+| `module_result` | module_id, attempts, hits, accuracy, gate_passed, passed_at | PK module_id | v2 |
+
+`verdict` ∈ {repouso, tensão_pedida, tensão_não_pedida, erro, passagem}.
+
+## Cálculo do gate (determinístico)
+
+```
+accuracy(module) = hits / attempts          # por módulo, sobre os desafios
+gate_passed      = accuracy >= 0.90
+```
+
+Regras de integridade:
+
+- `attempts` só conta tentativas válidas (mínimo de tentativas por desafio,
+  definido com o musician) — evita "1 acerto em 1 = 100%".
+- `passed` por tentativa é derivado da classificação das notas
+  (`docs/MUSIC.md`), nunca de opinião.
+- O gate é recalculado a cada tentativa; o histórico é imutável (append-only).
+- **Modo de teste (REQ-013):** quando o override está ativo, `module_result`
+  ignora o gate para fins de *acesso*, mas o cálculo real continua registrado.
+
+## Pipeline de dados (local, fora da thread de áudio)
+
+- **Extract:** o motor de avaliação publica eventos de nota em um FIFO
+  lock-free; um worker drena. Nada é persistido no callback de áudio.
+- **Transform:** funções puras — classificação repouso/tensão, agregação de
+  acurácia, detecção de uso de pattern.
+- **Load:** gravação idempotente no SQLite local.
+- **Serve:** views `v_module_accuracy`, `v_progress`, `v_weak_notes` para a UI de
+  progresso e para o relatório do aluno.
+
+## Governança e privacidade
+
+- As notas tocadas são dado do aluno; ficam **locais** e são apagáveis pelo
+  usuário (LGPD). Nenhum dado pessoal é coletado nesta fase.
+- Telemetria de "link estudado" é **local** e opt-in; sem consentimento, o
+  critério de link (REQ-010) é registrado mas não enviado a lugar algum.
+- Retenção: o usuário pode limpar o histórico de tentativas.

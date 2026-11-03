@@ -1,12 +1,14 @@
 # ROADMAP — CursoMusica
 
 Dono: **pm**. Altitude macro (trimestres), sem listas de tarefas. O detalhe
-tático vive em `docs/BACKLOG.md` (PO).
+tático vive em `docs/BACKLOG.md` (PO) e os requisitos rastreáveis em
+`docs/REQUIREMENTS.md`.
 
 ## Visão
 
-Um companheiro de estudo de guitarra para Windows, com latência baixíssima, que
-afina, mede e ajuda a praticar junto com o curso CursoMusica.
+Uma **plataforma de estudo de guitarra** para Windows, com latência baixíssima,
+que ensina, demonstra com áudio, gera desafios, mede o desempenho e **avalia
+improvisação** — tudo dentro do software, sem arquivos externos.
 
 ## Descoberta (resumo)
 
@@ -40,38 +42,46 @@ afina, mede e ajuda a praticar junto com o curso CursoMusica.
 
 ## Roadmap por trimestre
 
-### Q1 — Fundação confiável
-- **Objetivo:** o que já existe fica verificável e pronto para crescer.
-- **KPI:** build do CI verde em 100% dos PRs; suíte de testes rodando.
+### Q1 — Fundação confiável e distribuível
+- **Objetivo:** o que já existe fica verificável, e o app passa a ter instalador
+  Windows pronto para uso.
+- **KPI:** CI verde em 100% dos PRs; instalador instala em diretório escolhido e
+  abre pronto para uso (REQ-014).
 - **Owner:** devops + qa + architect.
 - **Tamanho:** M.
 - **Dependência:** decidir se `feature/juce-audio-app` é mesclada em `main`.
 
-### Q2 — Do mock ao real
-- **Objetivo:** afinador e medidor ligados à engine (nível e afinação reais);
-  latência medida no Windows com ASIO.
-- **KPI:** tempo até a primeira nota afinada ≤ 60 s; latência ≤ 10 ms.
-- **Owner:** developer (+ designer para estados visuais reais).
+### Q2 — Do mock ao real + estrutura de curso
+- **Objetivo:** afinador e medidor ligados à engine; estrutura de módulos
+  lineares com explicação e desafios; motor de medição com gate de 90%.
+- **KPI:** tempo até a primeira nota afinada ≤ 60 s; gate de 90% funcionando
+  (REQ-009); todo módulo com explicação e ≥1 desafio (REQ-003/REQ-008).
+- **Owner:** developer + designer + data-engineer + musician.
 - **Tamanho:** L.
-- **Dependência:** ASIO SDK no Windows; máquina Windows para medir.
+- **Dependência:** ASIO SDK e máquina Windows para medir latência.
 
-### Q3 — Estudar de verdade
-- **Objetivo:** playback com controle de velocidade e loop; presets de estudo.
-- **KPI:** 40% das sessões usam o loop; 0 xruns em 30 min.
-- **Owner:** developer + designer + data-engineer (sessões).
+### Q3 — Improvisação avaliada
+- **Objetivo:** conversão partitura → áudio; avaliação de improvisação
+  (repouso × tensão); módulos progressivos níveis 1–4.
+- **KPI:** toda partitura tem áudio (REQ-004); tensão não pedida conta como erro
+  (REQ-012); 40% das sessões usam o loop.
+- **Owner:** musician + developer + data-engineer.
 - **Tamanho:** L.
-- **Dependência:** Q2 concluído (engine real).
+- **Dependência:** Q2 (motor de medição).
 
-### Q4 — Empacotar e evoluir
-- **Objetivo:** instalador Windows, telemetria opcional (opt-in, LGPD) e
-  analytics de progresso.
-- **KPI:** instalação sem passo manual; dados de progresso disponíveis.
-- **Owner:** devops + data-engineer.
-- **Tamanho:** M.
-- **Dependência:** Q3 concluído.
+### Q4 — Repertório e empacotamento final
+- **Objetivo:** módulos 5–7 (blues, standards com modulação, repertório);
+  curadoria de links/patterns; instaladores de teste por módulo.
+- **KPI:** 7 níveis completos; cada módulo com ≥1 link e ≥1 pattern verificados
+  (REQ-010); instalador por módulo na branch de teste (REQ-013).
+- **Owner:** musician + po + devops.
+- **Tamanho:** L.
+- **Dependência:** Q3.
 
 ## Riscos macro (detalhe em `docs/RISKS.md`, owner: project-manager)
 
 - ASIO SDK é licenciado e não vem no JUCE → risco de licença e de ausência no CI.
 - Sem máquina Windows de teste, a latência real fica não verificada.
 - PDFs do curso têm direitos autorais → não embarcar no app sem permissão.
+- Repertório (Coltrane, Hancock, Corea, Jobim, João Bosco) é protegido → usar só
+  progressões/estudo, nunca gravação ou partitura publicada sem licença.
