@@ -48,7 +48,21 @@ Loureiro.
 | ID | Requisito | MoSCoW | Verificação |
 |---|---|---|---|
 | REQ-011 | O sistema identifica **notas de repouso** para saber quando o aluno erra na improvisação | Must | dado contexto harmônico, classifica nota como repouso/tensão |
-| REQ-012 | **Notas de tensão** (que geram tensão) só são aceitas se o **estado de improviso pedir** o seu uso | Must | a avaliação rejeita tensão fora de contexto e aceita quando solicitado |
+| REQ-012 | **Notas de tensão** só são aceitas se o **estado de improviso pedir** o seu uso; qualquer tensão não solicitada é erro, **a menos que faça parte do acorde** | Must | a avaliação rejeita tensão fora de contexto e aceita quando solicitada ou quando a nota pertence ao acorde |
+
+## D2. Metrônomo com meta de andamento
+
+| ID | Requisito | MoSCoW | Verificação |
+|---|---|---|---|
+| REQ-015 | O sistema usa **metrônomo para praticar**; estipula um **valor meta** (BPM alvo) e, **se o aluno não o atingir, não avança** nos módulos | Must | BPM alvo por desafio; abaixo da meta → módulo não libera |
+
+## D3. Catálogo de patterns
+
+| ID | Requisito | MoSCoW | Verificação |
+|---|---|---|---|
+| REQ-016 | O sistema deve oferecer o **catálogo de patterns** (melódicos, rítmicos e de arpejo) com IDs estáveis, aplicáveis por módulo e verificáveis | Must | cada pattern do catálogo é citável por um módulo e detectável pela avaliação |
+
+Catálogo detalhado (IDs `PTN-*`) em `docs/MUSIC.md` §"Catálogo de patterns".
 
 ## E. Modelos progressivos de improvisação (REQ-002, REQ-010)
 
@@ -126,3 +140,5 @@ A decisão de arquitetura (incluindo o trade-off latência × síntese) fica no
 | REQ-012 | musician + developer | `docs/MUSIC.md` | pendente |
 | REQ-013 | devops | `.github/workflows/` | pendente |
 | REQ-014 | devops | instalador Windows | pendente |
+| REQ-015 | musician + developer + data-engineer | ADR 0004 | pendente |
+| REQ-016 | musician | `docs/MUSIC.md` | catalogado (IDs PTN-*) |

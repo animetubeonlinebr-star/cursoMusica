@@ -27,6 +27,8 @@ capacidade. Direção do produto fica em `docs/ROADMAP.md` (PM).
 | M7 | Conversão partitura → áudio (CM-007) | Q3 | developer | ADR 0002 |
 | M8 | Avaliação de improvisação repouso × tensão (CM-009) | Q3 | musician, developer | M5, M7 |
 | M9 | Módulos progressivos níveis 1–7 (CM-011/CM-012) | Q3–Q4 | musician, po | M8 |
+| M9b | Metrônomo com BPM meta como gate (CM-014) | Q3 | musician, developer | M5 |
+| M9c | Catálogo de patterns (CM-015) | Q3 | musician | M9 |
 | M10 | Instaladores de teste por módulo (REQ-013) | Q4 | devops | M2b, M4 |
 
 ## Marcos de decisão

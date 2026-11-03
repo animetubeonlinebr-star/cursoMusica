@@ -114,8 +114,19 @@ Para um dado acorde, classificamos a altura tocada em três estados:
 
 **Regra de aceitação (REQ-012):** uma nota de tensão só é aceita se o *estado de
 improviso* a pedir (ex.: "resolva com ♭9 no V7", "use a escala alterada",
-"toque tensão e resolva em repouso"). Fora desse estado, tensão não pedida
-conta como erro.
+"toque tensão e resolva em repouso"). Fora desse estado, **qualquer tensão não
+solicitada é erro, a menos que a nota faça parte do acorde**. Não há tolerância
+zero ambígua: a regra é binária e explicável.
+
+**Critério exato (definitivo):**
+
+| Situação da nota | Veredito |
+|---|---|
+| Pertence ao acorde (fundamental, 3ª, 5ª, 7ª) | repouso (aceita) |
+| Tensão **solicitada** pelo estado de improviso | aceita |
+| Tensão **não solicitada** e **fora** do acorde | **erro** |
+| Tensão não solicitada **que faz parte do acorde** (ex.: 9ª/13ª que está no acorde) | aceita |
+| Passagem cromática que resolve no tempo forte | passagem (aceita) |
 
 **Matemática da classificação:** a nota é comparada ao acorde pela sua **classe
 de altura** (pitch class, 0–11) e pela sua distância em semitons à fundamental do
@@ -143,6 +154,39 @@ Progressão **linear**: o módulo N+1 só é liberado após o gate do módulo N
 | 5 | Blues (12 compassos) | forma, swing e o blues scale | I, IV, V e a blue note |
 | 6 | Standards com modulação | acompanhar mudança de tom | repouso segue o tom vigente |
 | 7 | Uso de músicas (repertório real) | aplicar tudo em contexto | idem, por trecho |
+
+## Metrônomo e meta de andamento (REQ-015)
+
+O aluno pratica com metrônomo e precisa **atingir o BPM meta** do desafio para
+avançar (segundo eixo de gate, além dos 90% — ADR 0004).
+
+### BPM meta sugerido por nível
+
+| Nível | BPM meta inicial | Observação |
+|---|---|---|
+| 1 — vamp/1 acorde | 60 | foco em ouvir o centro, sem pressa |
+| 2 — vamp/2 acordes | 70 | movimento entre centros |
+| 3 — II–V–I | 80 | resolução no tempo |
+| 4 — turnarounds | 90 | antecipar a volta |
+| 5 — blues | 100 | swing e forma de 12 |
+| 6 — standards com modulação | 120 | mudança de tom em tempo |
+| 7 — repertório | 140 | contexto real |
+
+### Tolerância rítmica (como medir o BPM atingido)
+
+`achieved_bpm` só conta se o aluno tocar **na grade** do metrônomo. A tolerância
+é uma janela em torno do tempo esperado, proporcional à subdivisão:
+
+| Subdivisão | Janela de tolerância (aprox.) |
+|---|---|
+| Semínima (1/4) | ±25% do intervalo entre batidas |
+| Colcheia (1/8) | ±20% |
+| Tercina | ±18% |
+| Semicolcheia (1/16) | ±15% |
+
+`on_grid_ratio` = fração das notas que caíram dentro da janela. O BPM só é
+considerado atingido quando `on_grid_ratio` passa do limiar (proposto: 0,90,
+alinhado ao gate de acurácia). Tocar rápido e fora do tempo **não** conta.
 
 ## Patterns de guitarristas (REQ-007, REQ-010)
 
@@ -184,4 +228,146 @@ Toda partitura exibida deve ter áudio. O caminho musical:
 Ponto de atenção: **transposição**. A guitarra é instrumento transpositor (soa
 uma oitava abaixo do escrito). A conversão precisa respeitar isso para o áudio
 soar na oitava correta.
+
+---
+
+# Standards como laboratório progressivo
+
+Standards de jazz e clássicos da MPB/Bossa Nova não são só repertório: são o
+**laboratório definitivo**, "livros de exercícios vivos" organizados por
+complexidade harmônica e conceitual. Cada standard entra no nível em que o
+conceito que ele ensina aparece pela primeira vez.
+
+| Estágio | Conceito foco | Standards sugeridos |
+|---|---|---|
+| 1 — Estatismo modal | um centro, uma cor | *Maiden Voyage*, *Cantaloupe Island* (vamps) |
+| 2 — Movimento modal interno | dois centros, notas comuns | *Maiden Voyage*, *Cantaloupe Island* |
+| 3 — II–V–I | função e resolução | *Só Danço Samba*, *Equinox* |
+| 4 — Turnarounds | ciclo e volta | *Só Danço Samba*, *Equinox* |
+| 5 — Blues | forma de 12 compassos | *Equinox*, *Incompatibilidade de Gênios* |
+| 6 — Modulação | mudança de tom | *500 Miles High*, *Spain*, *Incompatibilidade de Gênios* |
+| 7 — Repertório | tudo em contexto | *Spain*, *500 Miles High*, *Equinox* |
+
+Repertório completo: ver `docs/REQUIREMENTS.md` (REQ-012/repertório).
+
+> Cada standard é usado **como progressão para estudo** (acordes, escalas,
+> trechos), nunca como gravação. Ver "Direitos autorais" abaixo.
+
+# Catálogo de patterns
+
+Os patterns são padrões **numéricos** aplicados sobre escalas (sobretudo
+pentatônicas e modos gregos) para desenvolver fluência mecânica e gerar frases.
+Cada pattern tem um ID estável para o módulo citar e a avaliação detectar
+(REQ-010).
+
+## 1. Patterns melódicos e de escala (licks e digitações)
+
+### 1.A Grupos de notas (sequências)
+
+Avança na escala em blocos repetitivos.
+
+| ID | Pattern | Fórmula |
+|---|---|---|
+| PTN-M-3 | Grupos de 3 (tercinas) | 1-2-3, 2-3-4, 3-4-5, 4-5-6… |
+| PTN-M-4 | Grupos de 4 (semicolcheias) | 1-2-3-4, 2-3-4-5, 3-4-5-6, 4-5-6-7… |
+
+### 1.B Salto de intervalos
+
+Avança saltando notas para quebrar o som linear de "sobe e desce".
+
+| ID | Pattern | Fórmula |
+|---|---|---|
+| PTN-M-3rds | Terças | 1-3, 2-4, 3-5, 4-6, 5-7… |
+| PTN-M-4ths | Quartas | 1-4, 2-5, 3-6, 4-7… |
+
+### 1.C Triquetra / vai-e-vem
+
+Muda a direção a cada grupo de notas.
+
+| ID | Pattern | Fórmula |
+|---|---|---|
+| PTN-M-TRIQ | Triquetra | 1-2-3-2, 2-3-4-3, 3-4-5-4… |
+
+### 1.D Patterns na pentatônica
+
+| ID | Pattern | Fórmula |
+|---|---|---|
+| PTN-M-P31 | Pattern 3-1 (em 5 posições) | sobe 3 notas, volta 1, retoma a subida |
+| PTN-M-SKIP | String skipping | toca na 6ª corda, pula para a 4ª, toca na 5ª, pula para a 3ª… |
+
+## 2. Patterns rítmicos e de acompanhamento (base/groove)
+
+### 2.A Funk / R&B — 16th note scratching
+
+| ID | Pattern | Característica |
+|---|---|---|
+| PTN-R-FUNK | [acorde – abafado – abafado – acorde] | semicolcheias constantes alternando dead notes e acordes pequenos nas cordas agudas (inversões nas cordas 1, 2 e 3), sincopado |
+
+### 2.B Rock / Metal — palm muting e power chords
+
+| ID | Pattern | Característica |
+|---|---|---|
+| PTN-R-PALM | pedal point abafado + power chords | palm mute na ponte em colcheias/semicolcheias na tônica (ex.: E5 na 6ª solta) intercalado com power chords abertos |
+
+### 2.C Bossa Nova e Samba — fingerstyle
+
+| ID | Pattern | Característica |
+|---|---|---|
+| PTN-R-BOSSA | polegar nos tempos, dedos nas síncopas | separação estrita: polegar marca a tônica nos tempos 1 e 3; indicador, médio e anelar puxam o acorde nos contratempos |
+
+### 2.D Country / Blues — hybrid picking e Travis picking
+
+| ID | Pattern | Característica |
+|---|---|---|
+| PTN-R-HYBRID | palheta + dedos | palheta nas cordas graves, dedos nas agudas; alternância do baixo com tônica e quinta do acorde |
+
+## 3. Patterns de arpejo
+
+| ID | Pattern | Característica |
+|---|---|---|
+| PTN-A-TRIAD | arpejos de 3 cordas (tríades) | varredura (sweep) em E–B–G e retorno; usado em rock neoclássico e fusion |
+| PTN-A-DROP2 | arpejos de 7ª em Drop 2 | digitação fixa 1-3-5-7, horizontal ou vertical no braço |
+| PTN-A-DROP3 | arpejos de 7ª em Drop 3 | digitação fixa 1-3-5-7, drop 3 |
+
+## Detecção do uso de pattern (REQ-010)
+
+A avaliação confere o pattern ensinado por assinatura musical dentro do trecho
+improvisado:
+
+- **Melódicos:** sequência de graus (ex.: 1-2-3, 2-3-4…), direção e repetição do
+  bloco; intervalos (terças/quartas) medidos em semitons; inversão de direção
+  (triquetra); relação de cordas para string skipping.
+- **Rítmicos:** posição das notas na grade de subdivisão (dead notes, acentos,
+  contratempos), presença de palm mute (ataque curto) e separação grave/agudo.
+- **Arpejos:** graus 1-3-5(-7) em ordem e o padrão de varredura entre cordas.
+
+Sem assinatura detectada, o exercício não conta como concluído.
+
+# Direitos autorais (posição registrada)
+
+**Decisão (musician + pm):** para este projeto **pessoal, sem fins comerciais**,
+com as músicas usadas **apenas para estudo e sem execução por completa**, a
+inclusão de pequenos trechos é considerada aceitável sob o **art. 46, inciso II**
+da Lei 9.610/98:
+
+- reprodução de um **único exemplar** de **pequenos trechos**;
+- para **uso privado do próprio copista**;
+- realizada **pelo próprio copista**;
+- **sem finalidade de lucro**.
+
+**Condições que mantêm a decisão válida** (se qualquer uma deixar de valer, a
+análise precisa ser refeita):
+
+1. O projeto permanece **pessoal e sem fins comerciais** (sem venda, sem
+   assinatura, sem publicidade, sem distribuição pública ampla).
+2. São usados apenas **pequenos trechos**, com finalidade de estudo — **nunca a
+   obra completa**.
+3. O material **não é redistribuído** como partitura/áudio da obra (o app não
+   publica o arquivo do autor; ele contém a progressão para exercício).
+4. Os créditos de composição são sempre exibidos.
+
+Impacto: o risco **R-08** deixa de ser bloqueante e passa a **condicional**
+(ver `docs/RISKS.md`). Se o projeto virar comercial, esta seção deve ser
+substituída por licenciamento formal.
+
 

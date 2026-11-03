@@ -160,6 +160,10 @@ Uma entrega só é "pronta" quando:
 | 2026-11-02 | architect | ADR 0002 (pugixml, midifile, FluidSynth/RtAudio, libsndfile fora da thread de áudio) e ADR 0003 (progressão linear, gate de 90%, avaliação explicável, override de teste) | Novas dependências e modelo de curso definidos |
 | 2026-11-02 | data-engineer | Schema v2 de medição (`attempt`, `note_event`, `module_result`, uso de pattern/link) e cálculo determinístico do gate | Motor de progressão passa a ser auditável |
 | 2026-11-02 | devops | Workflow de release com instalador Windows (REQ-014) e instaladores de teste por módulo (REQ-013) | Cada módulo tem artefato instalável na branch de teste |
+| 2026-11-02 | musician | Catálogo de patterns com IDs estáveis (`PTN-*`): melódicos, rítmicos e de arpejo; mapa de standards como laboratório progressivo | PO pode citar pattern por ID; avaliação detecta assinatura (REQ-016) |
+| 2026-11-02 | musician + pm | Direitos autorais: posição registrada (art. 46, II, Lei 9.610/98) para projeto pessoal, sem fins comerciais, só pequenos trechos de estudo | R-08 passa de bloqueante a condicional |
+| 2026-11-02 | musician + pm | Regra de tensão refinada: tensão não solicitada é erro, salvo se a nota fizer parte do acorde | REQ-012 sem ambiguidade; QA testa os dois casos |
+| 2026-11-02 | pm + musician + architect | REQ-015 (metrônomo com BPM meta como gate) e REQ-016 (catálogo de patterns); ADR 0004 (dois eixos de gate, tolerância rítmica) | Progressão passa a exigir acurácia ≥90% **e** BPM meta |
 
 ## 8. Convenções de código
 

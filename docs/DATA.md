@@ -106,3 +106,36 @@ Regras de integridade:
 - Telemetria de "link estudado" é **local** e opt-in; sem consentimento, o
   critério de link (REQ-010) é registrado mas não enviado a lugar algum.
 - Retenção: o usuário pode limpar o histórico de tentativas.
+
+---
+
+# Gate de andamento (metrônomo) — migração v3 (REQ-015)
+
+Segundo eixo de gate (ADR 0004): além da acurácia, o aluno precisa **atingir o
+BPM meta** para avançar. O BPM vem do metrônomo do próprio app.
+
+## Schema adicional (migração v3)
+
+| Tabela / coluna | Descrição | Versão |
+|---|---|---|
+| `challenge.target_bpm` | BPM meta do desafio (definido pelo musician) | v3 |
+| `attempt.achieved_bpm` | maior BPM em que o aluno executou o desafio dentro da tolerância | v3 |
+| `tempo_sample` (id, attempt_id, bpm, on_grid_ratio, at) | amostras de alinhamento à grade | v3 |
+| `module_result.bpm_passed` | se o BPM meta do módulo foi atingido | v3 |
+
+## Cálculo do gate de andamento
+
+```
+bpm_passed(module) = achieved_bpm >= target_bpm     # por desafio, agregado no módulo
+gate_passed(module) = accuracy >= 0.90 AND bpm_passed
+```
+
+Regras:
+
+- `achieved_bpm` só conta se `on_grid_ratio >= limiar` (alinhamento à grade do
+  metrônomo, limiar definido pelo musician). Tocar rápido e fora do tempo não
+  vale.
+- O BPM é medido contra o metrônomo interno, o que torna o resultado
+  determinístico.
+- Continua valendo: histórico append-only; override de teste (REQ-013) libera
+  acesso mas não altera os dois cálculos.

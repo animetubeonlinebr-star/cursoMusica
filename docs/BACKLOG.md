@@ -112,7 +112,7 @@ Critérios de aceite (derivados de `docs/MUSIC.md`, dono: musician):
 Dependências: CM-007 (contexto sonoro), CM-008. Owner: musician + developer.
 
 ### [CM-011] Módulos progressivos de improvisação (níveis 1–7) — valor: H — tamanho: L — status: draft
-Requisitos: REQ-002, REQ-010; ordem em `docs/MUSIC.md`.
+Requisitos: REQ-002, REQ-010, REQ-016; ordem e standards em `docs/MUSIC.md`.
 Como um aluno, eu quero estudar improvisação em níveis crescentes, do vamp de 1
 acorde até músicas reais, para que eu progrida sem pular etapas.
 
@@ -120,17 +120,50 @@ Critérios de aceite (rascunho):
 - Níveis na ordem: 1 vamp/1 acorde → 2 vamps/2 acordes → 3 II–V–I →
   4 turnarounds → 5 blues 12 compassos → 6 standards com modulação →
   7 repertório.
-- Cada nível ensina ≥1 link e ≥1 pattern e verifica o uso (CM-012).
+- Cada nível é ancorado em standards concretos (mapa em `docs/MUSIC.md`).
+- Cada nível ensina ≥1 link e ≥1 pattern do catálogo (CM-015) e verifica o uso
+  (CM-012).
 
 Dependências: CM-009. Owner: musician + po.
 
+### [CM-014] Metrônomo com BPM meta como gate — valor: H — tamanho: M — status: draft
+Requisitos: REQ-015; ADR 0004.
+Como um aluno, eu quero praticar com metrônomo e ter uma meta de andamento, para
+que eu só avance quando tocar certo na velocidade exigida.
+
+Critérios de aceite (derivados de `docs/MUSIC.md`, dono: musician):
+- Cada desafio tem `target_bpm`; o sistema mede o maior BPM executado dentro da
+  tolerância rítmica (`achieved_bpm`).
+- Atingir `target_bpm` (com alinhamento à grade) → eixo de andamento aprovado;
+  ficar 1 BPM abaixo → não aprova.
+- Tocar rápido e fora do tempo **não** conta como BPM atingido.
+- O módulo só libera com acurácia ≥ 90% **e** BPM meta atingido.
+
+Dependências: CM-008, `docs/DATA.md` (schema v3). Owner: musician + developer +
+data-engineer.
+
+### [CM-015] Catálogo de patterns (melódicos, rítmicos, arpejos) — valor: H — tamanho: M — status: draft
+Requisitos: REQ-016, REQ-010; IDs em `docs/MUSIC.md` §"Catálogo de patterns".
+Como um aluno, eu quero praticar os patterns do catálogo, para que eu desenvolva
+fluência mecânica e fraseado.
+
+Critérios de aceite (rascunho):
+- O catálogo contém os grupos: melódicos (3, 4, terças, quartas, triquetra, 3-1,
+  string skipping), rítmicos (funk, palm mute, bossa, hybrid) e arpejos (tríade,
+  drop 2, drop 3).
+- Cada pattern tem ID estável (`PTN-*`) e é citável por um módulo.
+- A avaliação detecta a assinatura do pattern no trecho improvisado (CM-012).
+
+Dependências: CM-011. Owner: musician.
+
 ### [CM-012] Curadoria de conteúdo: apostilas, links e patterns — valor: M — tamanho: M — status: draft
-Requisitos: REQ-006, REQ-007, REQ-010.
+Requisitos: REQ-006, REQ-007, REQ-010, REQ-016.
 Como o time de conteúdo, eu quero revisar as apostilas e anexar links e patterns
 de guitarristas por módulo, para que o material seja coerente e verificável.
 
 Critérios de aceite (rascunho):
-- Cada módulo lista: fonte da apostila usada, ≥1 link, ≥1 pattern.
+- Cada módulo lista: fonte da apostila usada, ≥1 link, ≥1 pattern (ID do
+  catálogo, CM-015).
 - Guitarristas de referência considerados: Petrucci, Govan, Kotzen, Howe, Vai,
   Satriani, Juninho Afram, Edu Ardanuy, Kiko Loureiro.
 - A avaliação detecta se o pattern ensinado foi usado.

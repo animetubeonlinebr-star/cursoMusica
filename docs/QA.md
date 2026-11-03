@@ -24,7 +24,12 @@ Dono: **qa**. Estratégia de teste, execuções e defeitos. Evidência obrigató
 - **Migração de schema em dados existentes** → dados antigos continuam legíveis.
 - **Gate de 90% (REQ-009)** → 90,0% libera; 89,9% não libera; amostra pequena
   (1/1) não vale como aprovação.
-- **Tensão não pedida (REQ-012)** → conta como erro; tensão pedida é aceita.
+- **Tensão não pedida (REQ-012)** → conta como erro; tensão pedida é aceita;
+  tensão não pedida **que faz parte do acorde** é aceita.
+- **Metrônomo/BPM meta (REQ-015)** → atingir a meta libera o eixo de andamento;
+  meta−1 BPM não libera; tocar rápido fora da grade não conta como atingido.
+- **Catálogo de patterns (REQ-016)** → cada ID `PTN-*` é citável por um módulo e
+  detectável pela avaliação.
 - **Nota de repouso identificada corretamente (REQ-011)** → nota do acorde e nota
   de fora classificadas de forma distinta e explicável.
 - **Conversão partitura → áudio (REQ-004)** → mesma entrada produz o mesmo áudio;
