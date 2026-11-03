@@ -13,10 +13,10 @@ o instalador Windows funciona (REQ-014).
 - Cria atalhos (menu iniciar e desktop) e registra o desinstalador.
 - O desinstalador remove arquivos, atalhos e chaves de registro.
 - O entregável é **`instalador/Instalador CursoMusica.exe`**, na raiz do
-  projeto. O NSIS resolve caminhos relativos ao próprio `.nsi` e não aceita
-  `..`, então o build primeiro faz staging em `deploy/windows/dist/app/` e
-  depois copia o resultado para `instalador/`.
-- Runtime opcional: se `build/runtime/` existir, o build passa `/DRUNTIME` e o
+  projeto. O NSIS resolve caminhos relativos ao script no Linux e ao diretório
+  atual no Windows, e não aceita `..`; por isso o build passa caminhos absolutos
+  via `-DAPPEXE=` (binário compilado) e `-DOUTFILE=` (destino).
+- Runtime opcional: se `build/runtime/` existir, o build passa `-DRUNTIME` e o
   NSIS o inclui; sem essa pasta o instalador continua sendo gerado.
 
 ## Build e publicação
