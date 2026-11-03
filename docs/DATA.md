@@ -126,15 +126,22 @@ BPM meta** para avançar. O BPM vem do metrônomo do próprio app.
 ## Cálculo do gate de andamento
 
 ```
-bpm_passed(module) = achieved_bpm >= target_bpm     # por desafio, agregado no módulo
+target_grid(module) = 0.75..0.82        # módulos 1–14: faixa de estudo
+target_grid(module) = 0.82..0.90        # módulos 15–19: rampa linear
+target_grid(module) = 0.90              # módulos 20+: performance
+
+bpm_passed(module) = achieved_bpm >= target_bpm AND on_grid_ratio >= target_grid(module)
 gate_passed(module) = accuracy >= 0.90 AND bpm_passed
 ```
 
 Regras:
 
-- `achieved_bpm` só conta se `on_grid_ratio >= limiar` (alinhamento à grade do
-  metrônomo, limiar definido pelo musician). Tocar rápido e fora do tempo não
-  vale.
+- O alvo de `on_grid_ratio` **cresce com o módulo** (rampa linear do 15 ao 20),
+  refletindo a pedagogia: primeiro a precisão rítmica com respiração (75–82%),
+  depois a precisão de performance (90%).
+- `achieved_bpm` só conta se `on_grid_ratio` atingir o alvo do módulo.
+- Síncope brasileira (bossa/samba) exige que a grade modele o deslocamento —
+  senão o aluno é penalizado por tocar certo (ver `docs/MUSIC.md`, R-13).
 - O BPM é medido contra o metrônomo interno, o que torna o resultado
   determinístico.
 - Continua valendo: histórico append-only; override de teste (REQ-013) libera

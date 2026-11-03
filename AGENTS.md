@@ -164,6 +164,9 @@ Uma entrega só é "pronta" quando:
 | 2026-11-02 | musician + pm | Direitos autorais: posição registrada (art. 46, II, Lei 9.610/98) para projeto pessoal, sem fins comerciais, só pequenos trechos de estudo | R-08 passa de bloqueante a condicional |
 | 2026-11-02 | musician + pm | Regra de tensão refinada: tensão não solicitada é erro, salvo se a nota fizer parte do acorde | REQ-012 sem ambiguidade; QA testa os dois casos |
 | 2026-11-02 | pm + musician + architect | REQ-015 (metrônomo com BPM meta como gate) e REQ-016 (catálogo de patterns); ADR 0004 (dois eixos de gate, tolerância rítmica) | Progressão passa a exigir acurácia ≥90% **e** BPM meta |
+| 2026-11-02 | musician + pm | Faixa de `on_grid_ratio` fixada em **0,75–0,82** (precisão com respiração; 90% cedo engessa a execução), com **rampa linear até 0,90 do módulo 15 ao 20** | Corrige a calibração do gate de andamento (ADR 0004, R-13) |
+| 2026-11-02 | musician | Análise harmônica por música registrada em `docs/MUSIC.md` (Maiden Voyage, Cantaloupe Island, Só Danço Samba, Equinox, Incompatibilidade de Gênios, 500 Miles High, Spain) com encadeamentos verificados e mapeamento música → nível | Currículo por standards passa a ser executável por módulo |
+| 2026-11-02 | musician | Síncope brasileira exige grade própria na medição de tempo; `PTN-R-BOSSA` ligado a Só Danço Samba e Incompatibilidade de Gênios | Evita penalizar o aluno por tocar certo no estilo (R-13) |
 
 ## 8. Convenções de código
 

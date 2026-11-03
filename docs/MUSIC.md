@@ -172,7 +172,7 @@ avançar (segundo eixo de gate, além dos 90% — ADR 0004).
 | 6 — standards com modulação | 120 | mudança de tom em tempo |
 | 7 — repertório | 140 | contexto real |
 
-### Tolerância rítmica (como medir o BPM atingido)
+### Tolerância rítmica e alvo de `on_grid_ratio` (75–82%)
 
 `achieved_bpm` só conta se o aluno tocar **na grade** do metrônomo. A tolerância
 é uma janela em torno do tempo esperado, proporcional à subdivisão:
@@ -184,9 +184,26 @@ avançar (segundo eixo de gate, além dos 90% — ADR 0004).
 | Tercina | ±18% |
 | Semicolcheia (1/16) | ±15% |
 
-`on_grid_ratio` = fração das notas que caíram dentro da janela. O BPM só é
-considerado atingido quando `on_grid_ratio` passa do limiar (proposto: 0,90,
-alinhado ao gate de acurácia). Tocar rápido e fora do tempo **não** conta.
+`on_grid_ratio` = fração das notas que caíram dentro da janela.
+
+**Por que 75–82% é a faixa ideal de estudo (e não 90%).** Exigir ≥90% de
+alinhamento num instrumento de cordas obriga a uma **rigidez mecânica quase
+robótica**: o braço e os dedos perdem a *respiração* (o micro-timing natural).
+Na faixa de 75–82% o aluno mantém a precisão rítmica cirúrgica **sem soar
+engessado** — o pulso fica firme e o *swing/groove* natural do estilo sobrevive.
+90% é meta de **performance**, não de **aprendizado**.
+
+**Rampa de exigência (progressão baseada em níveis):**
+
+| Módulos | Alvo de `on_grid_ratio` |
+|---|---|
+| 1–14 | 0,75 a 0,82 (faixa de estudo) |
+| 15–19 | sobe linearmente de 0,82 até 0,90 |
+| 20+ | 0,90 (precisão de performance) |
+
+A rampa é **linear** do módulo 15 ao 20 e só começa depois que a base está
+consolidada — é o aluno "afinando o relógio interno" antes de exigir precisão de
+palco. Tocar rápido e fora do tempo continua **não** contando.
 
 ## Patterns de guitarristas (REQ-007, REQ-010)
 
@@ -252,6 +269,112 @@ Repertório completo: ver `docs/REQUIREMENTS.md` (REQ-012/repertório).
 
 > Cada standard é usado **como progressão para estudo** (acordes, escalas,
 > trechos), nunca como gravação. Ver "Direitos autorais" abaixo.
+
+## Detalhamento harmônico por música
+
+Dados verificados em fontes públicas (lead sheets/Real Book e análises
+publicadas). Onde a tonalidade difere entre gravação original e Real Book, ambas
+são citadas. **Toda altura abaixo é concert pitch.**
+
+### Maiden Voyage — Herbie Hancock
+- **Tom / forma:** D (modal), 32 compassos, AABA, 4/4.
+- **Harmonia:** quase toda em acordes **sus** (7sus4): `Dsus`, `Fsus`, `Ebsus`,
+  `Dbsus`. No original, o quarto acorde soa como **sus com 3ª menor** (o Real
+  Book grafa `Dbsus`); a diferença é audível e vale como exercício de escuta.
+- **Conceito (níveis 1–2):** **estatismo modal** — sem função dominante, sem
+  trítono pedindo resolução. É o "mar aberto".
+- **Foco de estudo:** ouvir o **centro** e a cor de cada modo; notas de repouso =
+  fundamental, 4ª, 5ª, 7ª.
+- **Pattern sugerido:** `PTN-M-3rds` (terças) e frases com intervalos de 4ª (o
+  tema abre e fecha em quartas).
+
+### Cantaloupe Island — Herbie Hancock
+- **Tom / forma:** F menor, 16 compassos, ABAB, hard bop/funk.
+- **Harmonia:** três vamps estáticos de 2 compassos — `Fm7` (F dórico),
+  `Db7` (**lídio dominante**), `Dm7` (D dórico) — e volta a `Fm7`.
+  Sem movimento harmônico funcional; a "forma" é o groove.
+- **Conceito (níveis 1–2):** **vamps e movimento modal interno** (o baixo desce
+  F → Db → D).
+- **Foco de estudo:** trocar de escala por centro — Dórico em Fm7/Dm7, Lídio
+  dominante em Db7.
+- **Pattern sugerido:** `PTN-R-FUNK` (levada sincopada) e `PTN-M-P31`.
+
+### Só Danço Samba — Tom Jobim & Vinicius de Moraes
+- **Tom / forma:** Dó maior (Real Book), forma de 32 compassos (AABA), bossa.
+- **Harmonia:** a **progressão de bossa do Jobim** — tônica, VI7, **II7
+  prolongado** (o `D7` onde se esperaria `Dm7`; a "luz" da bossa), V7, I. O
+  dominante secundário alongado é a assinatura.
+- **Conceito (nível 3):** **II–V–I** e dominantes secundários.
+- **Foco de estudo:** ouvir a resolução; o `II7` pede **tensão** e é o exemplo
+  perfeito da regra REQ-012 (tensão aceita só quando o contexto a pede).
+- **Pattern sugerido:** `PTN-R-BOSSA` — polegar nos tempos 1 e 3, dedos nas
+  síncopas. É o pattern que define a **levada brasileira** e afeta o
+  `on_grid_ratio` (a síncope desloca a grade de propósito).
+
+### Equinox — John Coltrane
+- **Tom / forma:** **Dó# menor** (gravação original) / Dó menor (Real Book),
+  **blues menor de 12 compassos**.
+- **Harmonia:** `C#m7`, `F#m7`, `G#7alt`, `C#7#9`; no 9º compasso o acorde
+  inesperado é `Ab9` (substituto do IV, colocando o D da melodia como trítono).
+- **Conceito (nível 5):** **blues de 12 compassos** + blues menor modal.
+- **Foco de estudo:** forma de 12, a blue note e o `#9` (som "Trane").
+- **Pattern sugerido:** `PTN-M-4` (grupos de 4) sobre a escala de blues menor.
+
+### Incompatibilidade de Gênios — João Bosco & Aldir Blanc
+- **Tom / forma:** **Lá menor**; harmonia **repetida** (intro + tema), samba com
+  levada de **cuíca** no violão.
+- **Harmonia (encadeamento verificado):**
+  `Am9` → `Dm9` (Dm11 com baixo em Lá) → `G7(9b)` → `C7M(#11)` (com baixo em Sol)
+  → `F7M` (com baixo em Lá) → `Bm7(b5)` (com baixo em Lá) → `E7` → `Am9`.
+  São **10 acordes**, com **empréstimos modais** e baixos pedalizados.
+- **Conceito (níveis 5–6):** blues/forma brasileira **+ modulação e empréstimo
+  modal**; aqui a harmonia **foge do ciclo diatônico previsível** do jazz
+  americano (ao contrário de *Autumn Leaves*).
+- **Foco de estudo:** o **`C7M(#11)`** (o #11 = 4ª aumentada) e o **`Bm7(b5)`
+  com baixo em Lá** — acordes de passagem que dão o "molho" do samba.
+- **Atenção ao `on_grid_ratio`:** a **rítmica brasileira é altamente sincopada**;
+  a grade do metrônomo precisa considerar o deslocamento da síncope, senão o
+  aluno é penalizado por tocar **certo** no estilo. Este é o caso que mais exige
+  cuidado na calibração da tolerância (R-13).
+- **Pattern sugerido:** `PTN-R-BOSSA` + `PTN-M-3rds` (terças sobre os acordes de
+  passagem).
+
+### 500 Miles High — Chick Corea / Return to Forever
+- **Tom / forma:** **Mi menor** (lead sheet em Dó menor), **18 compassos**
+  (forma atípica, sem A/B simétrico), latin ~100 BPM.
+- **Harmonia:** `Em7` → `Gm6/9` → `BbMaj7` → `Bm7(b5)` → `E7#9` → `Am7` →
+  `F#m7(b5)` → `Fm7` → `Cm7` → `B7#5#9`. O `B7#5#9` é o V que volta ao topo.
+  A ligação entre áreas usa **movimento por graus conjuntos** (cromatismo), não
+  ciclos de quintas.
+- **Conceito (nível 6):** **modulação e áreas tonais distantes** — duas áreas
+  (Em/Am e Fm/Cm) sem cadências óbvias.
+- **Foco de estudo:** ouvir os centros e as resoluções escondidas (`Bm7b5 →
+  E7#9 → Am7` é um II–V–I menor dentro da peça).
+- **Pattern sugerido:** `PTN-M-TRIQ` (vai-e-vem) sobre os cromatismos.
+
+### Spain — Chick Corea / Return to Forever
+- **Tom / forma:** Si menor; forma longa com **introdução** citada do
+  *Concierto de Aranjuez* (Joaquín Rodrigo) e uma seção C que modula.
+- **Harmonia:** intro `Bm` → `Em` → `F#7`; seção principal `GMaj7` → `F#7` →
+  `Em7` → `A7` → `DMaj7` → `C#7` → `F#7` → `Bm` → `B7`; a seção C modula e
+  retorna.
+- **Conceito (nível 6–7):** **modulação** e **forma longa**; o laboratório final
+  do repertório.
+- **Foco de estudo:** navegar a forma inteira e as modulações sem perder o pulso.
+- **Pattern sugerido:** `PTN-A-TRIAD` (arpejos de tríade em varredura) e
+  `PTN-M-SKIP`.
+
+### Resumo de mapeamento música → nível
+
+| Música | Nível | Conceito foco |
+|---|---|---|
+| Maiden Voyage | 1–2 | estatismo modal / movimento interno |
+| Cantaloupe Island | 1–2 | vamps modais |
+| Só Danço Samba | 3 | II–V–I, dominante secundário |
+| Equinox | 4–5 | turnaround / blues 12 |
+| Incompatibilidade de Gênios | 5–6 | empréstimo modal, modulação, síncope |
+| 500 Miles High | 6 | áreas tonais distantes |
+| Spain | 6–7 | modulação, forma longa |
 
 # Catálogo de patterns
 

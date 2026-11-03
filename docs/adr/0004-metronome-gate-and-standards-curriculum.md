@@ -27,13 +27,21 @@ O requisito acrescenta duas coisas que afetam o modelo de progressão:
    subdivisão do metrônomo e do alinhamento das notas detectadas: o aluno precisa
    tocar as notas na grade (tolerância de janela definida pelo musician) no BPM
    alvo. Não é "tocar rápido", é "tocar certo no tempo".
-4. **O metrônomo é o árbitro.** O BPM vem do metrônomo do próprio app (REQ-015),
+4. **O alvo de alinhamento cresce com o módulo.** Módulos 1–14 exigem
+   `on_grid_ratio` na faixa **0,75–0,82** (precisão com respiração natural —
+   exigir 0,90 cedo torna a execução robótica); do módulo 15 ao 20 a exigência
+   sobe **linearmente** até **0,90** (precisão de performance). Racional completo
+   em `docs/MUSIC.md`.
+5. **A grade modela a síncope.** Em bossa/samba a síncope desloca a grade de
+   propósito; a tolerância precisa refletir isso, senão o aluno é penalizado por
+   tocar certo (R-13).
+6. **O metrônomo é o árbitro.** O BPM vem do metrônomo do próprio app (REQ-015),
    então a medição é determinística e não depende de tempo externo.
-5. **Currículo ancorado em standards.** Cada nível 1–7 cita o(s) standard(s) que
+7. **Currículo ancorado em standards.** Cada nível 1–7 cita o(s) standard(s) que
    materializam o conceito (`docs/MUSIC.md` §"Standards como laboratório
    progressivo"). O standard é usado como progressão de estudo, nunca como
    gravação.
-6. **Sem regressão do ADR 0003.** O override de teste (REQ-013) continua
+8. **Sem regressão do ADR 0003.** O override de teste (REQ-013) continua
    liberando o acesso, mas **ambos** os gates seguem sendo calculados e
    registrados.
 

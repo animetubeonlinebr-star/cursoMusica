@@ -134,9 +134,12 @@ que eu só avance quando tocar certo na velocidade exigida.
 Critérios de aceite (derivados de `docs/MUSIC.md`, dono: musician):
 - Cada desafio tem `target_bpm`; o sistema mede o maior BPM executado dentro da
   tolerância rítmica (`achieved_bpm`).
+- O alvo de `on_grid_ratio` é **0,75–0,82** nos módulos 1–14, sobe **linearmente**
+  até **0,90** do 15 ao 20, e é **0,90** a partir do 20.
 - Atingir `target_bpm` (com alinhamento à grade) → eixo de andamento aprovado;
   ficar 1 BPM abaixo → não aprova.
 - Tocar rápido e fora do tempo **não** conta como BPM atingido.
+- Em bossa/samba, tocar a síncope correta não é penalizado como fora da grade.
 - O módulo só libera com acurácia ≥ 90% **e** BPM meta atingido.
 
 Dependências: CM-008, `docs/DATA.md` (schema v3). Owner: musician + developer +

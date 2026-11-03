@@ -17,7 +17,7 @@ Probabilidade e impacto em H/M/L.
 | R-10 | Avaliação de improvisação pode ser injusta (falso erro/negativo) e desmotivar o aluno | M | H | Classificação determinística e explicável (`docs/MUSIC.md`); tolerância para passagem cromática; o aluno vê o porquê | musician, qa | aberto |
 | R-11 | Gate de 90% mal calibrado (amostra pequena, desafio mal escrito) libera ou bloqueia o aluno errado | M | M | Mínimo de tentativas por desafio; QA testa 90,0% vs 89,9% e amostra 1/1 | data-engineer, qa | aberto |
 | R-12 | Sem certificado de assinatura de código, o instalador Windows dispara aviso do SmartScreen | H | M | Assinar quando houver certificado; documentar o aviso enquanto não houver | devops | aberto |
-| R-13 | Meta de BPM mal calibrada (tolerância rítmica frouxa ou apertada) bloqueia o aluno injustamente ou libera quem não toca no tempo | M | M | Tolerância por subdivisão definida pelo musician; `achieved_bpm` só vale com alinhamento à grade; QA testa meta, meta−1 e fora-do-tempo | musician, qa | aberto |
+| R-13 | Meta de BPM/`on_grid_ratio` mal calibrada: tolerância apertada torna a execução robótica (exigir 90% cedo) ou frouxa demais libera quem não toca no tempo; a síncope brasileira pode ser lida como erro | M | H | Faixa de estudo 0,75–0,82 nos módulos 1–14, rampa linear até 0,90 no 20; a grade modela a síncope de bossa/samba; QA testa meta, meta−1, fora-do-tempo e síncope correta | musician, qa | aberto |
 
 ## Como usar
 
