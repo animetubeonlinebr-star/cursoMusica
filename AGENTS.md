@@ -89,10 +89,12 @@ antigas.
 - [x] Host VST3 com scan, cadeia na entrada e editor de plugin
 - [x] Afinador transversal com referência A4 editável (REQ-017)
 - [x] Módulo 1 jogável no app: explicação A–I (inclui rítmica), CAGED, trilha de prática, exercícios EX-1.1–EX-1.8 e gate (REQ-003/REQ-007/REQ-018); apostilas curadas citadas (REQ-006)
+- [x] Execução por seleção de tópico: menu de módulos expansível, explicação detalhada do tópico no centro e prática filtrada à direita (REQ-003/REQ-008)
+- [x] Questionário do Módulo 1 (7 questões, uma por tela) e QuizSession com gate de 90% (REQ-006)
 - [x] Motor de medição: NoteMath, ExerciseEvaluator (LCS + acordes), TempoGrid, PracticeSession (CM-008)
 - [x] Metrônomo RT-safe com BPM meta e grade (CM-014)
 - [x] Gate de progressão linear: módulo N+1 só abre com ≥90% no gate de N; progresso persistido (REQ-002/REQ-009)
-- [x] Testes unitários da lógica pura (85 checagens) rodando no CI
+- [x] Testes unitários da lógica pura (122 checagens) rodando no CI
 - [x] Build validada no Linux: binário gerado, UI renderiza
 - [ ] Ligar UI principal à engine (nível e afinação reais em vez de dummy)
 - [ ] Playback com controle de velocidade e loop
@@ -223,6 +225,9 @@ Uma entrega só é "pronta" quando:
 | 2026-11-02 | data-engineer + developer + musician | **Módulo 1 fechado**: motor de medição (`NoteMath`, `ExerciseEvaluator`, `TempoGrid`, `PracticeSession`), metrônomo RT-safe (CM-014), painel de prática e gate de progressão linear com persistência (`ProgressStore`, `ProgressionRule`); 50 checagens unitárias verdes no CI; pattern/links REQ-007 exibidos no módulo | Aluno conclui o Módulo 1 dentro do app e o Módulo 2 desbloqueia ao atingir ≥90%; gate auditável e testado |
 | 2026-11-02 | musician + developer | **Revisão das apostilas (CM-012)**: PDFs sob LFS baixados e lidos (OCR nos digitalizados); mapa bloco → fonte em `docs/MUSIC.md` §1.1; lacuna fechada com o **bloco I — Rítmica** (pulsação, figuras, contagem TÁ/TÁ-KI, do cap. "Rítmica" de `pdf-fraseado-melodico`) e **EX-1.8**; `CourseModule::sources` + `rhythm` no modelo, exibidos na UI (seções "Apostilas" e "Rítmica e contagem"); corrigido `getRequiredHeight` (CAGED/prática subestimavam a altura e cortavam o fim do módulo); suíte em **85 checagens verdes** | Conteúdo do Módulo 1 lastreado na fonte e completo; fim do módulo deixa de ser cortado na UI |
 | 2026-11-03 | devops | **Instalador de teste de ponta a ponta (CM-010/CM-013)**: `TEST_UNLOCK_ALL` virou opção de CMake e ativa `ProgressStore::unlockAll` (ADR 0003 item 7); `installer.nsi` gera `Instalador CursoMusica.exe` via staging `deploy/windows/dist/app` (makensis não resolve `..`) com runtime opcional (`/DRUNTIME`); `release.yml` roda em push da branch `test` no `windows-2022` (MSVC + Ninja) e publica o `.exe` em `instalador/` (artifact do run; commit sob `commit_installer=true`) | Validação passa a ter um instalador Windows real, com tudo liberado, entregue na raiz do projeto da branch de teste |
+| 2026-11-03 | musician + developer + designer | **Execução do módulo por seleção (REQ-003/REQ-008/REQ-009)**: o painel de módulos virou três painéis dependentes — menu à esquerda (módulos expansíveis em tópicos, `TreeView`), explicação no centro (visão geral do módulo, tópico detalhado ou demonstração do exercício) e prática à direita; clicar num tópico carrega a explicação no centro e filtra os exercícios do tópico; a medição (Nota/Acertos/Grade) fica sempre visível acima da aplicação (exercício jogável ou questionário) | O aluno estuda cada tópico com a explicação e a prática do tópico lado a lado; o fim do módulo deixa de cortar conteúdo |
+| 2026-11-03 | musician + developer | **Questionário do Módulo 1 (REQ-006)**: `Exercise::quiz` (`QuizQuestion`) e `QuizSession` (sessão pura, gate 90%); EX-1.1 virou "Questionário: conhecendo o instrumento" com as 7 questões de `Questionario_m1.pdf`, respondidas uma por tela no painel direito; explicações detalhadas do tópico A (partes da guitarra/violão) tiradas de `explica_painelEsquerdo.pdf`, com destaques e tabelas | Conteúdo das apostilas curadas vira exercício avaliável dentro do app; suíte em **122 checagens verdes** |
+| 2026-11-03 | devops | **Varredura de duplicatas nas apostilas**: as 21 apostilas da branch `adequacao` foram comparadas por hash LFS e por assinatura de imagem multi-página (páginas 0/25/50/75/última), pegando também PDFs digitalizados sem texto; 3 eram cópias exatas com sufixo `(1)` no nome; removidas no commit `b4f284c`, restando 18 apostilas únicas | Acervo sem repetição, uma de cada, sem perder nenhum título |
 
 ## 8. Convenções de código
 
