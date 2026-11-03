@@ -107,6 +107,18 @@ namespace
                 "Ler a cifra e achar a forma no braço (via CAGED) é a habilidade "
                 "prática do módulo."
             }),
+            block ("I", juce::String::fromUTF8 ("Rítmica: pulsação e figuras"), {
+                "Pulsação (tempo) é a batida constante do metrônomo; o compasso agrupa "
+                "os tempos (4/4, 3/4, 6/8).",
+                "Figuras: semibreve (4 tempos), mínima (2), semínima (1), colcheia "
+                "(1/2) e semicolcheia (1/4). Ponto aumenta metade do valor; ligadura "
+                "soma a duração de duas notas.",
+                "Sílaba rítmica (solfa rítmica): TÁ = semínima, TÁ-KI = colcheias, "
+                "TA-KI-TA-KI = quatro semicolcheias. Contar em voz alta antes de tocar "
+                "é o que permite alinhar ao metrônomo.",
+                "O gate cobra tocar na grade: contar a subdivisão é a base do "
+                "on_grid_ratio ≥ 0,75."
+            }),
         };
 
         m.exercises = {
@@ -131,6 +143,9 @@ namespace
             exercise ("EX-1.7", juce::String::fromUTF8 ("Cifrado e tonalidade"),
                       juce::String::fromUTF8 ("Dado Dm7, G7, C7M, dizer o campo harmônico e tocar as tríades."),
                       juce::String::fromUTF8 ("Detecção de acorde e resposta.")),
+            exercise ("EX-1.8", juce::String::fromUTF8 ("Contar e tocar na grade"),
+                      juce::String::fromUTF8 ("Contar em voz alta (TÁ / TÁ-KI) e tocar a 6ª solta em semínimas na grade do metrônomo a 60 BPM."),
+                      juce::String::fromUTF8 ("on_grid_ratio ≥ 0,75 nas batidas (REQ-015).")),
         };
 
         // Playable specs for the exercises the app can verify with the detector.
@@ -138,6 +153,7 @@ namespace
         m.exercises[2].targets = notes ({ "C4", "D4", "E4", "F4", "G4", "A4", "B4", "C5" }); // EX-1.3
         m.exercises[3].chordPitchClasses = { 0, 4, 7 };                     // EX-1.4, first C
         m.exercises[4].chordPitchClasses = { 5, 9, 0 };                     // EX-1.5, F barre
+        m.exercises[7].targets = notes ({ "E2" });                          // EX-1.8, on the grid
 
         // The gate is a chord progression played on the grid (REQ-009, REQ-015).
         auto& gate = m.exercises.emplace_back (exercise (
@@ -168,6 +184,24 @@ namespace
             { "G", juce::String::fromUTF8 ("6ª"), juce::String::fromUTF8 ("casas 5–8") },
             { "E", juce::String::fromUTF8 ("6ª"), juce::String::fromUTF8 ("casas 8–12") },
             { "D", juce::String::fromUTF8 ("4ª"), juce::String::fromUTF8 ("casas 10–12") },
+        };
+
+        // Counting cells for the metronome (REQ-015); syllables from the
+        // rhythmic reading chapter of the curated apostila (MUSIC.md §1.2, block I).
+        m.rhythm = {
+            { juce::String::fromUTF8 ("Semínima"), juce::String::fromUTF8 ("1 tempo (1/4)"),
+              juce::String::fromUTF8 ("TÁ") },
+            { juce::String::fromUTF8 ("Colcheias"), juce::String::fromUTF8 ("2 por tempo (2/8)"),
+              juce::String::fromUTF8 ("TÁ-KI") },
+            { juce::String::fromUTF8 ("Semicolcheias"), juce::String::fromUTF8 ("4 por tempo (4/16)"),
+              juce::String::fromUTF8 ("TA-KI-TA-KI") },
+        };
+
+        // Curated apostilas (REQ-006, CM-012); see docs/MUSIC.md §1.1.
+        m.sources = {
+            "pdf-mozart-mello-livroestudosdeguitarra4em1",
+            "pdf-fraseado-melodico",
+            "pdf-desvendando-os-segredos-da-guitarra-fusion",
         };
 
         return m;

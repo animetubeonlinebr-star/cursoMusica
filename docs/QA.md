@@ -49,7 +49,7 @@ Dono: **qa**. Estratégia de teste, execuções e defeitos. Evidência obrigató
 
 | Data | Escopo (SHA/branch) | Resultado | Evidência |
 |---|---|---|---|
-| 2026-11-02 | `feat/measurement-engine` (Módulo 1) | **50/50 checagens verdes** (`ctest` no CI). Smoke manual em Xvfb: módulos 2+ bloqueados com aviso; após registrar `highestPassedModule=1`, o Módulo 2 abre; trilha de prática exibe `PTN-R-PALM` + "Referência: Juninho Afram" | `CursoMusicaTests`, job Linux do CI; capturas do smoke |
+| 2026-11-02 | `feat/measurement-engine` (Módulo 1) | **85/85 checagens verdes** (`ctest` no CI). Smoke manual em Xvfb: módulos 2+ bloqueados com aviso; após registrar `highestPassedModule=1`, o Módulo 2 abre; trilha de prática exibe `PTN-R-PALM` + "Referência: Juninho Afram"; bloco I (rítmica) e seção "Apostilas" (curadoria) renderizam no fim do módulo | `CursoMusicaTests`, job Linux do CI; capturas do smoke |
 | 2026-11-02 | `feat/multi-agent-framework` | Build não aplicável (só docs/agentes neste ciclo); sem suíte ainda | — |
 
 ## Defeitos

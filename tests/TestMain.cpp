@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "Course/ExerciseEvaluator.h"
+#include "Course/ModuleCatalog.h"
 #include "Course/NoteMath.h"
 #include "Course/PracticeSession.h"
 #include "Course/ProgressionRule.h"
@@ -188,6 +189,57 @@ void testProgression()
     check (highestUnlocked (4) == 5, "passing up to module 4 unlocks module 5");
 }
 
+void testModuleCatalog()
+{
+    using namespace cursomusica;
+
+    const auto& modules = ModuleCatalog::getModules();
+    check (modules.size() == 20, "catalogue has 20 modules");
+
+    const auto* m1 = ModuleCatalog::findModule (1);
+    check (m1 != nullptr, "module 1 exists");
+    if (m1 == nullptr)
+        return;
+
+    check (m1->implemented, "module 1 is implemented");
+    check (m1->lessons.size() == 9, "module 1 has nine explanation blocks (REQ-003)");
+    check (m1->lessons.front().id == "A" && m1->lessons.back().id == "I",
+           "module 1 blocks run A..I in order");
+
+    // Counting cells backing the metronome grid (REQ-015).
+    check (m1->rhythm.size() == 3, "module 1 teaches the three basic counting cells");
+    check (m1->rhythm.front().syllable == juce::String::fromUTF8 ("TÁ"),
+           "quarter-note cell is counted TÁ");
+
+    // Curated apostilas backing the blocks (REQ-006, CM-012).
+    check (m1->sources.size() == 3, "module 1 cites its curated apostilas");
+    check (m1->sources.contains ("pdf-fraseado-melodico"),
+           "CAGED source (fraseado-melodico) is cited");
+    check (m1->sources.contains ("pdf-desvendando-os-segredos-da-guitarra-fusion"),
+           "harmony source (fusion) is cited");
+
+    // Pattern and reference players (REQ-007).
+    check (m1->practice.patternId == "PTN-R-PALM", "module 1 cites PTN-R-PALM");
+    check (m1->practice.guitarists.size() >= 1, "module 1 cites at least one guitarist link");
+
+    // The gate is a playable chord progression (REQ-009, REQ-015).
+    bool hasGate = false;
+    for (const auto& e : m1->exercises)
+        if (e.isGate)
+        {
+            hasGate = true;
+            check (e.chordProgression.size() == 4, "gate progression has four chords");
+            check (e.chordProgression.front() == std::vector<int> ({ 0, 4, 7 }),
+                   "gate opens on C major");
+        }
+    check (hasGate, "module 1 has a gate exercise");
+    check (m1->exercises.size() == 9, "module 1 lists EX-1.1..EX-1.8 plus the gate");
+
+    for (const auto& m : modules)
+        if (m.number > 1)
+            check (! m.implemented, "modules 2..20 are still placeholders");
+}
+
 int main()
 {
     testNoteMath();
@@ -195,6 +247,7 @@ int main()
     testTempoGrid();
     testPracticeSession();
     testProgression();
+    testModuleCatalog();
 
     std::cout << "\n" << (checks - failures) << "/" << checks << " checks passed\n";
     if (failures > 0)

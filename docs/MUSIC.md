@@ -542,15 +542,34 @@ organização do instrumento.
 |---|---|---|
 | A | Partes da guitarra e do violão | `pdf-mozart-mello-livroestudosdeguitarra4em1` (cap. introdutório) |
 | B | Notas musicais (natural, sustenido, bemol) | `pdf-fraseado-melodico` (fundamentos) |
-| C | Localização das notas no braço | `pdf-mozart-mello-livroestudosdeguitarra4em1` |
-| D | Pestanas (barré e meio barré) | `pdf-mozart-mello-livroestudosdeguitarra4em1` |
-| E | Sistema 5 (CAGED) | `pdf-fraseado-melodico` |
-| F | Organização das tonalidades | `pdf-desvendando-os-segredos-da-guitarra-fusion` |
-| G | Introdução ao cifrado | `pdf-mozart-mello-livroestudosdeguitarra4em1` |
+| C | Sustenidos e bemóis (enarmonia) | `pdf-fraseado-melodico` (fundamentos) |
+| D | Localização das notas no braço | `pdf-mozart-mello-livroestudosdeguitarra4em1` |
+| E | Pestanas (barré e meio barré) | `pdf-mozart-mello-livroestudosdeguitarra4em1` |
+| F | Sistema 5 (CAGED) | `pdf-fraseado-melodico` (§Sistema 5, item 13 do índice) |
+| G | Organização das tonalidades | `pdf-desvendando-os-segredos-da-guitarra-fusion` |
+| H | Introdução ao cifrado | `pdf-mozart-mello-livroestudosdeguitarra4em1` |
+| I | Rítmica: pulsação, figuras e contagem | `pdf-fraseado-melodico` (§Rítmica, item 1 do índice) |
 
-**Nota de curadoria.** Os PDFs estão sob **Git LFS**; a extração do conteúdo real
-depende do LFS acessível (ver `docs/RISKS.md`). Até então, esta tabela é o
-**mapa de curadoria** — o que revisar e em que bloco se enquadra.
+**Nota de curadoria (revisão de 2026-11-02).** As apostilas estão sob **Git LFS**;
+o conteúdo real foi baixado (`git lfs pull`) e revisado bloco a bloco:
+
+- `pdf-fraseado-melodico` e `pdf-mozart-mello-improvisacion-pop` são **PDFs
+  digitalizados** (imagem, sem camada de texto); o índice foi lido por OCR. O
+  índice do `fraseado-melodico` confirma o item **"Sistema 5 + Acordes x
+  Escalas"** (bloco F), a seção de campos harmônicos maiores/menores (bloco G) e
+  o capítulo **"Rítmica"** (bloco I): figuras (semibreve → semicolcheia), valor,
+  compasso, andamento, subdivisão, ligaduras e as **sílabas rítmicas** (TÁ,
+  TÁ-KI, TA-KI-TA-KI).
+- `pdf-mozart-mello-livroestudosdeguitarra4em1` é um **livro de estudos** (27
+  estudos em 9 estilos, partitura + áudio) — cobre o introdutório (blocos A/D/E/H),
+  não teoria iniciante isolada.
+- `pdf-desvendando-os-segredos-da-guitarra-fusion` é o material de **harmonia
+  funcional** (escalas, tríades, tétrades); sustenta o bloco G.
+
+A letra de cada linha acima agora **coincide com os blocos A–I do módulo**; a
+tabela anterior usava 7 letras e não cobria sustenidos/bemóis nem rítmica. Este
+mapa é o que o catálogo registra por módulo (`CourseModule::sources`, exibido no
+app).
 
 ## 1.2 Teoria apresentada no módulo
 
@@ -645,6 +664,30 @@ Cinco **formas** de acorde maior (C, A, G, E, D) cobrem todo o braço e se
 Cifrar é **descrever o acorde de forma compacta**; ler a cifra e achar a forma no
 braço (via CAGED) é a habilidade prática do módulo.
 
+### Bloco I — Rítmica: pulsação, figuras e contagem
+
+Toda execução no app é medida **na grade do metrônomo** (REQ-015), então o aluno
+precisa contar antes de tocar.
+
+- **Pulsação (tempo):** a batida constante do metrônomo. O **compasso** agrupa os
+  tempos (4/4 = quatro semínimas por compasso; 3/4; 6/8).
+- **Figuras e valores:**
+
+| Figura | Valor | Subdivisão do tempo | Sílaba rítmica |
+|---|---|---|---|
+| Semibreve | 4 tempos (1/1) | — | — |
+| Mínima | 2 tempos (1/2) | — | TÁ–A |
+| Semínima | 1 tempo (1/4) | 1 por tempo | TÁ |
+| Colcheia | 1/2 tempo (1/8) | 2 por tempo | TÁ-KI |
+| Semicolcheia | 1/4 tempo (1/16) | 4 por tempo | TA-KI-TA-KI |
+
+- **Ponto de aumento:** soma metade do valor da figura (semínima pontuada = 1,5
+  tempo). **Ligadura:** soma a duração de duas notas, atravessando o tempo forte.
+- **Andamento:** lento (adágio), moderado (andante/moderato), rápido (allegro),
+  definido em BPM — no app, o BPM meta do módulo.
+- **Contagem:** dizer a sílaba em voz alta **enquanto** toca é o que alinha a
+  execução à grade. O `on_grid_ratio ≥ 0,75` do gate mede exatamente isso.
+
 ## 1.3 Prática (exercícios e desafios — REQ-008)
 
 Cada exercício tem **explicação antes da execução** (REQ-003) e é **medido**
@@ -659,6 +702,7 @@ Cada exercício tem **explicação antes da execução** (REQ-003) e é **medido
 | EX-1.5 | Pestana de Fá (F) na 1ª casa; todas as cordas devem soar | pestana | nível/ataque em todas as cordas |
 | EX-1.6 | Mover a forma de `E` pelo braço e nomear o acorde resultante | CAGED | identificar acorde por região |
 | EX-1.7 | Dado `Dm7`, `G7`, `C7M`, dizer o campo harmônico e tocar as tríades | cifrado + tonalidade | detecção de acorde e resposta |
+| EX-1.8 | Contar em voz alta (`TÁ`/`TÁ-KI`) e tocar a 6ª solta em semínimas na grade | rítmica + grade | `on_grid_ratio ≥ 0,75` a 60 BPM |
 
 **Desafio de gate (CM-014/CM-016 do currículo):** tocar a progressão
 `C – G – Am – F` (vamp de 1 acorde, nível 1) a **60 BPM** com **≥90% de acerto**

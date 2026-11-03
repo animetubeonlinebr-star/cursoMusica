@@ -37,21 +37,25 @@ braço, a pestana, o CAGED, as tonalidades e o cifrado sem sair do software.
 Critérios de aceite:
 - Dado o app aberto, quando clico em **Modules**, então vejo a lista de módulos e
   o Módulo 1 selecionado com sua explicação.
-- Dado o Módulo 1 aberto, quando leio, então os oito blocos (A–H) aparecem na
-  ordem, antes de qualquer desafio (REQ-003).
+- Dado o Módulo 1 aberto, quando leio, então os nove blocos (A–I) aparecem na
+  ordem, antes de qualquer desafio (REQ-003). O bloco I cobre rítmica (pulsação,
+  figuras e contagem), base do alinhamento à grade exigido pelo gate.
 - Dado o módulo, então ele exibe nível 1, BPM meta 60 e gate 90%.
 - Dado o módulo, então há ≥1 pattern (`PTN-R-PALM`) e ≥1 link de guitarrista
   citados (REQ-007).
 - Dado o desafio de gate, então é `C – G – Am – F` a 60 BPM com ≥90% e
   `on_grid_ratio ≥ 0,75`.
+- Dado o módulo, então as apostilas de curadoria (REQ-006) são citadas por
+  arquivo-fonte (`CourseModule::sources`), visíveis na seção "Apostilas".
 
 Pronto quando (DoD):
 - [x] Conteúdo espelhado de `docs/MUSIC.md` para o catálogo (ADR 0005).
 - [x] Build compila sem avisos novos.
 - [x] Medição real dos exercícios (CM-008 — `PracticeSession`, `ExerciseEvaluator`, `TempoGrid`).
 - [x] Gate de progressão linear com ≥90% e persistência do desbloqueio (REQ-002/REQ-009).
-- [x] Teste automatizado no CI (CM-002 — 50 checagens, `ctest` no job Linux).
+- [x] Teste automatizado no CI (CM-002 — 85 checagens, `ctest` no job Linux).
 - [x] Pattern e links de guitarristas exibidos no módulo (REQ-007).
+- [x] Apostilas curadas citadas no catálogo e exibidas na UI (REQ-006, CM-012).
 
 ### [CM-016] Afinador transversal com pitch de referência editável — valor: H — tamanho: S — status: done
 Requisito: REQ-017. Deriva de `docs/MUSIC.md` (referência A4, tolerância ±5 cents).
@@ -211,17 +215,27 @@ Critérios de aceite (rascunho):
 
 Dependências: CM-011. Owner: musician.
 
-### [CM-012] Curadoria de conteúdo: apostilas, links e patterns — valor: M — tamanho: M — status: draft
+### [CM-012] Curadoria de conteúdo: apostilas, links e patterns — valor: M — tamanho: M — status: in-progress
 Requisitos: REQ-006, REQ-007, REQ-010, REQ-016.
 Como o time de conteúdo, eu quero revisar as apostilas e anexar links e patterns
 de guitarristas por módulo, para que o material seja coerente e verificável.
+
+Progresso (2026-11-02, Módulo 1):
+- [x] Apostilas sob Git LFS baixadas e revisadas bloco a bloco (OCR nos PDFs
+  digitalizados); mapa bloco → fonte em `docs/MUSIC.md` §1.1.
+- [x] `CourseModule::sources` registra as fontes por módulo; a UI exibe a seção
+  "Apostilas" (REQ-006).
+- [x] Lacuna de conteúdo fechada: **bloco I — Rítmica** (pulsação, figuras,
+  contagem TÁ/TÁ-KI), extraído do capítulo "Rítmica" de `pdf-fraseado-melodico`;
+  sustenta o `on_grid_ratio` do gate (REQ-015).
+- [ ] Módulos 2..20: mesma revisão (owner: musician) quando o conteúdo for escrito.
+- [ ] A avaliação detecta se o pattern ensinado foi usado (CM-015).
 
 Critérios de aceite (rascunho):
 - Cada módulo lista: fonte da apostila usada, ≥1 link, ≥1 pattern (ID do
   catálogo, CM-015).
 - Guitarristas de referência considerados: Petrucci, Govan, Kotzen, Howe, Vai,
   Satriani, Juninho Afram, Edu Ardanuy, Kiko Loureiro.
-- A avaliação detecta se o pattern ensinado foi usado.
 
 Dependências: CM-011. Owner: musician.
 

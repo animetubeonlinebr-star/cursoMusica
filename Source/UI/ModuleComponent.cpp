@@ -56,13 +56,21 @@ public:
             for (const auto& exercise : current->exercises)
                 height += exerciseHeight (exercise);
 
+            // Each CAGED shape paints on two lines (name, then bass/region).
             if (! current->caged.empty())
-                height += 24 + 20 * (int) current->caged.size() + th::spacing::sm;
+                height += 24 + 40 * (int) current->caged.size() + th::spacing::sm;
+
+            if (! current->rhythm.empty())
+                height += 24 + 20 * (int) current->rhythm.size() + th::spacing::sm;
 
             if (current->practice.patternId.isNotEmpty())
-                height += 24 + 20 + 20 * (int) current->practice.guitarists.size() + th::spacing::sm;
+                height += 24 + 20 + 20 + 20 * (int) current->practice.guitarists.size()
+                          + th::spacing::sm;
 
-            height += 80; // gate challenge
+            height += 22 + 40; // gate challenge heading + body
+
+            if (! current->sources.isEmpty())
+                height += th::spacing::sm + 24 + 18 * (int) current->sources.size();
         }
 
         return juce::jmax (height, 400);
@@ -169,6 +177,27 @@ public:
             bounds.removeFromTop (th::spacing::sm);
         }
 
+        if (! m.rhythm.empty())
+        {
+            g.setColour (th::colour::textPrimary);
+            g.setFont (th::type::makeFont (th::type::body, true));
+            g.drawText (juce::String::fromUTF8 ("Rítmica e contagem"), bounds.removeFromTop (24),
+                        juce::Justification::centredLeft, false);
+
+            g.setFont (th::type::makeFont (th::type::body));
+            for (const auto& cell : m.rhythm)
+            {
+                g.setColour (th::colour::accent);
+                g.drawText (cell.figure, bounds.removeFromTop (20).removeFromLeft (150),
+                            juce::Justification::centredLeft, false);
+                g.setColour (th::colour::textSecondary);
+                g.drawText (cell.value + juce::String::fromUTF8 ("   ·   ") + cell.syllable,
+                            bounds.removeFromTop (20), juce::Justification::centredLeft, false);
+            }
+
+            bounds.removeFromTop (th::spacing::sm);
+        }
+
         if (m.practice.patternId.isNotEmpty())
         {
             g.setColour (th::colour::textPrimary);
@@ -207,6 +236,22 @@ public:
             g.setFont (th::type::makeFont (th::type::body));
             g.drawFittedText (m.gateChallenge, bounds.removeFromTop (40),
                               juce::Justification::topLeft, 2);
+        }
+
+        if (! m.sources.isEmpty())
+        {
+            bounds.removeFromTop (th::spacing::sm);
+
+            g.setColour (th::colour::textPrimary);
+            g.setFont (th::type::makeFont (th::type::body, true));
+            g.drawText (juce::String::fromUTF8 ("Apostilas (curadoria — REQ-006)"),
+                        bounds.removeFromTop (24), juce::Justification::centredLeft, false);
+
+            g.setColour (th::colour::textSecondary);
+            g.setFont (th::type::makeFont (th::type::caption));
+            for (const auto& source : m.sources)
+                g.drawText (source, bounds.removeFromTop (18),
+                            juce::Justification::centredLeft, false);
         }
     }
 

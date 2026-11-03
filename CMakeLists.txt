@@ -130,7 +130,8 @@ target_sources(CursoMusicaTests PRIVATE
     Source/Course/NoteMath.cpp
     Source/Course/ExerciseEvaluator.cpp
     Source/Course/TempoGrid.cpp
-    Source/Course/PracticeSession.cpp)
+    Source/Course/PracticeSession.cpp
+    Source/Course/ModuleCatalog.cpp)
 
 target_include_directories(CursoMusicaTests PRIVATE Source)
 

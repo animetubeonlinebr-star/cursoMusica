@@ -29,12 +29,14 @@ Isso levanta duas perguntas: **onde o conteúdo vive** e **como a UI o apresenta
 4. **Explicação antes do desafio é estrutural.** O módulo tem uma lista ordenada
    de blocos de aula e, só depois, os exercícios; a UI abre na explicação e não
    permite pular para o desafio sem passar por ela (REQ-003).
-5. **Módulo 1 implementado por completo.** O catálogo traz o Módulo 1 com os oito
-   blocos (A–H), os exercícios EX-1.1 a EX-1.7, o desafio de gate e a trilha de
-   prática, exatamente como especificado em `docs/MUSIC.md`.
-6. **CAGED e cifrado são dados, não texto solto.** O módulo expõe a lista de
-   formas CAGED e a tabela de cifras como dados, para a UI renderizar e para os
-   exercícios poderem referenciá-los.
+5. **Módulo 1 implementado por completo.** O catálogo traz o Módulo 1 com os nove
+   blocos (A–I, incluindo rítmica/contagem), os exercícios EX-1.1 a EX-1.8, o
+   desafio de gate e a trilha de prática, exatamente como especificado em
+   `docs/MUSIC.md`. As apostilas de curadoria que sustentam os blocos são citadas
+   em `CourseModule::sources` (REQ-006).
+6. **CAGED, cifrado e rítmica são dados, não texto solto.** O módulo expõe a
+   lista de formas CAGED, a tabela de cifras e as células rítmicas (`RhythmCell`)
+   como dados, para a UI renderizar e para os exercícios poderem referenciá-los.
 7. **Só o Módulo 1 nesta entrega.** Os módulos 2–20 ficam declarados no mapa
    módulo → nível (MUSIC.md) e entram em entregas seguintes; a UI mostra os não
    implementados como bloqueados, não como ausentes.

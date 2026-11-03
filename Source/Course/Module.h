@@ -57,6 +57,14 @@ struct CagedShape
     juce::String region;
 };
 
+// A rhythmic figure the student counts while playing (REQ-004, REQ-015).
+struct RhythmCell
+{
+    juce::String figure;    // "semínima"
+    juce::String value;     // "1 tempo (1/4)"
+    juce::String syllable;  // "TÁ"
+};
+
 struct CourseModule
 {
     int number = 0;
@@ -72,6 +80,10 @@ struct CourseModule
     juce::String gateChallenge;
     PracticeTrack practice;
     std::vector<CagedShape> caged;
+    std::vector<RhythmCell> rhythm; // counting cells shown with the metronome (REQ-015)
+
+    // Curated apostilas backing the blocks, by file stem (REQ-006, CM-012).
+    juce::StringArray sources;
 };
 
 } // namespace cursomusica
