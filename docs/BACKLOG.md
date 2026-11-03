@@ -28,6 +28,28 @@ Dependências: `AudioEngine` (getters já existem, ver `Source/Audio/AudioEngine
 Notas técnicas (architect): consumir só os getters públicos e atomics; nenhuma
 chamada bloqueante na UI.
 
+### [CM-016] Afinador transversal com pitch de referência editável — valor: H — tamanho: S — status: done
+Requisito: REQ-017. Deriva de `docs/MUSIC.md` (referência A4, tolerância ±5 cents).
+Como um guitarrista, eu quero abrir um afinador a qualquer momento e escolher a
+referência de afinação, para que eu possa afinar em A=440 ou em outra referência
+(432, 442, barroco) sem depender do material do curso.
+
+Critérios de aceite:
+- Dado o app aberto em qualquer tela, quando clico em **Tuner**, então a janela do
+  afinador abre sobre a tela atual, sem entrar em nenhum módulo.
+- Dado sinal puro de 440 Hz com A4 = 440, quando o detector estabiliza, então o
+  afinador mostra "A" e desvio 0 (±5 cents).
+- Dado A4 = 440, quando eu mudo para 442 Hz, então as notas são recalculadas para
+  a nova referência e o valor persiste após reabrir o app.
+- Dado um valor fora de 400–480 Hz, quando confirmo, então o sistema limita ao
+  intervalo válido.
+- Dado "Reset to 440", quando clico, então a referência volta ao padrão.
+
+Pronto quando (DoD):
+- [x] Código compila sem avisos novos (build Linux validada).
+- [x] `AGENTS.md`, `docs/REQUIREMENTS.md` e este backlog atualizados.
+- [ ] Teste automatizado no CI (pendente: CM-002).
+
 ### [CM-002] Pipeline de CI para build e testes — valor: H — tamanho: M — status: ready
 Requisito: REQ-009 (base para medir), DoD.
 Como o time de desenvolvimento, eu quero que cada PR compile e rode os testes

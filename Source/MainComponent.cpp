@@ -27,9 +27,14 @@ MainComponent::MainComponent()
     settingsButton.onClick = [this] { showSettings(); };
     addAndMakeVisible (settingsButton);
 
+    tunerButton.onClick = [this] { showTuner(); };
+    addAndMakeVisible (tunerButton);
+
     addAndMakeVisible (tunerDisplay);
     addAndMakeVisible (devicePanel);
     addAndMakeVisible (transportPanel);
+
+    tunerDisplay.setReferenceHz (tuningSettings.getReferenceHz());
 
     referenceLabel.setText ("No material loaded", juce::dontSendNotification);
     referenceLabel.setFont (th::type::makeFont (th::type::body));
@@ -39,13 +44,43 @@ MainComponent::MainComponent()
     addAndMakeVisible (studyReferencePanel);
 
     setSize (1040, 680);
+
+    // Poll the engine so the tuner and meter show real values, not dummies.
+    startTimerHz (30);
 }
 
 MainComponent::~MainComponent()
 {
+    stopTimer();
+    tuner.reset();
     settings.reset();
     audioEngine.shutdown();
     juce::LookAndFeel::setDefaultLookAndFeel (nullptr);
+}
+
+void MainComponent::timerCallback()
+{
+    tunerDisplay.setFrequencyHz (audioEngine.getDetectedFrequencyHz());
+}
+
+void MainComponent::showTuner()
+{
+    if (tuner == nullptr)
+    {
+        tuner = std::make_unique<TunerComponent> (audioEngine, tuningSettings);
+        tuner->onCloseRequested = [this] { hideTuner(); };
+        addAndMakeVisible (*tuner);
+    }
+
+    tuner->setBounds (getLocalBounds());
+    tuner->toFront (true);
+}
+
+void MainComponent::hideTuner()
+{
+    tuner.reset();
+    // The pitch may have changed while the tuner was open.
+    tunerDisplay.setReferenceHz (tuningSettings.getReferenceHz());
 }
 
 void MainComponent::showSettings()
@@ -77,6 +112,8 @@ void MainComponent::resized()
 
     auto header = bounds.removeFromTop (64);
     settingsButton.setBounds (header.removeFromRight (110).withSizeKeepingCentre (110, 34));
+    header.removeFromRight (th::spacing::sm);
+    tunerButton.setBounds (header.removeFromRight (110).withSizeKeepingCentre (110, 34));
     header.removeFromRight (th::spacing::md);
     auto titleArea = header;
     titleLabel.setBounds (titleArea.removeFromTop (32));

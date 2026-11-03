@@ -208,6 +208,8 @@ Uma entrega só é "pronta" quando:
 | 2026-11-02 | musician | Análise harmônica por música registrada em `docs/MUSIC.md` (Maiden Voyage, Cantaloupe Island, Só Danço Samba, Equinox, Incompatibilidade de Gênios, 500 Miles High, Spain) com encadeamentos verificados e mapeamento música → nível | Currículo por standards passa a ser executável por módulo |
 | 2026-11-02 | musician | Síncope brasileira exige grade própria na medição de tempo; `PTN-R-BOSSA` ligado a Só Danço Samba e Incompatibilidade de Gênios | Evita penalizar o aluno por tocar certo no estilo (R-13) |
 | 2026-11-02 | musician + pm | **Confirmado: o BPM meta sobe progressivamente do módulo 15 ao 20** (120 → 140, +4 BPM/módulo), em paralelo com a rampa de `on_grid_ratio` (0,82 → 0,90); mapa módulo → nível (20 módulos nos 7 modelos) fixado | Currículo passa a ter velocidade e precisão crescentes, sem saltos |
+| 2026-11-02 | architect + developer + designer | App JUCE mesclado na branch do framework (o projeto estava partido em duas branches); `AGENTS.md` unificado com o layout de código e a disciplina de branches (§11) | Código e framework passam a viver juntos; `main` ainda intocado |
+| 2026-11-02 | pm + musician + developer + designer | **REQ-017: afinador transversal** (menu próprio, fora dos módulos) com pitch de referência A4 editável (padrão 440 Hz, faixa 400–480, persistido); implementado em `TunerComponent.*` + `TuningSettings.*`; presets incluem 415 Hz barroco (MUSIC.md) | Aluno afina a qualquer momento, em qualquer referência; build Linux validada sem avisos |
 
 ## 8. Convenções de código
 
@@ -243,3 +245,18 @@ cmake --build build --config Release
   não rescaneia).
 - O ambiente de build pode reiniciar entre sessões: se `cmake` sumir, reinstale
   `cmake ninja-build pkg-config` e as libs de desenvolvimento do JUCE.
+
+## 11. Disciplina de branches, backup e push (regra do usuário)
+
+Pode-se criar quantas branches forem necessárias, mas **antes de qualquer push**:
+
+1. **Backup da versão anterior.** Crie uma branch de backup apontando para o
+   estado atual (`git branch backup/<nome> <sha>` ou `git tag backup-<nome>`)
+   **antes** de reescrever história ou publicar.
+2. **Merge antes do push.** Traga a linha principal (`main`/integração) para a
+   branch de trabalho (`git merge`) e resolva conflitos **localmente**; só então
+   publique. Nada é enviado sem ter passado pelo merge.
+3. **Nunca reescrever história já publicada.** Se o push exigir força, pare e
+   alinhe com o usuário.
+4. **PR, não push direto.** A entrega vai por pull request com CI verde e
+   revisão; `main` não recebe push direto.

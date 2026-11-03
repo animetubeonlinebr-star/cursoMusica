@@ -15,18 +15,20 @@ public:
     // Frequency in Hz, or 0 when no pitch is detected.
     void setFrequencyHz (float newFrequencyHz);
 
+    // Frequency assigned to A4 (Hz). Changes how notes and cents are computed.
+    void setReferenceHz (float newReferenceHz);
+
     void paint (juce::Graphics& g) override;
 
 private:
     void updateFromFrequency();
 
     float frequencyHz = 0.0f;
+    float referenceHz = 440.0f;
     juce::String noteName { "--" };
     int octave = 0;
     float centsOffset = 0.0f;
     bool hasPitch = false;
-
-    static constexpr float concertA = 440.0f;
 };
 
 } // namespace cursomusica

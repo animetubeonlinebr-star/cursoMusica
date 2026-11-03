@@ -64,6 +64,12 @@ Loureiro.
 
 Catálogo detalhado (IDs `PTN-*`) em `docs/MUSIC.md` §"Catálogo de patterns".
 
+## D4. Afinador transversal
+
+| ID | Requisito | MoSCoW | Verificação |
+|---|---|---|---|
+| REQ-017 | O sistema oferece um **afinador como ferramenta transversal**, acessível a qualquer momento por um menu próprio, **fora de qualquer módulo**; a janela permite **selecionar o pitch de referência (A4)**, padrão **440 Hz**, editável e persistido | Must | afinador abre em qualquer momento, sem módulo ativo; valor de A4 editável de 400 a 480 Hz e mantido entre sessões |
+
 ## E. Modelos progressivos de improvisação (REQ-002, REQ-010)
 
 Ordem obrigatória (progressão linear):
@@ -142,3 +148,4 @@ A decisão de arquitetura (incluindo o trade-off latência × síntese) fica no
 | REQ-014 | devops | instalador Windows | pendente |
 | REQ-015 | musician + developer + data-engineer | ADR 0004 | pendente |
 | REQ-016 | musician | `docs/MUSIC.md` | catalogado (IDs PTN-*) |
+| REQ-017 | developer + designer | `Source/UI/TunerComponent.*`, `Source/Audio/TuningSettings.*` | **implementado** |

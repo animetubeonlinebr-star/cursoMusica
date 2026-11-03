@@ -29,6 +29,16 @@ void TunerDisplay::setFrequencyHz (float newFrequencyHz)
     repaint();
 }
 
+void TunerDisplay::setReferenceHz (float newReferenceHz)
+{
+    if (std::abs (newReferenceHz - referenceHz) < 0.01f)
+        return;
+
+    referenceHz = newReferenceHz;
+    updateFromFrequency();
+    repaint();
+}
+
 void TunerDisplay::updateFromFrequency()
 {
     if (frequencyHz <= 0.0f)
@@ -41,8 +51,8 @@ void TunerDisplay::updateFromFrequency()
 
     hasPitch = true;
 
-    // MIDI note number, with A4 = 69.
-    const float midi = 69.0f + 12.0f * std::log2 (frequencyHz / concertA);
+    // MIDI note number, with A4 = 69 at the configured reference pitch.
+    const float midi = 69.0f + 12.0f * std::log2 (frequencyHz / referenceHz);
     const int nearest = juce::roundToInt (midi);
     centsOffset = (midi - (float) nearest) * 100.0f;
 
