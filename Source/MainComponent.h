@@ -44,7 +44,7 @@ private:
 
     juce::Label titleLabel;
     juce::Label subtitleLabel;
-    juce::TextButton modulesButton { "Modules" };
+    juce::TextButton modulesButton { juce::String::fromUTF8 ("Módulos") };
     juce::TextButton tunerButton { "Tuner" };
     juce::TextButton settingsButton { "Settings" };
 

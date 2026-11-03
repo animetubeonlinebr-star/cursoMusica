@@ -30,6 +30,8 @@ private:
     void showModule (int number);
     void timerCallback() override;
     void refreshModuleList();
+    void setListVisible (bool shouldBeVisible);
+    void setPracticeVisible (bool shouldBeVisible);
 
     AudioEngine& audioEngine;
     course::ProgressStore progressStore;
@@ -38,6 +40,11 @@ private:
     juce::Label subtitleLabel;
     juce::Label hintLabel;
     juce::TextButton closeButton { "Close" };
+    juce::TextButton listToggle { juce::String::fromUTF8 ("Módulos") };
+    juce::TextButton practiceToggle { juce::String::fromUTF8 ("Prática") };
+
+    bool listVisible = true;
+    bool practiceVisible = true;
 
     juce::ListBox moduleList;
     std::unique_ptr<ModuleListModel> listModel;

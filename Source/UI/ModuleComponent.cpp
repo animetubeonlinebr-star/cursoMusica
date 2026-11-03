@@ -332,6 +332,17 @@ ModuleComponent::ModuleComponent (AudioEngine& engine)
     closeButton.onClick = [this] { if (onCloseRequested != nullptr) onCloseRequested(); };
     addAndMakeVisible (closeButton);
 
+    // Collapse/expand the side panels so the lesson content can use the width.
+    listToggle.setClickingTogglesState (true);
+    listToggle.setToggleState (true, juce::dontSendNotification);
+    listToggle.onClick = [this] { setListVisible (listToggle.getToggleState()); };
+    addAndMakeVisible (listToggle);
+
+    practiceToggle.setClickingTogglesState (true);
+    practiceToggle.setToggleState (true, juce::dontSendNotification);
+    practiceToggle.onClick = [this] { setPracticeVisible (practiceToggle.getToggleState()); };
+    addAndMakeVisible (practiceToggle);
+
     listModel = std::make_unique<ModuleListModel>();
     listModel->onSelectionChanged = [this] (int row) { showModule (row + 1); };
     listModel->isUnlocked = [this] (int number) { return progressStore.isModuleUnlocked (number); };
@@ -385,6 +396,26 @@ void ModuleComponent::refreshModuleList()
     moduleList.repaint();
 }
 
+void ModuleComponent::setListVisible (bool shouldBeVisible)
+{
+    listVisible = shouldBeVisible;
+    listToggle.setToggleState (shouldBeVisible, juce::dontSendNotification);
+    moduleList.setVisible (shouldBeVisible);
+    listToggle.setButtonText (shouldBeVisible ? juce::String::fromUTF8 ("Módulos")
+                                              : juce::String::fromUTF8 ("> Módulos"));
+    resized();
+}
+
+void ModuleComponent::setPracticeVisible (bool shouldBeVisible)
+{
+    practiceVisible = shouldBeVisible;
+    practiceToggle.setToggleState (shouldBeVisible, juce::dontSendNotification);
+    practicePanel->setVisible (shouldBeVisible);
+    practiceToggle.setButtonText (shouldBeVisible ? juce::String::fromUTF8 ("Prática")
+                                                  : juce::String::fromUTF8 ("Prática <"));
+    resized();
+}
+
 void ModuleComponent::showModule (int number)
 {
     const auto* module = ModuleCatalog::findModule (number);
@@ -434,17 +465,27 @@ void ModuleComponent::resized()
     auto header = bounds.removeFromTop (64);
     closeButton.setBounds (header.removeFromRight (110).withSizeKeepingCentre (110, 34));
     header.removeFromRight (th::spacing::md);
+    practiceToggle.setBounds (header.removeFromRight (110).withSizeKeepingCentre (110, 34));
+    header.removeFromRight (th::spacing::sm);
+    listToggle.setBounds (header.removeFromRight (110).withSizeKeepingCentre (110, 34));
+    header.removeFromRight (th::spacing::md);
     titleLabel.setBounds (header.removeFromTop (32));
     subtitleLabel.setBounds (header.removeFromTop (22));
 
     bounds.removeFromTop (th::spacing::md);
 
-    moduleList.setBounds (bounds.removeFromLeft (260));
-    bounds.removeFromLeft (th::spacing::md);
+    // Either side panel can be collapsed to give the lesson content the width.
+    if (listVisible)
+    {
+        moduleList.setBounds (bounds.removeFromLeft (260));
+        bounds.removeFromLeft (th::spacing::md);
+    }
 
-    // Practice strip on the right, the scrollable lesson content fills the rest.
-    practicePanel->setBounds (bounds.removeFromRight (320));
-    bounds.removeFromRight (th::spacing::md);
+    if (practiceVisible)
+    {
+        practicePanel->setBounds (bounds.removeFromRight (320));
+        bounds.removeFromRight (th::spacing::md);
+    }
 
     contentViewport.setBounds (bounds);
     contentView->setSize (contentViewport.getMaximumVisibleWidth(),
