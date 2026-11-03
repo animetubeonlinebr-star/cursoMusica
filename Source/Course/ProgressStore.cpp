@@ -19,6 +19,12 @@ ProgressStore::ProgressStore()
 
     properties = std::make_unique<juce::PropertiesFile> (options);
     load();
+
+   #ifdef TEST_UNLOCK_ALL
+    // Test build (REQ-013, ADR 0003 item 7): every module is reachable for
+    // inspection. This never touches the real progress record.
+    unlockAll = true;
+   #endif
 }
 
 bool ProgressStore::isModuleUnlocked (int moduleNumber) const noexcept

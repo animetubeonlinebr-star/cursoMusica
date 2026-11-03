@@ -1,17 +1,24 @@
 ; CursoMusica Windows installer (NSIS)
 ; Owned by devops. Requirements: REQ-014 (choose install directory, ready to
 ; use) and REQ-013 (test builds unlock all modules).
+;
+; Paths are resolved relative to this script, so the build first stages the
+; artefacts under dist/app/ (see build-installer.sh and the release workflow).
+; makensis does not resolve "..", which is why nothing here climbs out of the
+; deploy/windows directory.
 
 Unicode true
 !include "MUI2.nsh"
 
 !define APP_NAME "CursoMusica"
-!define APP_EXE "CursoMusica.exe"
+; The executable keeps the JUCE PRODUCT_NAME ("Curso Musica Studio").
+!define APP_EXE "Curso Musica Studio.exe"
 !define APP_VERSION "0.1.0"
 !define COMPANY "CursoMusica"
 
 Name "${APP_NAME}"
-OutFile "dist\${APP_NAME}-Setup-${APP_VERSION}.exe"
+; Built here, then copied to <repo>/instalador/Instalador CursoMusica.exe.
+OutFile "dist/Instalador CursoMusica.exe"
 ; Default install directory; the MUI Directory page lets the user change it
 ; (REQ-014). InstallDir points at %ProgramFiles% by default.
 InstallDir "$PROGRAMFILES64\${APP_NAME}"
@@ -34,8 +41,13 @@ Section "CursoMusica" SecMain
     ; Application and runtime dependencies (JUCE app + bundled libraries from
     ; ADR 0002: FluidSynth, libsndfile, SoundFont/samples). Everything needed so
     ; the app is ready to use after install (REQ-014).
-    File "build\CursoMusica_artefacts\Release\${APP_EXE}"
-    File /r "build\runtime\*.*"
+    File "dist/app/${APP_EXE}"
+
+    ; Bundled runtime (SoundFont/samples/DLLs) when the build produced it; the
+    ; installer still succeeds when it did not (the build passes /DRUNTIME).
+!ifdef RUNTIME
+    File /r "dist/app/runtime/*.*"
+!endif
 
     ; Remember the chosen directory for upgrades and uninstall.
     WriteRegStr HKLM "Software\${APP_NAME}" "InstallDir" "$INSTDIR"

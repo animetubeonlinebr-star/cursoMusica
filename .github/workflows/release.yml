@@ -5,20 +5,28 @@ name: Release (Windows installer)
 # without unlocking the previous ones.
 # REQ-014: the Windows installer lets the user choose the install directory and
 # leaves the app ready to use.
+#
+# This workflow is also the only way to produce the real Windows binary: the
+# development machine is Linux, so the .exe is built here and then committed to
+# instalador/ on the test branch.
 
 on:
   push:
-    tags: ["v*"]
+    branches: [test]
   workflow_dispatch:
     inputs:
       module:
-        description: "Module id for a test build (e.g. m3-ii-v-i)"
+        description: "Module id for a test build (e.g. 1)"
         required: false
-        default: "test"
+        default: "1"
       unlock_all:
         description: "Build with all modules unlocked (test override)"
         type: boolean
         default: true
+      commit_installer:
+        description: "Commit the built installer to instalador/ on this branch"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -34,7 +42,7 @@ jobs:
         run: git clone --depth 1 --branch 8.0.4 https://github.com/juce-framework/JUCE.git External/JUCE
 
       - name: Configure
-        run: cmake -B build -G "Visual Studio 17 2022" -A x64 -DTEST_UNLOCK_ALL=${{ github.event.inputs.unlock_all }}
+        run: cmake -B build -G "Visual Studio 17 2022" -A x64 -DTEST_UNLOCK_ALL=${{ github.event.inputs.unlock_all || 'true' }}
 
       - name: Build
         run: cmake --build build --config Release
@@ -45,18 +53,38 @@ jobs:
       - name: Build installer (choose install directory)
         shell: pwsh
         run: |
-          # The installer script must include the NSIS "Directory" page so the
-          # user can choose where to install (REQ-014).
-          makensis deploy/windows/installer.nsi
+          # Stage the app next to the script (NSIS resolves paths relative to
+          # the .nsi and does not accept "..") and build the installer.
+          $stage = "deploy/windows/dist/app"
+          New-Item -ItemType Directory -Force -Path $stage | Out-Null
+          Copy-Item "build/CursoMusica_artefacts/Release/Curso Musica Studio.exe" "$stage/Curso Musica Studio.exe"
+          $defines = @()
+          if (Test-Path "build/runtime") {
+            Copy-Item -Recurse "build/runtime" "$stage/runtime"
+            $defines += "/DRUNTIME"
+          }
+          makensis @defines deploy/windows/installer.nsi
+          New-Item -ItemType Directory -Force -Path "instalador" | Out-Null
+          Copy-Item "deploy/windows/dist/Instalador CursoMusica.exe" "instalador/Instalador CursoMusica.exe"
 
       - name: Upload installer artifact
         uses: actions/upload-artifact@v4
         with:
-          name: CursoMusica-Setup-${{ github.event.inputs.module || github.ref_name }}
-          path: deploy/windows/dist/*.exe
+          name: Instalador-CursoMusica-${{ github.event.inputs.module || 'test' }}
+          path: instalador/Instalador CursoMusica.exe
+
+      - name: Commit installer to the test branch
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.commit_installer == 'true' }}
+        shell: pwsh
+        run: |
+          git config user.name "openhands"
+          git config user.email "openhands@all-hands.dev"
+          git add -f "instalador/Instalador CursoMusica.exe"
+          git commit -m "build(test): instalador CursoMusica com todos os modulos liberados (REQ-013)"
+          git push
 
       - name: Attach to release (on tag)
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: deploy/windows/dist/*.exe
+          files: instalador/Instalador CursoMusica.exe

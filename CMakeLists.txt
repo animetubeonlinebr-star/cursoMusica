@@ -2,6 +2,11 @@ cmake_minimum_required(VERSION 3.22)
 
 project(CursoMusica VERSION 0.1.0 LANGUAGES C CXX)
 
+# Release builds on the test branch open every module without touching the real
+# progress record (ADR 0003 item 7, REQ-013). Default off: normal builds keep
+# the linear gate.
+option(TEST_UNLOCK_ALL "Open every module in this build (test override)" OFF)
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -50,6 +55,10 @@ target_sources(CursoMusica PRIVATE
     Source/UI/SettingsComponent.cpp)
 
 target_include_directories(CursoMusica PRIVATE Source)
+
+if(TEST_UNLOCK_ALL)
+    target_compile_definitions(CursoMusica PRIVATE TEST_UNLOCK_ALL=1)
+endif()
 
 # ---------------------------------------------------------------------------
 # ASIO (Windows only)
