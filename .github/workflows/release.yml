@@ -34,18 +34,23 @@ permissions:
 jobs:
   windows-installer:
     name: Build and package Windows installer
-    runs-on: windows-latest
+    runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
 
       - name: Clone JUCE (pinned)
         run: git clone --depth 1 --branch 8.0.4 https://github.com/juce-framework/JUCE.git External/JUCE
 
+      - name: Set up MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
       - name: Configure
-        run: cmake -B build -G "Visual Studio 17 2022" -A x64 -DTEST_UNLOCK_ALL=${{ github.event.inputs.unlock_all || 'true' }}
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DTEST_UNLOCK_ALL=${{ github.event.inputs.unlock_all || 'true' }}
 
       - name: Build
-        run: cmake --build build --config Release
+        run: cmake --build build
 
       - name: Install NSIS
         run: choco install nsis -y
@@ -53,6 +58,8 @@ jobs:
       - name: Build installer (choose install directory)
         shell: pwsh
         run: |
+          # choco updates the machine PATH, which this process does not see.
+          $env:Path += ";C:\Program Files (x86)\NSIS"
           # Stage the app next to the script (NSIS resolves paths relative to
           # the .nsi and does not accept "..") and build the installer.
           $stage = "deploy/windows/dist/app"
