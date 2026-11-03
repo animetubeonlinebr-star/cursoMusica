@@ -6,6 +6,7 @@
 #include "UI/Design/Panel.h"
 #include "UI/DevicePanel.h"
 #include "UI/SettingsComponent.h"
+#include "UI/ModuleComponent.h"
 #include "UI/TunerComponent.h"
 #include "UI/TunerDisplay.h"
 #include "UI/TransportPanel.h"
@@ -32,6 +33,8 @@ private:
     void hideSettings();
     void showTuner();
     void hideTuner();
+    void showModules();
+    void hideModules();
 
     CursoLookAndFeel lookAndFeel;
 
@@ -41,6 +44,7 @@ private:
 
     juce::Label titleLabel;
     juce::Label subtitleLabel;
+    juce::TextButton modulesButton { "Modules" };
     juce::TextButton tunerButton { "Tuner" };
     juce::TextButton settingsButton { "Settings" };
 
@@ -52,6 +56,7 @@ private:
 
     std::unique_ptr<SettingsComponent> settings;
     std::unique_ptr<TunerComponent> tuner;
+    std::unique_ptr<ModuleComponent> modules;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };

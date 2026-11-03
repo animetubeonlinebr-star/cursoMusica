@@ -31,11 +31,13 @@ target_sources(CursoMusica PRIVATE
     Source/Audio/PluginHost.cpp
     Source/Audio/PluginChain.cpp
     Source/Audio/TuningSettings.cpp
+    Source/Course/ModuleCatalog.cpp
     Source/UI/Design/LookAndFeel.cpp
     Source/UI/Design/Panel.cpp
     Source/UI/LevelMeter.cpp
     Source/UI/TunerDisplay.cpp
     Source/UI/TunerComponent.cpp
+    Source/UI/ModuleComponent.cpp
     Source/UI/DevicePanel.cpp
     Source/UI/TransportPanel.cpp
     Source/UI/SettingsComponent.cpp)

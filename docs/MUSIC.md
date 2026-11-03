@@ -526,3 +526,158 @@ Impacto: o risco **R-08** deixa de ser bloqueante e passa a **condicional**
 substituída por licenciamento formal.
 
 
+
+# Módulo 1 — Ambientação, instrumento e organização musical
+
+**Nível:** 1 (vamp de 1 acorde) · **BPM meta:** 60 (REQ-015) · **Gate:** 90% (REQ-009)
+**Objetivo:** preparar o aluno para acompanhar os estudos e compreender a
+organização do instrumento.
+
+> **Regra de ouro (REQ-003):** a explicação vem **antes** de qualquer desafio.
+> Nenhum desafio abre sem que o conteúdo abaixo tenha sido apresentado.
+
+## 1.1 Conteúdo (curadoria — REQ-006)
+
+| Bloco | Conteúdo | Fonte a revisar (REQ-006) |
+|---|---|---|
+| A | Partes da guitarra e do violão | `pdf-mozart-mello-livroestudosdeguitarra4em1` (cap. introdutório) |
+| B | Notas musicais (natural, sustenido, bemol) | `pdf-fraseado-melodico` (fundamentos) |
+| C | Localização das notas no braço | `pdf-mozart-mello-livroestudosdeguitarra4em1` |
+| D | Pestanas (barré e meio barré) | `pdf-mozart-mello-livroestudosdeguitarra4em1` |
+| E | Sistema 5 (CAGED) | `pdf-fraseado-melodico` |
+| F | Organização das tonalidades | `pdf-desvendando-os-segredos-da-guitarra-fusion` |
+| G | Introdução ao cifrado | `pdf-mozart-mello-livroestudosdeguitarra4em1` |
+
+**Nota de curadoria.** Os PDFs estão sob **Git LFS**; a extração do conteúdo real
+depende do LFS acessível (ver `docs/RISKS.md`). Até então, esta tabela é o
+**mapa de curadoria** — o que revisar e em que bloco se enquadra.
+
+## 1.2 Teoria apresentada no módulo
+
+### Bloco A — Partes do instrumento
+
+Corpo, braço, escala (braço), cavalete (ponte), rastilho, pestana (nut), tarraxas
+(cabeça), trastes, casas, cordas (6ª a 1ª), captadores, botões de volume e tom.
+No violão: a boca, o tampo e as cordas de nylon (som mais doce, menor tensão).
+
+### Bloco B — Notas musicais
+
+Sete nomes naturais: **Dó Ré Mi Fá Sol Lá Si** (C D E F G A B). Entre Mi–Fá e
+Si–Dó **não há** nota intermediária (semitonos naturais). As demais notas
+naturais estão a um **tom** de distância e admitem uma nota intermediária.
+
+### Bloco C — Sustenidos e bemóis
+
+- **Sustenido (♯):** sobe meio-tom. `Fá♯` está meio-tom acima de `Fá`.
+- **Bemol (♭):** desce meio-tom. `Si♭` está meio-tom abaixo de `Si`.
+- **Enarmonia:** `Fá♯ = Sol♭`, `Dó♯ = Ré♭` — mesmo som, nomes diferentes.
+- **Regra prática:** não existe `Mi♯` nem `Si♯` na escala natural (e nem
+  `Fá♭`/`Dó♭`); o intervalo Mi–Fá e Si–Dó já é de meio-tom.
+
+### Bloco D — Localização das notas no braço
+
+Afinação padrão, da **6ª (mais grave) à 1ª (mais aguda)**: `E2 A2 D3 G3 B3 E4`.
+
+| Corda | Solta | Casa 1 | Casa 2 | Casa 3 | Casa 5 | Casa 7 | Casa 12 |
+|---|---|---|---|---|---|---|---|
+| 6ª | E2 | F2 | F#2 | G2 | A2 | B2 | E3 |
+| 5ª | A2 | A#2 | B2 | C3 | D3 | E3 | A3 |
+| 4ª | D3 | D#3 | E3 | F3 | G3 | A3 | D4 |
+| 3ª | G3 | G#3 | A3 | A#3 | C4 | D4 | G4 |
+| 2ª | B3 | C4 | C#4 | D4 | E4 | F#4 | B4 |
+| 1ª | E4 | F4 | F#4 | G4 | A4 | B4 | E5 |
+
+- **Regra do oitavo grau:** a casa 12 repete a corda solta **uma oitava acima**.
+- **Transpositor (convenção de partitura — REQ-004):** a guitarra **soa uma
+  oitava abaixo** do que está escrito. A conversão partitura→áudio deve aplicar
+  essa transposição; o `E4` escrito soa como `E3`.
+
+### Bloco E — Pestanas
+
+- **Pestana completa (barré):** um dedo (geralmente o indicador) pressiona
+  **todas** as cordas na mesma casa; os demais dedos montam o acorde à frente.
+- **Meio barré:** o indicador cobre apenas **2 a 4 cordas**.
+- **Por que existe:** permite usar a **mesma forma** de acorde em qualquer região
+  do braço — é o alicerce do CAGED.
+- **Erro comum:** a corda abafada no meio da pestana soa "morta". Ajuste o dedo
+  para trás do traste e aproxime o polegar do centro do braço.
+
+### Bloco F — Sistema 5 (CAGED)
+
+Cinco **formas** de acorde maior (C, A, G, E, D) cobrem todo o braço e se
+**repetem** a cada 12 casas, na ordem que dá nome ao sistema: **C → A → G → E → D**.
+
+| Forma | Acorde (exemplo em Dó) | Baixo na corda | Região |
+|---|---|---|---|
+| C | Dó (C) | 5ª | casas 0–3 |
+| A | Dó (C) | 5ª | casas 3–5 |
+| G | Dó (C) | 6ª | casas 5–8 |
+| E | Dó (C) | 6ª | casas 8–12 |
+| D | Dó (C) | 4ª | casas 10–12 |
+
+- As formas **conectam-se**: a última nota de uma é a primeira da seguinte.
+- A **mesma forma** vale para acordes menores, de 7ª, etc. (muda a qualidade).
+- O CAGED é a ponte entre **acorde** e **escala**: cada forma contém a
+  pentatônica/modo daquele centro (ligação com o nível 1 de improvisação).
+
+### Bloco G — Organização das tonalidades
+
+- **Campo harmônico maior:** `I – ii – iii – IV – V – vi – vii°`.
+  Exemplo em Dó: `C – Dm – Em – F – G – Am – Bdim`.
+- **Círculo das quintas:** `C → G → D → A → E → B → F# → C# → …`; a cada passo,
+  acrescenta-se um sustenido. No sentido inverso (`C → F → Bb → Eb…`),
+  acrescenta-se um bemol.
+- **Armadura de clave:** quantos sustenidos/bemóis a tonalidade tem.
+- **Relativa menor:** cada maior tem uma menor com a mesma armadura (`C` ↔ `Am`).
+
+### Bloco H — Introdução ao cifrado
+
+| Cifra | Significado | Exemplo |
+|---|---|---|
+| `C` | acorde maior | Dó maior |
+| `Cm` | acorde menor | Dó menor |
+| `C7` | sétima dominante | Dó com 7ª menor |
+| `C7M` (`Cmaj7`) | sétima maior | Dó com 7ª maior |
+| `Cm7` | menor com sétima | Dó menor com 7ª |
+| `C/E` | acorde com baixo na nota após a barra | Dó com baixo em Mi |
+| `C(9)`, `C(#11)` | tensões adicionadas | nona, quarta aumentada |
+
+Cifrar é **descrever o acorde de forma compacta**; ler a cifra e achar a forma no
+braço (via CAGED) é a habilidade prática do módulo.
+
+## 1.3 Prática (exercícios e desafios — REQ-008)
+
+Cada exercício tem **explicação antes da execução** (REQ-003) e é **medido**
+(REQ-009). BPM meta 60 (REQ-015).
+
+| ID | Exercício | Habilidade | Verificação automática |
+|---|---|---|---|
+| EX-1.1 | Nomear as 6 cordas soltas e dizer a nota de cada uma | identificar cordas | pergunta com resposta esperada |
+| EX-1.2 | Tocar a corda 6ª solta e a nota da casa 5 (deve dar Lá) | localizar notas | detector: E2 solto e A2 na 5ª casa |
+| EX-1.3 | Tocar a escala de Dó na 1ª posição (2 oitavas) | ler o braço | sequência de notas esperada, 90% de acerto |
+| EX-1.4 | Montar `C`, `G`, `D`, `Am`, `Em` e identificar a forma CAGED de cada | acordes simples | detecção de acorde (soma de notas) |
+| EX-1.5 | Pestana de Fá (F) na 1ª casa; todas as cordas devem soar | pestana | nível/ataque em todas as cordas |
+| EX-1.6 | Mover a forma de `E` pelo braço e nomear o acorde resultante | CAGED | identificar acorde por região |
+| EX-1.7 | Dado `Dm7`, `G7`, `C7M`, dizer o campo harmônico e tocar as tríades | cifrado + tonalidade | detecção de acorde e resposta |
+
+**Desafio de gate (CM-014/CM-016 do currículo):** tocar a progressão
+`C – G – Am – F` (vamp de 1 acorde, nível 1) a **60 BPM** com **≥90% de acerto**
+de acordes e `on_grid_ratio ≥ 0,75`.
+
+## 1.4 Patterns e links do módulo (REQ-007, REQ-010)
+
+- **Pattern obrigatório:** `PTN-R-PALM` (pedal point abafado + power chords) —
+  primeiro contato com o ritmo e o abafamento; alternativa `PTN-R-BOSSA` para
+  quem já tem base de violão.
+- **Pattern de escala:** `PTN-M-3` (grupos de 3) sobre a escala de Dó, na 1ª
+  posição, para ligar braço × fluência.
+- **Links (guitarristas de referência — REQ-007):** um vídeo-aula por referência,
+  curado com **citação da fonte** (sem copiar material protegido):
+  - **Juninho Afram** — didática de rock nacional e formação de acordes.
+  - **Kiko Loureiro** — organização do braço e CAGED aplicado.
+  - **John Petrucci** — exercícios mecânicos de aquecimento (ligação com
+    `PTN-M-3`).
+
+**Verificação de uso (REQ-010):** o módulo registra o pattern (`PTN-R-PALM`) e o
+link; a avaliação confere a assinatura do pattern no trecho tocado (ver
+§"Detecção do uso de pattern"). Sem assinatura detectada, o exercício não conta.

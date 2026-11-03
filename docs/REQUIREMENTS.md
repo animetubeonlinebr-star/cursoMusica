@@ -70,6 +70,12 @@ Catálogo detalhado (IDs `PTN-*`) em `docs/MUSIC.md` §"Catálogo de patterns".
 |---|---|---|---|
 | REQ-017 | O sistema oferece um **afinador como ferramenta transversal**, acessível a qualquer momento por um menu próprio, **fora de qualquer módulo**; a janela permite **selecionar o pitch de referência (A4)**, padrão **440 Hz**, editável e persistido | Must | afinador abre em qualquer momento, sem módulo ativo; valor de A4 editável de 400 a 480 Hz e mantido entre sessões |
 
+## D5. Apresentação dos módulos no app
+
+| ID | Requisito | MoSCoW | Verificação |
+|---|---|---|---|
+| REQ-018 | O sistema apresenta os **módulos do curso dentro do software** (lista navegável + conteúdo do módulo), com a **explicação antes de qualquer desafio** (REQ-003); o conteúdo é espelho de `docs/MUSIC.md` | Must | módulo abre com os blocos de explicação na ordem; nenhum desafio antes da explicação |
+
 ## E. Modelos progressivos de improvisação (REQ-002, REQ-010)
 
 Ordem obrigatória (progressão linear):
@@ -149,3 +155,10 @@ A decisão de arquitetura (incluindo o trade-off latência × síntese) fica no
 | REQ-015 | musician + developer + data-engineer | ADR 0004 | pendente |
 | REQ-016 | musician | `docs/MUSIC.md` | catalogado (IDs PTN-*) |
 | REQ-017 | developer + designer | `Source/UI/TunerComponent.*`, `Source/Audio/TuningSettings.*` | **implementado** |
+| REQ-018 | developer + designer + musician | `Source/Course/**`, `Source/UI/ModuleComponent.*`, ADR 0005 | **implementado (Módulo 1)** |
+
+**Detalhe de REQ-018:** o sistema apresenta os **módulos do curso** dentro do
+software, com a **explicação antes de qualquer desafio** (REQ-003) e a lista de
+módulos navegável. O conteúdo vive no catálogo compilado (ADR 0005) e é espelho
+de `docs/MUSIC.md`. Módulos ainda sem conteúdo aparecem como bloqueados, não
+como ausentes.

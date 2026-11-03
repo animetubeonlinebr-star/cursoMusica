@@ -28,6 +28,29 @@ Dependências: `AudioEngine` (getters já existem, ver `Source/Audio/AudioEngine
 Notas técnicas (architect): consumir só os getters públicos e atomics; nenhuma
 chamada bloqueante na UI.
 
+### [CM-017] Módulo 1 jogável: ambientação, instrumento e organização musical — valor: H — tamanho: L — status: in progress
+Requisito: REQ-003, REQ-006, REQ-007, REQ-008. Conteúdo em `docs/MUSIC.md` §Módulo 1.
+Como um aluno iniciante, eu quero estudar o Módulo 1 dentro do app (explicação
+antes do desafio), para que eu aprenda as partes do instrumento, as notas, o
+braço, a pestana, o CAGED, as tonalidades e o cifrado sem sair do software.
+
+Critérios de aceite:
+- Dado o app aberto, quando clico em **Modules**, então vejo a lista de módulos e
+  o Módulo 1 selecionado com sua explicação.
+- Dado o Módulo 1 aberto, quando leio, então os oito blocos (A–H) aparecem na
+  ordem, antes de qualquer desafio (REQ-003).
+- Dado o módulo, então ele exibe nível 1, BPM meta 60 e gate 90%.
+- Dado o módulo, então há ≥1 pattern (`PTN-R-PALM`) e ≥1 link de guitarrista
+  citados (REQ-007).
+- Dado o desafio de gate, então é `C – G – Am – F` a 60 BPM com ≥90% e
+  `on_grid_ratio ≥ 0,75`.
+
+Pronto quando (DoD):
+- [x] Conteúdo espelhado de `docs/MUSIC.md` para o catálogo (ADR 0005).
+- [x] Build compila sem avisos novos.
+- [ ] Medição real dos exercícios (depende de CM-008).
+- [ ] Teste automatizado no CI (depende de CM-002).
+
 ### [CM-016] Afinador transversal com pitch de referência editável — valor: H — tamanho: S — status: done
 Requisito: REQ-017. Deriva de `docs/MUSIC.md` (referência A4, tolerância ±5 cents).
 Como um guitarrista, eu quero abrir um afinador a qualquer momento e escolher a

@@ -30,6 +30,9 @@ MainComponent::MainComponent()
     tunerButton.onClick = [this] { showTuner(); };
     addAndMakeVisible (tunerButton);
 
+    modulesButton.onClick = [this] { showModules(); };
+    addAndMakeVisible (modulesButton);
+
     addAndMakeVisible (tunerDisplay);
     addAndMakeVisible (devicePanel);
     addAndMakeVisible (transportPanel);
@@ -52,10 +55,29 @@ MainComponent::MainComponent()
 MainComponent::~MainComponent()
 {
     stopTimer();
+    modules.reset();
     tuner.reset();
     settings.reset();
     audioEngine.shutdown();
     juce::LookAndFeel::setDefaultLookAndFeel (nullptr);
+}
+
+void MainComponent::showModules()
+{
+    if (modules == nullptr)
+    {
+        modules = std::make_unique<ModuleComponent>();
+        modules->onCloseRequested = [this] { hideModules(); };
+        addAndMakeVisible (*modules);
+    }
+
+    modules->setBounds (getLocalBounds());
+    modules->toFront (true);
+}
+
+void MainComponent::hideModules()
+{
+    modules.reset();
 }
 
 void MainComponent::timerCallback()
@@ -114,6 +136,8 @@ void MainComponent::resized()
     settingsButton.setBounds (header.removeFromRight (110).withSizeKeepingCentre (110, 34));
     header.removeFromRight (th::spacing::sm);
     tunerButton.setBounds (header.removeFromRight (110).withSizeKeepingCentre (110, 34));
+    header.removeFromRight (th::spacing::sm);
+    modulesButton.setBounds (header.removeFromRight (110).withSizeKeepingCentre (110, 34));
     header.removeFromRight (th::spacing::md);
     auto titleArea = header;
     titleLabel.setBounds (titleArea.removeFromTop (32));
