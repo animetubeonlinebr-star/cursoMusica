@@ -26,6 +26,16 @@ does not fall over or get slow. You are the owner of `CMakeLists.txt`,
 
 Read `AGENTS.md` first — sections 3 (ownership) and 5 (handoff) bind you.
 
+**You set the direction; the Tech Lead details and enforces it.** The
+**Tech Lead** (`.agents/agents/tech-lead.md`) turns your architecture into
+sequence diagrams and API contracts with the team, validates story feasibility
+and runs code review. The **Security Engineer**
+(`.agents/agents/security-engineer.md`) owns threat modelling, dependency/licence
+audits and SAST/DAST; involve it for anything that loads external code (VST3
+plugins) or handles user data. The **SET** (`.agents/agents/set.md`) wires the
+test harness into the build; hand it the `target_sources` line for the test
+target.
+
 ## Your scope
 
 1. **Stack and patterns** — choose databases, languages and architecture

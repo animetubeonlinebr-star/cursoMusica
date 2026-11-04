@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 
+#include "Audio/AudioPortClassifier.h"
 #include "Course/ExerciseEvaluator.h"
 #include "Course/ModuleCatalog.h"
 #include "Course/NoteMath.h"
@@ -242,6 +243,48 @@ void testProgression()
     check (highestUnlocked (4) == 5, "passing up to module 4 unlocks module 5");
 }
 
+void testAudioPortClassifier()
+{
+    std::cout << "AudioPortClassifier\n";
+    using namespace cursomusica::audio;
+
+    // Ordinary hardware keeps the direction the backend reported.
+    check (classifyAudioPort ("Microfone (Logi C270 HD WebCam)", true) == PortKind::capture,
+           "a real microphone stays a capture port");
+    check (classifyAudioPort ("Alto-falantes (USB Audio Device)", false) == PortKind::playback,
+           "real speakers stay a playback port");
+
+    // VoiceMeeter names its ports from the mixer's side (REQ-023): the raw name
+    // looks swapped, so the classifier must correct it.
+    check (classifyAudioPort ("Voicemeeter Input (VB-Audio Voicemeeter VAIO)", false) == PortKind::playback,
+           "Voicemeeter Input is a playback target for the app");
+    check (classifyAudioPort ("Voicemeeter AUX Input (VB-Audio Voicemeeter VAIO)", false) == PortKind::playback,
+           "Voicemeeter AUX Input is a playback target for the app");
+    check (classifyAudioPort ("Voicemeeter In 3 (VB-Audio Voicemeeter VAIO)", false) == PortKind::playback,
+           "Voicemeeter In N is a playback target for the app");
+    check (classifyAudioPort ("Voicemeeter VAIO3 Input (VB-Audio Voicemeeter VAIO)", false) == PortKind::playback,
+           "Voicemeeter VAIO3 Input is a playback target for the app");
+
+    check (classifyAudioPort ("Voicemeeter Out A1 (VB-Audio Voicemeeter VAIO)", true) == PortKind::capture,
+           "Voicemeeter Out A1 is a capture source for the app");
+    check (classifyAudioPort ("Voicemeeter Out B1 (VB-Audio Voicemeeter VAIO)", true) == PortKind::capture,
+           "Voicemeeter Out B1 is a capture source for the app");
+
+    check (classifyAudioPort ("CABLE Input (VB-Audio Virtual Cable)", false) == PortKind::playback,
+           "VB-Audio CABLE Input is a playback target for the app");
+    check (classifyAudioPort ("CABLE Output (VB-Audio Virtual Cable)", true) == PortKind::capture,
+           "VB-Audio CABLE Output is a capture source for the app");
+
+    // Even when the backend mislabels a virtual port, the name wins.
+    check (classifyAudioPort ("Voicemeeter Input (VB-Audio Voicemeeter VAIO)", true) == PortKind::playback,
+           "a mislabelled virtual input is still corrected to playback");
+
+    check (isVirtualMixerPort ("Voicemeeter Out A1 (VB-Audio Voicemeeter VAIO)"),
+           "VoiceMeeter ports are recognised as virtual mixer ports");
+    check (! isVirtualMixerPort ("Alto-falantes (High Definition Audio Device)"),
+           "ordinary hardware is not a virtual mixer port");
+}
+
 void testModuleCatalog()
 {
     using namespace cursomusica;
@@ -286,7 +329,7 @@ void testModuleCatalog()
                    "gate opens on C major");
         }
     check (hasGate, "module 1 has a gate exercise");
-    check (m1->exercises.size() == 9, "module 1 lists EX-1.1..EX-1.8 plus the gate");
+    check (m1->exercises.size() == 11, "module 1 lists EX-1.1..EX-1.10 plus the gate");
 
     // EX-1.1 is the learning quiz (Questionario_m1), answered one at a time.
     check (m1->exercises.front().isQuiz(), "EX-1.1 is a multiple-choice quiz");
@@ -295,6 +338,15 @@ void testModuleCatalog()
         check (q.correctIndex >= 0 && q.correctIndex < q.options.size(),
                "every quiz question has a valid answer key");
     check (m1->exercises.front().lessonId == "A", "the quiz belongs to topic A");
+
+    // Every topic A..I is served by at least one exercise (REQ-022).
+    juce::StringArray coveredTopics;
+    for (const auto& e : m1->exercises)
+        if (e.lessonId.isNotEmpty() && ! coveredTopics.contains (e.lessonId))
+            coveredTopics.add (e.lessonId);
+    for (const auto& topic : { "A", "B", "C", "D", "E", "F", "G", "H", "I" })
+        check (coveredTopics.contains (topic),
+               juce::String ("topic ") + topic + " has at least one exercise (REQ-022)");
 
     // Every exercise is tied to a topic so the right panel follows the left.
     for (const auto& e : m1->exercises)
@@ -322,6 +374,7 @@ int main()
     testQuizSession();
     testPracticeSession();
     testProgression();
+    testAudioPortClassifier();
     testModuleCatalog();
 
     std::cout << "\n" << (checks - failures) << "/" << checks << " checks passed\n";

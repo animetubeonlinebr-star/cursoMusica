@@ -57,7 +57,7 @@ private:
 };
 
 SettingsComponent::SettingsComponent (AudioEngine& engine, PluginHost& host)
-    : audioEngine (engine), pluginHost (host)
+    : audioEngine (engine), pluginHost (host), audioPortsPanel (engine.getDeviceManager())
 {
     titleLabel.setText ("Settings", juce::dontSendNotification);
     titleLabel.setFont (th::type::makeFont (th::type::title, true));
@@ -83,6 +83,11 @@ SettingsComponent::SettingsComponent (AudioEngine& engine, PluginHost& host)
         true);  // hide advanced options behind a button
     deviceSelector->setSize (400, 300);
     audioPanel.addAndMakeVisible (*deviceSelector);
+
+    // Explicit direction list, so a virtual mixer (VoiceMeeter) shows its ports
+    // under the category the app really uses them in (REQ-023).
+    audioPanel.addAndMakeVisible (audioPortsPanel);
+    audioEngine.getDeviceManager().addChangeListener (this);
 
     // ---- VST3 chain ------------------------------------------------------
     addAndMakeVisible (pluginPanel);
@@ -137,7 +142,16 @@ SettingsComponent::SettingsComponent (AudioEngine& engine, PluginHost& host)
     setSize (900, 620);
 }
 
-SettingsComponent::~SettingsComponent() = default;
+SettingsComponent::~SettingsComponent()
+{
+    audioEngine.getDeviceManager().removeChangeListener (this);
+}
+
+void SettingsComponent::changeListenerCallback (juce::ChangeBroadcaster* source)
+{
+    if (source == &audioEngine.getDeviceManager())
+        audioPortsPanel.refresh();
+}
 
 void SettingsComponent::paint (juce::Graphics& g)
 {
@@ -235,8 +249,17 @@ void SettingsComponent::resized()
     audioPanel.setBounds (left);
 
     auto audioContent = audioPanel.getContentBounds();
+
+    // Upper part: the stock selector (device, rate, buffer, channel routing).
+    // Lower part: the explicit direction list that names each port the way the
+    // app uses it (REQ-023).
+    auto portsArea = audioContent.removeFromBottom (juce::jmin (audioContent.getHeight() / 2, 220));
+    audioContent.removeFromBottom (th::spacing::sm);
+
     if (deviceSelector != nullptr)
         deviceSelector->setBounds (audioContent);
+
+    audioPortsPanel.setBounds (portsArea);
 
     pluginPanel.setBounds (right);
 

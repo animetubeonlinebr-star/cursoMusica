@@ -2,6 +2,8 @@
 
 #include <juce_gui_basics/juce_gui_basics.h>
 
+#include <unordered_map>
+
 #include "Audio/AudioEngine.h"
 #include "Course/Module.h"
 #include "Course/ProgressStore.h"
@@ -15,9 +17,11 @@ namespace cursomusica
 //   centre  what the current selection explains (module, topic or exercise);
 //   right   the practical exercises and the live measurement of the attempt.
 //
-// Selecting a topic on the left loads its explanation in the centre and points
-// the right pane at that topic's exercises; the centre also demonstrates the
-// exercise that is armed (REQ-003, REQ-008, REQ-009).
+// Opening a module never loads a topic by itself (REQ-019): the centre shows
+// only the module's own context until the student clicks a topic. Returning to
+// a module keeps the topic last read in it; opening another module clears the
+// centre (REQ-020). The centre never runs the exercise: it only explains what
+// was proposed, and the right pane holds the playable one (REQ-021).
 class ModuleComponent final : public juce::Component,
                               private juce::Timer
 {
@@ -49,6 +53,11 @@ private:
     void showExercise (const Exercise* exercise);
     void updateContent();
 
+    // Remembers, per module, the topic the student last read there (REQ-020).
+    void rememberTopic (int moduleNumber, int topicIndex);
+    int recalledTopic (int moduleNumber) const;
+    void restoreTopicInTree (int moduleNumber, int topicIndex);
+
     void timerCallback() override;
     void refreshSubjectTree();
     void setListVisible (bool shouldBeVisible);
@@ -58,6 +67,13 @@ private:
     course::ProgressStore progressStore;
 
     Selection selection;
+
+    // module number -> topic index last read in it (REQ-020).
+    std::unordered_map<int, int> lastTopicPerModule;
+
+    // Set while the component drives the tree itself (restoring a remembered
+    // topic), so the tree callbacks do not re-enter the selection logic.
+    bool suppressTreeCallbacks = false;
 
     juce::Label titleLabel;
     juce::Label subtitleLabel;

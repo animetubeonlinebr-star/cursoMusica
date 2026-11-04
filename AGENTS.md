@@ -83,7 +83,7 @@ antigas.
 - [x] Estrutura CMake e dependência JUCE
 - [x] Engine de áudio em tempo real (callback mínimo, FIFO lock-free)
 - [x] Detecção de pitch (YIN) em thread de análise dedicada
-- [x] Agente de design (`designer.md`) e design system (`Theme.h`, `DESIGN.md`)
+- [x] Agente de design (`ux-ui-designer.md`) e design system (`Theme.h`, `DESIGN.md`)
 - [x] Telas iniciais (layout, sem funcionalidade de estudo)
 - [x] Menu de configuração: dispositivos, entrada, saída, buffer
 - [x] Host VST3 com scan, cadeia na entrada e editor de plugin
@@ -94,9 +94,10 @@ antigas.
 - [x] Motor de medição: NoteMath, ExerciseEvaluator (LCS + acordes), TempoGrid, PracticeSession (CM-008)
 - [x] Metrônomo RT-safe com BPM meta e grade (CM-014)
 - [x] Gate de progressão linear: módulo N+1 só abre com ≥90% no gate de N; progresso persistido (REQ-002/REQ-009)
-- [x] Testes unitários da lógica pura (122 checagens) rodando no CI
+- [x] Testes unitários da lógica pura (146 checagens) rodando no CI
 - [x] Build validada no Linux: binário gerado, UI renderiza
 - [ ] Ligar UI principal à engine (nível e afinação reais em vez de dummy)
+- [x] Ajustes do `musica.docx` (CM-018..CM-021): módulo abre em branco e mantém o tópico no mesmo módulo (REQ-019/020), exercício à direita e explicação no centro (REQ-021), ≥1 exercício por tópico A–I (REQ-022), classificação correta de entradas/saídas de áudio (REQ-023)
 - [ ] Playback com controle de velocidade e loop
 - [ ] Avaliação de improvisação (repouso × tensão, REQ-010/REQ-011/REQ-012)
 - [ ] ASIO SDK no Windows (licença Steinberg, download separado)
@@ -111,15 +112,22 @@ quando precisa, ele **pede** ao dono (ver protocolo de handoff, seção 5).
 |---|---|---|
 | `Source/Audio/**` | `developer` (linha de áudio) | todos |
 | `Source/Course/**` | `developer` (conteúdo: co-own com `musician`) | todos |
-| `Source/UI/**` | `designer` | todos |
+| `Source/UI/**` | `ux-ui-designer` | todos |
 | `CMakeLists.txt`, `Source/Main.cpp` | `architect` | todos |
 | `Source/Data/**`, `tools/etl/**` | `data-engineer` | todos |
-| `.github/workflows/**`, `Dockerfile*`, `deploy/**` | `devops` | todos |
-| `docs/ROADMAP.md`, `docs/REQUIREMENTS.md` | `pm` | todos |
+| `.github/workflows/**`, `Dockerfile*`, `deploy/**` | `devops` (jobs de teste: co-own com `set`) | todos |
+| `tests/**` | `qa` (harness/infra: co-own com `set`) | todos |
+| `docs/ROADMAP.md` | `pm` | todos |
+| `docs/inbox/**` (fontes brutas: docx, e-mail) | `business-analyst` | todos |
+| `docs/REQUIREMENTS.md` | `business-analyst` (co-own com `pm`) | todos |
 | `docs/MUSIC.md` | `musician` (co-own com `pm`) | todos |
 | `docs/BACKLOG.md`, `docs/stories/**` | `po` | todos |
-| `docs/PLAN.md`, `docs/STATUS.md`, `docs/RISKS.md` | `project-manager` | todos |
-| `tests/**`, `docs/QA.md` | `qa` | todos |
+| `docs/RESEARCH.md` | `ux-researcher` | todos |
+| `docs/PLAN.md`, `docs/STATUS.md`, `docs/RISKS.md` | `engineering-manager` | todos |
+| `docs/PROCESS.md` | `scrum-master` | todos |
+| `docs/SECURITY.md` | `security-engineer` | todos |
+| `docs/QA.md` | `qa` | todos |
+| `docs/adr/**` | `architect` | todos |
 | `AGENTS.md` | todos (append em "Registro de decisões") | todos |
 
 Regra dura herdada do designer: quem não é dono de `Source/Audio/` ou
@@ -130,16 +138,22 @@ build entrega a linha exata de `target_sources` ao dono.
 
 | Agente | Arquivo | Dono de | Pergunta que responde |
 |---|---|---|---|
-| Product Manager | `.agents/agents/pm.md` | `docs/ROADMAP.md`, `docs/REQUIREMENTS.md`, KPIs | **Por quê / O quê** (macro) |
-| Músico Profissional | `.agents/agents/musician.md` | `docs/MUSIC.md` (co-own com PM) | **Está musicalmente correto?** |
-| Product Owner | `.agents/agents/po.md` | `docs/BACKLOG.md`, histórias | **O quê** (detalhe, critérios de aceite) |
-| Arquiteto de Software | `.agents/agents/architect.md` | `CMakeLists.txt`, `Source/Main.cpp`, decisões técnicas | **Como estruturar** |
+| Product Manager / Head de Produto | `.agents/agents/pm.md` | `docs/ROADMAP.md` (co-own `docs/REQUIREMENTS.md`), KPIs/OKRs | **Por quê / O quê** (macro, valor) |
+| Músico Profissional | `.agents/agents/musician.md` | `docs/MUSIC.md` (co-own com PM) | **Está musicalmente correto? E ensina?** |
+| Business Analyst | `.agents/agents/business-analyst.md` | `docs/REQUIREMENTS.md` (co-own com PM) | **Qual é a necessidade real (REQ-NNN)?** |
+| UX Researcher | `.agents/agents/ux-researcher.md` | `docs/RESEARCH.md` | **O problema existe? A jornada funciona?** |
+| UX/UI Designer | `.agents/agents/ux-ui-designer.md` | `Source/UI/**`, `design-references/**` | **Como se vê, se usa e se acessa?** |
+| Product Owner | `.agents/agents/po.md` | `docs/BACKLOG.md`, `docs/stories/**` | **O quê** (detalhe, critérios de aceite) |
+| Tech Lead | `.agents/agents/tech-lead.md` | (qualidade técnica; sem diretório próprio) | **É viável? Está bem desenhado e revisado?** |
+| Arquiteto de Software | `.agents/agents/architect.md` | `CMakeLists.txt`, `Source/Main.cpp`, `docs/adr/**` | **Como estruturar** |
+| Engineering Manager | `.agents/agents/engineering-manager.md` | `docs/PLAN.md`, `docs/STATUS.md`, `docs/RISKS.md` | **Capacidade, alocação, impedimentos** |
+| Scrum Master / Agile Coach | `.agents/agents/scrum-master.md` | `docs/PROCESS.md` | **O processo e o escopo estão claros?** |
+| Software Engineer | `.agents/agents/developer.md` | `Source/Audio/**` (e código geral) | **Construir** |
 | Data Engineer | `.agents/agents/data-engineer.md` | `Source/Data/**`, `tools/etl/**` | **Dados: capturar, limpar, governar** |
-| Project Manager | `.agents/agents/project-manager.md` | `docs/PLAN.md`, `docs/STATUS.md`, `docs/RISKS.md` | **Prazo, custo, risco** |
-| Desenvolvedor | `.agents/agents/developer.md` | `Source/Audio/**` (e código geral) | **Construir** |
-| QA Engineer | `.agents/agents/qa.md` | `tests/**`, `docs/QA.md` | **Prevenir falhas** |
-| DevOps | `.agents/agents/devops.md` | `.github/workflows/**`, infra | **Entregar automatizado** |
-| Designer | `.agents/agents/designer.md` | `Source/UI/**` | **Como se vê e se sente** |
+| QA Engineer | `.agents/agents/qa.md` | `tests/**` (co-own `set`), `docs/QA.md` | **Prevenir falhas; veredito de release** |
+| Software Engineer in Test (SET) | `.agents/agents/set.md` | harness e jobs de teste em `tests/**` e `.github/workflows/**` | **Automatizar teste em escala** |
+| Security Engineer | `.agents/agents/security-engineer.md` | `docs/SECURITY.md` | **Está seguro? É lícito?** |
+| DevOps | `.agents/agents/devops.md` | `.github/workflows/**`, `deploy/**`, infra | **Entregar automatizado** |
 
 ## 5. Protocolo de handoff (como os agentes conversam)
 
@@ -147,33 +161,42 @@ O trabalho flui em uma esteira. Cada etapa tem **entrada**, **saída** e um
 **artefato verificável** que destrava a próxima.
 
 ```
-PM + Músico (ROADMAP + MUSIC: o quê, musicalmente correto, KPIs)
-   └─> PO (BACKLOG, histórias + critérios de aceite)
-          └─> Arquiteto (decisões técnicas, ADR, esqueleto de build)
-                 └─> Developer / Data Engineer / Designer (código)
-                        └─> QA (testes, regressão, carga)
-                               └─> DevOps (CI/CD, deploy, observabilidade)
-   Project Manager observa tudo: prazo, custo, risco, capacidade.
+Músico + PM + Business Analyst + UX Researcher
+   (MUSIC + ROADMAP + REQUIREMENTS + RESEARCH: necessidade, valor, musical, evidência)
+      └─> PO (BACKLOG: histórias + critérios de aceite, vindos de REQ-NNN)
+             └─> Tech Lead (viabilidade + desenho técnico) ⇄ Arquiteto (ADR, build)
+                    └─> Software Engineer / Data Engineer / UX-UI Designer (código)
+                           └─> QA + SET (testes, regressão, carga, automação)
+                                  └─> Security Engineer (SAST/DAST, dependências, licença)
+                                         └─> DevOps (CI/CD, deploy, observabilidade)
+   Engineering Manager observa tudo: capacidade, alocação, impedimentos.
+   Scrum Master facilita o processo (planning, refinement, review, retro).
 ```
 
 Regras do handoff:
 
-1. **Nada entra em desenvolvimento sem critérios de aceite** escritos pelo PO.
-2. **Nada com dimensão musical entra sem revisão do músico** — o PM e o músico
-   ajustam o requisito juntos; a verdade musical fica em `docs/MUSIC.md`.
+1. **Nada entra em desenvolvimento sem critérios de aceite** escritos pelo PO,
+   rastreáveis a um `REQ-NNN` do Business Analyst.
+2. **Nada com dimensão musical entra sem revisão do músico** — o PM, o BA e o
+   músico ajustam o requisito juntos; a verdade musical fica em `docs/MUSIC.md`.
 3. **Nada entra em build sem decisão de arquitetura** quando toca estrutura,
-   dependência ou contrato entre módulos.
+   dependência ou contrato entre módulos, e sem o **veredito de viabilidade do
+   Tech Lead**.
 4. **Nada é considerado pronto sem evidência** (teste, build, log) anexada pelo
-   QA/DevOps.
+   QA/SET/DevOps.
 5. Ao terminar uma etapa, o agente **escreve o artefato no seu arquivo** e
    **adiciona uma linha no Registro de decisões** (seção 7) com: data, agente,
    decisão, impacto.
 6. Conflito de escopo se resolve **a favor do dono do arquivo**; quem discorda
-   abre uma nota em `docs/RISKS.md` (dono: Project Manager).
+   abre uma nota em `docs/RISKS.md` (dono: Engineering Manager).
+7. **Mudança que carrega código externo ou dado do usuário** (host VST3, parsing
+   de arquivo, telemetria) passa pelo Security Engineer antes do merge.
 
 ### Formato de uma história de usuário (padrão do PO)
 
 ```
+### [ID] [Título]  —  valor: A/M/B  —  tamanho: P/M/G  —  status: ready/draft
+Origem: REQ-NNN (docs/REQUIREMENTS.md)
 Como um [tipo de usuário], eu quero [fazer algo] para que eu possa [benefício].
 
 Critérios de aceite:
@@ -181,9 +204,11 @@ Critérios de aceite:
 - ...
 
 Pronto quando (DoD):
-- [ ] Código revisado via PR
-- [ ] Teste automatizado verde no CI
+- [ ] Veredito de viabilidade do Tech Lead (ready)
+- [ ] Código revisado via PR (Tech Lead)
+- [ ] Teste automatizado verde no CI (QA/SET)
 - [ ] Build sem avisos novos
+- [ ] Sem achado de segurança aberto (Security Engineer, quando aplicável)
 - [ ] Documentação/memória atualizada
 ```
 
@@ -191,10 +216,11 @@ Pronto quando (DoD):
 
 Uma entrega só é "pronta" quando:
 
-- [ ] Atende aos critérios de aceite do PO (evidência anexada).
+- [ ] Atende aos critérios de aceite do PO (evidência anexada) e rastreia um `REQ-NNN`.
 - [ ] Passa no build (`cmake --build build`) sem avisos novos.
-- [ ] Tem teste automatizado (quando houver lógica testável).
-- [ ] Passou por `code review` de outro agente (PR).
+- [ ] Tem teste automatizado (quando houver lógica testável) verde no CI.
+- [ ] Passou por `code review` do Tech Lead (PR).
+- [ ] Passou pelo Security Engineer quando carrega código externo, parsing de arquivo ou dado do usuário.
 - [ ] CI verde (`.github/workflows`).
 - [ ] `AGENTS.md` e o doc do módulo atualizados.
 
@@ -229,6 +255,9 @@ Uma entrega só é "pronta" quando:
 | 2026-11-03 | musician + developer | **Questionário do Módulo 1 (REQ-006)**: `Exercise::quiz` (`QuizQuestion`) e `QuizSession` (sessão pura, gate 90%); EX-1.1 virou "Questionário: conhecendo o instrumento" com as 7 questões de `Questionario_m1.pdf`, respondidas uma por tela no painel direito; explicações detalhadas do tópico A (partes da guitarra/violão) tiradas de `explica_painelEsquerdo.pdf`, com destaques e tabelas | Conteúdo das apostilas curadas vira exercício avaliável dentro do app; suíte em **122 checagens verdes** |
 | 2026-11-03 | devops | **Varredura de duplicatas nas apostilas**: as 21 apostilas da branch `adequacao` foram comparadas por hash LFS e por assinatura de imagem multi-página (páginas 0/25/50/75/última), pegando também PDFs digitalizados sem texto; 3 eram cópias exatas com sufixo `(1)` no nome; removidas no commit `b4f284c`, restando 18 apostilas únicas | Acervo sem repetição, uma de cada, sem perder nenhum título |
 | 2026-11-04 | devops + pm | **Merge do Módulo 1 em `test` e instalador de teste**: `feat/measurement-engine` mesclada em `test` com `--no-ff` (merge `4a434e3`; `test` era ancestral, sem conflitos); build Linux limpo e **122/122 testes verdes**; push disparou o `release.yml` e um `workflow_dispatch` com `commit_installer=true` publicou `instalador/Instalador CursoMusica.exe` na branch `test` (commit `956b80c`, ~1,9 MB, todos os módulos liberados). Backups `backup/pre-merge-modulo1-test` (cc06277) e `backup/feat-measurement-engine-839bc40` | Versão de teste com instalador Windows entregue na branch `test` (REQ-013); `main` intocado |
+| 2026-11-04 | orquestrador + todo o time | **Reorganização do time de agentes** (pedido do usuário + `musica.docx`): criados `business-analyst`, `ux-researcher`, `tech-lead`, `engineering-manager`, `scrum-master`, `security-engineer` e `set`; `designer.md` renomeado para `ux-ui-designer.md` (ganhou UX, protótipos, acessibilidade) e `project-manager.md` para `engineering-manager.md`; `musician` passa a levar a necessidade ao PM **e** ao BA e a auditar se o curso ensina; `pm` vira Head de Produto alimentado por BA + UX Researcher; `po` decompõe `REQ-NNN` com veredito de viabilidade do Tech Lead; handoff, DoD e mapa de propriedade atualizados em `AGENTS.md` §3–6 e em `.agents/README.md` | Time passa a cobrir descoberta (BA/UX), liderança técnica (Tech Lead), segurança (InfoSec), automação de teste (SET) e processo (Scrum Master); nenhum papel de produto perdido |
+| 2026-11-04 | business-analyst + musician + po | **Processamento do `musica.docx`** (fonte preservada em `docs/inbox/musica.docx`): elicitados 5 requisitos — REQ-019 (módulo abre em branco), REQ-020 (mantém tópico no mesmo módulo, limpa em outro), REQ-021 (exercício à direita, explicação no centro), REQ-022 (≥1 exercício por tópico), REQ-023 (classificação correta de entradas/saídas — bug VoiceMeeter Banana); decompostos em histórias CM-018..CM-021 no `docs/BACKLOG.md`, com critérios de aceite | Solicitação do cliente rastreada ponta a ponta (docx → REQ-NNN → história); CM-021 bloqueado por exigir Windows + VoiceMeeter |
+| 2026-11-04 | developer + ux-ui-designer + musician | **Ajustes do `musica.docx` implementados (CM-018..CM-021, branch `feat/modulo1-completo`)**: (REQ-019/020) abrir um módulo mostra só o contexto, o tópico só carrega no clique e a memória de tópico é por módulo — módulo já lido lista os tópicos de novo, módulo novo abre em branco; (REQ-021) o centro traz só a explicação e o exercício executável fica no painel direito; (REQ-022) criados EX-1.9 (sustenidos/bemóis/enarmonia, tópico C) e EX-1.10 (tonalidade/campo harmônico, tópico G), fechando ≥1 exercício por tópico A–I; (REQ-023) novo `AudioPortClassifier` + `AudioPortsPanel` que rotulam cada porta pela direção real do app, corrigindo o VoiceMeeter (nome escrito pela ótica do mixer). Suíte em **146 checagens verdes**; build Linux limpa | Os 5 requisitos do cliente ficam verificáveis; falta só a validação de REQ-023 no Windows com o VoiceMeeter instalado |
 
 ## 8. Convenções de código
 

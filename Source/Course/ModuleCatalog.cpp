@@ -293,6 +293,12 @@ namespace
             exercise ("EX-1.8", juce::String::fromUTF8 ("Contar e tocar na grade"),
                       juce::String::fromUTF8 ("Contar em voz alta (TÁ / TÁ-KI) e tocar a 6ª solta em semínimas na grade do metrônomo a 60 BPM."),
                       juce::String::fromUTF8 ("on_grid_ratio ≥ 0,75 nas batidas (REQ-015).")),
+            exercise ("EX-1.9", juce::String::fromUTF8 ("Sustenidos, bemóis e enarmonia"),
+                      juce::String::fromUTF8 ("Nomear a nota que falta e dizer quais nomes são o mesmo som (enarmonia)."),
+                      juce::String::fromUTF8 ("Acerto ≥90% nas questões de sustenidos, bemóis e enarmonia.")),
+            exercise ("EX-1.10", juce::String::fromUTF8 ("Tonalidade e campo harmônico"),
+                      juce::String::fromUTF8 ("Montar o campo harmônico maior de Dó e achar a relativa menor."),
+                      juce::String::fromUTF8 ("Acerto ≥90% nas questões de campo harmônico e círculo das quintas.")),
         };
 
         // Topic each exercise belongs to, so the right panel follows the topic
@@ -305,6 +311,8 @@ namespace
         m.exercises[5].lessonId = "F";   // CAGED shapes
         m.exercises[6].lessonId = "H";   // chord symbols
         m.exercises[7].lessonId = "I";   // rhythm on the grid
+        m.exercises[8].lessonId = "C";   // sharps / flats / enharmony
+        m.exercises[9].lessonId = "G";   // key organisation / harmonic field
 
         // EX-1.1 is the learning quiz of the module (Questionario_m1). Questions
         // are answered one at a time; the gate is the same 90% (REQ-009).
@@ -349,6 +357,57 @@ namespace
         m.exercises[3].chordPitchClasses = { 0, 4, 7 };                     // EX-1.4, first C
         m.exercises[4].chordPitchClasses = { 5, 9, 0 };                     // EX-1.5, F barre
         m.exercises[7].targets = notes ({ "E2" });                          // EX-1.8, on the grid
+
+        // EX-1.9 and EX-1.10 are quizzes on topics C and G, so every topic A..I
+        // has at least one exercise (REQ-022). Answered one at a time, like the
+        // module quiz, with the same 90% mark (REQ-009).
+        m.exercises[8].quiz = {
+            question ("Quantos semitons um sustenido (#) sobe a nota?",
+                      { "Meio-tom (um semitom)",
+                        "Um tom (dois semitons)",
+                        "Dois tons",
+                        "Uma oitava" }, 0),
+            question ("Sib está a que distância de Si?",
+                      { "Meio-tom acima",
+                        "Meio-tom abaixo",
+                        "Um tom abaixo",
+                        "Nenhuma: são a mesma nota" }, 1),
+            question ("Quais pares são enarmônicos (mesmo som, nomes diferentes)?",
+                      { "Fá# e Solb",
+                        "Dó e Dó#",
+                        "Mi e Fá",
+                        "Sol e Sol#" }, 0),
+            question ("Por que não existe Mi# nem Si# na escala natural?",
+                      { "Porque o intervalo Mi–Fá e Si–Dó já é de meio-tom",
+                        "Porque essas notas são graves demais",
+                        "Porque a guitarra não alcança essas notas",
+                        "Porque só existem bemóis" }, 0),
+            question ("Dó# é enarmônico de qual nota?",
+                      { "Ré", "Réb", "Si", "Dób" }, 1),
+            question ("Um bemol (b) faz o quê com a altura da nota?",
+                      { "Sobe meio-tom", "Desce meio-tom", "Não muda nada", "Dobra a duração" }, 1),
+        };
+
+        m.exercises[9].quiz = {
+            question ("Qual é o campo harmônico maior de Dó?",
+                      { "C – Dm – Em – F – G – Am – Bdim",
+                        "C – D – E – F – G – A – B",
+                        "Cm – Dm – Em – Fm – Gm – Am – Bdim",
+                        "C – Em – F – G – Am – Bdim – Dm" }, 0),
+            question ("No círculo das quintas, qual tonalidade vem logo depois de Dó?",
+                      { "Fá", "Sol", "Ré", "Si" }, 1),
+            question ("Qual é a relativa menor de Dó maior?",
+                      { "Lá menor (Am)", "Mi menor (Em)", "Ré menor (Dm)", "Si menor (Bm)" }, 0),
+            question ("A armadura de clave indica o quê?",
+                      { "O tempo do compasso",
+                        "Quantos sustenidos ou bemóis a tonalidade tem",
+                        "A digitação da mão direita",
+                        "O volume do metrônomo" }, 1),
+            question ("No campo harmônico maior, qual grau é o acorde dominante?",
+                      { "I", "IV", "V", "vi" }, 2),
+            question ("Ir de Dó para Fá no círculo das quintas acrescenta o quê?",
+                      { "Um sustenido", "Um bemol", "Nada", "Duas oitavas" }, 1),
+        };
 
         // The gate is a chord progression played on the grid (REQ-009, REQ-015).
         auto& gate = m.exercises.emplace_back (exercise (

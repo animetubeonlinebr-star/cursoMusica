@@ -11,6 +11,83 @@ Cada história cita o(s) requisito(s) que atende.
 
 ## Pronto para desenvolvimento (topo)
 
+### [CM-018] Módulo abre em branco; conteúdo só ao clicar no tópico — valor: H — tamanho: S — status: ready
+Requisito: REQ-019, REQ-020.
+Como um aluno de guitarra, eu quero que a área de conteúdo fique em branco ao
+abrir um módulo e mostre o conteúdo só quando eu clicar num tópico, para que eu
+escolha consciente o que estudar em vez de receber conteúdo automático.
+
+Critérios de aceite:
+- Dado o app aberto, quando clico em **Módulos** e seleciono um módulo, então o
+  painel central mostra só o contexto do módulo (título, objetivo) e **nenhum**
+  tópico carregado.
+- Dado o módulo aberto, quando clico no tópico "A. Partes da Guitarra e do
+  Violão", então a explicação do tópico é carregada no centro.
+- Dado que li um tópico do módulo A, quando volto ao módulo A, então o conteúdo
+  do tópico continua carregado.
+- Dado que li um tópico do módulo A, quando abro o módulo B, então o módulo B
+  fica **em branco** (nenhum tópico carregado).
+
+Dependências: `ModuleComponent` (estado de seleção por módulo). Hoje
+`itemOpennessChanged`/`itemClicked` chamam `selectTopic(number, 0)` — é isso que
+precisa deixar de acontecer no abrir.
+
+### [CM-019] Exercício no painel direito, explicação no centro — valor: H — tamanho: S — status: ready
+Requisito: REQ-021.
+Como um aluno de guitarra, eu quero ver o exercício a executar no painel da
+direita e apenas a explicação do proposto no centro, para que eu saiba o que
+tocar sem confundir a instrução com o executor.
+
+Critérios de aceite:
+- Dado um exercício selecionado, quando o painel central o demonstra, então ele
+  mostra **apenas** a explicação (objetivo, como fazer), sem o executor/controles
+  de execução.
+- Dado o mesmo exercício, então o **painel direito** é quem oferece o executor
+  (start/finish/metrônomo ou as opções do questionário).
+- Dado o estado atual, quando um exercício é demonstrado no centro, então nenhum
+  controle executável aparece no centro.
+
+Dependências: `PracticePanel` (já tem o executor), `ModuleComponent::paintExercise`.
+
+### [CM-020] Um exercício executável por tópico do Módulo 1 — valor: H — tamanho: L — status: draft
+Requisito: REQ-022 (com REQ-006/REQ-008). Conteúdo por **musician + pm +
+business-analyst**.
+Como um aluno de guitarra, eu quero ter ao menos um exercício prático para cada
+tópico do módulo, para que eu pratique o assunto daquele tópico e não apenas
+responda ao questionário.
+
+Critérios de aceite:
+- Dado o Módulo 1, quando abro cada um dos tópicos A–I, então cada tópico tem
+  **≥1 exercício executável** associado (não só o questionário EX-1.1).
+- Dado o exercício do tópico, então ele mede o desempenho (nota/acertos/grade)
+  pelo motor de medição (CM-008) e respeita o gate de 90%.
+- Dado o tópico, então o exercício cobre o assunto do tópico (validado pelo
+  musician).
+
+Dependências: curadoria de conteúdo (CM-012), catálogo (`ModuleCatalog.cpp`),
+motor de medição (CM-008).
+
+### [CM-021] Classificação correta de entradas/saídas de áudio — valor: H — tamanho: M — status: ready
+Requisito: REQ-023.
+Como um aluno que usa o VoiceMeeter Banana, eu quero ver minhas entradas na
+lista de *inputs* e minhas saídas na lista de *outputs*, para que eu selecione o
+dispositivo certo sem adivinhar.
+
+Critérios de aceite:
+- Dado o VoiceMeeter Banana instalado no Windows, quando abro **Settings >
+  Áudio**, então as **entradas** aparecem em *Input* e as **saídas** em *Output*
+  (sem inversão).
+- Dado qualquer backend (ASIO/WASAPI), então o rótulo de cada porta vem da
+  direção real do canal (`getInputChannelNames()`/`getOutputChannelNames()` do
+  `AudioIODevice`), não do nome bruto.
+- Dado o dispositivo selecionado, quando toco uma corda, então o medidor de
+  nível reage ao sinal de entrada (prova de que a porta escolhida é a captura).
+
+Dependências: `SettingsComponent`/`AudioEngine` (device manager).
+**Bloqueio:** validação exige Windows + VoiceMeeter Banana (ambiente Linux atual
+só valida compilação). Requer revisão do **security-engineer** (driver ASIO de
+terceiros).
+
 ### [CM-001] Afinador e medidor reais na UI — valor: H — tamanho: M — status: ready
 Requisito: REQ-001.
 Como um aluno de guitarra, eu quero ver a afinação e o nível reais do meu som na

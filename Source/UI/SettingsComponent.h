@@ -4,13 +4,15 @@
 
 #include "Audio/AudioEngine.h"
 #include "Audio/PluginHost.h"
+#include "UI/AudioPortsPanel.h"
 #include "UI/Design/Panel.h"
 
 namespace cursomusica
 {
 
 // Settings view: audio device configuration and the VST3 input chain.
-class SettingsComponent final : public juce::Component
+class SettingsComponent final : public juce::Component,
+                                private juce::ChangeListener
 {
 public:
     SettingsComponent (AudioEngine& engine, PluginHost& host);
@@ -31,6 +33,9 @@ private:
     void openEditorForSelectedChainPlugin();
     void refreshChainList();
 
+    // Keeps the port list in step with the selected device (REQ-023).
+    void changeListenerCallback (juce::ChangeBroadcaster* source) override;
+
     AudioEngine& audioEngine;
     PluginHost& pluginHost;
 
@@ -40,6 +45,7 @@ private:
     // Audio tab.
     Panel audioPanel { "Audio device" };
     std::unique_ptr<juce::AudioDeviceSelectorComponent> deviceSelector;
+    AudioPortsPanel audioPortsPanel;
 
     // Plugin tab.
     Panel pluginPanel { "VST3 plugins" };

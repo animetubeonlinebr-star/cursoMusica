@@ -37,6 +37,7 @@ target_sources(CursoMusica PRIVATE
     Source/Audio/PluginChain.cpp
     Source/Audio/TuningSettings.cpp
     Source/Audio/Metronome.cpp
+    Source/Audio/AudioPortClassifier.cpp
     Source/Course/NoteMath.cpp
     Source/Course/ExerciseEvaluator.cpp
     Source/Course/TempoGrid.cpp
@@ -51,6 +52,7 @@ target_sources(CursoMusica PRIVATE
     Source/UI/TunerComponent.cpp
     Source/UI/ModuleComponent.cpp
     Source/UI/PracticePanel.cpp
+    Source/UI/AudioPortsPanel.cpp
     Source/UI/DevicePanel.cpp
     Source/UI/TransportPanel.cpp
     Source/UI/SettingsComponent.cpp)
@@ -142,7 +144,8 @@ target_sources(CursoMusicaTests PRIVATE
     Source/Course/TempoGrid.cpp
     Source/Course/PracticeSession.cpp
     Source/Course/QuizSession.cpp
-    Source/Course/ModuleCatalog.cpp)
+    Source/Course/ModuleCatalog.cpp
+    Source/Audio/AudioPortClassifier.cpp)
 
 target_include_directories(CursoMusicaTests PRIVATE Source)
 
