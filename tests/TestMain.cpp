@@ -9,6 +9,7 @@
 #include "Course/NoteMath.h"
 #include "Course/PracticeSession.h"
 #include "Course/ProgressionRule.h"
+#include "Course/QuizSession.h"
 #include "Course/TempoGrid.h"
 
 // Minimal dependency-free test runner for the pure course logic (QA).
@@ -128,6 +129,58 @@ namespace
         checkClose (none, 0.0, 1e-9, "notes off the grid reach no BPM");
     }
 
+    void testQuizSession()
+    {
+        std::cout << "QuizSession\n";
+        using namespace cursomusica::course;
+
+        cursomusica::Exercise quiz;
+        quiz.id = "EX-1.1";
+        quiz.quiz = {
+            { "Q1", { "a", "b", "c" }, 1 },
+            { "Q2", { "a", "b", "c" }, 2 },
+            { "Q3", { "a", "b", "c" }, 0 },
+        };
+
+        QuizSession session;
+        session.start (quiz);
+        check (session.isRunning(), "quiz starts running");
+        check (session.getNumQuestions() == 3, "quiz exposes its three questions");
+        check (session.currentQuestion() != nullptr, "first question is on screen");
+        check (session.currentQuestion()->prompt == "Q1", "first question is Q1");
+
+        session.answer (1);   // correct
+        check (session.getState().answered == 1, "one question answered");
+        check (session.getState().correct == 1, "the correct answer scores");
+        check (session.currentQuestion()->prompt == "Q2", "advances to the next question");
+
+        session.answer (0);   // wrong
+        session.answer (0);   // correct (Q3)
+
+        const auto& state = session.getState();
+        check (! state.running, "quiz stops after the last question");
+        check (state.finished, "quiz is finished");
+        check (state.correct == 2 && state.answered == 3, "two of three correct");
+        checkClose (state.accuracy, 2.0 / 3.0, 1e-6, "accuracy is 2/3");
+        check (! state.passed, "2/3 fails the 90% gate");
+        check (session.currentQuestion() == nullptr, "no question left on screen");
+
+        // A perfect run passes the same gate as the playable exercises.
+        QuizSession perfect;
+        perfect.start (quiz);
+        perfect.answer (1);
+        perfect.answer (2);
+        perfect.answer (0);
+        checkClose (perfect.getState().accuracy, 1.0, 1e-9, "perfect quiz is 100%");
+        check (perfect.getState().passed, "perfect quiz passes the gate");
+
+        // An empty quiz never runs.
+        cursomusica::Exercise empty;
+        QuizSession none;
+        none.start (empty);
+        check (! none.isRunning(), "a quiz with no questions does not run");
+    }
+
     void testPracticeSession()
     {
         std::cout << "PracticeSession\n";
@@ -235,6 +288,27 @@ void testModuleCatalog()
     check (hasGate, "module 1 has a gate exercise");
     check (m1->exercises.size() == 9, "module 1 lists EX-1.1..EX-1.8 plus the gate");
 
+    // EX-1.1 is the learning quiz (Questionario_m1), answered one at a time.
+    check (m1->exercises.front().isQuiz(), "EX-1.1 is a multiple-choice quiz");
+    check (m1->exercises.front().quiz.size() == 7, "the quiz has seven questions");
+    for (const auto& q : m1->exercises.front().quiz)
+        check (q.correctIndex >= 0 && q.correctIndex < q.options.size(),
+               "every quiz question has a valid answer key");
+    check (m1->exercises.front().lessonId == "A", "the quiz belongs to topic A");
+
+    // Every exercise is tied to a topic so the right panel follows the left.
+    for (const auto& e : m1->exercises)
+        check (e.lessonId.isNotEmpty(), "exercise " + e.id + " is tied to a topic");
+
+    // The detailed explanation backing topic A (the full text of the apostila).
+    const auto& topicA = m1->lessons.front();
+    check (! topicA.detail.empty(), "topic A carries a detailed explanation");
+    bool hasTable = false;
+    for (const auto& item : topicA.detail)
+        if (item.kind == cursomusica::ContentKind::table)
+            hasTable = true;
+    check (hasTable, "topic A renders at least one table");
+
     for (const auto& m : modules)
         if (m.number > 1)
             check (! m.implemented, "modules 2..20 are still placeholders");
@@ -245,6 +319,7 @@ int main()
     testNoteMath();
     testEvaluator();
     testTempoGrid();
+    testQuizSession();
     testPracticeSession();
     testProgression();
     testModuleCatalog();

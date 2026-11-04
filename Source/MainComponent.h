@@ -44,14 +44,14 @@ private:
 
     juce::Label titleLabel;
     juce::Label subtitleLabel;
-    juce::TextButton modulesButton { "Modules" };
-    juce::TextButton tunerButton { "Tuner" };
-    juce::TextButton settingsButton { "Settings" };
+    juce::TextButton modulesButton { juce::String::fromUTF8 ("Módulos") };
+    juce::TextButton tunerButton { juce::String::fromUTF8 ("Afinador") };
+    juce::TextButton settingsButton { juce::String::fromUTF8 ("Configurações") };
 
     TunerDisplay tunerDisplay;
     DevicePanel devicePanel;
     TransportPanel transportPanel;
-    Panel studyReferencePanel { "Study material" };
+    Panel studyReferencePanel { juce::String::fromUTF8 ("Material de estudo") };
     juce::Label referenceLabel;
 
     std::unique_ptr<SettingsComponent> settings;

@@ -571,6 +571,20 @@ tabela anterior usava 7 letras e não cobria sustenidos/bemóis nem rítmica. Es
 mapa é o que o catálogo registra por módulo (`CourseModule::sources`, exibido no
 app).
 
+**Detalhamento do tópico A e questionário (revisão de 2026-11-03).** O tópico A
+(partes da guitarra e do violão) ganhou a explicação completa de
+`explica_painelEsquerdo.pdf` (16 páginas, anexado à branch `adequacao`), com
+destaques e duas tabelas (nomes das partes por região e função). O
+`Questionario_m1.pdf` virou o exercício **EX-1.1 "Questionário: conhecendo o
+instrumento"**, com as 7 questões do teste de aprendizagem respondidas uma por
+tela no painel direito e gate de 90% (`QuizSession`).
+
+**Acervo sem repetição (2026-11-03).** As apostilas da branch `adequacao` foram
+varridas por hash LFS e por assinatura de imagem multi-página (páginas
+0/25/50/75/última), o que também pega PDFs digitalizados sem texto. Três eram
+cópias exatas com sufixo `(1)` no nome e foram removidas (`b4f284c`); o acervo
+fica com **18 apostilas únicas**, uma de cada.
+
 ## 1.2 Teoria apresentada no módulo
 
 ### Bloco A — Partes do instrumento

@@ -19,7 +19,7 @@ MainComponent::MainComponent()
     titleLabel.setColour (juce::Label::textColourId, th::colour::textPrimary);
     addAndMakeVisible (titleLabel);
 
-    subtitleLabel.setText ("Guitar study with real-time audio analysis", juce::dontSendNotification);
+    subtitleLabel.setText (juce::String::fromUTF8 ("Estudo de guitarra com análise de áudio em tempo real"), juce::dontSendNotification);
     subtitleLabel.setFont (th::type::makeFont (th::type::body));
     subtitleLabel.setColour (juce::Label::textColourId, th::colour::textSecondary);
     addAndMakeVisible (subtitleLabel);
@@ -39,7 +39,7 @@ MainComponent::MainComponent()
 
     tunerDisplay.setReferenceHz (tuningSettings.getReferenceHz());
 
-    referenceLabel.setText ("No material loaded", juce::dontSendNotification);
+    referenceLabel.setText (juce::String::fromUTF8 ("Nenhum material carregado"), juce::dontSendNotification);
     referenceLabel.setFont (th::type::makeFont (th::type::body));
     referenceLabel.setColour (juce::Label::textColourId, th::colour::textSecondary);
     referenceLabel.setJustificationType (juce::Justification::centredLeft);

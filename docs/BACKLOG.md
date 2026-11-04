@@ -228,6 +228,10 @@ Progresso (2026-11-02, Módulo 1):
 - [x] Lacuna de conteúdo fechada: **bloco I — Rítmica** (pulsação, figuras,
   contagem TÁ/TÁ-KI), extraído do capítulo "Rítmica" de `pdf-fraseado-melodico`;
   sustenta o `on_grid_ratio` do gate (REQ-015).
+- [x] Tópico A detalhado a partir de `explica_painelEsquerdo.pdf` (16 páginas);
+  `Questionario_m1.pdf` virou o exercício **EX-1.1** (7 questões, gate 90%).
+- [x] Apostilas da branch `adequacao` varridas por duplicatas (hash LFS +
+  assinatura de imagem); 3 cópias `(1)` removidas, 18 apostilas únicas.
 - [ ] Módulos 2..20: mesma revisão (owner: musician) quando o conteúdo for escrito.
 - [ ] A avaliação detecta se o pattern ensinado foi usado (CM-015).
 
