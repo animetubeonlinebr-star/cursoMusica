@@ -16,12 +16,16 @@ do repositório (commits, CI, resultados de QA), nunca de otimismo.
   (`QuizSession`, gate 90%). O motor de medição (`NoteMath`, `ExerciseEvaluator`, `TempoGrid`,
   `PracticeSession`) e o metrônomo RT-safe (CM-014) medem a execução; ao atingir
   **≥90%** o Módulo 2 desbloqueia e o resultado é persistido (`ProgressStore`).
-- **Métricas:** suíte de lógica pura com **122 checagens, 100% verdes**, rodando no
+- **Métricas:** suíte de lógica pura com **146 checagens, 100% verdes**, rodando no
   CI (`ctest` no job Linux). Velocity/Lead Time ainda sem baseline.
 - **Blockers:** nenhum para M1. Pendente para M2+: decisão D4 (estratégia de
   síntese) — owner: architect.
 - **Riscos (top 3):** R-10 (avaliação de improvisação injusta), R-13 (meta de BPM
   mal calibrada), R-12 (assinatura do instalador). R-08 condicional.
+- **Ajustes do `musica.docx` (REQ-019..023):** implementados e publicados na
+  branch `test` (merge `3603ee6`); instalador de teste em
+  `instalador/Instalador CursoMusica.exe` (commit `d031d86`). Falta validar
+  REQ-023 no Windows com o VoiceMeeter Banana instalado.
 - **Próximo:** M2 (Módulos 2–7 do currículo) e ligar a UI principal à engine
   (CM-001). Avaliação de improvisação fica para M2b.
 
@@ -29,6 +33,7 @@ do repositório (commits, CI, resultados de QA), nunca de otimismo.
 
 | Ciclo | Milestone | Resultado | Evidência |
 |---|---|---|---|
+| 2026-11-04 | M1 | Ajustes do `musica.docx` (REQ-019..023) publicados na branch `test` com instalador de teste | merge `3603ee6`; instalador commit `d031d86`; 146/146 testes |
 | 2026-11-02 | M1 | Módulo 1 jogável + gate ≥90% com desbloqueio persistido + pattern/links REQ-007 | commit do Módulo 1 na branch `feat/measurement-engine`; 85/85 testes |
 | 2026-11-02 | M0 | Agentes + memória compartilhada criados | commits na branch `feat/multi-agent-framework` |
 | 2026-11-02 | M0 | Requisitos de sistema formalizados (REQ-001..REQ-014) e backlog/ADRs derivados | `docs/REQUIREMENTS.md`, `docs/adr/0002`, `docs/adr/0003` |
