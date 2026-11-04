@@ -55,6 +55,15 @@ public:
         repaint();
     }
 
+    // The module overview lists its topics only after the student has read one
+    // there (REQ-020): a module never read opens blank of lesson content
+    // (REQ-019), a module already read keeps its topic data loaded.
+    void setOverviewLessonsVisible (bool visible)
+    {
+        showOverviewLessons = visible;
+        repaint();
+    }
+
     int getRequiredHeight() const
     {
         if (current == nullptr)
@@ -69,12 +78,14 @@ public:
         if (currentTopic != nullptr)
             return height + topicDetailHeight (width) + 40;
 
-        for (const auto& lesson : current->lessons)
-            height += 22 + lessonSummaryHeight (lesson, width);
+        // No topic selected: a module never read carries its context only, so the
+        // centre opens blank of lesson content (REQ-019). A module already read
+        // lists its topics again when the student returns to it (REQ-020).
+        height += 44 + th::spacing::sm;
 
-        height += 30;
-        for (const auto& exercise : current->exercises)
-            height += 22 + textHeight (th::type::makeFont (th::type::body), exercise.goal, width);
+        if (showOverviewLessons)
+            for (const auto& lesson : current->lessons)
+                height += lessonSummaryHeight (lesson, width);
 
         if (! current->caged.empty())
             height += 24 + 40 * (int) current->caged.size() + th::spacing::sm;
@@ -155,15 +166,9 @@ private:
         height += 20 + textHeight (th::type::makeFont (th::type::body), currentExercise->goal, width) + 8;
         height += 20 + textHeight (th::type::makeFont (th::type::body), currentExercise->check, width) + 8;
 
-        if (! currentExercise->quiz.empty())
-            height += 22;
-        for (const auto& q : currentExercise->quiz)
-        {
-            height += textHeight (th::type::makeFont (th::type::body, true), q.prompt, width) + 6;
-            for (const auto& option : q.options)
-                height += textHeight (th::type::makeFont (th::type::body), option, width - 24) + 2;
-            height += th::spacing::sm;
-        }
+        // The exercise card only explains what was proposed (REQ-021); the
+        // playable quiz lives in the right pane.
+        height += 36 + th::spacing::sm;
         return height;
     }
 
@@ -199,46 +204,34 @@ private:
 
     void paintOverview (juce::Graphics& g, juce::Rectangle<int> bounds, const CourseModule& m)
     {
-        for (const auto& lesson : m.lessons)
-        {
-            g.setColour (th::colour::accent);
-            g.setFont (th::type::makeFont (th::type::body, true));
-            g.drawText (lesson.id + ". " + lesson.title, bounds.removeFromTop (22),
-                        juce::Justification::centredLeft, false);
+        // A module never read shows only its own context, so the centre opens
+        // "blank" of lesson content (REQ-019). Once the student has read a topic
+        // in it, returning to the module lists the topics again (REQ-020).
+        g.setColour (th::colour::textSecondary);
+        g.setFont (th::type::makeFont (th::type::body));
+        g.drawFittedText (juce::String::fromUTF8 (
+                              "Selecione um tópico à esquerda para ler a explicação. "
+                              "Os exercícios de cada tópico ficam no painel de prática, à direita."),
+                          bounds.removeFromTop (44), juce::Justification::topLeft, 3);
 
-            g.setColour (th::colour::textSecondary);
-            g.setFont (th::type::makeFont (th::type::body));
-            for (const auto& paragraph : lesson.paragraphs)
+        if (showOverviewLessons)
+            for (const auto& lesson : m.lessons)
             {
-                const int height = textHeight (th::type::makeFont (th::type::body), paragraph, bounds.getWidth());
-                g.drawFittedText (paragraph, bounds.removeFromTop (height),
-                                  juce::Justification::topLeft, 4);
-            }
-            bounds.removeFromTop (th::spacing::sm);
-        }
-
-        if (! m.exercises.empty())
-        {
-            g.setColour (th::colour::textPrimary);
-            g.setFont (th::type::makeFont (th::type::body, true));
-            g.drawText (juce::String::fromUTF8 ("Exercícios"), bounds.removeFromTop (30),
-                        juce::Justification::centredLeft, false);
-
-            for (const auto& exercise : m.exercises)
-            {
-                g.setColour (th::colour::accentAlt);
+                g.setColour (th::colour::accent);
                 g.setFont (th::type::makeFont (th::type::body, true));
-                g.drawText (exercise.id + " — " + exercise.title, bounds.removeFromTop (20),
+                g.drawText (lesson.id + ". " + lesson.title, bounds.removeFromTop (22),
                             juce::Justification::centredLeft, false);
 
                 g.setColour (th::colour::textSecondary);
                 g.setFont (th::type::makeFont (th::type::body));
-                const int height = textHeight (th::type::makeFont (th::type::body), exercise.goal, bounds.getWidth());
-                g.drawFittedText (exercise.goal, bounds.removeFromTop (height),
-                                  juce::Justification::topLeft, 2);
+                for (const auto& paragraph : lesson.paragraphs)
+                {
+                    const int height = textHeight (th::type::makeFont (th::type::body), paragraph, bounds.getWidth());
+                    g.drawFittedText (paragraph, bounds.removeFromTop (height),
+                                      juce::Justification::topLeft, 4);
+                }
                 bounds.removeFromTop (th::spacing::sm);
             }
-        }
 
         if (! m.caged.empty())
         {
@@ -463,37 +456,21 @@ private:
                           juce::Justification::topLeft, 3);
         bounds.removeFromTop (th::spacing::md);
 
-        if (exercise.quiz.empty())
-            return;
-
-        g.setColour (th::colour::accentAlt);
-        g.setFont (th::type::makeFont (th::type::body, true));
-        g.drawText (juce::String::fromUTF8 ("Questionário"), bounds.removeFromTop (22),
-                    juce::Justification::centredLeft, false);
-
-        for (const auto& q : exercise.quiz)
-        {
-            g.setColour (th::colour::textPrimary);
-            g.setFont (th::type::makeFont (th::type::body, true));
-            g.drawFittedText (q.prompt,
-                              bounds.removeFromTop (textHeight (th::type::makeFont (th::type::body, true), q.prompt, bounds.getWidth())),
-                              juce::Justification::topLeft, 2);
-
-            g.setFont (th::type::makeFont (th::type::body));
-            for (const auto& option : q.options)
-            {
-                auto row = bounds.removeFromTop (textHeight (th::type::makeFont (th::type::body), option, bounds.getWidth() - 24));
-                g.setColour (th::colour::textSecondary);
-                g.drawFittedText (option, row.reduced (16, 0), juce::Justification::topLeft, 2);
-                bounds.removeFromTop (2);
-            }
-            bounds.removeFromTop (th::spacing::sm);
-        }
+        // Only the explanation of what was proposed lives here (REQ-021). The
+        // exercise itself — the quiz, its options and the live measurement — is
+        // run in the right pane, so the centre never duplicates the controls.
+        g.setColour (th::colour::textDisabled);
+        g.setFont (th::type::makeFont (th::type::body));
+        g.drawFittedText (juce::String::fromUTF8 (
+                              "Responda no painel de prática, à direita. "
+                              "Aqui fica só a explicação do que foi proposto."),
+                          bounds.removeFromTop (36), juce::Justification::topLeft, 2);
     }
 
     const CourseModule* current = nullptr;
     const LessonBlock* currentTopic = nullptr;
     const Exercise* currentExercise = nullptr;
+    bool showOverviewLessons = false;
     juce::String lockedMessage;
 };
 
@@ -512,7 +489,15 @@ public:
 
     void itemSelectionChanged (bool isNowSelected) override
     {
-        if (isNowSelected)
+        if (isNowSelected && ! ownerRef.suppressTreeCallbacks)
+            ownerRef.selectTopic (module, index);
+    }
+
+    // A click always loads the topic, even when the item was already selected
+    // (the module view pre-highlights the last topic read, REQ-020).
+    void itemClicked (const juce::MouseEvent&) override
+    {
+        if (! ownerRef.suppressTreeCallbacks)
             ownerRef.selectTopic (module, index);
     }
 
@@ -557,8 +542,12 @@ public:
 
     void itemOpennessChanged (bool isNowOpen) override
     {
-        if (isNowOpen)
-            ownerRef.selectTopic (number, 0);
+        // Opening a module reveals its topics but must not load one by itself
+        // (REQ-019): the centre stays on the module context until a topic is
+        // clicked. Re-opening a module restores the topic last read in it
+        // (REQ-020); the memory is per module, so it survives collapsing.
+        if (isNowOpen && ! ownerRef.suppressTreeCallbacks)
+            ownerRef.showModule (number);
     }
 
     void itemClicked (const juce::MouseEvent&) override
@@ -566,15 +555,25 @@ public:
         if (! implemented)
             return;
 
+        // The first click expands the module (topics appear, centre still empty);
+        // the second collapses it and returns to the module view. Selecting a
+        // topic is what loads the content.
         if (isOpen())
+        {
             setOpen (false);
+
+            if (! ownerRef.suppressTreeCallbacks)
+                ownerRef.showModule (number);
+        }
         else
-            ownerRef.selectTopic (number, 0);
+        {
+            setOpen (true);
+        }
     }
 
     void itemSelectionChanged (bool isNowSelected) override
     {
-        if (isNowSelected)
+        if (isNowSelected && ! ownerRef.suppressTreeCallbacks)
             ownerRef.showModule (number);
     }
 
@@ -675,10 +674,14 @@ ModuleComponent::ModuleComponent (AudioEngine& engine)
 
     buildTree();
 
-    // Open on the first module so its topics are visible immediately.
+    // Select and expand the first module so its topics are visible, but do not
+    // load one: the centre starts on the module context only (REQ-019).
     if (subjectRoot != nullptr && subjectRoot->getNumSubItems() > 0)
         if (auto* first = subjectRoot->getSubItem (0))
+        {
+            first->setOpen (true);
             first->setSelected (true, true);
+        }
 
     startTimerHz (20); // drains detected notes while an exercise runs
 }
@@ -743,8 +746,28 @@ void ModuleComponent::showModule (int number)
     selection = {};
     selection.module = unlocked ? module : nullptr;
 
+    const int remembered = (unlocked && module != nullptr) ? recalledTopic (number) : -1;
+    const bool hasMemory = module != nullptr && remembered >= 0
+                             && remembered < (int) module->lessons.size();
+
+    // Opening a module never auto-loads a topic: the centre stays on the module
+    // context (REQ-019). A module already read lists its topics again, and the
+    // right pane keeps that topic's exercises (REQ-020); a module never read has
+    // no memory and stays blank of lesson content.
+    contentView->setOverviewLessonsVisible (hasMemory);
+
     if (practicePanel != nullptr)
+    {
         practicePanel->setModule (unlocked ? module : nullptr);
+
+        if (hasMemory)
+            practicePanel->setTopicFilter (module->lessons[(size_t) remembered].id);
+    }
+
+    // Highlight the remembered topic in the tree without loading it, so the
+    // student sees where they stopped while the centre stays on the overview.
+    if (hasMemory)
+        restoreTopicInTree (number, remembered);
 
     updateContent();
 
@@ -779,10 +802,46 @@ void ModuleComponent::selectTopic (int moduleNumber, int topicIndex)
     selection.topic = &module->lessons[(size_t) topicIndex];
     selection.exercise = nullptr;
 
+    // The student read this topic, so the module now remembers it (REQ-020).
+    rememberTopic (moduleNumber, topicIndex);
+
     if (practicePanel != nullptr)
         practicePanel->setTopicFilter (module->lessons[(size_t) topicIndex].id);
 
     updateContent();
+}
+
+void ModuleComponent::rememberTopic (int moduleNumber, int topicIndex)
+{
+    lastTopicPerModule[moduleNumber] = topicIndex;
+}
+
+int ModuleComponent::recalledTopic (int moduleNumber) const
+{
+    const auto it = lastTopicPerModule.find (moduleNumber);
+    return it == lastTopicPerModule.end() ? -1 : it->second;
+}
+
+void ModuleComponent::restoreTopicInTree (int moduleNumber, int topicIndex)
+{
+    if (subjectRoot == nullptr)
+        return;
+
+    const juce::ScopedValueSetter<bool> guard (suppressTreeCallbacks, true);
+
+    for (int i = 0; i < subjectRoot->getNumSubItems(); ++i)
+    {
+        if (auto* moduleItem = dynamic_cast<SubjectTreeItem*> (subjectRoot->getSubItem (i)))
+        {
+            if (moduleItem->getModuleNumber() != moduleNumber)
+                continue;
+
+            if (auto* topicItem = moduleItem->getSubItem (topicIndex))
+                topicItem->setSelected (true, true);
+
+            return;
+        }
+    }
 }
 
 void ModuleComponent::showExercise (const Exercise* exercise)

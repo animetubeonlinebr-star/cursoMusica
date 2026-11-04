@@ -185,11 +185,11 @@ conteúdo (REQ-006), não só de código.
 | REQ-016 | musician | `docs/MUSIC.md` | catalogado (IDs PTN-*) |
 | REQ-017 | developer + designer | `Source/UI/TunerComponent.*`, `Source/Audio/TuningSettings.*` | **implementado** |
 | REQ-018 | developer + designer + musician | `Source/Course/**`, `Source/UI/ModuleComponent.*`, ADR 0005 | **implementado (Módulo 1)** |
-| REQ-019 | developer + ux-ui-designer | `Source/UI/ModuleComponent.*` | pendente |
-| REQ-020 | developer | `Source/UI/ModuleComponent.*` | pendente |
-| REQ-021 | developer + ux-ui-designer | `Source/UI/PracticePanel.*`, `Source/UI/ModuleComponent.*` | pendente |
-| REQ-022 | musician + pm + business-analyst + developer | `Source/Course/ModuleCatalog.cpp` | pendente |
-| REQ-023 | developer + security-engineer | `Source/UI/SettingsComponent.*`, `Source/Audio/AudioEngine.*` | pendente (validar no Windows) |
+| REQ-019 | developer + ux-ui-designer | `Source/UI/ModuleComponent.*` | **implementado** |
+| REQ-020 | developer | `Source/UI/ModuleComponent.*` | **implementado** |
+| REQ-021 | developer + ux-ui-designer | `Source/UI/PracticePanel.*`, `Source/UI/ModuleComponent.*` | **implementado** |
+| REQ-022 | musician + pm + business-analyst + developer | `Source/Course/ModuleCatalog.cpp` | **implementado (Módulo 1)** |
+| REQ-023 | developer + security-engineer | `Source/Audio/AudioPortClassifier.*`, `Source/UI/AudioPortsPanel.*`, `Source/UI/SettingsComponent.*` | **implementado** (validar no Windows com VoiceMeeter) |
 
 **Detalhe de REQ-018:** o sistema apresenta os **módulos do curso** dentro do
 software, com a **explicação antes de qualquer desafio** (REQ-003) e a lista de

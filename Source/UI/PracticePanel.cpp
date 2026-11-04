@@ -81,6 +81,7 @@ PracticePanel::~PracticePanel() = default;
 void PracticePanel::setModule (const CourseModule* module)
 {
     currentModule = module;
+    topicFilter = {};
     selectedExerciseIndex = 0;
     session = {};
     quiz = {};
