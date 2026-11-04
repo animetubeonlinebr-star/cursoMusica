@@ -118,6 +118,7 @@ quando precisa, ele **pede** ao dono (ver protocolo de handoff, seção 5).
 | `.github/workflows/**`, `Dockerfile*`, `deploy/**` | `devops` (jobs de teste: co-own com `set`) | todos |
 | `tests/**` | `qa` (harness/infra: co-own com `set`) | todos |
 | `docs/ROADMAP.md` | `pm` | todos |
+| `docs/inbox/**` (fontes brutas: docx, e-mail) | `business-analyst` | todos |
 | `docs/REQUIREMENTS.md` | `business-analyst` (co-own com `pm`) | todos |
 | `docs/MUSIC.md` | `musician` (co-own com `pm`) | todos |
 | `docs/BACKLOG.md`, `docs/stories/**` | `po` | todos |
