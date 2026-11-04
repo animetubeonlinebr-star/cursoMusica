@@ -1,9 +1,9 @@
 # REQUIREMENTS — CursoMusica
 
-Dono: **pm** (requisitos de produto) em conjunto com o **musician** (requisitos
-musicais). Cada requisito tem um ID estável e rastreável: o PO cria histórias a
-partir daqui, o QA valida contra a coluna de verificação, o arquiteto decide a
-implementação.
+Dono: **business-analyst** (elicitação e IDs) em conjunto com o **pm**
+(requisitos de produto) e o **musician** (requisitos musicais). Cada requisito
+tem um ID estável e rastreável: o PO cria histórias a partir daqui, o QA valida
+contra a coluna de verificação, o arquiteto decide a implementação.
 
 Legenda: **MoSCoW** = Must / Should / Could / Won't (nesta fase).
 
@@ -134,6 +134,35 @@ A decisão de arquitetura (incluindo o trade-off latência × síntese) fica no
 - desinstalador que remove o que instalou;
 - assinatura de código (quando houver certificado) para evitar aviso do Windows.
 
+## H. Ajustes solicitados pelo cliente (fonte: `docs/inbox/musica.docx`)
+
+Fonte: `docs/inbox/musica.docx` (solicitação do usuário/cliente, 2026-11-04).
+Elicitação: **business-analyst**, com revisão do **musician** (dimensão musical)
+e do **ux-researcher** (jornada). Requisitos de produto (necessidade), não de
+solução.
+
+| ID | Requisito | MoSCoW | Verificação |
+|---|---|---|---|
+| REQ-019 | Ao abrir um módulo, a área de conteúdo inicia **em branco** (apenas o contexto do módulo), sem carregar automaticamente o conteúdo de nenhum tópico; o conteúdo só aparece quando o aluno **clica em um tópico** | Must | abrir módulo → conteúdo do tópico **não** exibido; clicar tópico → exibido |
+| REQ-020 | O sistema **mantém o conteúdo do tópico carregado** ao retornar ao mesmo módulo; mas, se o aluno abrir **outro módulo**, a área de conteúdo volta a ficar **em branco** | Must | módulo A→tópico→módulo A mantém; módulo A→tópico→módulo B → B em branco |
+| REQ-021 | No estudo prático, o **painel lateral (direito)** apresenta o **exercício executável** (o que se toca/executa) e o **painel central** apresenta **apenas a explicação** do que foi proposto | Must | painel direito = exercício; painel central = explicação, sem o executor |
+| REQ-022 | O sistema oferece **≥1 exercício por tópico** do módulo, cobrindo o assunto daquele tópico, para o aluno praticar (não apenas o questionário) | Must | todo tópico tem ≥1 exercício executável próprio |
+| REQ-023 | A **lista de dispositivos de áudio** classifica cada porta na categoria correta: **entradas de captura** em *inputs* e **saídas de reprodução** em *outputs* (hoje o VoiceMeeter Banana aparece invertido) | Must | com VoiceMeeter Banana instalado, entradas em Input e saídas em Output |
+
+**Nota de elicitação (BA).** O item de "módulo sem conteúdo" é um problema de
+*jornada/UX*, não de dados: o catálogo tem conteúdo, mas o app o carrega no
+abrir. O item do VoiceMeeter é um **bug de classificação** de portas: o
+`juce::AudioDeviceSelectorComponent` deriva os rótulos das flags de canal do
+driver e, para o driver ASIO virtual do VoiceMeeter, a convenção de captura/
+reprodução fica invertida. **Vetor técnico:** usar
+`AudioIODevice::getInputChannelNames()` / `getOutputChannelNames()` e o
+`AudioIODeviceType` correto para rotular, em vez de confiar no nome bruto do
+canal — investigar com o VoiceMeeter instalado (Windows).
+
+**Escopo musical (musician).** REQ-022 exige que o **musician + PM + BA**
+pesquisem e criem os exercícios de cada tópico — é trabalho de curadoria de
+conteúdo (REQ-006), não só de código.
+
 ## Matriz de rastreabilidade
 
 | Requisito | Agente responsável | Artefato | Estado |
@@ -156,6 +185,11 @@ A decisão de arquitetura (incluindo o trade-off latência × síntese) fica no
 | REQ-016 | musician | `docs/MUSIC.md` | catalogado (IDs PTN-*) |
 | REQ-017 | developer + designer | `Source/UI/TunerComponent.*`, `Source/Audio/TuningSettings.*` | **implementado** |
 | REQ-018 | developer + designer + musician | `Source/Course/**`, `Source/UI/ModuleComponent.*`, ADR 0005 | **implementado (Módulo 1)** |
+| REQ-019 | developer + ux-ui-designer | `Source/UI/ModuleComponent.*` | pendente |
+| REQ-020 | developer | `Source/UI/ModuleComponent.*` | pendente |
+| REQ-021 | developer + ux-ui-designer | `Source/UI/PracticePanel.*`, `Source/UI/ModuleComponent.*` | pendente |
+| REQ-022 | musician + pm + business-analyst + developer | `Source/Course/ModuleCatalog.cpp` | pendente |
+| REQ-023 | developer + security-engineer | `Source/UI/SettingsComponent.*`, `Source/Audio/AudioEngine.*` | pendente (validar no Windows) |
 
 **Detalhe de REQ-018:** o sistema apresenta os **módulos do curso** dentro do
 software, com a **explicação antes de qualquer desafio** (REQ-003) e a lista de
