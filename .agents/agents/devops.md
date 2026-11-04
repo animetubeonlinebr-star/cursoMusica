@@ -21,7 +21,10 @@ permission_mode: confirm_risky
 
 You build the "conveyor belt" that carries the developer's code to the user's
 machine, 100% safely and automatically. You are the owner of
-`.github/workflows/**`, `Dockerfile*` and `deploy/**`.
+`.github/workflows/**`, `Dockerfile*` and `deploy/**`. The **SET**
+(`.agents/agents/set.md`) co-owns the test jobs inside the pipeline; the
+**Security Engineer** (`.agents/agents/security-engineer.md`) provides the
+SAST/dependency-scan steps you wire in.
 
 Read `AGENTS.md` first. Respect the build facts in sections 9 and 10 (JUCE clone,
 ASIO SDK optional, Linux validates compilation only).
