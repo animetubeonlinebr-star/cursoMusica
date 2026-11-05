@@ -78,14 +78,16 @@ public:
         if (currentTopic != nullptr)
             return height + topicDetailHeight (width) + 40;
 
-        // No topic selected: a module never read carries its context only, so the
-        // centre opens blank of lesson content (REQ-019). A module already read
-        // lists its topics again when the student returns to it (REQ-020).
-        height += 44 + th::spacing::sm;
+        // A module never read opens blank: only the header, the meta line and the
+        // objective are measured (REQ-019). A module already read lists its topics
+        // again and keeps its module-level context on return (REQ-020).
+        if (! showOverviewLessons)
+            return juce::jmax (height, 200);
 
-        if (showOverviewLessons)
-            for (const auto& lesson : current->lessons)
-                height += lessonSummaryHeight (lesson, width);
+        height += th::spacing::sm;
+
+        for (const auto& lesson : current->lessons)
+            height += lessonSummaryHeight (lesson, width);
 
         if (! current->caged.empty())
             height += 24 + 40 * (int) current->caged.size() + th::spacing::sm;
@@ -204,34 +206,39 @@ private:
 
     void paintOverview (juce::Graphics& g, juce::Rectangle<int> bounds, const CourseModule& m)
     {
-        // A module never read shows only its own context, so the centre opens
-        // "blank" of lesson content (REQ-019). Once the student has read a topic
-        // in it, returning to the module lists the topics again (REQ-020).
-        g.setColour (th::colour::textSecondary);
-        g.setFont (th::type::makeFont (th::type::body));
-        g.drawFittedText (juce::String::fromUTF8 (
-                              "Selecione um tópico à esquerda para ler a explicação. "
-                              "Os exercícios de cada tópico ficam no painel de prática, à direita."),
-                          bounds.removeFromTop (44), juce::Justification::topLeft, 3);
+        // A module never read opens blank: only the module context drawn by
+        // paint() (header, meta line, objective) shows, so no lesson content is
+        // loaded by itself (REQ-019). Once the student reads a topic there,
+        // returning to the module lists its topics and keeps that content
+        // (REQ-020); opening another module clears the centre again.
+        if (! showOverviewLessons)
+        {
+            g.setColour (th::colour::textDisabled);
+            g.setFont (th::type::makeFont (th::type::body));
+            g.drawFittedText (juce::String::fromUTF8 (
+                                  "Selecione um tópico à esquerda para ler a explicação. "
+                                  "Os exercícios de cada tópico ficam no painel de prática, à direita."),
+                              bounds.removeFromTop (44), juce::Justification::topLeft, 3);
+            return;
+        }
 
-        if (showOverviewLessons)
-            for (const auto& lesson : m.lessons)
+        for (const auto& lesson : m.lessons)
+        {
+            g.setColour (th::colour::accent);
+            g.setFont (th::type::makeFont (th::type::body, true));
+            g.drawText (lesson.id + ". " + lesson.title, bounds.removeFromTop (22),
+                        juce::Justification::centredLeft, false);
+
+            g.setColour (th::colour::textSecondary);
+            g.setFont (th::type::makeFont (th::type::body));
+            for (const auto& paragraph : lesson.paragraphs)
             {
-                g.setColour (th::colour::accent);
-                g.setFont (th::type::makeFont (th::type::body, true));
-                g.drawText (lesson.id + ". " + lesson.title, bounds.removeFromTop (22),
-                            juce::Justification::centredLeft, false);
-
-                g.setColour (th::colour::textSecondary);
-                g.setFont (th::type::makeFont (th::type::body));
-                for (const auto& paragraph : lesson.paragraphs)
-                {
-                    const int height = textHeight (th::type::makeFont (th::type::body), paragraph, bounds.getWidth());
-                    g.drawFittedText (paragraph, bounds.removeFromTop (height),
-                                      juce::Justification::topLeft, 4);
-                }
-                bounds.removeFromTop (th::spacing::sm);
+                const int height = textHeight (th::type::makeFont (th::type::body), paragraph, bounds.getWidth());
+                g.drawFittedText (paragraph, bounds.removeFromTop (height),
+                                  juce::Justification::topLeft, 4);
             }
+            bounds.removeFromTop (th::spacing::sm);
+        }
 
         if (! m.caged.empty())
         {
