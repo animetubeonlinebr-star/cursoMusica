@@ -274,6 +274,8 @@ void testAudioPortClassifier()
            "VB-Audio CABLE Input is a playback target for the app");
     check (classifyAudioPort ("CABLE Output (VB-Audio Virtual Cable)", true) == PortKind::capture,
            "VB-Audio CABLE Output is a capture source for the app");
+    check (classifyAudioPort ("CABLE In 16ch (VB-Audio Virtual Cable)", false) == PortKind::playback,
+           "CABLE In 16ch (as in the VoiceMeeter screenshot) is a playback target");
 
     // Even when the backend mislabels a virtual port, the name wins.
     check (classifyAudioPort ("Voicemeeter Input (VB-Audio Voicemeeter VAIO)", true) == PortKind::playback,
@@ -358,6 +360,20 @@ void testModuleCatalog()
     for (const auto& topic : { "A", "B", "C", "D", "E", "F", "G", "H", "I" })
         check (coveredTopics.contains (topic),
                juce::String ("topic ") + topic + " has at least one exercise (REQ-022)");
+
+    // REQ-022 asks for a *playable* exercise per topic, not only a questionnaire:
+    // each topic must own an exercise the app can verify (quiz or playable spec).
+    juce::StringArray playableTopics;
+    for (const auto& e : m1->exercises)
+    {
+        const bool playable = e.isQuiz() || ! e.targets.empty() || ! e.chordPitchClasses.empty()
+                                || ! e.chordProgression.empty();
+        if (playable && e.lessonId.isNotEmpty() && ! playableTopics.contains (e.lessonId))
+            playableTopics.add (e.lessonId);
+    }
+    for (const auto& topic : { "A", "B", "C", "D", "E", "F", "G", "H", "I" })
+        check (playableTopics.contains (topic),
+               juce::String ("topic ") + topic + " has at least one executable exercise (REQ-022)");
 
     // Every exercise is tied to a topic so the right panel follows the left.
     for (const auto& e : m1->exercises)

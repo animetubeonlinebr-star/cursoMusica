@@ -358,6 +358,15 @@ namespace
         m.exercises[4].chordPitchClasses = { 5, 9, 0 };                     // EX-1.5, F barre
         m.exercises[7].targets = notes ({ "E2" });                          // EX-1.8, on the grid
 
+        // EX-1.7 (topic H, cifrado) is playable: the student plays the ii–V–I of C
+        // as the app recognises each chord (REQ-022 — every topic has an
+        // executable exercise, not only a questionnaire).
+        m.exercises[6].chordProgression = {
+            { 2, 5, 9, 0 },    // Dm7
+            { 7, 11, 2, 5 },   // G7
+            { 0, 4, 7, 11 },   // C7M
+        };
+
         // EX-1.9 and EX-1.10 are quizzes on topics C and G, so every topic A..I
         // has at least one exercise (REQ-022). Answered one at a time, like the
         // module quiz, with the same 90% mark (REQ-009).

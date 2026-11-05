@@ -16,7 +16,18 @@ do repositório (commits, CI, resultados de QA), nunca de otimismo.
   (`QuizSession`, gate 90%). O motor de medição (`NoteMath`, `ExerciseEvaluator`, `TempoGrid`,
   `PracticeSession`) e o metrônomo RT-safe (CM-014) medem a execução; ao atingir
   **≥90%** o Módulo 2 desbloqueia e o resultado é persistido (`ProgressStore`).
-- **Métricas:** suíte de lógica pura com **150 checagens, 100% verdes**, rodando no
+- **Conformidade com o `musica.docx` (2026-11-05, 2ª revisão).** As 9 capturas
+  do documento foram extraídas e o app foi executado (Xvfb, 1040×680 — a mesma
+  janela das capturas) para comparar estado a estado. Corrigido: **REQ-019** —
+  abrir um módulo nunca lido agora deixa o centro **em branco** (só o contexto
+  do módulo: cabeçalho, nível/BPM/gate e objetivo), sem CAGED, rítmica, trilha
+  nem fontes; **REQ-022** — o tópico H (cifrado) passou a ter exercício
+  **executável** (EX-1.7, progressão ii–V–I Dm7–G7–C7M), de modo que todo tópico
+  A–I tem ≥1 exercício que o app verifica, não só questionário. REQ-020 (mantém o
+  tópico ao voltar ao mesmo módulo, limpa ao trocar de módulo), REQ-021
+  (exercício à direita, explicação no centro) e REQ-023 (classificador de portas
+  do VoiceMeeter) já estavam corretos.
+- **Métricas:** suíte de lógica pura com **160 checagens, 100% verdes**, rodando no
   CI (`ctest` no job Linux). Velocity/Lead Time ainda sem baseline.
 - **Blockers:** nenhum para M1. Pendente para M2+: decisão D4 (estratégia de
   síntese) — owner: architect.
@@ -28,13 +39,15 @@ do repositório (commits, CI, resultados de QA), nunca de otimismo.
   regulagem/Mozart Carvalho). A curadoria do Módulo 1 passou de 3 para **7
   fontes** (`CourseModule::sources`), com o mapa bloco → fonte atualizado em
   `docs/MUSIC.md` §1.1.
-- **Próximo:** publicar instalador de teste atualizado na branch `test`
-  (Módulos 2–7 e engine na UI principal ficam para M2/CM-001).
+- **Próximo:** M2 (Módulos 2–7 do currículo) e ligar a UI principal à engine
+  (CM-001). Avaliação de improvisação fica para M2b. Instalador de teste com a
+  conformidade REQ-019..023 publicada em `test`.
 
 ## Histórico
 
 | Ciclo | Milestone | Resultado | Evidência |
 |---|---|---|---|
+| 2026-11-05 | M1 | Conformidade com o `musica.docx`: REQ-019 (módulo abre em branco) e REQ-022 (tópico H com exercício executável); app validado contra as 9 capturas | `ModuleComponent.cpp`; `ModuleCatalog.cpp` (EX-1.7); 160/160 testes |
 | 2026-11-05 | M1 | Curadoria ampliada com as 4 apostilas novas da `adequacao` (CAGED, teoria elementar, teoria da música, regulagem); instalador de teste atualizado | `docs/MUSIC.md` §1.1; `CourseModule::sources` (7); 150/150 testes |
 | 2026-11-04 | M1 | Ajustes do `musica.docx` (REQ-019..023) publicados na branch `test` com instalador de teste | merge `3603ee6`; instalador commit `d031d86`; 146/146 testes |
 | 2026-11-02 | M1 | Módulo 1 jogável + gate ≥90% com desbloqueio persistido + pattern/links REQ-007 | commit do Módulo 1 na branch `feat/measurement-engine`; 85/85 testes |
