@@ -41,6 +41,7 @@ public:
 
 private:
     void refreshExerciseList();
+    void refreshExerciseRow();
     void syncMetronomeFromModule();
     void updateButtonStates();
     void updateFeedback();
@@ -67,7 +68,22 @@ private:
     juce::Label headingLabel;
     juce::Label topicLabel;
     juce::ComboBox exerciseBox;
-    juce::TextButton demoButton { juce::String::fromUTF8 ("Demonstrar no centro") };
+
+    // Presents the armed exercise as a playable row (play glyph + id/title),
+    // matching the mock-up; clicking it asks the centre to demonstrate the
+    // exercise (REQ-021). The exercise itself still runs in this pane.
+    class ExerciseRowButton final : public juce::Button
+    {
+    public:
+        ExerciseRowButton() : juce::Button ("Demonstrar no centro") {}
+        void paintButton (juce::Graphics&, bool highlighted, bool down) override;
+        void setExerciseText (const juce::String& newText);
+
+    private:
+        juce::String exerciseText;
+    };
+
+    ExerciseRowButton demoButton;
 
     // Measurement, always shown.
     juce::Label measurementLabel;
