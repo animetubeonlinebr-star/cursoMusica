@@ -164,7 +164,7 @@ private:
 
     int exerciseDetailHeight (int width) const
     {
-        int height = 30; // id + title
+        int height = 0; // the id/title sits on the meta line, not in the card
         height += 20 + textHeight (th::type::makeFont (th::type::body), currentExercise->goal, width) + 8;
         height += 20 + textHeight (th::type::makeFont (th::type::body), currentExercise->check, width) + 8;
 
@@ -435,12 +435,8 @@ private:
 
     void paintExercise (juce::Graphics& g, juce::Rectangle<int> bounds, const Exercise& exercise)
     {
-        g.setColour (th::colour::accent);
-        g.setFont (th::type::makeFont (th::type::title, true));
-        g.drawFittedText (exercise.id + " — " + exercise.title, bounds.removeFromTop (28),
-                          juce::Justification::centredLeft, 1);
-        bounds.removeFromTop (th::spacing::sm);
-
+        // The exercise id/title already sits on the meta line above (context);
+        // the card itself only explains what was proposed (REQ-021).
         g.setColour (th::colour::textPrimary);
         g.setFont (th::type::makeFont (th::type::body, true));
         g.drawText (juce::String::fromUTF8 ("Objetivo"), bounds.removeFromTop (20),

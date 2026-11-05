@@ -16,6 +16,34 @@ namespace
     }
 }
 
+void PracticePanel::ExerciseRowButton::setExerciseText (const juce::String& newText)
+{
+    exerciseText = newText;
+    repaint();
+}
+
+void PracticePanel::ExerciseRowButton::paintButton (juce::Graphics& g, bool highlighted, bool down)
+{
+    auto bounds = getLocalBounds().toFloat();
+
+    g.setColour (th::colour::surfaceRaised.withAlpha (down ? 1.0f : (highlighted ? 0.9f : 0.7f)));
+    g.fillRoundedRectangle (bounds, th::radius::sm);
+
+    // Play glyph on the left, so the row reads as "this is the exercise to run".
+    auto glyph = getLocalBounds().removeFromLeft (22);
+    juce::Path triangle;
+    triangle.addTriangle (0.0f, 0.0f, 0.0f, 8.0f, 8.0f, 4.0f);
+    g.setColour (th::colour::accentAlt);
+    g.fillPath (triangle, triangle.getTransformToScaleToFit (glyph.toFloat().withSizeKeepingCentre (10.0f, 10.0f), true));
+
+    g.setColour (th::colour::textPrimary);
+    g.setFont (th::type::makeFont (th::type::body, true));
+    g.drawFittedText (exerciseText.isNotEmpty() ? exerciseText
+                                                : juce::String::fromUTF8 ("Selecione um exercício"),
+                      getLocalBounds().withTrimmedLeft (22).reduced (4, 0),
+                      juce::Justification::centredLeft, 1);
+}
+
 PracticePanel::PracticePanel (AudioEngine& engine)
     : audioEngine (engine)
 {
@@ -31,6 +59,7 @@ PracticePanel::PracticePanel (AudioEngine& engine)
     exerciseBox.onChange = [this]
     {
         selectedExerciseIndex = exerciseBox.getSelectedItemIndex();
+        refreshExerciseRow();
         updateApplication();
     };
     addAndMakeVisible (exerciseBox);
@@ -135,7 +164,16 @@ void PracticePanel::refreshExerciseList()
                             : juce::String::fromUTF8 ("Tópico ") + topicFilter,
                         juce::dontSendNotification);
 
+    refreshExerciseRow();
     updateApplication();
+}
+
+void PracticePanel::refreshExerciseRow()
+{
+    const auto* exercise = selectedExercise();
+    demoButton.setExerciseText (exercise != nullptr
+                                    ? exercise->id + " — " + exercise->title
+                                    : juce::String());
 }
 
 void PracticePanel::syncMetronomeFromModule()
@@ -403,7 +441,7 @@ void PracticePanel::resized()
 
     exerciseBox.setBounds (bounds.removeFromTop (28));
     bounds.removeFromTop (th::spacing::xs);
-    demoButton.setBounds (bounds.removeFromTop (26));
+    demoButton.setBounds (bounds.removeFromTop (30));
     bounds.removeFromTop (th::spacing::sm);
 
     // Measurement (Nota / Acertos / Grade), always present.
