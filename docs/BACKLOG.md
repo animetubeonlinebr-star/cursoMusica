@@ -11,7 +11,7 @@ Cada história cita o(s) requisito(s) que atende.
 
 ## Pronto para desenvolvimento (topo)
 
-### [CM-018] Módulo abre em branco; conteúdo só ao clicar no tópico — valor: H — tamanho: S — status: ready
+### [CM-018] Módulo abre em branco; conteúdo só ao clicar no tópico — valor: H — tamanho: S — status: **done** (merge `3603ee6`)
 Requisito: REQ-019, REQ-020.
 Como um aluno de guitarra, eu quero que a área de conteúdo fique em branco ao
 abrir um módulo e mostre o conteúdo só quando eu clicar num tópico, para que eu
@@ -32,7 +32,7 @@ Dependências: `ModuleComponent` (estado de seleção por módulo). Hoje
 `itemOpennessChanged`/`itemClicked` chamam `selectTopic(number, 0)` — é isso que
 precisa deixar de acontecer no abrir.
 
-### [CM-019] Exercício no painel direito, explicação no centro — valor: H — tamanho: S — status: ready
+### [CM-019] Exercício no painel direito, explicação no centro — valor: H — tamanho: S — status: **done**
 Requisito: REQ-021.
 Como um aluno de guitarra, eu quero ver o exercício a executar no painel da
 direita e apenas a explicação do proposto no centro, para que eu saiba o que
@@ -49,7 +49,7 @@ Critérios de aceite:
 
 Dependências: `PracticePanel` (já tem o executor), `ModuleComponent::paintExercise`.
 
-### [CM-020] Um exercício executável por tópico do Módulo 1 — valor: H — tamanho: L — status: draft
+### [CM-020] Um exercício executável por tópico do Módulo 1 — valor: H — tamanho: L — status: **done** (Módulo 1)
 Requisito: REQ-022 (com REQ-006/REQ-008). Conteúdo por **musician + pm +
 business-analyst**.
 Como um aluno de guitarra, eu quero ter ao menos um exercício prático para cada
@@ -67,7 +67,7 @@ Critérios de aceite:
 Dependências: curadoria de conteúdo (CM-012), catálogo (`ModuleCatalog.cpp`),
 motor de medição (CM-008).
 
-### [CM-021] Classificação correta de entradas/saídas de áudio — valor: H — tamanho: M — status: ready
+### [CM-021] Classificação correta de entradas/saídas de áudio — valor: H — tamanho: M — status: **done** (código; validação Windows pendente)
 Requisito: REQ-023.
 Como um aluno que usa o VoiceMeeter Banana, eu quero ver minhas entradas na
 lista de *inputs* e minhas saídas na lista de *outputs*, para que eu selecione o
@@ -309,6 +309,10 @@ Progresso (2026-11-02, Módulo 1):
   `Questionario_m1.pdf` virou o exercício **EX-1.1** (7 questões, gate 90%).
 - [x] Apostilas da branch `adequacao` varridas por duplicatas (hash LFS +
   assinatura de imagem); 3 cópias `(1)` removidas, 18 apostilas únicas.
+- [x] Revisão da `adequacao` reescrita (2026-11-05): 4 apostilas novas por hash
+  LFS — CAGED (Marcelo Mello, bloco F), Teoria Elementar (Lacerda, B/C/D),
+  Teoria da Música (Bohumil Med, B/C/G/I), Manual de regulagem (Mozart
+  Carvalho, A); `CourseModule::sources` passa de 3 para 7 fontes.
 - [ ] Módulos 2..20: mesma revisão (owner: musician) quando o conteúdo for escrito.
 - [ ] A avaliação detecta se o pattern ensinado foi usado (CM-015).
 

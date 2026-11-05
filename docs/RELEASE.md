@@ -61,9 +61,14 @@ makensis deploy/windows/installer.nsi
 
 ## Pendências
 
-- Instalador de teste do **Módulo 1** (`module=1`, `unlock_all=true`): o build
-  roda na branch `test`; baixe o artifact do run ou use `commit_installer=true`
-  para tê-lo em `instalador/` (CM-010).
+- Instalador de teste do **Módulo 1**: publicado em `test` (commit `d031d86`,
+  `instalador/Instalador CursoMusica.exe`, 1.981.593 bytes, PE32, sha256
+  `4d853fbf…`), com `unlock_all=true` (todos os módulos acessíveis). Veio dos
+  runs `41893051023` (push) e `41893699833` (`workflow_dispatch`,
+  `commit_installer=true`) sobre o merge `3603ee6` (REQ-019..023). Baixe o
+  artifact do run ou o `.exe` já commitado na branch (CM-010).
+- Validar **REQ-023** no Windows com o **VoiceMeeter Banana** instalado: as
+  entradas devem aparecer em *Input* e as saídas em *Output*.
 - Assinatura de código (R-12): sem certificado, o Windows mostra aviso.
 - Confirmar licenças de redistribuição das dependências (R-09) antes de
   distribuir publicamente.

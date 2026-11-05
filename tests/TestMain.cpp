@@ -308,11 +308,22 @@ void testModuleCatalog()
            "quarter-note cell is counted TÁ");
 
     // Curated apostilas backing the blocks (REQ-006, CM-012).
-    check (m1->sources.size() == 3, "module 1 cites its curated apostilas");
+    check (m1->sources.size() == 7, "module 1 cites its curated apostilas");
     check (m1->sources.contains ("pdf-fraseado-melodico"),
            "CAGED source (fraseado-melodico) is cited");
     check (m1->sources.contains ("pdf-desvendando-os-segredos-da-guitarra-fusion"),
            "harmony source (fusion) is cited");
+    check (m1->sources.contains (
+               "pdf-caged-e-derivaoes-de-acordes-marcelo-mello-apostila-de-violao-e-guitarra-vol1"),
+           "CAGED source (marcelo-mello) added in the 2026-11-04 review is cited");
+    check (m1->sources.contains ("pdf-teoria-elementar-da-musica-ricordi-osvaldo-lacerda"),
+           "elementary theory source (Lacerda) is cited");
+    check (m1->sources.contains (
+               "pdf-p-classtruncatedtext-module-lineclamped-85ulhh-style-max-lines5bohumil-med-teoria-da-musica-5-edicao-p"),
+           "music theory source (Bohumil Med) is cited");
+    check (m1->sources.contains (
+               "pdf-manual-de-regulagem-e-manutenao-em-guitarra-contrabaixos-e-violoes-mozart-carvalho"),
+           "instrument setup source (Mozart Carvalho) is cited");
 
     // Pattern and reference players (REQ-007).
     check (m1->practice.patternId == "PTN-R-PALM", "module 1 cites PTN-R-PALM");

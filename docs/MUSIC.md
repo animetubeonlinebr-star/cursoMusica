@@ -585,6 +585,36 @@ varridas por hash LFS e por assinatura de imagem multi-página (páginas
 cópias exatas com sufixo `(1)` no nome e foram removidas (`b4f284c`); o acervo
 fica com **18 apostilas únicas**, uma de cada.
 
+**Revisão da `adequacao` (2026-11-04).** A branch foi reescrita a partir da nova
+`main` e recebeu **4 apostilas novas** (identificadas por hash LFS, comparando a
+versão anterior `b70bdf7` com a atual `1dc295f`):
+
+| Apostila | Conteúdo | Blocos que sustenta |
+|---|---|---|
+| `pdf-caged-e-derivaoes-de-acordes-marcelo-mello-apostila-de-violao-e-guitarra-vol1` | Sistema CAGED: 5 formas móveis, conexão das regiões, escala sobre a forma (5 págs., texto) | F |
+| `pdf-teoria-elementar-da-musica-ricordi-osvaldo-lacerda` | *Compêndio de Teoria Elementar da Música* (152 págs.): notas, pauta, claves, semitom/tom, escalas maiores/menores | B, C, D |
+| `pdf-p-classtruncatedtext-module-lineclamped-85ulhh-style-max-lines5bohumil-med-teoria-da-musica-5-edicao-p` | *Teoria da Música* (Bohumil Med, 5ª ed., 424 págs.): intervalos, enarmonia, séries harmônicas, escala/grau, métrica | B, C, G, I |
+| `pdf-manual-de-regulagem-e-manutenao-em-guitarra-contrabaixos-e-violoes-mozart-carvalho` | *Manual de regulagem e manutenção* (Mozart Carvalho, 129 págs.): partes do instrumento, regulagem, manutenção | A |
+
+O nome do arquivo Bohumil Med traz um prefixo de layout do site
+(`p-classtruncatedtext-module-lineclamped-85ulhh-style-max-lines5…`) colado pela
+origem; é mantido **como está** porque o app cita o arquivo pelo *stem*
+(`CourseModule::sources`). O mapa bloco → fonte passa a ser:
+
+| Bloco | Fonte primária | Fonte de apoio (revisão 2026-11-04) |
+|---|---|---|
+| A | `pdf-mozart-mello-livroestudosdeguitarra4em1` | `pdf-manual-de-regulagem-e-manutenao-…-mozart-carvalho` |
+| B, C | `pdf-fraseado-melodico` | `pdf-teoria-elementar-…-lacerda`, `pdf-p-…-bohumil-med-…` |
+| D | `pdf-mozart-mello-livroestudosdeguitarra4em1` | `pdf-teoria-elementar-…-lacerda` |
+| E | `pdf-mozart-mello-livroestudosdeguitarra4em1` | — |
+| F | `pdf-fraseado-melodico` | `pdf-caged-e-derivaoes-de-acordes-marcelo-mello-…` |
+| G | `pdf-desvendando-os-segredos-da-guitarra-fusion` | `pdf-p-…-bohumil-med-…` |
+| H | `pdf-mozart-mello-livroestudosdeguitarra4em1` | — |
+| I | `pdf-fraseado-melodico` | `pdf-p-…-bohumil-med-…` |
+
+O acervo curado do Módulo 1 passa de 3 para **7 fontes** citadas no catálogo
+(`CourseModule::sources`), todas verificadas contra o conteúdo dos blocos.
+
 ## 1.2 Teoria apresentada no módulo
 
 ### Bloco A — Partes do instrumento
@@ -592,6 +622,10 @@ fica com **18 apostilas únicas**, uma de cada.
 Corpo, braço, escala (braço), cavalete (ponte), rastilho, pestana (nut), tarraxas
 (cabeça), trastes, casas, cordas (6ª a 1ª), captadores, botões de volume e tom.
 No violão: a boca, o tampo e as cordas de nylon (som mais doce, menor tensão).
+
+A nomenclatura das partes segue o **Manual de regulagem e manutenção** de Mozart
+Carvalho (fonte de apoio do bloco A, revisão 2026-11-04), que ainda serve de
+referência para regulagem e conservação do instrumento.
 
 ### Bloco B — Notas musicais
 
@@ -652,6 +686,11 @@ Cinco **formas** de acorde maior (C, A, G, E, D) cobrem todo o braço e se
 - A **mesma forma** vale para acordes menores, de 7ª, etc. (muda a qualidade).
 - O CAGED é a ponte entre **acorde** e **escala**: cada forma contém a
   pentatônica/modo daquele centro (ligação com o nível 1 de improvisação).
+
+Apostila de apoio do bloco F (revisão 2026-11-04): **"CAGED e derivações de
+acordes"** (Marcelo Mello, *Apostila de violão e guitarra vol. 1*, cap. 14),
+que descreve as cinco formas móveis, sua conexão e o uso da escala sobre cada
+forma.
 
 ### Bloco G — Organização das tonalidades
 

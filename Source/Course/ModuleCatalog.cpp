@@ -452,11 +452,18 @@ namespace
               juce::String::fromUTF8 ("TA-KI-TA-KI") },
         };
 
-        // Curated apostilas (REQ-006, CM-012); see docs/MUSIC.md §1.1.
+        // Curated apostilas (REQ-006, CM-012); see docs/MUSIC.md §1.1. The
+        // 2026-11-04 review of branch `adequacao` added four apostilas: CAGED
+        // (block F), elementary theory (blocks B/C/D), music theory (blocks
+        // G/I) and guitar setup/maintenance (block A).
         m.sources = {
             "pdf-mozart-mello-livroestudosdeguitarra4em1",
             "pdf-fraseado-melodico",
             "pdf-desvendando-os-segredos-da-guitarra-fusion",
+            "pdf-caged-e-derivaoes-de-acordes-marcelo-mello-apostila-de-violao-e-guitarra-vol1",
+            "pdf-teoria-elementar-da-musica-ricordi-osvaldo-lacerda",
+            "pdf-p-classtruncatedtext-module-lineclamped-85ulhh-style-max-lines5bohumil-med-teoria-da-musica-5-edicao-p",
+            "pdf-manual-de-regulagem-e-manutenao-em-guitarra-contrabaixos-e-violoes-mozart-carvalho",
         };
 
         return m;
