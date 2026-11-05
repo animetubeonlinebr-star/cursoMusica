@@ -49,6 +49,12 @@ Critérios de aceite:
 
 Dependências: `PracticePanel` (já tem o executor), `ModuleComponent::paintExercise`.
 
+Implementado: o painel direito apresenta o exercício armado como linha clicável
+com ícone de play e `id — título` (igual ao mock-up do `musica.docx`), que
+dispara a demonstração no centro; o centro mostra só objetivo e como o app
+verifica, sem repetir o `id — título` nem expor controles de execução
+(`PracticePanel::ExerciseRowButton`; instalador `9f5f70e` na `test`).
+
 ### [CM-020] Um exercício executável por tópico do Módulo 1 — valor: H — tamanho: L — status: **done** (Módulo 1)
 Requisito: REQ-022 (com REQ-006/REQ-008). Conteúdo por **musician + pm +
 business-analyst**.

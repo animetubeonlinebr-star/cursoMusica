@@ -47,6 +47,7 @@ do repositório (commits, CI, resultados de QA), nunca de otimismo.
 
 | Ciclo | Milestone | Resultado | Evidência |
 |---|---|---|---|
+| 2026-11-05 | M1 | Correção do painel de prática (REQ-021): exercício vira linha clicável com ícone de play e id/título no painel direito, como no mock-up; centro mostra só a explicação (sem repetir o id/título) | `PracticePanel.cpp/.h`; `ModuleComponent.cpp`; instalador `9f5f70e` na `test` |
 | 2026-11-05 | M1 | Conformidade com o `musica.docx`: REQ-019 (módulo abre em branco) e REQ-022 (tópico H com exercício executável); app validado contra as 9 capturas | `ModuleComponent.cpp`; `ModuleCatalog.cpp` (EX-1.7); 160/160 testes |
 | 2026-11-05 | M1 | Curadoria ampliada com as 4 apostilas novas da `adequacao` (CAGED, teoria elementar, teoria da música, regulagem); instalador de teste atualizado | `docs/MUSIC.md` §1.1; `CourseModule::sources` (7); 150/150 testes |
 | 2026-11-04 | M1 | Ajustes do `musica.docx` (REQ-019..023) publicados na branch `test` com instalador de teste | merge `3603ee6`; instalador commit `d031d86`; 146/146 testes |

@@ -61,14 +61,17 @@ makensis deploy/windows/installer.nsi
 
 ## Pendências
 
-- Instalador de teste do **Módulo 1** (versão atual, conformidade com o
-  `musica.docx` — REQ-019..023): publicado em `test` (commit `01580a2`,
-  `instalador/Instalador CursoMusica.exe`, **1.982.587 bytes**, PE32,
-  `machine 0x14c`, sha256 `83e20f24…`), com `unlock_all=true` (todos os módulos
-  acessíveis). Veio dos runs `42052071378` (push) e `42053079008`
-  (`workflow_dispatch`, `commit_installer=true`) sobre o merge `f40420c`.
-  O artifact do run é byte-a-byte idêntico ao `.exe` commitado (hash conferido).
-  Corrige REQ-019 (módulo abre em branco) e REQ-022 (tópico H executável).
+- Instalador de teste do **Módulo 1** (correção do painel de prática —
+  REQ-021, exercício no painel direito com ícone de play e id/título, como no
+  mock-up do `musica.docx`): publicado em `test` (commit `9f5f70e`,
+  `instalador/Instalador CursoMusica.exe`, **1.983.923 bytes**, PE32,
+  `machine 0x14c`, sha256 `abcf8194550b…`), com `unlock_all=true` (todos os
+  módulos acessíveis). Veio dos runs `42101567359` (push) e `42101586565`
+  (`workflow_dispatch`, `commit_installer=true`) sobre `a3a44c0`.
+  O binário embutido foi compilado em 2026-11-05 20:18 UTC.
+- Instalador anterior (conformidade REQ-019/022): commit `01580a2`,
+  1.982.587 bytes, PE32, `machine 0x14c`, sha256 `83e20f24…`, runs
+  `42052071378`/`42053079008` sobre o merge `f40420c`.
 - Instalador anterior (curadoria das apostilas novas da `adequacao`): commit
   `f4f3e2a`, 1.982.038 bytes, sha256 `7f997e64…`, runs
   `41952764869`/`41953169200` sobre o merge `800896e`.
