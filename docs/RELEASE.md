@@ -61,15 +61,19 @@ makensis deploy/windows/installer.nsi
 
 ## Pendências
 
-- Instalador de teste do **Módulo 1** (versão atual, com a curadoria das
-  apostilas novas da `adequacao`): publicado em `test` (commit `f4f3e2a`,
-  `instalador/Instalador CursoMusica.exe`, 1.982.038 bytes, PE32,
-  `machine 0x14c`, sha256 `7f997e64…`), com `unlock_all=true` (todos os módulos
-  acessíveis). Veio dos runs `41952764869` (push) e `41953169200`
-  (`workflow_dispatch`, `commit_installer=true`) sobre o merge `800896e`.
+- Instalador de teste do **Módulo 1** (versão atual, conformidade com o
+  `musica.docx` — REQ-019..023): publicado em `test` (commit `01580a2`,
+  `instalador/Instalador CursoMusica.exe`, **1.982.587 bytes**, PE32,
+  `machine 0x14c`, sha256 `83e20f24…`), com `unlock_all=true` (todos os módulos
+  acessíveis). Veio dos runs `42052071378` (push) e `42053079008`
+  (`workflow_dispatch`, `commit_installer=true`) sobre o merge `f40420c`.
   O artifact do run é byte-a-byte idêntico ao `.exe` commitado (hash conferido).
-- Instalador anterior (REQ-019..023): commit `d031d86`, sha256 `4d853fbf…`,
-  runs `41893051023`/`41893699833` sobre o merge `3603ee6`.
+  Corrige REQ-019 (módulo abre em branco) e REQ-022 (tópico H executável).
+- Instalador anterior (curadoria das apostilas novas da `adequacao`): commit
+  `f4f3e2a`, 1.982.038 bytes, sha256 `7f997e64…`, runs
+  `41952764869`/`41953169200` sobre o merge `800896e`.
+- Instalador anterior (1ª rodada REQ-019..023): commit `d031d86`, sha256
+  `4d853fbf…`, runs `41893051023`/`41893699833` sobre o merge `3603ee6`.
 - Validar **REQ-023** no Windows com o **VoiceMeeter Banana** instalado: as
   entradas devem aparecer em *Input* e as saídas em *Output*.
 - Assinatura de código (R-12): sem certificado, o Windows mostra aviso.
