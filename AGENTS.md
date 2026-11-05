@@ -88,13 +88,13 @@ antigas.
 - [x] Menu de configuração: dispositivos, entrada, saída, buffer
 - [x] Host VST3 com scan, cadeia na entrada e editor de plugin
 - [x] Afinador transversal com referência A4 editável (REQ-017)
-- [x] Módulo 1 jogável no app: explicação A–I (inclui rítmica), CAGED, trilha de prática, exercícios EX-1.1–EX-1.8 e gate (REQ-003/REQ-007/REQ-018); apostilas curadas citadas (REQ-006)
+- [x] Módulo 1 jogável no app: explicação A–I (inclui rítmica), CAGED, trilha de prática, exercícios EX-1.1–EX-1.10 e gate (REQ-003/REQ-007/REQ-018); apostilas curadas citadas (REQ-006)
 - [x] Execução por seleção de tópico: menu de módulos expansível, explicação detalhada do tópico no centro e prática filtrada à direita (REQ-003/REQ-008)
 - [x] Questionário do Módulo 1 (7 questões, uma por tela) e QuizSession com gate de 90% (REQ-006)
 - [x] Motor de medição: NoteMath, ExerciseEvaluator (LCS + acordes), TempoGrid, PracticeSession (CM-008)
 - [x] Metrônomo RT-safe com BPM meta e grade (CM-014)
 - [x] Gate de progressão linear: módulo N+1 só abre com ≥90% no gate de N; progresso persistido (REQ-002/REQ-009)
-- [x] Testes unitários da lógica pura (146 checagens) rodando no CI
+- [x] Testes unitários da lógica pura (150 checagens) rodando no CI
 - [x] Build validada no Linux: binário gerado, UI renderiza
 - [ ] Ligar UI principal à engine (nível e afinação reais em vez de dummy)
 - [x] Ajustes do `musica.docx` (CM-018..CM-021): módulo abre em branco e mantém o tópico no mesmo módulo (REQ-019/020), exercício à direita e explicação no centro (REQ-021), ≥1 exercício por tópico A–I (REQ-022), classificação correta de entradas/saídas de áudio (REQ-023)
@@ -259,6 +259,7 @@ Uma entrega só é "pronta" quando:
 | 2026-11-04 | business-analyst + musician + po | **Processamento do `musica.docx`** (fonte preservada em `docs/inbox/musica.docx`): elicitados 5 requisitos — REQ-019 (módulo abre em branco), REQ-020 (mantém tópico no mesmo módulo, limpa em outro), REQ-021 (exercício à direita, explicação no centro), REQ-022 (≥1 exercício por tópico), REQ-023 (classificação correta de entradas/saídas — bug VoiceMeeter Banana); decompostos em histórias CM-018..CM-021 no `docs/BACKLOG.md`, com critérios de aceite | Solicitação do cliente rastreada ponta a ponta (docx → REQ-NNN → história); CM-021 bloqueado por exigir Windows + VoiceMeeter |
 | 2026-11-04 | developer + ux-ui-designer + musician | **Ajustes do `musica.docx` implementados (CM-018..CM-021, branch `feat/modulo1-completo`)**: (REQ-019/020) abrir um módulo mostra só o contexto, o tópico só carrega no clique e a memória de tópico é por módulo — módulo já lido lista os tópicos de novo, módulo novo abre em branco; (REQ-021) o centro traz só a explicação e o exercício executável fica no painel direito; (REQ-022) criados EX-1.9 (sustenidos/bemóis/enarmonia, tópico C) e EX-1.10 (tonalidade/campo harmônico, tópico G), fechando ≥1 exercício por tópico A–I; (REQ-023) novo `AudioPortClassifier` + `AudioPortsPanel` que rotulam cada porta pela direção real do app, corrigindo o VoiceMeeter (nome escrito pela ótica do mixer). Suíte em **146 checagens verdes**; build Linux limpa | Os 5 requisitos do cliente ficam verificáveis; falta só a validação de REQ-023 no Windows com o VoiceMeeter instalado |
 | 2026-11-04 | devops | **Versão de teste com todos os ajustes publicada**: `feat/modulo1-completo` mesclada em `test` com `--no-ff` (merge `3603ee6`; backup `backup/pre-musica-docx-test`); push em `test` rodou o `release.yml` (run `41893051023`, success) e um `workflow_dispatch` com `commit_installer=true` (run `41893699833`, success) commitou o instalador em `test` (commit `d031d86`, `instalador/Instalador CursoMusica.exe`, 1.981.593 bytes, PE32, sha256 `4d853fbf…`), idêntico ao artifact do run | Versão de teste com REQ-019..023 entregue na branch `test` (REQ-013); `main` intocado |
+| 2026-11-05 | musician + business-analyst | **Revisão das apostilas novas da `adequacao`**: a branch foi reescrita a partir da nova `main` (`1dc295f`) e trouxe **4 apostilas** identificadas por hash LFS vs. a versão anterior (`b70bdf7`) — CAGED (Marcelo Mello, bloco F), Teoria Elementar (Lacerda, blocos B/C/D), Teoria da Música (Bohumil Med 5ª ed., blocos B/C/G/I) e Manual de regulagem/manutenção (Mozart Carvalho, bloco A). O acervo curado do Módulo 1 passou de 3 para **7 fontes** em `CourseModule::sources`; `docs/MUSIC.md` §1.1 ganhou a tabela apostila → blocos e o mapa bloco → fonte; suíte em **150 checagens verdes** | Conteúdo do Módulo 1 lastreado também nas obras de teoria e no manual do instrumento; curadoria rastreável |
 
 ## 8. Convenções de código
 

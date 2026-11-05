@@ -309,6 +309,10 @@ Progresso (2026-11-02, Módulo 1):
   `Questionario_m1.pdf` virou o exercício **EX-1.1** (7 questões, gate 90%).
 - [x] Apostilas da branch `adequacao` varridas por duplicatas (hash LFS +
   assinatura de imagem); 3 cópias `(1)` removidas, 18 apostilas únicas.
+- [x] Revisão da `adequacao` reescrita (2026-11-05): 4 apostilas novas por hash
+  LFS — CAGED (Marcelo Mello, bloco F), Teoria Elementar (Lacerda, B/C/D),
+  Teoria da Música (Bohumil Med, B/C/G/I), Manual de regulagem (Mozart
+  Carvalho, A); `CourseModule::sources` passa de 3 para 7 fontes.
 - [ ] Módulos 2..20: mesma revisão (owner: musician) quando o conteúdo for escrito.
 - [ ] A avaliação detecta se o pattern ensinado foi usado (CM-015).
 
