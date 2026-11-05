@@ -28,8 +28,9 @@ do repositório (commits, CI, resultados de QA), nunca de otimismo.
   regulagem/Mozart Carvalho). A curadoria do Módulo 1 passou de 3 para **7
   fontes** (`CourseModule::sources`), com o mapa bloco → fonte atualizado em
   `docs/MUSIC.md` §1.1.
-- **Próximo:** publicar instalador de teste atualizado na branch `test`
-  (Módulos 2–7 e engine na UI principal ficam para M2/CM-001).
+- **Próximo:** M2 (Módulos 2–7 do currículo) e ligar a UI principal à engine
+  (CM-001). Avaliação de improvisação fica para M2b. Instalador de teste com a
+  curadoria atualizada publicado em `test` (commit `f4f3e2a`).
 
 ## Histórico
 
