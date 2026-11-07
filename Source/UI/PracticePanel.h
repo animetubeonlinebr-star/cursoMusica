@@ -36,6 +36,18 @@ public:
     // Reports the exercise currently armed, so the centre can demonstrate it.
     std::function<void (const Exercise*)> onExerciseSelected;
 
+    // The centre demonstrates the running exercise: it reads the quiz state and
+    // sends the chosen option back here, so the right pane keeps only the
+    // controls and the scoreboard (REQ-021).
+    const course::QuizState& getQuizState() const;
+    void answerQuizOption (int optionIndex);
+
+    // Fired whenever the quiz advances, so the centre can redraw the question.
+    std::function<void()> onQuizChanged;
+
+    // Restarts the quiz from the first question (driven from the centre pane).
+    void restartQuiz();
+
     void paint (juce::Graphics& g) override;
     void resized() override;
 
@@ -53,7 +65,6 @@ private:
     void startSelectedExercise();
     void finishExercise();
     void toggleMetronome();
-    void answerQuiz (int optionIndex);
 
     AudioEngine& audioEngine;
     course::PracticeSession session;
@@ -66,6 +77,11 @@ private:
     bool metronomeOn = false;
 
     juce::Label headingLabel;
+
+    // "Todos os tópicos do módulo": clears the topic filter so the pane lists
+    // every exercise of the module again.
+    juce::HyperlinkButton topicLink { juce::String::fromUTF8 ("Todos os tópicos do módulo"), juce::URL() };
+
     juce::Label topicLabel;
     juce::ComboBox exerciseBox;
 
@@ -85,18 +101,17 @@ private:
 
     ExerciseRowButton demoButton;
 
-    // Measurement, always shown.
+    // Scoreboard (Acertos x/y · aproveitamento z%), always shown.
     juce::Label measurementLabel;
-    juce::Label feedbackLabel;
 
-    // Application area: play controls or the quiz.
+    // Guidance box: what the student must do in the armed exercise.
+    juce::Label guidanceLabel;
+
+    // Playable-exercise controls.
     juce::TextButton metronomeButton { "Metronome" };
     juce::TextButton startButton { "Start" };
     juce::TextButton finishButton { "Finish" };
     juce::Label bpmLabel;
-
-    juce::Label quizPrompt;
-    juce::OwnedArray<juce::TextButton> quizOptions;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PracticePanel)
 };

@@ -3,7 +3,7 @@
 Dono: **project-manager**. Atualizar ao fim de cada ciclo, a partir de evidência
 do repositório (commits, CI, resultados de QA), nunca de otimismo.
 
-## Ciclo atual — [data: 2026-11-05]
+## Ciclo atual — [data: 2026-11-07]
 
 - **Milestone em foco:** M1 — Módulo 1 jogável com gate de progressão.
 - **Progresso:** **Módulo 1 fechado de ponta a ponta.** O aluno lê a explicação
@@ -27,6 +27,15 @@ do repositório (commits, CI, resultados de QA), nunca de otimismo.
   tópico ao voltar ao mesmo módulo, limpa ao trocar de módulo), REQ-021
   (exercício à direita, explicação no centro) e REQ-023 (classificador de portas
   do VoiceMeeter) já estavam corretos.
+- **Revisão do painel de quiz (2026-11-07).** A pedido do cliente, o
+  **questionário (EX-1.1) passou a rodar no painel central** (REQ-021 revisado):
+  o centro mostra o cabeçalho do módulo (nível/BPM/gate), a instrução "Responda
+  uma questão por vez.", "Questão X de Y", o enunciado e as alternativas
+  clicáveis A–D; o **painel direito** ficou com os controles — cabeçalho com o
+  link "Todos os tópicos do módulo", seletor de exercício, botão de play com
+  `id — título`, placar "Acertos x/y · aproveitamento z%" e a caixa de orientação
+  ("Neste exercício, você deverá responder as questões…"). Validado sob Xvfb
+  (1040×680): responder uma alternativa avança a questão e atualiza o placar.
 - **Métricas:** suíte de lógica pura com **160 checagens, 100% verdes**, rodando no
   CI (`ctest` no job Linux). Velocity/Lead Time ainda sem baseline.
 - **Blockers:** nenhum para M1. Pendente para M2+: decisão D4 (estratégia de
@@ -47,6 +56,7 @@ do repositório (commits, CI, resultados de QA), nunca de otimismo.
 
 | Ciclo | Milestone | Resultado | Evidência |
 |---|---|---|---|
+| 2026-11-07 | M1 | Correção do painel de quiz (REQ-021, revisão do cliente): o **questionário roda no painel central** — cabeçalho do módulo (nível/BPM/gate), instrução "Responda uma questão por vez.", "Questão X de Y", enunciado e alternativas clicáveis A–D; o **painel direito** fica só com os controles (cabeçalho + link "Todos os tópicos do módulo", seletor, botão de play com `id — título`, placar e caixa de orientação "Neste exercício…") | `ModuleComponent.cpp` (`ContentView`); `PracticePanel.cpp/.h`; validado sob Xvfb (1040×680); 160/160 testes |
 | 2026-11-05 | M1 | Correção do painel de prática (REQ-021): exercício vira linha clicável com ícone de play e id/título no painel direito, como no mock-up; centro mostra só a explicação (sem repetir o id/título) | `PracticePanel.cpp/.h`; `ModuleComponent.cpp`; instalador `9f5f70e` na `test` |
 | 2026-11-05 | M1 | Conformidade com o `musica.docx`: REQ-019 (módulo abre em branco) e REQ-022 (tópico H com exercício executável); app validado contra as 9 capturas | `ModuleComponent.cpp`; `ModuleCatalog.cpp` (EX-1.7); 160/160 testes |
 | 2026-11-05 | M1 | Curadoria ampliada com as 4 apostilas novas da `adequacao` (CAGED, teoria elementar, teoria da música, regulagem); instalador de teste atualizado | `docs/MUSIC.md` §1.1; `CourseModule::sources` (7); 150/150 testes |

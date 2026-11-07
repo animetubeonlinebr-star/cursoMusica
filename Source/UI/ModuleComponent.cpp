@@ -1,6 +1,7 @@
 #include "UI/ModuleComponent.h"
 
 #include "Course/ModuleCatalog.h"
+#include "Course/QuizSession.h"
 #include "UI/Design/Theme.h"
 #include "UI/PracticePanel.h"
 
@@ -46,8 +47,23 @@ public:
         current = module;
         currentTopic = topic;
         currentExercise = exercise;
+        hoveredOption = -1;
         repaint();
     }
+
+    // Mirrors the quiz state held by the practice pane, so the centre can render
+    // the question and the clickable options (the exercise runs in the centre,
+    // the right pane keeps only the controls — REQ-021).
+    void setQuiz (const Exercise* exercise, const course::QuizState& state)
+    {
+        quizExercise = exercise;
+        quizState = state;
+        hoveredOption = -1;
+        repaint();
+    }
+
+    // The centre answers the quiz by proxy: the pane owns the session.
+    std::function<void (int)> onAnswerOption;
 
     void setLockedMessage (const juce::String& message)
     {
@@ -165,11 +181,28 @@ private:
     int exerciseDetailHeight (int width) const
     {
         int height = 0; // the id/title sits on the meta line, not in the card
+
+        if (currentExercise->isQuiz())
+        {
+            // The quiz runs in the centre (REQ-021): instruction, current
+            // question and its clickable options — no goal/check card, which
+            // would only repeat what the module header already states.
+            height += 20 + th::spacing::sm;                 // "Responda uma questão por vez."
+            height += 20;                                    // "Questão X de Y" (or its gap)
+            if (const auto* q = currentQuestion())
+                height += textHeight (th::type::makeFont (th::type::body, true), q->prompt, width);
+            height += th::spacing::sm;
+            height += quizOptionCount() * (32 + th::spacing::xs);
+            height += th::spacing::sm;
+            height += 36;                                    // verdict line
+            return height;
+        }
+
         height += 20 + textHeight (th::type::makeFont (th::type::body), currentExercise->goal, width) + 8;
         height += 20 + textHeight (th::type::makeFont (th::type::body), currentExercise->check, width) + 8;
 
         // The exercise card only explains what was proposed (REQ-021); the
-        // playable quiz lives in the right pane.
+        // playable one runs in the right pane.
         height += 36 + th::spacing::sm;
         return height;
     }
@@ -189,15 +222,19 @@ private:
 
     void paintMetaLine (juce::Graphics& g, juce::Rectangle<int> area, const CourseModule& m)
     {
+        const bool quiz = currentExercise != nullptr && currentExercise->isQuiz();
+
         juce::String text;
-        if (currentExercise != nullptr)
+        if (currentExercise != nullptr && ! quiz)
             text = currentExercise->id + " — " + currentExercise->title;
-        else if (currentTopic != nullptr)
-            text = juce::String::fromUTF8 ("Tópico ") + currentTopic->id + " — " + currentTopic->title;
-        else
+        else if (quiz || currentTopic == nullptr)
+            // The quiz keeps the module header (NÍVEL/BPM/GATE) of the mock-up,
+            // not the topic line: the question is what identifies the exercise.
             text = juce::String::fromUTF8 ("NÍVEL ") + juce::String (m.level)
                      + juce::String::fromUTF8 ("   ·   BPM META ") + juce::String (m.targetBpm)
                      + juce::String::fromUTF8 ("   ·   GATE 90%");
+        else
+            text = juce::String::fromUTF8 ("Tópico ") + currentTopic->id + " — " + currentTopic->title;
 
         g.setColour (th::colour::accentAlt);
         g.setFont (th::type::makeFont (th::type::caption, true));
@@ -435,8 +472,16 @@ private:
 
     void paintExercise (juce::Graphics& g, juce::Rectangle<int> bounds, const Exercise& exercise)
     {
+        // A quiz goes straight to the question: the module header above already
+        // states the context, so no goal/check card is repeated here (REQ-021).
+        if (exercise.isQuiz())
+        {
+            paintQuiz (g, bounds);
+            return;
+        }
+
         // The exercise id/title already sits on the meta line above (context);
-        // the card itself only explains what was proposed (REQ-021).
+        // the card explains what was proposed (REQ-021).
         g.setColour (th::colour::textPrimary);
         g.setFont (th::type::makeFont (th::type::body, true));
         g.drawText (juce::String::fromUTF8 ("Objetivo"), bounds.removeFromTop (20),
@@ -459,20 +504,158 @@ private:
                           juce::Justification::topLeft, 3);
         bounds.removeFromTop (th::spacing::md);
 
-        // Only the explanation of what was proposed lives here (REQ-021). The
-        // exercise itself — the quiz, its options and the live measurement — is
-        // run in the right pane, so the centre never duplicates the controls.
+        // A playable exercise explains only what was proposed (REQ-021); the
+        // play controls and the live measurement live in the right pane.
         g.setColour (th::colour::textDisabled);
         g.setFont (th::type::makeFont (th::type::body));
         g.drawFittedText (juce::String::fromUTF8 (
-                              "Responda no painel de prática, à direita. "
+                              "Execute no painel de prática, à direita. "
                               "Aqui fica só a explicação do que foi proposto."),
                           bounds.removeFromTop (36), juce::Justification::topLeft, 2);
+    }
+
+    // The quiz (question + options) runs in the centre: the student answers here
+    // and the right pane keeps only the controls and the scoreboard (REQ-021).
+    void paintQuiz (juce::Graphics& g, juce::Rectangle<int> bounds)
+    {
+        g.setColour (th::colour::accentAlt);
+        g.setFont (th::type::makeFont (th::type::body, true));
+        g.drawFittedText (quizInstruction(), bounds.removeFromTop (20), juce::Justification::centredLeft, 2);
+        bounds.removeFromTop (th::spacing::sm);
+
+        const auto* question = currentQuestion();
+        const int total = quizExercise != nullptr ? (int) quizExercise->quiz.size() : 0;
+
+        if (question != nullptr)
+        {
+            g.setColour (th::colour::textPrimary);
+            g.setFont (th::type::makeFont (th::type::body, true));
+            g.drawText (juce::String::fromUTF8 ("Questão ") + juce::String (quizState.currentQuestion + 1)
+                            + juce::String::fromUTF8 (" de ") + juce::String (total),
+                        bounds.removeFromTop (20), juce::Justification::centredLeft, false);
+
+            g.setColour (th::colour::textPrimary);
+            g.setFont (th::type::makeFont (th::type::body, true));
+            g.drawFittedText (question->prompt,
+                              bounds.removeFromTop (textHeight (th::type::makeFont (th::type::body, true),
+                                                                question->prompt, bounds.getWidth())),
+                              juce::Justification::topLeft, 2);
+        }
+        else
+        {
+            bounds.removeFromTop (20);
+        }
+
+        bounds.removeFromTop (th::spacing::sm);
+        layoutQuizButtons (bounds);
+
+        if (question != nullptr)
+            for (size_t i = 0; i < optionBounds.size() && i < (size_t) question->options.size(); ++i)
+            {
+                const bool hovered = (int) i == hoveredOption;
+                g.setColour (hovered ? th::colour::accentMuted : th::colour::surfaceRaised);
+                g.fillRoundedRectangle (optionBounds[i].toFloat(), th::radius::sm);
+
+                g.setColour (th::colour::textPrimary);
+                g.setFont (th::type::makeFont (th::type::body, hovered));
+                g.drawFittedText (juce::String::charToString ((juce::juce_wchar) ("ABCD"[i % 4]))
+                                      + ") " + question->options[(int) i],
+                                  optionBounds[i].reduced (10, 0), juce::Justification::centredLeft, 1);
+            }
+
+        if (! optionBounds.empty())
+            bounds.removeFromTop ((int) optionBounds.size() * (32 + th::spacing::xs));
+        bounds.removeFromTop (th::spacing::sm);
+
+        // The verdict replaces the instruction once the quiz is over.
+        if (quizState.finished)
+        {
+            g.setColour (quizState.passed ? th::colour::success : th::colour::danger);
+            g.setFont (th::type::makeFont (th::type::body, true));
+            g.drawFittedText (quizState.message, bounds.removeFromTop (36),
+                              juce::Justification::topLeft, 2);
+        }
+    }
+
+    juce::String quizInstruction() const
+    {
+        return juce::String::fromUTF8 ("Responda uma questão por vez.");
+    }
+
+    const QuizQuestion* currentQuestion() const
+    {
+        if (quizExercise == nullptr)
+            return nullptr;
+
+        const int i = quizState.currentQuestion;
+        if (i < 0 || i >= (int) quizExercise->quiz.size())
+            return nullptr;
+
+        return &quizExercise->quiz[(size_t) i];
+    }
+
+    // Lays out the clickable option rows; they are painted (not child buttons)
+    // so the layout follows the painted flow. `optionBounds` is filled here and
+    // read back by the mouse handlers.
+    void layoutQuizButtons (juce::Rectangle<int> area)
+    {
+        optionBounds.clear();
+        for (int i = 0; i < quizOptionCount(); ++i)
+        {
+            optionBounds.push_back (area.removeFromTop (32));
+            area.removeFromTop (th::spacing::xs);
+        }
+    }
+
+    int quizOptionCount() const
+    {
+        const auto* question = currentQuestion();
+        return question != nullptr ? question->options.size() : 0;
+    }
+
+    void mouseDown (const juce::MouseEvent& e) override
+    {
+        for (size_t i = 0; i < optionBounds.size(); ++i)
+        {
+            if (optionBounds[i].contains (e.getPosition()))
+            {
+                if (onAnswerOption != nullptr)
+                    onAnswerOption ((int) i);
+                return;
+            }
+        }
+    }
+
+    void mouseMove (const juce::MouseEvent& e) override
+    {
+        int hovered = -1;
+        for (size_t i = 0; i < optionBounds.size(); ++i)
+            if (optionBounds[i].contains (e.getPosition()))
+                hovered = (int) i;
+
+        if (hovered != hoveredOption)
+        {
+            hoveredOption = hovered;
+            repaint();
+        }
+    }
+
+    void mouseExit (const juce::MouseEvent&) override
+    {
+        if (hoveredOption != -1)
+        {
+            hoveredOption = -1;
+            repaint();
+        }
     }
 
     const CourseModule* current = nullptr;
     const LessonBlock* currentTopic = nullptr;
     const Exercise* currentExercise = nullptr;
+    const Exercise* quizExercise = nullptr;
+    course::QuizState quizState;
+    std::vector<juce::Rectangle<int>> optionBounds;
+    int hoveredOption = -1;
     bool showOverviewLessons = false;
     juce::String lockedMessage;
 };
@@ -665,6 +848,15 @@ ModuleComponent::ModuleComponent (AudioEngine& engine)
         refreshSubjectTree();
     };
     practicePanel->onExerciseSelected = [this] (const Exercise* exercise) { showExercise (exercise); };
+
+    // The quiz runs in the centre: mirror its state whenever it advances, and
+    // route the answer chosen there back to the session owned by the pane.
+    practicePanel->onQuizChanged = [this] { syncQuizToCentre(); };
+    contentView->onAnswerOption = [this] (int optionIndex)
+    {
+        if (practicePanel != nullptr)
+            practicePanel->answerQuizOption (optionIndex);
+    };
     addAndMakeVisible (*practicePanel);
 
     hintLabel.setFont (th::type::makeFont (th::type::caption));
@@ -856,7 +1048,27 @@ void ModuleComponent::showExercise (const Exercise* exercise)
 void ModuleComponent::updateContent()
 {
     contentView->setSelection (selection.module, selection.topic, selection.exercise);
+    syncQuizToCentre();
     contentView->setSize (contentViewport.getMaximumVisibleWidth(), contentView->getRequiredHeight());
+}
+
+void ModuleComponent::syncQuizToCentre()
+{
+    if (practicePanel == nullptr)
+        return;
+
+    // The quiz is demonstrated in the centre only when the armed exercise is a
+    // questionnaire; any other exercise (or none) clears the quiz state.
+    if (selection.exercise != nullptr && selection.exercise->isQuiz())
+    {
+        contentView->setQuiz (selection.exercise, practicePanel->getQuizState());
+        contentView->setSize (contentViewport.getMaximumVisibleWidth(), contentView->getRequiredHeight());
+    }
+    else
+    {
+        contentView->setQuiz (nullptr, {});
+        contentView->setSize (contentViewport.getMaximumVisibleWidth(), contentView->getRequiredHeight());
+    }
 }
 
 void ModuleComponent::paint (juce::Graphics& g)

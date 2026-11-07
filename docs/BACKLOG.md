@@ -32,28 +32,30 @@ Dependências: `ModuleComponent` (estado de seleção por módulo). Hoje
 `itemOpennessChanged`/`itemClicked` chamam `selectTopic(number, 0)` — é isso que
 precisa deixar de acontecer no abrir.
 
-### [CM-019] Exercício no painel direito, explicação no centro — valor: H — tamanho: S — status: **done**
+### [CM-019] Exercício no painel central, controles no painel direito — valor: H — tamanho: S — status: **done** (revisado 2026-11-07)
 Requisito: REQ-021.
-Como um aluno de guitarra, eu quero ver o exercício a executar no painel da
-direita e apenas a explicação do proposto no centro, para que eu saiba o que
-tocar sem confundir a instrução com o executor.
+Como um aluno de guitarra, eu quero executar o exercício no painel central e ver
+apenas os controles e o placar no painel da direita, para que a questão e as
+alternativas fiquem no palco principal, sem disputar espaço com os controles.
 
 Critérios de aceite:
-- Dado um exercício selecionado, quando o painel central o demonstra, então ele
-  mostra **apenas** a explicação (objetivo, como fazer), sem o executor/controles
-  de execução.
-- Dado o mesmo exercício, então o **painel direito** é quem oferece o executor
-  (start/finish/metrônomo ou as opções do questionário).
-- Dado o estado atual, quando um exercício é demonstrado no centro, então nenhum
-  controle executável aparece no centro.
+- Dado o questionário armado, quando o centro o demonstra, então ele mostra o
+  cabeçalho do módulo (nível/BPM/gate), a instrução "Responda uma questão por
+  vez.", a questão atual ("Questão X de Y") e as alternativas clicáveis (A–D).
+- Dado o mesmo exercício, então o **painel direito** mantém apenas os controles
+  (seletor, botão de play com `id — título`, placar "Acertos x/y · aproveitamento
+  z%") e a caixa de orientação ("Neste exercício…").
+- Dado um exercício tocável (não questionário), então o centro mostra só a
+  explicação (objetivo, como o app verifica) e o executor fica à direita.
 
-Dependências: `PracticePanel` (já tem o executor), `ModuleComponent::paintExercise`.
+Dependências: `PracticePanel` (dono da sessão de quiz), `ModuleComponent::ContentView`.
 
-Implementado: o painel direito apresenta o exercício armado como linha clicável
-com ícone de play e `id — título` (igual ao mock-up do `musica.docx`), que
-dispara a demonstração no centro; o centro mostra só objetivo e como o app
-verifica, sem repetir o `id — título` nem expor controles de execução
-(`PracticePanel::ExerciseRowButton`; instalador `9f5f70e` na `test`).
+Implementado (2026-11-07, revisão a pedido do cliente): o centro renderiza o
+questionário — cabeçalho do módulo, instrução, "Questão X de Y", enunciado e as
+alternativas clicáveis — e responde por procuração à sessão do `PracticePanel`
+(`ContentView::onAnswerOption`); o painel direito passa a apresentar o cabeçalho
+com o link "Todos os tópicos do módulo", o seletor, o botão de play, o placar e a
+caixa de orientação, sem repetir a questão.
 
 ### [CM-020] Um exercício executável por tópico do Módulo 1 — valor: H — tamanho: L — status: **done** (Módulo 1)
 Requisito: REQ-022 (com REQ-006/REQ-008). Conteúdo por **musician + pm +

@@ -52,6 +52,21 @@ PracticePanel::PracticePanel (AudioEngine& engine)
     headingLabel.setColour (juce::Label::textColourId, th::colour::textPrimary);
     addAndMakeVisible (headingLabel);
 
+    // Clears the topic filter, so the pane lists every exercise of the module
+    // again (the "Todos os tópicos do módulo" link of the mock-up).
+    topicLink.setColour (juce::HyperlinkButton::textColourId, th::colour::accentAlt);
+    topicLink.setFont (th::type::makeFont (th::type::caption, false), false,
+                       juce::Justification::centredRight);
+    topicLink.onClick = [this]
+    {
+        topicFilter = {};
+        selectedExerciseIndex = 0;
+        session = {};
+        quiz = {};
+        refreshExerciseList();
+    };
+    addAndMakeVisible (topicLink);
+
     topicLabel.setFont (th::type::makeFont (th::type::caption));
     topicLabel.setColour (juce::Label::textColourId, th::colour::accentAlt);
     addAndMakeVisible (topicLabel);
@@ -59,8 +74,14 @@ PracticePanel::PracticePanel (AudioEngine& engine)
     exerciseBox.onChange = [this]
     {
         selectedExerciseIndex = exerciseBox.getSelectedItemIndex();
+        session = {};
+        quiz = {};
         refreshExerciseRow();
         updateApplication();
+
+        // Arming another exercise also demonstrates it in the centre.
+        if (onExerciseSelected != nullptr)
+            onExerciseSelected (selectedExercise());
     };
     addAndMakeVisible (exerciseBox);
 
@@ -68,21 +89,26 @@ PracticePanel::PracticePanel (AudioEngine& engine)
     {
         if (onExerciseSelected != nullptr)
             onExerciseSelected (selectedExercise());
+
+        // Clicking the row of a finished quiz starts it over.
+        if (isQuizSelected() && quiz.getState().finished)
+            restartQuiz();
     };
     addAndMakeVisible (demoButton);
 
-    // Measurement: always on top of the application area.
+    // Scoreboard: Acertos x/y · aproveitamento z%.
     measurementLabel.setFont (th::type::makeFont (th::type::caption));
     measurementLabel.setColour (juce::Label::textColourId, th::colour::textSecondary);
     measurementLabel.setJustificationType (juce::Justification::topLeft);
     addAndMakeVisible (measurementLabel);
 
-    feedbackLabel.setFont (th::type::makeFont (th::type::body));
-    feedbackLabel.setColour (juce::Label::textColourId, th::colour::textSecondary);
-    feedbackLabel.setJustificationType (juce::Justification::topLeft);
-    addAndMakeVisible (feedbackLabel);
+    // Guidance box: what the student must do in the armed exercise.
+    guidanceLabel.setFont (th::type::makeFont (th::type::body));
+    guidanceLabel.setColour (juce::Label::textColourId, th::colour::textSecondary);
+    guidanceLabel.setJustificationType (juce::Justification::topLeft);
+    addAndMakeVisible (guidanceLabel);
 
-    // Application: playable exercise controls.
+    // Playable-exercise controls (the quiz runs in the centre pane).
     metronomeButton.onClick = [this] { toggleMetronome(); };
     addAndMakeVisible (metronomeButton);
 
@@ -96,16 +122,25 @@ PracticePanel::PracticePanel (AudioEngine& engine)
     bpmLabel.setColour (juce::Label::textColourId, th::colour::textSecondary);
     addAndMakeVisible (bpmLabel);
 
-    // Application: quiz.
-    quizPrompt.setFont (th::type::makeFont (th::type::body, true));
-    quizPrompt.setColour (juce::Label::textColourId, th::colour::textPrimary);
-    quizPrompt.setJustificationType (juce::Justification::topLeft);
-    addAndMakeVisible (quizPrompt);
-
     updateApplication();
 }
 
 PracticePanel::~PracticePanel() = default;
+
+const course::QuizState& PracticePanel::getQuizState() const { return quiz.getState(); }
+
+void PracticePanel::answerQuizOption (int optionIndex)
+{
+    if (! isQuizSelected())
+        return;
+
+    quiz.answer (optionIndex);
+    updateButtonStates();
+    updateFeedback();
+
+    if (onQuizChanged != nullptr)
+        onQuizChanged();
+}
 
 void PracticePanel::setModule (const CourseModule* module)
 {
@@ -160,9 +195,12 @@ void PracticePanel::refreshExerciseList()
         exerciseBox.setSelectedId (1, juce::dontSendNotification);
 
     topicLabel.setText (topicFilter.isEmpty()
-                            ? juce::String::fromUTF8 ("Todos os tópicos do módulo")
+                            ? juce::String()
                             : juce::String::fromUTF8 ("Tópico ") + topicFilter,
                         juce::dontSendNotification);
+
+    // The link is only meaningful while a topic filter is active.
+    topicLink.setVisible (topicFilter.isNotEmpty());
 
     refreshExerciseRow();
     updateApplication();
@@ -211,12 +249,12 @@ void PracticePanel::updateApplication()
     const auto* exercise = selectedExercise();
     const bool quizMode = exercise != nullptr && exercise->isQuiz();
 
-    // Playable-exercise controls vs. quiz widgets.
+    // Playable-exercise controls (the quiz runs in the centre pane, which shows
+    // the question and the options; this pane keeps only the scoreboard).
     metronomeButton.setVisible (! quizMode);
     startButton.setVisible (! quizMode);
     finishButton.setVisible (! quizMode);
     bpmLabel.setVisible (! quizMode);
-    quizPrompt.setVisible (quizMode);
 
     if (quizMode)
     {
@@ -228,9 +266,6 @@ void PracticePanel::updateApplication()
         resized();
         return;
     }
-
-    for (auto* button : quizOptions)
-        button->setVisible (false);
 
     updateButtonStates();
     updateFeedback();
@@ -247,18 +282,15 @@ void PracticePanel::toggleMetronome()
 
 void PracticePanel::startSelectedExercise()
 {
-    if (isQuizSelected())
-    {
-        quiz.restart();
-        updateButtonStates();
-        updateFeedback();
-        resized();
-        return;
-    }
-
     const auto* exercise = selectedExercise();
     if (exercise == nullptr || currentModule == nullptr)
         return;
+
+    if (exercise->isQuiz())
+    {
+        restartQuiz();
+        return;
+    }
 
     session.start (*exercise, currentModule->targetBpm, currentModule->onGridTarget);
     audioEngine.resetNoteCapture();
@@ -289,12 +321,17 @@ void PracticePanel::finishExercise()
     }
 }
 
-void PracticePanel::answerQuiz (int optionIndex)
+void PracticePanel::restartQuiz()
 {
-    quiz.answer (optionIndex);
+    if (! isQuizSelected())
+        return;
+
+    quiz.restart();
     updateButtonStates();
     updateFeedback();
-    resized();
+
+    if (onQuizChanged != nullptr)
+        onQuizChanged();
 }
 
 void PracticePanel::poll()
@@ -324,30 +361,30 @@ void PracticePanel::updateFeedback()
                                     + juce::String::fromUTF8 ("   ·   aproveitamento ") + percent (q.accuracy),
                                   juce::dontSendNotification);
 
-        juce::String prompt;
+        guidanceLabel.setColour (juce::Label::textColourId, th::colour::textSecondary);
 
-        if (const auto* question = quiz.currentQuestion())
+        const int moduleNumber = currentModule != nullptr ? currentModule->number : 1;
+        const juce::String part = (exercise != nullptr && exercise->lessonId.isNotEmpty())
+                                    ? exercise->lessonId : juce::String();
+
+        juce::String guidance = juce::String::fromUTF8 ("Neste exercício, você deverá responder as questões "
+                                                        "com base no material do Módulo ")
+                                  + juce::String (moduleNumber);
+        if (part.isNotEmpty())
+            guidance += juce::String::fromUTF8 (", parte ") + part;
+
+        guidance += juce::String::fromUTF8 (".\nResponda uma questão por vez no painel central.");
+        guidance += juce::String::fromUTF8 ("\n\nQuestões: ") + juce::String (total);
+
+        guidanceLabel.setText (guidance, juce::dontSendNotification);
+
+        if (q.finished)
         {
-            prompt = juce::String::fromUTF8 ("Questão ") + juce::String (q.currentQuestion + 1)
-                       + "/" + juce::String (total) + "\n" + question->prompt;
-        }
-        else
-        {
-            prompt = q.message.isNotEmpty() ? q.message
-                                            : juce::String::fromUTF8 ("Questionário concluído.");
+            guidanceLabel.setColour (juce::Label::textColourId,
+                                     q.passed ? th::colour::success : th::colour::danger);
+            guidanceLabel.setText (q.message, juce::dontSendNotification);
         }
 
-        quizPrompt.setText (prompt, juce::dontSendNotification);
-
-        feedbackLabel.setColour (juce::Label::textColourId,
-                                 q.finished
-                                   ? (q.passed ? th::colour::success : th::colour::danger)
-                                   : th::colour::textSecondary);
-        feedbackLabel.setText (q.finished
-                                   ? (q.passed ? juce::String::fromUTF8 ("Aprovado no questionário (≥90%).")
-                                               : juce::String::fromUTF8 ("Refaça: acerto abaixo de 90%."))
-                                   : juce::String::fromUTF8 ("Responda uma questão por vez."),
-                               juce::dontSendNotification);
         return;
     }
 
@@ -357,7 +394,7 @@ void PracticePanel::updateFeedback()
     {
         measurementLabel.setText (juce::String::fromUTF8 ("Nota: --   ·   acertos 0/0   ·   grade --%"),
                                   juce::dontSendNotification);
-        feedbackLabel.setText (juce::String::fromUTF8 ("Selecione um exercício e toque Iniciar."),
+        guidanceLabel.setText (juce::String::fromUTF8 ("Selecione um exercício e toque Iniciar."),
                                juce::dontSendNotification);
         return;
     }
@@ -369,54 +406,25 @@ void PracticePanel::updateFeedback()
                                 + juce::String::fromUTF8 ("   ·   grade ") + percent (state.onGridRatio),
                               juce::dontSendNotification);
 
-    feedbackLabel.setText (state.finished ? state.message
-                                          : juce::String::fromUTF8 ("Acerto ")
-                                              + percent (state.accuracy) + juce::String::fromUTF8 (" até agora."),
-                           juce::dontSendNotification);
-    feedbackLabel.setColour (juce::Label::textColourId,
+    guidanceLabel.setColour (juce::Label::textColourId,
                              state.finished
                                ? (state.passed ? th::colour::success : th::colour::danger)
                                : th::colour::textSecondary);
+    guidanceLabel.setText (state.finished
+                               ? state.message
+                               : juce::String::fromUTF8 ("Acerto ")
+                                   + percent (state.accuracy) + juce::String::fromUTF8 (" até agora."),
+                           juce::dontSendNotification);
 }
 
 void PracticePanel::updateButtonStates()
 {
-    const bool quizMode = isQuizSelected();
-
-    if (quizMode)
+    if (isQuizSelected())
     {
-        const auto& q = quiz.getState();
-
-        // Rebuild the option buttons for the question currently on screen.
-        const auto* question = quiz.currentQuestion();
-        const int wanted = question != nullptr ? question->options.size() : 0;
-
-        while (quizOptions.size() > wanted)
-            quizOptions.removeLast();
-
-        for (int i = quizOptions.size(); i < wanted; ++i)
-        {
-            auto* button = quizOptions.add (new juce::TextButton());
-            button->setColour (juce::TextButton::buttonColourId, th::colour::surfaceRaised);
-            button->onClick = [this, i] { answerQuiz (i); };
-            addAndMakeVisible (button);
-        }
-
-        for (int i = 0; i < quizOptions.size(); ++i)
-        {
-            if (question != nullptr && i < question->options.size())
-                quizOptions[i]->setButtonText (juce::String::charToString ("ABCD"[i % 4])
-                                                 + ") " + question->options[i]);
-            quizOptions[i]->setVisible (question != nullptr);
-        }
-
-        startButton.setButtonText (q.finished ? juce::String::fromUTF8 ("Reiniciar")
-                                              : juce::String::fromUTF8 ("Iniciar"));
+        // The question and its options live in the centre pane; the restart is
+        // driven from there too. Here only the scoreboard is refreshed.
         return;
     }
-
-    for (auto* button : quizOptions)
-        button->setVisible (false);
 
     const bool running = session.isRunning();
     startButton.setEnabled (! running);
@@ -435,7 +443,18 @@ void PracticePanel::resized()
 {
     auto bounds = getLocalBounds().reduced (th::spacing::md);
 
-    headingLabel.setBounds (bounds.removeFromTop (20));
+    // Heading with the "Todos os tópicos do módulo" link on its right.
+    auto heading = bounds.removeFromTop (20);
+    if (topicLink.isVisible())
+    {
+        topicLink.setBounds (heading.removeFromRight (170));
+        headingLabel.setBounds (heading);
+    }
+    else
+    {
+        headingLabel.setBounds (heading);
+    }
+
     topicLabel.setBounds (bounds.removeFromTop (16));
     bounds.removeFromTop (th::spacing::xs);
 
@@ -444,28 +463,17 @@ void PracticePanel::resized()
     demoButton.setBounds (bounds.removeFromTop (30));
     bounds.removeFromTop (th::spacing::sm);
 
-    // Measurement (Nota / Acertos / Grade), always present.
+    // Scoreboard (Acertos x/y · aproveitamento z%), always present.
     measurementLabel.setBounds (bounds.removeFromTop (20));
-    feedbackLabel.setBounds (bounds.removeFromTop (44));
+    bounds.removeFromTop (th::spacing::xs);
+
+    // Guidance box: what the student must do in the armed exercise.
+    guidanceLabel.setBounds (bounds.removeFromTop (72));
     bounds.removeFromTop (th::spacing::sm);
 
-    // Application below the measurement.
+    // Playable-exercise controls (absent for a quiz, which runs in the centre).
     if (isQuizSelected())
-    {
-        quizPrompt.setBounds (bounds.removeFromTop (56));
-        bounds.removeFromTop (th::spacing::xs);
-
-        const int perButton = 30;
-        for (auto* button : quizOptions)
-        {
-            button->setBounds (bounds.removeFromTop (perButton));
-            bounds.removeFromTop (th::spacing::xs);
-        }
-
-        bounds.removeFromTop (th::spacing::xs);
-        startButton.setBounds (bounds.removeFromTop (30).removeFromLeft (140));
         return;
-    }
 
     auto row = bounds.removeFromTop (30);
     metronomeButton.setBounds (row.removeFromLeft (150));
