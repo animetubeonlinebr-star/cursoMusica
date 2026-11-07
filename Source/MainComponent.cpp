@@ -130,6 +130,19 @@ void MainComponent::paint (juce::Graphics& g)
 
 void MainComponent::resized()
 {
+    // The overlay screens (Módulos, Afinador, Configurações) cover the whole
+    // window: they are created on demand, so they must be re-fitted here every
+    // time the window is resized or maximised, or they keep the size they had
+    // when they were opened.
+    if (modules != nullptr)
+        modules->setBounds (getLocalBounds());
+
+    if (tuner != nullptr)
+        tuner->setBounds (getLocalBounds());
+
+    if (settings != nullptr)
+        settings->setBounds (getLocalBounds());
+
     auto bounds = getLocalBounds().reduced (th::spacing::lg);
 
     auto header = bounds.removeFromTop (64);

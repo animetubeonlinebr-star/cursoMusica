@@ -38,6 +38,8 @@ private:
             setUsingNativeTitleBar (true);
             setContentOwned (new MainComponent(), true);
             setResizable (true, false);
+            // Below this the three-pane study layout clips its own header.
+            setResizeLimits (980, 660, 10000, 10000);
             centreWithSize (getWidth(), getHeight());
             setVisible (true);
         }
