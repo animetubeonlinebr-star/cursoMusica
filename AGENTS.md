@@ -88,13 +88,14 @@ antigas.
 - [x] Menu de configuração: dispositivos, entrada, saída, buffer
 - [x] Host VST3 com scan, cadeia na entrada e editor de plugin
 - [x] Afinador transversal com referência A4 editável (REQ-017)
-- [x] Módulo 1 jogável no app: explicação A–I (inclui rítmica), CAGED, trilha de prática, exercícios EX-1.1–EX-1.10 e gate (REQ-003/REQ-007/REQ-018); apostilas curadas citadas (REQ-006)
+- [x] Módulo 1 jogável no app: explicação A–I (inclui rítmica), CAGED, trilha de prática, exercícios EX-1.1–EX-1.29 + gate (REQ-003/REQ-007/REQ-018); apostilas curadas citadas (REQ-006)
+- [x] Explicação completa por tópico A–I (≥5 páginas cada) em `Source/Course/Content/Topic*.cpp`, e ≥3 exercícios por tópico (pedido do cliente, 2026-11-04)
 - [x] Execução por seleção de tópico: menu de módulos expansível, explicação detalhada do tópico no centro e prática filtrada à direita (REQ-003/REQ-008)
 - [x] Questionário do Módulo 1 (7 questões, uma por tela) e QuizSession com gate de 90% (REQ-006)
 - [x] Motor de medição: NoteMath, ExerciseEvaluator (LCS + acordes), TempoGrid, PracticeSession (CM-008)
 - [x] Metrônomo RT-safe com BPM meta e grade (CM-014)
 - [x] Gate de progressão linear: módulo N+1 só abre com ≥90% no gate de N; progresso persistido (REQ-002/REQ-009)
-- [x] Testes unitários da lógica pura (180 checagens) rodando no CI
+- [x] Testes unitários da lógica pura (217 checagens) rodando no CI
 - [x] Build validada no Linux: binário gerado, UI renderiza
 - [ ] Ligar UI principal à engine (nível e afinação reais em vez de dummy)
 - [x] Ajustes do `musica.docx` (CM-018..CM-021): módulo abre em branco e mantém o tópico no mesmo módulo (REQ-019/020), ≥1 exercício por tópico A–I (REQ-022), classificação correta de entradas/saídas de áudio (REQ-023)
@@ -272,6 +273,7 @@ Uma entrega só é "pronta" quando:
 | 2026-11-07 | devops | **Instalador de teste republicado (responsividade)**: push de `d433a90` em `test` rodou o `release.yml` (run `42401301219`, success) e um `workflow_dispatch` com `commit_installer=true` (run `42401311382`, success) commitou o instalador (commit `24ca1b3`, 1.990.974 bytes, PE32 `0x14c`, sha256 `846b4cd3…`) | Versão de teste com a responsividade corrigida entregue na branch `test` (REQ-013); `main` intocado |
 | 2026-11-07 | developer + ux-ui-designer | **Fluxo da tela Módulos por etapas (REQ-019/020/021, revisão do `musica.docx`)**: o painel direito virou estritamente dependente do esquerdo — ao abrir o módulo mostra só o cabeçalho "Exercícios práticos" (image3), ao clicar num tópico revela o seletor com o primeiro exercício como dica (image4) e só **arma** o exercício quando o aluno escolhe no combobox, revelando placar e orientação (image6). `PracticePanel` ganhou `topicChosen`/`exerciseArmed`; o combobox usa `setTextWhenNothingSelected` (sem pré-seleção) para que escolher o primeiro item dispare `onChange`. `CourseModule::usesTempo` (novo) faz o Módulo 1 imprimir traço em BPM META no cabeçalho **e** no painel de prática, conforme pedido ("o BPM nesse módulo não será utilizado"). Validado sob Xvfb (1040×680) nos 5 estados (image3→image4→image5→image6→image8); suíte em **180 checagens verdes** | Fecha o comportamento errado apontado ("ao abrir Módulos o quiz já aparece aberto"); painel direito só se popula após a seleção de tópico/exercício |
 | 2026-11-07 | devops | **Instalador de teste republicado (fluxo da tela Módulos)**: backup `backup/pre-modulos-flow-test` em `1ae25ff` (regra §11); `main` (`0d30ecb`) já era ancestral de `test`, sem merge a fazer; push de `a0bc0a7` em `test` rodou o `release.yml` (run `43087399261`, success) e um `workflow_dispatch` com `commit_installer=true` (run `43088022705`, success) commitou o instalador (commit `c0f6853`, 1.991.722 bytes, PE32 `0x14c`, sha256 `4298d2c7…`), byte-a-byte idêntico ao artifact `Instalador-CursoMusica-1` do run | Versão de teste com a correção do painel de Módulos entregue na branch `test` (REQ-013); `main` intocado |
+| 2026-11-07 | musician + developer | **Conteúdo completo do Módulo 1 (pedido do cliente)**: cada tópico A–I ganhou a explicação completa (≥5 páginas, escrita para iniciante) em `Source/Course/Content/TopicA.cpp` … `TopicI.cpp`, extraída dos PDFs curados (CAGED de Marcelo Mello, Teoria Elementar de Lacerda, Teoria da Música de Bohumil Med, Fraseado Melódico e o manual de regulagem), com `LessonBlock::detail` composto por `content::topicX()`; o catálogo passou de 10 para **29 exercícios numerados + o gate**, com **≥3 exercícios por tópico** A–I (questionários verificáveis + exercícios tocáveis no detector); `docs/MUSIC.md` §1.2/§1.3 e `AGENTS.md` atualizados; suíte em **217 checagens verdes**, incluindo um teste que impõe ≥5 páginas (`content::minTopicChars`) e ≥3 exercícios por tópico | Fecha o pedido do cliente ("expandir o conteúdo do curso" e "≥3 exercícios por tópico"); painel central passa a ensinar cada assunto de verdade |
 
 ## 8. Convenções de código
 

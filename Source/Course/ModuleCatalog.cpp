@@ -1,5 +1,6 @@
 #include "Course/ModuleCatalog.h"
 
+#include "Course/Content/Topics.h"
 #include "Course/NoteMath.h"
 
 namespace cursomusica
@@ -76,155 +77,29 @@ namespace
                 "trastes, casas, cordas (6ª a 1ª), captadores, volume e tom.",
                 "No violão: a boca, o tampo e as cordas de nylon — som mais doce e "
                 "menor tensão que as cordas de aço da guitarra."
-            }), {
-                ContentItem::paragraph (juce::String::fromUTF8 (
-                    "A guitarra e o violão são instrumentos de cordas. Compartilham a "
-                    "construção geral, mas diferem na forma de produzir e amplificar o som: "
-                    "o violão usa a caixa de ressonância; a guitarra elétrica depende de "
-                    "captação e amplificação.")),
-                ContentItem::heading (juce::String::fromUTF8 ("O corpo")),
-                ContentItem::paragraph (juce::String::fromUTF8 (
-                    "Parte principal e mais volumosa. É nele que ficam os componentes que "
-                    "produzem e controlam o som.")),
-                ContentItem::bullet (juce::String::fromUTF8 (
-                    "No violão: a caixa de ressonância amplifica naturalmente a vibração das "
-                    "cordas. A vibração é transmitida ao cavalete e ao tampo, movimentando o "
-                    "ar dentro da caixa.")),
-                ContentItem::bullet (juce::String::fromUTF8 (
-                    "Na guitarra elétrica: corpo geralmente maciço; sustenta ponte, "
-                    "captadores e controles, e depende do sistema de captação para soar.")),
-                ContentItem::callout (juce::String::fromUTF8 (
-                    "Para memorizar: o corpo é a estrutura principal; no violão acústico, "
-                    "também é a caixa de ressonância.")),
-                ContentItem::heading (juce::String::fromUTF8 ("O braço")),
-                ContentItem::paragraph (juce::String::fromUTF8 (
-                    "Parte alongada que liga o corpo às tarraxas. Sobre ele ficam a escala, "
-                    "os trastes e as casas. É onde a mão de execução posiciona os dedos.")),
-                ContentItem::bullet (juce::String::fromUTF8 (
-                    "Pressionar a corda numa casa muda o comprimento vibrante e, portanto, a "
-                    "altura da nota.")),
-                ContentItem::bullet (juce::String::fromUTF8 (
-                    "Corda solta = nota mais grave; avançar pelas casas deixa a nota "
-                    "progressivamente mais aguda.")),
-                ContentItem::callout (juce::String::fromUTF8 (
-                    "Para memorizar: o braço permite posicionar os dedos e modificar as notas.")),
-                ContentItem::heading (juce::String::fromUTF8 ("O cavalete ou ponte")),
-                ContentItem::paragraph (juce::String::fromUTF8 (
-                    "Sustenta as cordas sobre o corpo e transmite as vibrações ao tampo.")),
-                ContentItem::heading (juce::String::fromUTF8 ("O rastilho")),
-                ContentItem::paragraph (juce::String::fromUTF8 (
-                    "Encaixado no cavalete, serve de apoio às cordas no lado do corpo.")),
-                ContentItem::bullet (juce::String::fromUTF8 ("Determina a altura das cordas em relação ao corpo.")),
-                ContentItem::bullet (juce::String::fromUTF8 ("Ajuda a transmitir vibrações e participa da entonação.")),
-                ContentItem::callout (juce::String::fromUTF8 (
-                    "Altura inadequada deixa o instrumento desconfortável de tocar.")),
-                ContentItem::heading (juce::String::fromUTF8 ("A pestana")),
-                ContentItem::paragraph (juce::String::fromUTF8 (
-                    "Pequena peça na extremidade superior do braço, junto à cabeça, com sulcos "
-                    "que mantêm as cordas separadas e posicionadas.")),
-                ContentItem::bullet (juce::String::fromUTF8 ("Mantém o espaçamento entre as cordas.")),
-                ContentItem::bullet (juce::String::fromUTF8 ("Determina a altura das cordas no início do braço.")),
-                ContentItem::bullet (juce::String::fromUTF8 ("Apoia as cordas quando tocadas soltas.")),
-                ContentItem::callout (juce::String::fromUTF8 (
-                    "Pestana fica no início da escala (junto às tarraxas); rastilho fica no "
-                    "cavalete, sobre o corpo. Funções parecidas, posições diferentes.")),
-                ContentItem::heading (juce::String::fromUTF8 ("As tarraxas")),
-                ContentItem::paragraph (juce::String::fromUTF8 (
-                    "Ficam na cabeça do instrumento e afinam as cordas; cada corda tem a sua.")),
-                ContentItem::bullet (juce::String::fromUTF8 ("Aumentar a tensão deixa a nota mais aguda.")),
-                ContentItem::bullet (juce::String::fromUTF8 ("Diminuir a tensão deixa a nota mais grave.")),
-                ContentItem::callout (juce::String::fromUTF8 (
-                    "Para memorizar: as tarraxas controlam a tensão e a afinação das cordas.")),
-                ContentItem::heading (juce::String::fromUTF8 ("Os trastes e as casas")),
-                ContentItem::paragraph (juce::String::fromUTF8 (
-                    "Trastes são as barras metálicas transversais sobre a escala; casas são os "
-                    "espaços entre dois trastes. Não confunda: traste é a barra, casa é o espaço.")),
-                ContentItem::bullet (juce::String::fromUTF8 (
-                    "Cada casa corresponde a um semitom na afinação convencional.")),
-                ContentItem::table (juce::StringArray { "Posição", "Nota (corda Mi)" },
-                    { juce::StringArray { "Corda solta", "Mi" },
-                      juce::StringArray { "1ª casa", "Fá" },
-                      juce::StringArray { "2ª casa", "Fá sustenido" },
-                      juce::StringArray { "3ª casa", "Sol" },
-                      juce::StringArray { "4ª casa", "Sol sustenido" },
-                      juce::StringArray { "5ª casa", "Lá" } }),
-                ContentItem::callout (juce::String::fromUTF8 (
-                    "Para memorizar: as casas são os espaços onde posicionamos os dedos.")),
-                ContentItem::heading (juce::String::fromUTF8 ("As cordas: nylon e aço")),
-                ContentItem::paragraph (juce::String::fromUTF8 (
-                    "A corda vibra e produz uma frequência que depende do comprimento vibrante, "
-                    "da tensão e da massa por unidade de comprimento. O par guitarra/violão "
-                    "costuma ter seis cordas.")),
-                ContentItem::bullet (juce::String::fromUTF8 (
-                    "Nylon (violão clássico): toque mais macio, menor tensão, timbre mais "
-                    "suave — associado a clássico, MPB e bossa nova.")),
-                ContentItem::bullet (juce::String::fromUTF8 (
-                    "Aço (guitarra e violões de aço): timbre mais brilhante, mais agudos, "
-                    "toque mais rígido e maior tensão; essencial para os captadores magnéticos.")),
-                ContentItem::table (juce::StringArray { "Característica", "Nylon", "Aço" },
-                    { juce::StringArray { "Timbre", "Mais suave", "Mais brilhante" },
-                      juce::StringArray { "Toque", "Geralmente mais macio", "Geralmente mais firme" },
-                      juce::StringArray { "Uso tradicional", "Violão clássico", "Guitarra e violão de aço" },
-                      juce::StringArray { "Material", "Polímeros sintéticos", "Metal" },
-                      juce::StringArray { "Captação magnética", "Não adequada", "Adequada" } }),
-                ContentItem::callout (juce::String::fromUTF8 (
-                    "Nunca coloque cordas de aço num violão feito para nylon: a tensão pode "
-                    "danificar o instrumento.")),
-                ContentItem::heading (juce::String::fromUTF8 ("Os captadores")),
-                ContentItem::paragraph (juce::String::fromUTF8 (
-                    "Componentes eletrônicos das guitarras: transformam a vibração das cordas "
-                    "metálicas em sinal elétrico, que segue para o amplificador.")),
-                ContentItem::bullet (juce::String::fromUTF8 (
-                    "Single coil: uma bobina; som mais brilhante e definido, sujeito a ruído.")),
-                ContentItem::bullet (juce::String::fromUTF8 (
-                    "Humbucker: duas bobinas; som mais encorpado, boa resposta com distorção e "
-                    "menos ruído.")),
-                ContentItem::heading (juce::String::fromUTF8 ("Controle de volume e de tom")),
-                ContentItem::bullet (juce::String::fromUTF8 (
-                    "Volume: regula a intensidade do sinal enviado pelo instrumento.")),
-                ContentItem::bullet (juce::String::fromUTF8 (
-                    "Tom (tone): na maioria das guitarras passivas, reduz os agudos — tom aberto "
-                    "soa brilhante, tom fechado soa mais escuro e suave.")),
-                ContentItem::heading (juce::String::fromUTF8 ("Resumo dos componentes")),
-                ContentItem::table (juce::StringArray { "Componente", "Função principal" },
-                    { juce::StringArray { "Corpo", "Estrutura principal do instrumento" },
-                      juce::StringArray { "Braço", "Sustenta a escala e permite posicionar os dedos" },
-                      juce::StringArray { "Cavalete/ponte", "Sustenta as cordas e transmite vibrações" },
-                      juce::StringArray { "Rastilho", "Apoia as cordas no cavalete" },
-                      juce::StringArray { "Pestana", "Organiza e apoia as cordas no início do braço" },
-                      juce::StringArray { "Tarraxas", "Regulam a tensão e a afinação" },
-                      juce::StringArray { "Trastes", "Determinam os pontos de apoio das cordas" },
-                      juce::StringArray { "Casas", "Espaços onde posicionamos os dedos" },
-                      juce::StringArray { "Cordas", "Produzem as vibrações sonoras" },
-                      juce::StringArray { "Captadores", "Transformam vibrações em sinais elétricos" },
-                      juce::StringArray { "Volume", "Regula a intensidade do sinal" },
-                      juce::StringArray { "Tom", "Modifica a característica tonal do sinal" } }),
-                ContentItem::heading (juce::String::fromUTF8 ("Como tudo funciona em conjunto")),
-                ContentItem::bullet (juce::String::fromUTF8 (
-                    "Guitarra: toque na corda → vibração → captador gera sinal elétrico → "
-                    "circuito e controles → amplificador → alto-falante.")),
-                ContentItem::bullet (juce::String::fromUTF8 (
-                    "Violão: toque na corda → vibração → cavalete transmite ao corpo → tampo e "
-                    "caixa de ressonância movimentam o ar → som projetado naturalmente.")),
-            }),
-            block ("B", juce::String::fromUTF8 ("Notas musicais"), {
+            }), content::topicA()),
+            detail (block ("B", juce::String::fromUTF8 ("Notas musicais"), {
+
                 "Sete nomes naturais: Dó Ré Mi Fá Sol Lá Si (C D E F G A B).",
                 "Entre Mi–Fá e Si–Dó não há nota intermediária (semitons naturais). "
                 "As demais notas naturais estão a um tom e admitem nota intermediária."
-            }),
-            block ("C", juce::String::fromUTF8 ("Sustenidos e bemóis"), {
+            }), content::topicB()),
+            detail (block ("C", juce::String::fromUTF8 ("Sustenidos e bemóis"), {
+
                 "Sustenido (#) sobe meio-tom: Fá# está meio-tom acima de Fá. "
                 "Bemol (b) desce meio-tom: Sib está meio-tom abaixo de Si.",
                 "Enarmonia: Fá# = Solb, Dó# = Réb — mesmo som, nomes diferentes.",
                 "Regra prática: não existe Mi# nem Si# na escala natural."
-            }),
-            block ("D", juce::String::fromUTF8 ("Localização das notas no braço"), {
+            }), content::topicC()),
+            detail (block ("D", juce::String::fromUTF8 ("Localização das notas no braço"), {
+
                 "Afinação padrão, da 6ª (mais grave) à 1ª (mais aguda): E2 A2 D3 G3 B3 E4.",
                 "Regra do oitavo grau: a casa 12 repete a corda solta uma oitava acima.",
                 "Convenção de partitura: a guitarra soa uma oitava abaixo do escrito. "
                 "A conversão partitura→áudio aplica essa transposição."
-            }),
-            block ("E", juce::String::fromUTF8 ("Pestanas"), {
+            }), content::topicD()),
+            detail (block ("E", juce::String::fromUTF8 ("Pestanas"), {
+
                 "Pestana completa (barré): um dedo pressiona todas as cordas na mesma "
                 "casa; os demais dedos montam o acorde à frente.",
                 "Meio barré: o indicador cobre apenas 2 a 4 cordas.",
@@ -232,30 +107,34 @@ namespace
                 "é o alicerce do CAGED.",
                 "Erro comum: corda abafada no meio da pestana soa morta. Ajuste o dedo "
                 "para trás do traste e aproxime o polegar do centro do braço."
-            }),
-            block ("F", juce::String::fromUTF8 ("Sistema 5 (CAGED)"), {
+            }), content::topicE()),
+            detail (block ("F", juce::String::fromUTF8 ("Sistema 5 (CAGED)"), {
+
                 "Cinco formas de acorde maior (C, A, G, E, D) cobrem todo o braço e se "
                 "repetem a cada 12 casas, na ordem C → A → G → E → D.",
                 "As formas conectam-se: a última nota de uma é a primeira da seguinte.",
                 "A mesma forma vale para acordes menores e de 7ª (muda a qualidade).",
                 "O CAGED é a ponte entre acorde e escala: cada forma contém a "
                 "pentatônica/modo daquele centro."
-            }),
-            block ("G", juce::String::fromUTF8 ("Organização das tonalidades"), {
+            }), content::topicF()),
+            detail (block ("G", juce::String::fromUTF8 ("Organização das tonalidades"), {
+
                 "Campo harmônico maior: I – ii – iii – IV – V – vi – vii°. "
                 "Em Dó: C – Dm – Em – F – G – Am – Bdim.",
                 "Círculo das quintas: C → G → D → A → E → B → F# → C#…; cada passo "
                 "acrescenta um sustenido. No sentido inverso, um bemol.",
                 "Cada maior tem uma relativa menor com a mesma armadura (C ↔ Am)."
-            }),
-            block ("H", juce::String::fromUTF8 ("Introdução ao cifrado"), {
+            }), content::topicG()),
+            detail (block ("H", juce::String::fromUTF8 ("Introdução ao cifrado"), {
+
                 "Cifrar é descrever o acorde de forma compacta: C (maior), Cm (menor), "
                 "C7 (sétima dominante), C7M (sétima maior), Cm7 (menor com sétima).",
                 "C/E indica baixo na nota após a barra; C(9) e C(#11) indicam tensões.",
                 "Ler a cifra e achar a forma no braço (via CAGED) é a habilidade "
                 "prática do módulo."
-            }),
-            block ("I", juce::String::fromUTF8 ("Rítmica: pulsação e figuras"), {
+            }), content::topicH()),
+            detail (block ("I", juce::String::fromUTF8 ("Rítmica: pulsação e figuras"), {
+
                 "Pulsação (tempo) é a batida constante do metrônomo; o compasso agrupa "
                 "os tempos (4/4, 3/4, 6/8).",
                 "Figuras: semibreve (4 tempos), mínima (2), semínima (1), colcheia "
@@ -266,7 +145,7 @@ namespace
                 "é o que permite alinhar ao metrônomo.",
                 "O gate cobra tocar na grade: contar a subdivisão é a base do "
                 "on_grid_ratio ≥ 0,75."
-            }),
+            }), content::topicI()),
         };
 
         m.exercises = {
@@ -417,6 +296,285 @@ namespace
                       { "I", "IV", "V", "vi" }, 2),
             question ("Ir de Dó para Fá no círculo das quintas acrescenta o quê?",
                       { "Um sustenido", "Um bemol", "Nada", "Duas oitavas" }, 1),
+        };
+
+        // --- Extra exercises: at least three per topic (client request). ------
+        // The client asked for >= 3 exercises on every topic A..I. EX-1.1..EX-1.10
+        // and the gate give each topic at least one; the exercises below complete
+        // the set, mixing quizzes (verifiable) and playable specs (detector).
+        m.exercises.emplace_back (exercise (
+            "EX-1.11", juce::String::fromUTF8 ("Partes do instrumento: nomear"),
+            juce::String::fromUTF8 ("Apontar e nomear as partes da guitarra e do violão."),
+            juce::String::fromUTF8 ("Acerto ≥90% no questionário de partes do instrumento.")));
+        m.exercises.back().lessonId = "A";
+        m.exercises.back().quiz = {
+            question ("O que é a pestana (nut)?",
+                      { "A barra metálica onde os dedos pressionam",
+                        "A peça que organiza as cordas no início do braço",
+                        "O controle de volume",
+                        "O captador" }, 1),
+            question ("Qual peça transmite a vibração da corda ao corpo do violão?",
+                      { "A tarraxa", "O cavalete (ponte)", "O traste", "A pestana" }, 1),
+            question ("Na guitarra elétrica, o que transforma a vibração em sinal elétrico?",
+                      { "O captador", "O rastilho", "A caixa de ressonância", "A escala" }, 0),
+            question ("Qual é a função das tarraxas?",
+                      { "Regular a tensão e a afinação das cordas",
+                        "Amplificar o som",
+                        "Sustentar os trastes",
+                        "Abafar as cordas" }, 0),
+            question ("Onde fica o tirante (truss rod)?",
+                      { "Dentro do braço", "Dentro da caixa de ressonância",
+                        "Na cabeça", "No captador" }, 0),
+            question ("O que diferencia as cordas de nylon das de aço?",
+                      { "O nylon produz som mais suave e menor tensão",
+                        "O nylon produz som mais brilhante e metálico",
+                        "São idênticas",
+                        "O nylon só existe em guitarras" }, 0),
+        };
+
+        m.exercises.emplace_back (exercise (
+            "EX-1.12", juce::String::fromUTF8 ("Identificar partes por região"),
+            juce::String::fromUTF8 ("Dizer a que região do instrumento pertence cada peça."),
+            juce::String::fromUTF8 ("Acerto ≥90% no questionário de regiões.")));
+        m.exercises.back().lessonId = "A";
+        m.exercises.back().quiz = {
+            question ("Em que região fica o captador?",
+                      { "Corpo", "Braço", "Cabeça", "Pestana" }, 0),
+            question ("Em que região fica a escala (com os trastes)?",
+                      { "Corpo", "Braço", "Cabeça", "Cavalete" }, 1),
+            question ("Em que região ficam as tarraxas?",
+                      { "Corpo", "Braço", "Cabeça", "Boca" }, 2),
+            question ("O rastilho fica em qual peça?",
+                      { "No cavalete", "Na pestana", "No cabeçote", "No tampo" }, 0),
+        };
+
+        // Topic B — notes.
+        m.exercises.emplace_back (exercise (
+            "EX-1.13", juce::String::fromUTF8 ("Nomear as notas naturais"),
+            juce::String::fromUTF8 ("Dizer as sete notas naturais e suas cifras."),
+            juce::String::fromUTF8 ("Acerto ≥90% no questionário de notas.")));
+        m.exercises.back().lessonId = "B";
+        m.exercises.back().quiz = {
+            question ("Quais são as sete notas naturais?",
+                      { "Dó Ré Mi Fá Sol Lá Si",
+                        "Dó Ré Mi Fá Sol Lá Si Dó",
+                        "Lá Si Dó Ré Mi Fá Sol",
+                        "Dó Ré Mi Fá Sol Lá" }, 0),
+            question ("Qual cifra corresponde ao Lá?",
+                      { "A", "B", "G", "L" }, 0),
+            question ("Qual cifra corresponde ao Ré?",
+                      { "R", "D", "E", "C" }, 1),
+            question ("Entre quais notas naturais há apenas um semitom?",
+                      { "Dó–Ré e Fá–Sol", "Mi–Fá e Si–Dó",
+                        "Ré–Mi e Sol–Lá", "Fá–Sol e Lá–Si" }, 1),
+            question ("Depois do Si, qual nota vem subindo?",
+                      { "Lá", "Dó", "Ré", "Mi" }, 1),
+        };
+
+        m.exercises.emplace_back (exercise (
+            "EX-1.14", juce::String::fromUTF8 ("Tons e semitons"),
+            juce::String::fromUTF8 ("Dizer a distância (tom ou semitom) entre notas naturais."),
+            juce::String::fromUTF8 ("Acerto ≥90% no questionário de intervalos.")));
+        m.exercises.back().lessonId = "B";
+        m.exercises.back().quiz = {
+            question ("Um tom equivale a quantos semitons?",
+                      { "Meio semitom", "Um semitom", "Dois semitons", "Doze semitons" }, 2),
+            question ("Qual é a distância entre Dó e Ré?",
+                      { "Um semitom", "Um tom", "Dois tons", "Uma oitava" }, 1),
+            question ("Qual é a distância entre Mi e Fá?",
+                      { "Um semitom", "Um tom", "Dois tons", "Três semitons" }, 0),
+            question ("Quantos semitons há de Dó a Dó (uma oitava)?",
+                      { "7", "10", "12", "14" }, 2),
+            question ("Qual é a distância entre Sol e Lá?",
+                      { "Um semitom", "Um tom", "Dois tons", "Nenhuma" }, 1),
+        };
+
+        m.exercises.emplace_back (exercise (
+            "EX-1.15", juce::String::fromUTF8 ("Cantar a nota junto com a corda"),
+            juce::String::fromUTF8 ("Tocar a 6ª corda solta (Mi) e cantar a mesma nota."),
+            juce::String::fromUTF8 ("Detector: E2 solto, sustentado por 2 segundos.")));
+        m.exercises.back().lessonId = "B";
+        m.exercises.back().targets = notes ({ "E2" });
+
+        // Topic C — sharps, flats and enharmony (EX-1.9 already covers the topic).
+        m.exercises.emplace_back (exercise (
+            "EX-1.16", juce::String::fromUTF8 ("Sustenido e bemol no braço"),
+            juce::String::fromUTF8 ("Tocar Fá e Fá♯ na 6ª corda; depois Si e Si♭."),
+            juce::String::fromUTF8 ("Detector: F2, F♯2, B3, A♯3.")));
+        m.exercises.back().lessonId = "C";
+        m.exercises.back().targets = notes ({ "F2", "F#2", "B3", "A#3" });
+
+        m.exercises.emplace_back (exercise (
+            "EX-1.17", juce::String::fromUTF8 ("Escala cromática na 6ª corda"),
+            juce::String::fromUTF8 ("Tocar a 6ª corda da casa 0 à casa 12, casa a casa."),
+            juce::String::fromUTF8 ("Detector: 13 notas cromáticas de E2 a E3.")));
+        m.exercises.back().lessonId = "C";
+        m.exercises.back().targets = notes ({
+            "E2", "F2", "F#2", "G2", "G#2", "A2", "A#2", "B2",
+            "C3", "C#3", "D3", "D#3", "E3" });
+
+        // Topic D — fretboard location (EX-1.2 and EX-1.3 already cover it).
+        m.exercises.emplace_back (exercise (
+            "EX-1.18", juce::String::fromUTF8 ("Oitavas: mesma nota, duas cordas"),
+            juce::String::fromUTF8 ("Tocar E2 na 6ª solta e E3 na casa 12 da 6ª."),
+            juce::String::fromUTF8 ("Detector: E2 e E3, uma oitava de diferença.")));
+        m.exercises.back().lessonId = "D";
+        m.exercises.back().targets = notes ({ "E2", "E3" });
+
+        m.exercises.emplace_back (exercise (
+            "EX-1.19", juce::String::fromUTF8 ("Casa 5 = corda de baixo solta"),
+            juce::String::fromUTF8 ("Tocar a casa 5 da 6ª (Lá) e a 5ª corda solta (Lá)."),
+            juce::String::fromUTF8 ("Detector: A2 tocado duas vezes (mesma nota).")));
+        m.exercises.back().lessonId = "D";
+        m.exercises.back().targets = notes ({ "A2", "A2" });
+
+        // Topic E — barre (EX-1.5 already covers it).
+        m.exercises.emplace_back (exercise (
+            "EX-1.20", juce::String::fromUTF8 ("Meio barré de Si menor"),
+            juce::String::fromUTF8 ("Fazer o meio barré de Bm na 2ª casa; cordas limpas."),
+            juce::String::fromUTF8 ("Detector: acorde Bm (Si Ré Fá♯).")));
+        m.exercises.back().lessonId = "E";
+        m.exercises.back().chordPitchClasses = { 11, 2, 6 };
+
+        m.exercises.emplace_back (exercise (
+            "EX-1.21", juce::String::fromUTF8 ("Pestana: teoria e posição"),
+            juce::String::fromUTF8 ("Responder sobre pestana completa, meio barré e posição."),
+            juce::String::fromUTF8 ("Acerto ≥90% no questionário de pestana.")));
+        m.exercises.back().lessonId = "E";
+        m.exercises.back().quiz = {
+            question ("O que é uma pestana completa (barré)?",
+                      { "Um dedo pressionando todas as cordas numa casa",
+                        "Dois dedos pressionando uma corda",
+                        "Um acorde sem pestana",
+                        "Uma corda solta" }, 0),
+            question ("Quantas cordas um meio barré costuma cobrir?",
+                      { "Todas as seis", "Apenas uma", "De 2 a 4", "Nenhuma" }, 2),
+            question ("Onde o dedo deve ficar para a pestana soar limpa?",
+                      { "No meio da casa", "Logo atrás do traste",
+                        "Em cima do traste", "Fora do braço" }, 1),
+            question ("Onde o polegar deve ficar para dar alavanca?",
+                      { "Aproximado do centro do braço", "Muito acima do braço",
+                        "Solto, sem tocar", "Cruzado na frente" }, 0),
+            question ("Por que uma corda abafa no meio da pestana?",
+                      { "Por falta de força sempre",
+                        "Por causa dos vales entre as falanges do dedo",
+                        "Porque a corda está solta",
+                        "Porque o traste está gasto" }, 1),
+        };
+
+        // Topic F — CAGED (EX-1.4 and EX-1.6 already cover it).
+        m.exercises.emplace_back (exercise (
+            "EX-1.22", juce::String::fromUTF8 ("As cinco formas do CAGED"),
+            juce::String::fromUTF8 ("Tocar as formas C, A, G, E, D de Dó maior."),
+            juce::String::fromUTF8 ("Detector: C maior em cinco regiões do braço.")));
+        m.exercises.back().lessonId = "F";
+        m.exercises.back().chordProgression = {
+            { 0, 4, 7 },   // C  (forma C)
+            { 0, 4, 7 },   // C  (forma A)
+            { 0, 4, 7 },   // C  (forma G)
+            { 0, 4, 7 },   // C  (forma E)
+            { 0, 4, 7 },   // C  (forma D)
+        };
+
+        m.exercises.emplace_back (exercise (
+            "EX-1.23", juce::String::fromUTF8 ("Nomear o acorde pela forma"),
+            juce::String::fromUTF8 ("Mover a forma de A e dizer o acorde em cada casa."),
+            juce::String::fromUTF8 ("Acerto ≥90% no questionário de formas móveis.")));
+        m.exercises.back().lessonId = "F";
+        m.exercises.back().quiz = {
+            question ("Quais letras formam o sistema CAGED?",
+                      { "C A G E D", "D G B E A", "A B C D E", "C D E F G" }, 0),
+            question ("Em que ordem as formas aparecem subindo pelo braço?",
+                      { "C → A → G → E → D", "D → E → G → A → C",
+                        "A → B → C → D → E", "G → C → D → A → E" }, 0),
+            question ("A forma de E tem a fundamental em qual corda?",
+                      { "4ª corda", "5ª corda", "6ª corda", "1ª corda" }, 2),
+            question ("A forma de D tem a fundamental em qual corda?",
+                      { "4ª corda", "5ª corda", "6ª corda", "2ª corda" }, 0),
+            question ("O CAGED serve também para acordes menores?",
+                      { "Sim, mudando a qualidade da forma",
+                        "Não, só para maiores",
+                        "Só na primeira posição",
+                        "Não, apenas para escalas" }, 0),
+        };
+
+        // Topic G — key organisation (EX-1.10 already covers it).
+        m.exercises.emplace_back (exercise (
+            "EX-1.24", juce::String::fromUTF8 ("Campo harmônico de Dó"),
+            juce::String::fromUTF8 ("Tocar I–vi–IV–V em Dó: C – Am – F – G."),
+            juce::String::fromUTF8 ("Detector: sequência C, Am, F, G.")));
+        m.exercises.back().lessonId = "G";
+        m.exercises.back().chordProgression = {
+            { 0, 4, 7 },   // C
+            { 9, 0, 4 },   // Am
+            { 5, 9, 0 },   // F
+            { 7, 11, 2 },  // G
+        };
+
+        m.exercises.emplace_back (exercise (
+            "EX-1.25", juce::String::fromUTF8 ("Escala maior: padrão de tons"),
+            juce::String::fromUTF8 ("Tocar a escala de Dó maior e confirmar o padrão T–T–S–T–T–T–S."),
+            juce::String::fromUTF8 ("Detector: C4 a C5 (oito notas da escala).")));
+        m.exercises.back().lessonId = "G";
+        m.exercises.back().targets = notes ({ "C4", "D4", "E4", "F4", "G4", "A4", "B4", "C5" });
+
+        // Topic H — chord symbols (EX-1.7 already covers it).
+        m.exercises.emplace_back (exercise (
+            "EX-1.26", juce::String::fromUTF8 ("Ler cifras de acorde"),
+            juce::String::fromUTF8 ("Dizer o significado de C, Cm, C7, C7M, Cm7 e C/E."),
+            juce::String::fromUTF8 ("Acerto ≥90% no questionário de cifras.")));
+        m.exercises.back().lessonId = "H";
+        m.exercises.back().quiz = {
+            question ("O que significa Cm7?",
+                      { "Dó maior com sétima", "Dó menor com sétima",
+                        "Dó menor sem sétima", "Dó aumentado" }, 1),
+            question ("O que significa C/E?",
+                      { "Dó maior com Mi no baixo", "Dó dividido por Mi",
+                        "Mi maior com Dó no baixo", "Dois acordes ao mesmo tempo" }, 0),
+            question ("Qual cifra indica sétima maior?",
+                      { "C7", "C7M", "Cm7", "Cdim" }, 1),
+            question ("Uma letra sem símbolo (por exemplo, G) indica qual acorde?",
+                      { "Sol menor", "Sol maior", "Sol diminuto", "Sol com sétima" }, 1),
+            question ("O que C(#11) acrescenta?",
+                      { "Uma nona", "Uma quarta aumentada", "Uma sexta", "Um baixo em Mi" }, 1),
+        };
+
+        m.exercises.emplace_back (exercise (
+            "EX-1.27", juce::String::fromUTF8 ("Tocar uma cifra com inversão"),
+            juce::String::fromUTF8 ("Tocar C/E (Dó maior com Mi no baixo)."),
+            juce::String::fromUTF8 ("Detector: acorde C maior com baixo em E.")));
+        m.exercises.back().lessonId = "H";
+        m.exercises.back().chordProgression = {
+            { 0, 4, 7 },   // C with E in the bass
+        };
+
+        // Topic I — rhythm (EX-1.8 already covers it).
+        m.exercises.emplace_back (exercise (
+            "EX-1.28", juce::String::fromUTF8 ("Colcheias na grade"),
+            juce::String::fromUTF8 ("Tocar a 6ª solta em colcheias (TÁ-KI) a 60 BPM."),
+            juce::String::fromUTF8 ("on_grid_ratio ≥ 0,75 em subdivisão de colcheia.")));
+        m.exercises.back().lessonId = "I";
+        m.exercises.back().targets = notes ({ "E2" });
+        m.exercises.back().subdivision = course::TempoGrid::Subdivision::eighth;
+        m.exercises.back().onGridTarget = 0.75f;
+
+        m.exercises.emplace_back (exercise (
+            "EX-1.29", juce::String::fromUTF8 ("Figuras rítmicas e valores"),
+            juce::String::fromUTF8 ("Dizer o valor das figuras e as sílabas rítmicas."),
+            juce::String::fromUTF8 ("Acerto ≥90% no questionário de rítmica.")));
+        m.exercises.back().lessonId = "I";
+        m.exercises.back().quiz = {
+            question ("Quantos tempos vale uma semínima?",
+                      { "4 tempos", "2 tempos", "1 tempo", "Meio tempo" }, 2),
+            question ("Quantas colcheias cabem em um tempo?",
+                      { "1", "2", "3", "4" }, 1),
+            question ("Qual sílaba rítmica corresponde a duas colcheias?",
+                      { "TÁ", "TÁ-KI", "TA-KI-TA-KI", "TÁ-A" }, 1),
+            question ("O que o ponto de aumento faz com a figura?",
+                      { "Dobra o valor", "Soma metade do valor",
+                        "Nada", "Divide o valor por dois" }, 1),
+            question ("Em 4/4, quantos tempos há por compasso?",
+                      { "2", "3", "4", "6" }, 2),
         };
 
         // The gate is a chord progression played on the grid (REQ-009, REQ-015).
