@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "Audio/AudioPortClassifier.h"
+#include "Course/Content/Topics.h"
 #include "Course/ExerciseEvaluator.h"
 #include "Course/ModuleCatalog.h"
 #include "Course/NoteMath.h"
@@ -342,7 +343,7 @@ void testModuleCatalog()
                    "gate opens on C major");
         }
     check (hasGate, "module 1 has a gate exercise");
-    check (m1->exercises.size() == 11, "module 1 lists EX-1.1..EX-1.10 plus the gate");
+    check (m1->exercises.size() == 30, "module 1 lists EX-1.1..EX-1.29 plus the gate");
 
     // EX-1.1 is the learning quiz (Questionario_m1), answered one at a time.
     check (m1->exercises.front().isQuiz(), "EX-1.1 is a multiple-choice quiz");
@@ -387,6 +388,41 @@ void testModuleCatalog()
         if (item.kind == cursomusica::ContentKind::table)
             hasTable = true;
     check (hasTable, "topic A renders at least one table");
+
+    // The client asked for at least five "pages" of explanation on every topic
+    // A..I, and at least three exercises per topic. A page is a fixed amount of
+    // body text (content::charsPerPage); both rules are enforced here so the
+    // central panel really teaches each subject.
+    auto detailChars = [] (const cursomusica::LessonBlock& topic)
+    {
+        int total = 0;
+        for (const auto& item : topic.detail)
+        {
+            total += item.text.length();
+            for (const auto& cell : item.columns)
+                total += cell.length();
+            for (const auto& row : item.rows)
+                for (const auto& cell : row)
+                    total += cell.length();
+        }
+        return total;
+    };
+
+    for (const auto& topic : m1->lessons)
+    {
+        const int chars = detailChars (topic);
+        check (chars >= cursomusica::content::minTopicChars,
+               juce::String ("topic ") + topic.id + " has at least "
+                   + juce::String (cursomusica::content::minPages)
+                   + " pages of explanation (" + juce::String (chars) + " chars)");
+
+        int count = 0;
+        for (const auto& e : m1->exercises)
+            if (e.lessonId == topic.id)
+                ++count;
+        check (count >= 3, juce::String ("topic ") + topic.id
+                               + " has at least three exercises (" + juce::String (count) + ")");
+    }
 
     // The client asked that module 1 not use the BPM target (it is only
     // meaningful from module 2 on): the header then prints a dash. Later

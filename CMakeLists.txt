@@ -45,6 +45,16 @@ target_sources(CursoMusica PRIVATE
     Source/Course/QuizSession.cpp
     Source/Course/ProgressStore.cpp
     Source/Course/ModuleCatalog.cpp
+    Source/Course/Content/Topics.cpp
+    Source/Course/Content/TopicA.cpp
+    Source/Course/Content/TopicB.cpp
+    Source/Course/Content/TopicC.cpp
+    Source/Course/Content/TopicD.cpp
+    Source/Course/Content/TopicE.cpp
+    Source/Course/Content/TopicF.cpp
+    Source/Course/Content/TopicG.cpp
+    Source/Course/Content/TopicH.cpp
+    Source/Course/Content/TopicI.cpp
     Source/UI/Design/LookAndFeel.cpp
     Source/UI/Design/Panel.cpp
     Source/UI/LevelMeter.cpp
@@ -145,6 +155,16 @@ target_sources(CursoMusicaTests PRIVATE
     Source/Course/PracticeSession.cpp
     Source/Course/QuizSession.cpp
     Source/Course/ModuleCatalog.cpp
+    Source/Course/Content/Topics.cpp
+    Source/Course/Content/TopicA.cpp
+    Source/Course/Content/TopicB.cpp
+    Source/Course/Content/TopicC.cpp
+    Source/Course/Content/TopicD.cpp
+    Source/Course/Content/TopicE.cpp
+    Source/Course/Content/TopicF.cpp
+    Source/Course/Content/TopicG.cpp
+    Source/Course/Content/TopicH.cpp
+    Source/Course/Content/TopicI.cpp
     Source/Audio/AudioPortClassifier.cpp)
 
 target_include_directories(CursoMusicaTests PRIVATE Source)
