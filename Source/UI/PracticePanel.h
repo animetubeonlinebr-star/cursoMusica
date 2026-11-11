@@ -72,6 +72,8 @@ private:
 
     const CourseModule* currentModule = nullptr;
     juce::String topicFilter;
+    bool topicChosen = false;     // the pane only lists exercises after a topic is picked
+    bool exerciseArmed = false;   // the play row appears only after the student picks one
     std::vector<int> filteredIndices;
     int selectedExerciseIndex = 0;
     bool metronomeOn = false;

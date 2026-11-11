@@ -228,11 +228,16 @@ private:
         if (currentExercise != nullptr && ! quiz)
             text = currentExercise->id + " — " + currentExercise->title;
         else if (quiz || currentTopic == nullptr)
+        {
             // The quiz keeps the module header (NÍVEL/BPM/GATE) of the mock-up,
             // not the topic line: the question is what identifies the exercise.
+            // A module that does not use a BPM target prints a dash (client).
+            const juce::String bpm = m.usesTempo ? juce::String (m.targetBpm)
+                                                 : juce::String::fromUTF8 ("—");
             text = juce::String::fromUTF8 ("NÍVEL ") + juce::String (m.level)
-                     + juce::String::fromUTF8 ("   ·   BPM META ") + juce::String (m.targetBpm)
+                     + juce::String::fromUTF8 ("   ·   BPM META ") + bpm
                      + juce::String::fromUTF8 ("   ·   GATE 90%");
+        }
         else
             text = juce::String::fromUTF8 ("Tópico ") + currentTopic->id + " — " + currentTopic->title;
 
@@ -955,6 +960,9 @@ void ModuleComponent::showModule (int number)
     {
         practicePanel->setModule (unlocked ? module : nullptr);
 
+        // The right pane depends on the left one (client): it only knows what to
+        // show after a topic is selected. Opening a module without a topic keeps
+        // it blank; only a module already read restores that topic's exercises.
         if (hasMemory)
             practicePanel->setTopicFilter (module->lessons[(size_t) remembered].id);
     }

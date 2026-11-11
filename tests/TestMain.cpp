@@ -388,6 +388,14 @@ void testModuleCatalog()
             hasTable = true;
     check (hasTable, "topic A renders at least one table");
 
+    // The client asked that module 1 not use the BPM target (it is only
+    // meaningful from module 2 on): the header then prints a dash. Later
+    // modules keep the tempo, so the flag defaults to true.
+    check (! m1->usesTempo, "module 1 does not use a BPM target (client)");
+    for (const auto& m : modules)
+        if (m.number > 1)
+            check (m.usesTempo, "modules 2..20 still use a BPM target");
+
     for (const auto& m : modules)
         if (m.number > 1)
             check (! m.implemented, "modules 2..20 are still placeholders");

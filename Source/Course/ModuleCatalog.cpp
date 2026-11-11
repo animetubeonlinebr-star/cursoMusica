@@ -68,6 +68,7 @@ namespace
         m.targetBpm = 60;      // MUSIC.md, módulo 1
         m.onGridTarget = 0.75f;
         m.implemented = true;
+        m.usesTempo = false;   // the client: module 1 does not use the BPM target
 
         m.lessons = {
             detail (block ("A", juce::String::fromUTF8 ("Partes da guitarra e do violão"), {

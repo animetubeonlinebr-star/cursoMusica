@@ -121,6 +121,11 @@ struct CourseModule
     float onGridTarget = 0.0f;  // alignment target for this module
     bool implemented = false;
 
+    // Whether the module grades against a target BPM. The client asked that
+    // module 1 not show a BPM target (it is only meaningful from later modules
+    // on): the header then prints a dash instead of the number.
+    bool usesTempo = true;
+
     std::vector<LessonBlock> lessons;
     std::vector<Exercise> exercises;
     juce::String gateChallenge;

@@ -60,6 +60,8 @@ PracticePanel::PracticePanel (AudioEngine& engine)
     topicLink.onClick = [this]
     {
         topicFilter = {};
+        topicChosen = true;
+        exerciseArmed = false;
         selectedExerciseIndex = 0;
         session = {};
         quiz = {};
@@ -74,6 +76,7 @@ PracticePanel::PracticePanel (AudioEngine& engine)
     exerciseBox.onChange = [this]
     {
         selectedExerciseIndex = exerciseBox.getSelectedItemIndex();
+        exerciseArmed = true;   // picking an exercise is what arms it (client step 4)
         session = {};
         quiz = {};
         refreshExerciseRow();
@@ -146,6 +149,8 @@ void PracticePanel::setModule (const CourseModule* module)
 {
     currentModule = module;
     topicFilter = {};
+    topicChosen = false;
+    exerciseArmed = false;
     selectedExerciseIndex = 0;
     session = {};
     quiz = {};
@@ -156,6 +161,8 @@ void PracticePanel::setModule (const CourseModule* module)
 void PracticePanel::setTopicFilter (const juce::String& lessonId)
 {
     topicFilter = lessonId;
+    topicChosen = true;
+    exerciseArmed = false;
     selectedExerciseIndex = 0;
     session = {};
     quiz = {};
@@ -167,7 +174,7 @@ void PracticePanel::refreshExerciseList()
     exerciseBox.clear (juce::dontSendNotification);
     filteredIndices.clear();
 
-    if (currentModule != nullptr)
+    if (currentModule != nullptr && topicChosen)
     {
         for (int i = 0; i < (int) currentModule->exercises.size(); ++i)
         {
@@ -191,19 +198,22 @@ void PracticePanel::refreshExerciseList()
                                  (int) slot + 1);
         }
 
-    if (exerciseBox.getNumItems() > 0)
-        exerciseBox.setSelectedId (1, juce::dontSendNotification);
+    // The box shows the first exercise as a hint but arms nothing: arming only
+    // happens when the student picks from the list (client steps 3-4). Leaving
+    // no real selection is what makes picking even the first item register.
+    exerciseBox.setTextWhenNothingSelected (exerciseBox.getNumItems() > 0
+                                                ? exerciseBox.getItemText (0)
+                                                : juce::String());
+    exerciseBox.setSelectedId (0, juce::dontSendNotification);
 
     topicLabel.setText (topicFilter.isEmpty()
                             ? juce::String()
                             : juce::String::fromUTF8 ("Tópico ") + topicFilter,
                         juce::dontSendNotification);
 
-    // The link is only meaningful while a topic filter is active.
-    topicLink.setVisible (topicFilter.isNotEmpty());
-
     refreshExerciseRow();
     updateApplication();
+    resized();
 }
 
 void PracticePanel::refreshExerciseRow()
@@ -221,7 +231,12 @@ void PracticePanel::syncMetronomeFromModule()
 
     audioEngine.getMetronome().setBpm ((double) currentModule->targetBpm);
     audioEngine.getMetronome().setRunning (metronomeOn);
-    bpmLabel.setText (juce::String::fromUTF8 ("BPM meta ") + juce::String (currentModule->targetBpm)
+
+    // Module 1 does not grade against a BPM target (client): it prints a dash,
+    // like the module header, while later modules show the number.
+    const juce::String bpm = currentModule->usesTempo ? juce::String (currentModule->targetBpm)
+                                                      : juce::String::fromUTF8 ("—");
+    bpmLabel.setText (juce::String::fromUTF8 ("BPM meta ") + bpm
                         + juce::String::fromUTF8 ("  ·  alvo de grade ") + percent (currentModule->onGridTarget),
                       juce::dontSendNotification);
 }
@@ -249,12 +264,24 @@ void PracticePanel::updateApplication()
     const auto* exercise = selectedExercise();
     const bool quizMode = exercise != nullptr && exercise->isQuiz();
 
+    // The pane depends on the left one (client): with no topic chosen it stays
+    // blank; once a topic is picked it shows the selector, but the play row and
+    // the scoreboard only appear after the student arms an exercise.
+    topicLabel.setVisible (topicChosen);
+    exerciseBox.setVisible (topicChosen);
+    topicLink.setVisible (topicChosen && topicFilter.isNotEmpty());
+
+    demoButton.setVisible (exerciseArmed && exercise != nullptr);
+    measurementLabel.setVisible (exerciseArmed && exercise != nullptr);
+    guidanceLabel.setVisible (exerciseArmed && exercise != nullptr);
+
     // Playable-exercise controls (the quiz runs in the centre pane, which shows
     // the question and the options; this pane keeps only the scoreboard).
-    metronomeButton.setVisible (! quizMode);
-    startButton.setVisible (! quizMode);
-    finishButton.setVisible (! quizMode);
-    bpmLabel.setVisible (! quizMode);
+    const bool showPlayControls = exerciseArmed && exercise != nullptr && ! quizMode;
+    metronomeButton.setVisible (showPlayControls);
+    startButton.setVisible (showPlayControls);
+    finishButton.setVisible (showPlayControls);
+    bpmLabel.setVisible (showPlayControls);
 
     if (quizMode)
     {
@@ -455,11 +482,21 @@ void PracticePanel::resized()
         headingLabel.setBounds (heading);
     }
 
+    // Blank until a topic is picked on the left: only the heading shows.
+    if (! topicChosen)
+        return;
+
     topicLabel.setBounds (bounds.removeFromTop (16));
     bounds.removeFromTop (th::spacing::xs);
 
     exerciseBox.setBounds (bounds.removeFromTop (28));
     bounds.removeFromTop (th::spacing::xs);
+
+    // The selector alone until an exercise is armed (client step 2): the play
+    // row, the scoreboard and the guidance only appear after the choice.
+    if (! exerciseArmed)
+        return;
+
     demoButton.setBounds (bounds.removeFromTop (30));
     bounds.removeFromTop (th::spacing::sm);
 
