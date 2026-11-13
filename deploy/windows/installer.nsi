@@ -23,10 +23,24 @@ Unicode true
 !ifndef RUNTIMEDIR
 !define RUNTIMEDIR "build/runtime"
 !endif
+!ifndef APPICON
+!define APPICON "Assets/AppIcon.ico"
+!endif
+
+; Installer/uninstaller icon and the icon the shortcuts point at. NSIS resolves
+; these relative to the script directory, so build-installer.sh and release.yml
+; pass an absolute -DAPPICON=.
+Icon "${APPICON}"
+UninstallIcon "${APPICON}"
+!define MUI_ICON "${APPICON}"
+!define MUI_UNICON "${APPICON}"
 
 !define APP_NAME "CursoMusica"
 ; The executable keeps the JUCE PRODUCT_NAME ("Curso Musica Studio").
 !define APP_EXE "Curso Musica Studio.exe"
+; The .ico is staged next to the .exe and used for the shortcuts, so the
+; desktop/Start menu entries show the logo before the shell has indexed the exe.
+!define APP_ICON "AppIcon.ico"
 !define APP_VERSION "0.1.0"
 !define COMPANY "CursoMusica"
 
@@ -56,6 +70,7 @@ Section "CursoMusica" SecMain
     ; ADR 0002: FluidSynth, libsndfile, SoundFont/samples). Everything needed so
     ; the app is ready to use after install (REQ-014).
     File "${APPEXE}"
+    File "${APPICON}"
 
     ; Bundled runtime (SoundFont/samples/DLLs) when the build produced it; the
     ; installer still succeeds when it did not (the build passes -DRUNTIME).
@@ -71,12 +86,13 @@ Section "CursoMusica" SecMain
     WriteUninstaller "$INSTDIR\uninstall.exe"
 
     CreateDirectory "$SMPROGRAMS\${APP_NAME}"
-    CreateShortCut "$SMPROGRAMS\${APP_NAME}\${APP_NAME}.lnk" "$INSTDIR\${APP_EXE}"
-    CreateShortCut "$DESKTOP\${APP_NAME}.lnk" "$INSTDIR\${APP_EXE}"
+    CreateShortCut "$SMPROGRAMS\${APP_NAME}\${APP_NAME}.lnk" "$INSTDIR\${APP_EXE}" "" "$INSTDIR\${APP_ICON}"
+    CreateShortCut "$DESKTOP\${APP_NAME}.lnk" "$INSTDIR\${APP_EXE}" "" "$INSTDIR\${APP_ICON}"
 SectionEnd
 
 Section "Uninstall"
     Delete "$INSTDIR\${APP_EXE}"
+    Delete "$INSTDIR\${APP_ICON}"
     Delete "$INSTDIR\uninstall.exe"
     RMDir /r "$INSTDIR"
     Delete "$SMPROGRAMS\${APP_NAME}\${APP_NAME}.lnk"
