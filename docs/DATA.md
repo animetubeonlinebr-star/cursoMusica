@@ -212,5 +212,6 @@ Regras de integridade:
 
 - **Nada de dado pessoal** nesta fase: `student_id` é um rótulo local.
 - Credenciais vêm **só do ambiente**; ver `docs/SECURITY.md`.
+- Como ligar o banco (Windows/Linux, inclusive PostgreSQL 18): `docs/POSTGRESQL.md`; script pronto em `tools/setup_postgres.sh`.
 - O app continua **local-first**: o banco é espelho, não dependência de
   execução. `main` e o instalador permanecem funcionais sem banco.

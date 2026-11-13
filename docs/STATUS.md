@@ -44,6 +44,9 @@ do repositório (commits, CI, resultados de QA), nunca de otimismo.
   `curso-musica`) por uma thread dedicada, sem tocar a thread de áudio. O app é
   **offline-first**: sem `libpq` no build ou sem banco no ar, o progresso continua
   salvo localmente (ADR 0006, `docs/DATA.md` §v4, `docs/SECURITY.md`).
+  O app **não fixa a versão do servidor** (usa libpq; o CI já
+  compilou com 18.6): um PostgreSQL 18 na máquina do cliente é suportado, com o
+  caminho de configuração em `docs/POSTGRESQL.md`.
 - **Blockers:** nenhum para M1. Pendente para M2+: decisão D4 (estratégia de
   síntese) — owner: architect.
 - **Riscos (top 3):** R-10 (avaliação de improvisação injusta), R-13 (meta de BPM

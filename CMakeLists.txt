@@ -140,9 +140,18 @@ endif()
 #
 # The student's progress is mirrored to a PostgreSQL database when libpq is
 # available at build time; otherwise the app compiles and runs purely local.
-# Same discipline as the ASIO SDK above: absence is a warning, never an error.
+# Same discipline as the ASIO SDK above: absence is a warning, never an error,
+# unless the builder explicitly asks for a guaranteed integration.
+#
+# Point the build at a specific server version (e.g. PostgreSQL 18 on Windows)
+# with:  -DPostgreSQL_ROOT="C:/Program Files/PostgreSQL/18"
+# Force a hard requirement with:  -DCURSOMUSICA_REQUIRE_POSTGRES=ON
+#
 # The connection details come from the environment at runtime, never the binary.
 # ---------------------------------------------------------------------------
+option(CURSOMUSICA_REQUIRE_POSTGRES
+       "Fail the build when libpq is not found (guarantees progress mirroring)" OFF)
+
 find_package(PostgreSQL QUIET)
 
 if(PostgreSQL_FOUND)
@@ -150,6 +159,12 @@ if(PostgreSQL_FOUND)
     target_include_directories(CursoMusica PRIVATE ${PostgreSQL_INCLUDE_DIRS})
     target_link_libraries(CursoMusica PRIVATE PostgreSQL::PostgreSQL)
     target_compile_definitions(CursoMusica PRIVATE CURSOMUSICA_HAS_POSTGRES=1)
+elseif(CURSOMUSICA_REQUIRE_POSTGRES)
+    message(FATAL_ERROR
+        "libpq not found, but CURSOMUSICA_REQUIRE_POSTGRES=ON.\n"
+        "Install the PostgreSQL client library, then reconfigure. On Windows with\n"
+        "PostgreSQL 18 installed, pass:\n"
+        "  -DPostgreSQL_ROOT=\"C:/Program Files/PostgreSQL/18\"")
 else()
     message(STATUS "libpq not found - building without PostgreSQL (progress stays local)")
 endif()
