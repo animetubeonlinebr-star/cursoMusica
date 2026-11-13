@@ -29,7 +29,7 @@ jobs:
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U cursomusica"
+          --health-cmd "pg_isready -U cursomusica -d curso-musica"
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
@@ -70,7 +70,9 @@ jobs:
           PGPASSWORD: cursomusica
           PGDATABASE: curso-musica
           CURSOMUSICA_PG_SCHEMA: curso-musica
-        run: ctest --test-dir build --output-on-failure
+        # -V so the integration evidence (online vs offline path) is visible
+        # in the CI log, not only on failure.
+        run: ctest --test-dir build -V
 
   windows-build:
     name: Windows build (target platform)
