@@ -30,7 +30,7 @@ Isso levanta duas perguntas: **onde o conteúdo vive** e **como a UI o apresenta
    de blocos de aula e, só depois, os exercícios; a UI abre na explicação e não
    permite pular para o desafio sem passar por ela (REQ-003).
 5. **Módulo 1 implementado por completo.** O catálogo traz o Módulo 1 com os nove
-   blocos (A–I, incluindo rítmica/contagem), os exercícios EX-1.1 a EX-1.8, o
+   blocos (A–I, incluindo rítmica/contagem), os exercícios EX-1.A.1 a EX-1.I.1, o
    desafio de gate e a trilha de prática, exatamente como especificado em
    `docs/MUSIC.md`. As apostilas de curadoria que sustentam os blocos são citadas
    em `CourseModule::sources` (REQ-006).

@@ -35,6 +35,7 @@ std::vector<ContentItem> topicI()
            "2, 3 ou 4. Esse agrupamento é o compasso, e vem a seguir."),
 
         h ("Compasso: agrupando os tempos"),
+        img ("i_compasso_4_4", "Compasso 4/4: quatro tempos e a subdivisão."),
         p ("Compasso é a divisão da música em grupos de tempos, marcados por "
            "barras de compasso. O primeiro tempo de cada compasso é o mais forte "
            "(o \"tempo forte\"), e é ele que dá a sensação de ciclo."),
@@ -52,6 +53,7 @@ std::vector<ContentItem> topicI()
            "que você sinta os tempos fortes e fracos."),
 
         h ("As figuras rítmicas e seus valores"),
+        img ("i_figuras_ritmicas", "Da semibreve à semicolcheia: cada figura vale metade da anterior."),
         p ("As figuras são símbolos que representam a duração das notas. Cada "
            "figura vale uma fração do tempo, e cada uma é metade da anterior. "
            "Conhecer as figuras é o que permite ler e tocar ritmos."),
@@ -166,7 +168,7 @@ std::vector<ContentItem> topicI()
            "silêncios precisos."),
         c ("Exercício clássico: toque a 6ª corda solta em semínimas, contando "
            "TÁ a cada tempo, a 60 BPM. Depois em colcheias (TÁ-KI) e depois em "
-           "semicolcheias (TA-KI-TA-KI). É exatamente o exercício EX-1.8."),
+           "semicolcheias (TA-KI-TA-KI). É exatamente o exercício EX-1.I.1."),
 
         h ("Fórmula de compasso em detalhe"),
         p ("A fórmula de compasso aparece no início da música, como duas "

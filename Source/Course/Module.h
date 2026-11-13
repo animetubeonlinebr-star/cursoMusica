@@ -14,7 +14,7 @@ namespace cursomusica
 // truth for the wording is docs/MUSIC.md (owner: musician).
 
 // One rich piece of the detailed explanation rendered in the central panel.
-enum class ContentKind { heading, paragraph, bullet, callout, table };
+enum class ContentKind { heading, paragraph, bullet, callout, table, image };
 
 struct ContentItem
 {
@@ -22,11 +22,12 @@ struct ContentItem
     juce::String text;                    // heading / paragraph / bullet / callout
     juce::StringArray columns;            // table header cells (kind == table)
     std::vector<juce::StringArray> rows;  // table rows (kind == table)
+    juce::String imageName;               // diagram stem (kind == image), e.g. "f_caged_conexao"
 
-    static ContentItem heading (juce::String t) { return { ContentKind::heading, std::move (t), {}, {} }; }
-    static ContentItem paragraph (juce::String t) { return { ContentKind::paragraph, std::move (t), {}, {} }; }
-    static ContentItem bullet (juce::String t) { return { ContentKind::bullet, std::move (t), {}, {} }; }
-    static ContentItem callout (juce::String t) { return { ContentKind::callout, std::move (t), {}, {} }; }
+    static ContentItem heading (juce::String t) { return { ContentKind::heading, std::move (t), {}, {}, {} }; }
+    static ContentItem paragraph (juce::String t) { return { ContentKind::paragraph, std::move (t), {}, {}, {} }; }
+    static ContentItem bullet (juce::String t) { return { ContentKind::bullet, std::move (t), {}, {}, {} }; }
+    static ContentItem callout (juce::String t) { return { ContentKind::callout, std::move (t), {}, {}, {} }; }
 
     static ContentItem table (juce::StringArray header, std::vector<juce::StringArray> body)
     {
@@ -34,6 +35,17 @@ struct ContentItem
         item.kind = ContentKind::table;
         item.columns = std::move (header);
         item.rows = std::move (body);
+        return item;
+    }
+
+    // A JPG diagram embedded through juce_add_binary_data (see
+    // Course/Content/Diagrams.h). `name` is the file stem, e.g. "f_caged_conexao".
+    static ContentItem image (juce::String name, juce::String caption = {})
+    {
+        ContentItem item;
+        item.kind = ContentKind::image;
+        item.imageName = std::move (name);
+        item.text = std::move (caption);
         return item;
     }
 };
@@ -63,7 +75,7 @@ struct QuizQuestion
 // evaluator uses; an exercise with neither is shown as text only.
 struct Exercise
 {
-    juce::String id;      // "EX-1.1"
+    juce::String id;      // "EX-1.A.1"
     juce::String title;
     juce::String goal;
     juce::String check;   // how the app verifies it

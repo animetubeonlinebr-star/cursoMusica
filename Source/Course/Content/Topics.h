@@ -29,6 +29,13 @@ inline ContentItem p (const char* t) { return ContentItem::paragraph (U (t)); }
 inline ContentItem b (const char* t) { return ContentItem::bullet (U (t)); }
 inline ContentItem c (const char* t) { return ContentItem::callout (U (t)); }
 
+// A JPG diagram embedded in the binary, by its file stem (see Diagrams.h and
+// tools/make_diagrams.py). `caption` is optional and shown under the image.
+inline ContentItem img (const char* name, const char* caption = "")
+{
+    return ContentItem::image (U (name), U (caption));
+}
+
 ContentItem tbl (std::initializer_list<const char*> header,
                  std::initializer_list<std::initializer_list<const char*>> rows);
 

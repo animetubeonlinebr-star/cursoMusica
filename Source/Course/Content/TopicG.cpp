@@ -82,6 +82,7 @@ std::vector<ContentItem> topicG()
            "tonalidade."),
 
         h ("O campo harmônico maior"),
+        img ("g_campo_harmonico_do", "Os sete acordes do campo harmônico de Dó."),
         p ("O campo harmônico é o conjunto de acordes que nasce naturalmente de "
            "uma escala maior. Se construirmos uma tríade (fundamental, terça e "
            "quinta) sobre cada grau da escala de Dó maior, obtemos sete acordes, "
@@ -123,6 +124,7 @@ std::vector<ContentItem> topicG()
            "frases musicais."),
 
         h ("O círculo das quintas"),
+        img ("g_ciclo_das_quintas", "O círculo das quintas: maiores e relativas menores."),
         p ("O círculo das quintas é um diagrama que organiza todas as tonalidades "
            "por distância de quinta. Cada passo no sentido horário sobe uma quinta "
            "justa (sete semitons) e acrescenta um sustenido à armadura; cada passo "

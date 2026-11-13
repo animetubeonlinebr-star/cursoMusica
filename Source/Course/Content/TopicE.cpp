@@ -58,6 +58,7 @@ std::vector<ContentItem> topicE()
            "oitava e volta ao mesmo nome."),
 
         h ("Como fazer uma pestana completa (barré)"),
+        img ("e_pestana_fa", "Fá maior com pestana na 1ª casa."),
         p ("A execução correta da pestana depende mais de posição e pressão "
            "distribuída do que de força bruta. Vamos por partes."),
         b ("Posicione o indicador deitado, levemente de lado (a parte óssea, não "
@@ -76,6 +77,7 @@ std::vector<ContentItem> topicE()
            "mal posicionado ou longe do traste."),
 
         h ("Como fazer um meio barré"),
+        img ("e_meio_barre_bm", "Si menor com meio barré na 2ª casa."),
         p ("O meio barré é mais fácil que a pestana completa e é o primeiro passo "
            "para quem está começando. Em vez de cobrir as seis cordas, o indicador "
            "cobre apenas as cordas necessárias — por exemplo, as duas ou três "
@@ -122,7 +124,7 @@ std::vector<ContentItem> topicE()
            "1ª casa) e verifique todas as cordas."),
         b ("Etapa 5 — mobilidade: deslize a forma de Fá pelas casas 3, 5, 7 e 8, "
            "nomeando o acorde resultante em cada posição."),
-        c ("Progressão do app: o exercício EX-1.5 cobra exatamente a pestana de "
+        c ("Progressão do app: o exercício EX-1.E.1 cobra exatamente a pestana de "
            "Fá na 1ª casa, com todas as cordas soando. Use-o como teste depois de "
            "praticar as etapas acima."),
 

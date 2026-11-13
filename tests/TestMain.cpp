@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "Audio/AudioPortClassifier.h"
+#include "Course/Content/Diagrams.h"
 #include "Course/Content/Topics.h"
 #include "Course/ExerciseEvaluator.h"
 #include "Course/ModuleCatalog.h"
@@ -137,7 +138,7 @@ namespace
         using namespace cursomusica::course;
 
         cursomusica::Exercise quiz;
-        quiz.id = "EX-1.1";
+        quiz.id = "EX-1.A.1";
         quiz.quiz = {
             { "Q1", { "a", "b", "c" }, 1 },
             { "Q2", { "a", "b", "c" }, 2 },
@@ -190,7 +191,7 @@ namespace
 
         // A note-sequence exercise: E2 then A2, at 60 BPM.
         cursomusica::Exercise sequence;
-        sequence.id = "EX-1.2";
+        sequence.id = "EX-1.D.1";
         sequence.targets = { { 40, "E2" }, { 45, "A2" } };
 
         PracticeSession session;
@@ -343,10 +344,10 @@ void testModuleCatalog()
                    "gate opens on C major");
         }
     check (hasGate, "module 1 has a gate exercise");
-    check (m1->exercises.size() == 30, "module 1 lists EX-1.1..EX-1.29 plus the gate");
+    check (m1->exercises.size() == 30, "module 1 lists EX-1.A.1..EX-1.I.3 plus the gate");
 
-    // EX-1.1 is the learning quiz (Questionario_m1), answered one at a time.
-    check (m1->exercises.front().isQuiz(), "EX-1.1 is a multiple-choice quiz");
+    // EX-1.A.1 is the learning quiz (Questionario_m1), answered one at a time.
+    check (m1->exercises.front().isQuiz(), "EX-1.A.1 is a multiple-choice quiz");
     check (m1->exercises.front().quiz.size() == 7, "the quiz has seven questions");
     for (const auto& q : m1->exercises.front().quiz)
         check (q.correctIndex >= 0 && q.correctIndex < q.options.size(),
@@ -435,6 +436,36 @@ void testModuleCatalog()
     for (const auto& m : modules)
         if (m.number > 1)
             check (! m.implemented, "modules 2..20 are still placeholders");
+
+    // The client asked the graphical material (fretboard, CAGED shapes, rhythm
+    // figures) to be shown as images instead of text art. Every diagram named by
+    // the content must be embedded in the binary (see tools/make_diagrams.py).
+    check (content::diagramNames().size() >= 19, "the build embeds the course diagrams");
+    for (const auto& topic : m1->lessons)
+        for (const auto& item : topic.detail)
+            if (item.kind == cursomusica::ContentKind::image)
+                check (content::diagramExists (item.imageName),
+                       juce::String ("topic ") + topic.id + " references the diagram '"
+                           + item.imageName + "'");
+
+    // The client asked the exercise ids to carry the module and the topic:
+    // EX-1.<topico>.<n> (e.g. EX-1.A.1, EX-1.E.1), numbered per topic.
+    for (const auto& topic : m1->lessons)
+    {
+        const auto prefix = juce::String ("EX-1.") + topic.id + ".";
+        int expected = 0;
+        for (const auto& e : m1->exercises)
+            if (e.lessonId == topic.id && ! e.isGate)
+            {
+                ++expected;
+                check (e.id.startsWith (prefix),
+                       juce::String ("exercise ") + e.id + " of topic " + topic.id
+                           + " follows EX-1.<topico>.<n>");
+                check (e.id == prefix + juce::String (expected),
+                       juce::String ("exercise ids of topic ") + topic.id
+                           + " are numbered in order (" + e.id + ")");
+            }
+    }
 }
 
 int main()

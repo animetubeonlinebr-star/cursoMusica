@@ -19,6 +19,28 @@ endif()
 
 add_subdirectory(External/JUCE)
 
+# ---------------------------------------------------------------------------
+# Diagrams embedded in the binary (REQ-003/REQ-006).
+#
+# The teaching images (fretboard, CAGED shapes, rhythm figures...) are drawn by
+# tools/make_diagrams.py into Source/Course/Content/Diagrams/*.jpg and embedded
+# here, so the app ships self-contained. The stem of each file becomes its
+# BinaryData resource name; ContentItem of kind image refers to it by that stem.
+# ---------------------------------------------------------------------------
+file(GLOB _diagram_files CONFIGURE_DEPENDS
+     "${CMAKE_CURRENT_SOURCE_DIR}/Source/Course/Content/Diagrams/*.jpg")
+
+if(NOT _diagram_files)
+    message(FATAL_ERROR
+        "No course diagrams found. Generate them with:\n"
+        "  python3 tools/make_diagrams.py")
+endif()
+
+juce_add_binary_data(CursoMusicaDiagrams
+    NAMESPACE CursoMusicaDiagrams
+    HEADER_NAME BinaryData.h
+    SOURCES ${_diagram_files})
+
 juce_add_gui_app(CursoMusica
     PRODUCT_NAME "Curso Musica Studio"
     COMPANY_NAME "CursoMusica"
@@ -46,6 +68,7 @@ target_sources(CursoMusica PRIVATE
     Source/Course/ProgressStore.cpp
     Source/Course/ModuleCatalog.cpp
     Source/Course/Content/Topics.cpp
+    Source/Course/Content/Diagrams.cpp
     Source/Course/Content/TopicA.cpp
     Source/Course/Content/TopicB.cpp
     Source/Course/Content/TopicC.cpp
@@ -129,6 +152,7 @@ target_compile_definitions(CursoMusica PRIVATE
 
 target_link_libraries(CursoMusica
     PRIVATE
+        CursoMusicaDiagrams
         juce::juce_audio_utils
         juce::juce_audio_processors
         juce::juce_dsp
@@ -156,6 +180,7 @@ target_sources(CursoMusicaTests PRIVATE
     Source/Course/QuizSession.cpp
     Source/Course/ModuleCatalog.cpp
     Source/Course/Content/Topics.cpp
+    Source/Course/Content/Diagrams.cpp
     Source/Course/Content/TopicA.cpp
     Source/Course/Content/TopicB.cpp
     Source/Course/Content/TopicC.cpp
@@ -175,6 +200,7 @@ target_compile_definitions(CursoMusicaTests PRIVATE
 
 target_link_libraries(CursoMusicaTests
     PRIVATE
+        CursoMusicaDiagrams
         juce::juce_core
     PUBLIC
         juce::juce_recommended_config_flags

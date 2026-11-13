@@ -575,7 +575,7 @@ app).
 (partes da guitarra e do violão) ganhou a explicação completa de
 `explica_painelEsquerdo.pdf` (16 páginas, anexado à branch `adequacao`), com
 destaques e duas tabelas (nomes das partes por região e função). O
-`Questionario_m1.pdf` virou o exercício **EX-1.1 "Questionário: conhecendo o
+`Questionario_m1.pdf` virou o exercício **EX-1.A.1 "Questionário: conhecendo o
 instrumento"**, com as 7 questões do teste de aprendizagem respondidas uma por
 tela no painel direito e gate de 90% (`QuizSession`).
 
@@ -760,35 +760,35 @@ em `Exercise::lessonId`.
 
 | ID | Tópico | Exercício | Habilidade | Verificação automática |
 |---|---|---|---|---|
-| EX-1.1 | A | Nomear as 6 cordas soltas e dizer a nota de cada uma | identificar cordas | pergunta com resposta esperada |
-| EX-1.11 | A | Nomear as partes do instrumento (pestana, cavalete, captador, tarraxas, tirante) | partes do instrumento | questionário ≥90% |
-| EX-1.12 | A | Dizer a região de cada peça (corpo, braço, cabeça) | partes do instrumento | questionário ≥90% |
-| EX-1.13 | B | Dizer as sete notas naturais e suas cifras | notas musicais | questionário ≥90% |
-| EX-1.14 | B | Dizer a distância (tom/semitom) entre notas naturais | intervalos | questionário ≥90% |
-| EX-1.15 | B | Tocar a 6ª solta (Mi) e cantar a mesma nota | percepção | detector: E2 sustentado |
-| EX-1.3 | B | Tocar a escala de Dó na 1ª posição (2 oitavas) | ler o braço | sequência de notas esperada, 90% |
-| EX-1.9 | C | Nomear a nota que falta e identificar enarmonia | sustenidos/bemóis | questionário ≥90% |
-| EX-1.16 | C | Tocar Fá/Fá♯ na 6ª e Si/Si♭ (sustenido e bemol no braço) | acidentes | detector: F2, F♯2, B3, A♯3 |
-| EX-1.17 | C | Tocar a escala cromática na 6ª corda (casa 0 a 12) | cromatismo | detector: 13 notas E2→E3 |
-| EX-1.2 | D | Tocar a 6ª solta (Mi) e a casa 5 (Lá) | localizar notas | detector: E2 e A2 |
-| EX-1.18 | D | Tocar E2 (6ª solta) e E3 (casa 12) — oitava | localizar notas | detector: E2 e E3 |
-| EX-1.19 | D | Tocar a casa 5 da 6ª (Lá) e a 5ª solta (Lá) | referências do braço | detector: A2 duas vezes |
-| EX-1.5 | E | Pestana de Fá (F) na 1ª casa; todas as cordas devem soar | pestana | nível/ataque em todas as cordas |
-| EX-1.20 | E | Meio barré de Si menor (Bm) na 2ª casa | pestana | detector: acorde Bm |
-| EX-1.21 | E | Pestana completa, meio barré e posição correta | pestana | questionário ≥90% |
-| EX-1.4 | F | Montar `C`, `G`, `D`, `Am`, `Em` e identificar a forma CAGED | acordes simples | detecção de acorde |
-| EX-1.6 | F | Mover a forma de `E` pelo braço e nomear o acorde | CAGED | identificar acorde por região |
-| EX-1.22 | F | Tocar as cinco formas (C, A, G, E, D) de Dó maior | CAGED | detector: C maior em 5 regiões |
-| EX-1.23 | F | Nomear o acorde pela forma móvel | CAGED | questionário ≥90% |
-| EX-1.10 | G | Montar o campo harmônico maior de Dó e achar a relativa menor | tonalidade | questionário ≥90% |
-| EX-1.24 | G | Tocar I–vi–IV–V em Dó (C – Am – F – G) | campo harmônico | detector: C, Am, F, G |
-| EX-1.25 | G | Tocar a escala de Dó maior (padrão T–T–S–T–T–T–S) | escala maior | detector: C4→C5 |
-| EX-1.7 | H | Dado `Dm7`, `G7`, `C7M`, dizer o campo harmônico e tocar as tríades | cifrado + tonalidade | detecção de acorde e resposta |
-| EX-1.26 | H | Dizer o significado de `C`, `Cm`, `C7`, `C7M`, `Cm7`, `C/E` | cifrado | questionário ≥90% |
-| EX-1.27 | H | Tocar uma cifra com inversão (`C/E`) | cifrado | detector: C maior com baixo em E |
-| EX-1.8 | I | Contar (`TÁ`/`TÁ-KI`) e tocar a 6ª solta em semínimas na grade | rítmica + grade | `on_grid_ratio ≥ 0,75` a 60 BPM |
-| EX-1.28 | I | Tocar a 6ª solta em colcheias (`TÁ-KI`) a 60 BPM | subdivisão | `on_grid_ratio ≥ 0,75` |
-| EX-1.29 | I | Dizer o valor das figuras e as sílabas rítmicas | rítmica | questionário ≥90% |
+| EX-1.A.1 | A | Nomear as 6 cordas soltas e dizer a nota de cada uma | identificar cordas | pergunta com resposta esperada |
+| EX-1.A.2 | A | Nomear as partes do instrumento (pestana, cavalete, captador, tarraxas, tirante) | partes do instrumento | questionário ≥90% |
+| EX-1.A.3 | A | Dizer a região de cada peça (corpo, braço, cabeça) | partes do instrumento | questionário ≥90% |
+| EX-1.B.1 | B | Tocar a escala de Dó na 1ª posição (2 oitavas) | ler o braço | sequência de notas esperada, 90% |
+| EX-1.B.2 | B | Dizer as sete notas naturais e suas cifras | notas musicais | questionário ≥90% |
+| EX-1.B.3 | B | Dizer a distância (tom/semitom) entre notas naturais | intervalos | questionário ≥90% |
+| EX-1.B.4 | B | Tocar a 6ª solta (Mi) e cantar a mesma nota | percepção | detector: E2 sustentado |
+| EX-1.C.1 | C | Nomear a nota que falta e identificar enarmonia | sustenidos/bemóis | questionário ≥90% |
+| EX-1.C.2 | C | Tocar Fá/Fá♯ na 6ª e Si/Si♭ (sustenido e bemol no braço) | acidentes | detector: F2, F♯2, B3, A♯3 |
+| EX-1.C.3 | C | Tocar a escala cromática na 6ª corda (casa 0 a 12) | cromatismo | detector: 13 notas E2→E3 |
+| EX-1.D.1 | D | Tocar a 6ª solta (Mi) e a casa 5 (Lá) | localizar notas | detector: E2 e A2 |
+| EX-1.D.2 | D | Tocar E2 (6ª solta) e E3 (casa 12) — oitava | localizar notas | detector: E2 e E3 |
+| EX-1.D.3 | D | Tocar a casa 5 da 6ª (Lá) e a 5ª solta (Lá) | referências do braço | detector: A2 duas vezes |
+| EX-1.E.1 | E | Pestana de Fá (F) na 1ª casa; todas as cordas devem soar | pestana | nível/ataque em todas as cordas |
+| EX-1.E.2 | E | Meio barré de Si menor (Bm) na 2ª casa | pestana | detector: acorde Bm |
+| EX-1.E.3 | E | Pestana completa, meio barré e posição correta | pestana | questionário ≥90% |
+| EX-1.F.1 | F | Montar `C`, `G`, `D`, `Am`, `Em` e identificar a forma CAGED | acordes simples | detecção de acorde |
+| EX-1.F.2 | F | Mover a forma de `E` pelo braço e nomear o acorde | CAGED | identificar acorde por região |
+| EX-1.F.3 | F | Tocar as cinco formas (C, A, G, E, D) de Dó maior | CAGED | detector: C maior em 5 regiões |
+| EX-1.F.4 | F | Nomear o acorde pela forma móvel | CAGED | questionário ≥90% |
+| EX-1.G.1 | G | Montar o campo harmônico maior de Dó e achar a relativa menor | tonalidade | questionário ≥90% |
+| EX-1.G.2 | G | Tocar I–vi–IV–V em Dó (C – Am – F – G) | campo harmônico | detector: C, Am, F, G |
+| EX-1.G.3 | G | Tocar a escala de Dó maior (padrão T–T–S–T–T–T–S) | escala maior | detector: C4→C5 |
+| EX-1.H.1 | H | Dado `Dm7`, `G7`, `C7M`, dizer o campo harmônico e tocar as tríades | cifrado + tonalidade | detecção de acorde e resposta |
+| EX-1.H.2 | H | Dizer o significado de `C`, `Cm`, `C7`, `C7M`, `Cm7`, `C/E` | cifrado | questionário ≥90% |
+| EX-1.H.3 | H | Tocar uma cifra com inversão (`C/E`) | cifrado | detector: C maior com baixo em E |
+| EX-1.I.1 | I | Contar (`TÁ`/`TÁ-KI`) e tocar a 6ª solta em semínimas na grade | rítmica + grade | `on_grid_ratio ≥ 0,75` a 60 BPM |
+| EX-1.I.2 | I | Tocar a 6ª solta em colcheias (`TÁ-KI`) a 60 BPM | subdivisão | `on_grid_ratio ≥ 0,75` |
+| EX-1.I.3 | I | Dizer o valor das figuras e as sílabas rítmicas | rítmica | questionário ≥90% |
 
 **Desafio de gate (CM-014/CM-016 do currículo):** tocar a progressão
 `C – G – Am – F` (vamp de 1 acorde, nível 1) a **60 BPM** com **≥90% de acerto**
