@@ -50,13 +50,14 @@ do repositório (commits, CI, resultados de QA), nunca de otimismo.
   `docs/MUSIC.md` §1.1.
 - **Próximo:** M2 (Módulos 2–7 do currículo) e ligar a UI principal à engine
   (CM-001). Avaliação de improvisação fica para M2b. Instalador de teste com a
-  conformidade REQ-019..023 publicada em `test`.
+  conformidade REQ-019..023 e os diagramas embutidos publicada em `test`
+  (commit `89b0498`).
 
 ## Histórico
 
 | Ciclo | Milestone | Resultado | Evidência |
 |---|---|---|---|
-| 2026-11-13 | M1 | Diagramas do curso como **imagens embutidas** (19 JPG gerados por `tools/make_diagrams.py`, `juce_add_binary_data`) renderizadas no painel central, e **IDs de exercício por tópico** (`EX-1.<tópico>.<n>`, EX-1.A.1…EX-1.I.3) | `Source/Course/Content/Diagrams.*`; `CMakeLists.txt`; `ModuleComponent.cpp`; `ModuleCatalog.cpp`; `docs/MUSIC.md`; 295/295 testes |
+| 2026-11-13 | M1 | Diagramas do curso como **imagens embutidas** (19 JPG gerados por `tools/make_diagrams.py`, `juce_add_binary_data`) renderizadas no painel central, e **IDs de exercício por tópico** (`EX-1.<tópico>.<n>`, EX-1.A.1…EX-1.I.3). Instalador de teste republicado (`89b0498`) | `Source/Course/Content/Diagrams.*`; `CMakeLists.txt`; `ModuleComponent.cpp`; `ModuleCatalog.cpp`; `docs/MUSIC.md`; 295/295 testes |
 | 2026-11-07 | M1 | Correção do painel de quiz (REQ-021, revisão do cliente): o **questionário roda no painel central** — cabeçalho do módulo (nível/BPM/gate), instrução "Responda uma questão por vez.", "Questão X de Y", enunciado e alternativas clicáveis A–D; o **painel direito** fica só com os controles (cabeçalho + link "Todos os tópicos do módulo", seletor, botão de play com `id — título`, placar e caixa de orientação "Neste exercício…") | `ModuleComponent.cpp` (`ContentView`); `PracticePanel.cpp/.h`; validado sob Xvfb (1040×680); 160/160 testes |
 | 2026-11-05 | M1 | Correção do painel de prática (REQ-021): exercício vira linha clicável com ícone de play e id/título no painel direito, como no mock-up; centro mostra só a explicação (sem repetir o id/título) | `PracticePanel.cpp/.h`; `ModuleComponent.cpp`; instalador `9f5f70e` na `test` |
 | 2026-11-05 | M1 | Conformidade com o `musica.docx`: REQ-019 (módulo abre em branco) e REQ-022 (tópico H com exercício executável); app validado contra as 9 capturas | `ModuleComponent.cpp`; `ModuleCatalog.cpp` (EX-1.H.1); 160/160 testes |
