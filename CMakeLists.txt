@@ -67,6 +67,7 @@ target_sources(CursoMusica PRIVATE
     Source/Course/QuizSession.cpp
     Source/Course/ProgressStore.cpp
     Source/Course/ModuleCatalog.cpp
+    Source/Data/ProgressDatabase.cpp
     Source/Course/Content/Topics.cpp
     Source/Course/Content/Diagrams.cpp
     Source/Course/Content/TopicA.cpp
@@ -134,6 +135,25 @@ if(WIN32)
     endif()
 endif()
 
+# ---------------------------------------------------------------------------
+# PostgreSQL progress storage (optional, ADR 0006).
+#
+# The student's progress is mirrored to a PostgreSQL database when libpq is
+# available at build time; otherwise the app compiles and runs purely local.
+# Same discipline as the ASIO SDK above: absence is a warning, never an error.
+# The connection details come from the environment at runtime, never the binary.
+# ---------------------------------------------------------------------------
+find_package(PostgreSQL QUIET)
+
+if(PostgreSQL_FOUND)
+    message(STATUS "libpq found (${PostgreSQL_VERSION_STRING}): progress mirrored to PostgreSQL")
+    target_include_directories(CursoMusica PRIVATE ${PostgreSQL_INCLUDE_DIRS})
+    target_link_libraries(CursoMusica PRIVATE PostgreSQL::PostgreSQL)
+    target_compile_definitions(CursoMusica PRIVATE CURSOMUSICA_HAS_POSTGRES=1)
+else()
+    message(STATUS "libpq not found - building without PostgreSQL (progress stays local)")
+endif()
+
 target_compile_definitions(CursoMusica PRIVATE
     JUCE_WEB_BROWSER=0
     JUCE_USE_CURL=0
@@ -179,6 +199,8 @@ target_sources(CursoMusicaTests PRIVATE
     Source/Course/PracticeSession.cpp
     Source/Course/QuizSession.cpp
     Source/Course/ModuleCatalog.cpp
+    Source/Course/ProgressStore.cpp
+    Source/Data/ProgressDatabase.cpp
     Source/Course/Content/Topics.cpp
     Source/Course/Content/Diagrams.cpp
     Source/Course/Content/TopicA.cpp
@@ -198,10 +220,19 @@ target_compile_definitions(CursoMusicaTests PRIVATE
     JUCE_USE_CURL=0
     JUCE_WEB_BROWSER=0)
 
+# The tests exercise the real libpq path when it is available (integration test
+# against a local PostgreSQL), and degrade to the no-op path otherwise.
+if(PostgreSQL_FOUND)
+    target_include_directories(CursoMusicaTests PRIVATE ${PostgreSQL_INCLUDE_DIRS})
+    target_link_libraries(CursoMusicaTests PRIVATE PostgreSQL::PostgreSQL)
+    target_compile_definitions(CursoMusicaTests PRIVATE CURSOMUSICA_HAS_POSTGRES=1)
+endif()
+
 target_link_libraries(CursoMusicaTests
     PRIVATE
         CursoMusicaDiagrams
         juce::juce_core
+        juce::juce_data_structures
     PUBLIC
         juce::juce_recommended_config_flags
         juce::juce_recommended_warning_flags)

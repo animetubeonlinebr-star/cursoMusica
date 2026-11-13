@@ -14,6 +14,8 @@
 #include "Course/ProgressionRule.h"
 #include "Course/QuizSession.h"
 #include "Course/TempoGrid.h"
+#include "Course/ProgressStore.h"
+#include "Data/ProgressDatabase.h"
 
 // Minimal dependency-free test runner for the pure course logic (QA).
 // Runs on the build machine with no audio device, so it is CI-friendly.
@@ -468,6 +470,110 @@ void testModuleCatalog()
     }
 }
 
+// Progress persistence in PostgreSQL (ADR 0006). The unit part always runs; the
+// integration part runs only when a real database is reachable, so CI without a
+// server still passes and a developer with one gets the real path exercised.
+void testProgressDatabase()
+{
+    std::cout << "ProgressDatabase\n";
+    using namespace cursomusica::data;
+
+    const auto config = PostgresConfig::fromEnvironment();
+    check (config.port == "5432", "default PostgreSQL port is 5432");
+    check (config.schema == "curso-musica", "default schema is curso-musica");
+    check (config.student.isNotEmpty(), "a student id is always present");
+
+    ProgressDatabase database;
+
+    if (! ProgressDatabase::isCompiledIn())
+    {
+        // Local-only build: every call must be a safe no-op, never a crash.
+        check (! database.connect (config), "connect is a no-op without libpq");
+        check (database.loadHighestPassedModule() == -1, "load returns -1 without libpq");
+        check (! database.saveHighestPassedModule (1), "save is a no-op without libpq");
+        check (! database.ensureSchema(), "ensureSchema is a no-op without libpq");
+        std::cout << "  (built without libpq: local-only path verified)\n";
+        return;
+    }
+
+    if (! config.isEnabled() || ! database.connect (config))
+    {
+        // No database in this environment (CI): the code must degrade cleanly.
+        check (! database.isConnected(), "not connected without a server");
+        check (database.loadHighestPassedModule() == -1, "load returns -1 when offline");
+        check (database.lastError().isNotEmpty(), "an offline attempt reports an error");
+        std::cout << "  (no PostgreSQL reachable: offline path verified)\n";
+        return;
+    }
+
+    check (database.isConnected(), "connected to PostgreSQL");
+    check (database.ensureSchema(), "schema and tables are created (idempotent)");
+    check (database.ensureSchema(), "ensureSchema is idempotent");
+
+    // Use a throwaway student id, unique per run, so the test never disturbs
+    // real progress and is repeatable (each run starts from a clean row).
+    auto testConfig = config;
+    testConfig.student = "qa-integration-" + juce::String (juce::Time::currentTimeMillis());
+    ProgressDatabase scoped;
+    check (scoped.connect (testConfig), "scoped connection opens");
+
+    check (scoped.ensureSchema(), "scoped schema ready");
+
+    check (scoped.loadHighestPassedModule() == -1, "a fresh student has no record");
+
+    check (scoped.saveHighestPassedModule (3), "first save succeeds");
+    check (scoped.loadHighestPassedModule() == 3, "saved value is read back");
+
+    // Monotonicity: a lower value must never overwrite a higher one.
+    check (scoped.saveHighestPassedModule (1), "lower save is accepted");
+    check (scoped.loadHighestPassedModule() == 3, "progress never goes backwards");
+
+    check (scoped.saveHighestPassedModule (5), "higher save succeeds");
+    check (scoped.loadHighestPassedModule() == 5, "progress advances");
+
+    check (scoped.recordModuleResult (5, true), "gate result is appended");
+    check (scoped.recordModuleResult (5, false), "a failed attempt is appended too");
+
+    std::cout << "  (integration against PostgreSQL verified)\n";
+}
+
+// End-to-end: the ProgressStore must save locally and mirror to PostgreSQL
+// without blocking, and the module gate must follow the saved record.
+void testProgressStore()
+{
+    std::cout << "ProgressStore\n";
+    using namespace cursomusica::course;
+
+    {
+        ProgressStore store;
+        store.setUnlockAll (false);
+
+        check (! store.isModuleUnlocked (2), "module 2 starts locked");
+
+        store.recordGateResult (1, true);
+        check (store.getHighestPassedModule() == 1, "passing module 1 is recorded");
+        check (store.isModuleUnlocked (2), "passing module 1 unlocks module 2");
+        check (! store.isModuleUnlocked (3), "module 3 stays locked");
+
+        // A failure never advances, and never regresses an earlier pass.
+        store.recordGateResult (2, false);
+        check (store.getHighestPassedModule() == 1, "a failure does not advance");
+        store.recordGateResult (1, true);
+        check (store.getHighestPassedModule() == 1, "re-passing does not regress");
+    }
+
+    // The local record survives a new instance (offline persistence).
+    {
+        ProgressStore reopened;
+        check (reopened.getHighestPassedModule() == 1,
+               "local progress survives a restart");
+
+        // Clean up the shared local record so reruns start from scratch.
+        reopened.reset();
+        check (reopened.getHighestPassedModule() == 0, "reset clears the record");
+    }
+}
+
 int main()
 {
     testNoteMath();
@@ -478,6 +584,8 @@ int main()
     testProgression();
     testAudioPortClassifier();
     testModuleCatalog();
+    testProgressDatabase();
+    testProgressStore();
 
     std::cout << "\n" << (checks - failures) << "/" << checks << " checks passed\n";
     if (failures > 0)

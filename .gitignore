@@ -3,3 +3,8 @@ External/JUCE/
 External/asio/
 .agent_tmp/
 *.user
+
+# Local environment / database credentials (ADR 0006, docs/SECURITY.md)
+.env
+.env.*
+*.pgpass
