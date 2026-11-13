@@ -63,6 +63,7 @@ std::vector<ContentItem> topicD()
            "memoriza sozinho pelo uso."),
 
         h ("Mapa da 6ª corda (Mi grave)"),
+        img ("d_mapa_corda_6", "A 6ª corda nas doze primeiras casas."),
         p ("A 6ª corda é a mais importante para se orientar: muitas formas de "
            "acorde e escalas têm a fundamental nela. Vamos mapear as primeiras "
            "casas e os pontos de referência."),
@@ -83,6 +84,7 @@ std::vector<ContentItem> topicD()
            "corda."),
 
         h ("Mapa completo do braço (6ª à 1ª corda)"),
+        img ("d_mapa_do_braco", "Notas das seis cordas até a casa 12."),
         p ("A tabela a seguir reúne as notas das seis cordas nas casas principais. "
            "Use-a como consulta, não como decoreba. Confirme sempre pela regra do "
            "semitom."),
@@ -112,6 +114,7 @@ std::vector<ContentItem> topicD()
            "casa 12 com pestana, soando mais agudos."),
 
         h ("Notas iguais em cordas diferentes"),
+        img ("d_oitavas", "Padrão de oitava: duas cordas acima, duas casas à frente."),
         p ("Um dos fatos mais libertadores do instrumento é que a mesma nota pode "
            "ser tocada em vários lugares. O Lá, por exemplo, existe na 5ª corda "
            "solta, na casa 5 da 6ª corda, na casa 10 da 2ª corda e assim por "

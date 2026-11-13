@@ -19,6 +19,7 @@ std::vector<ContentItem> topicF()
            "em inglês: C, A, G, E, D."),
 
         h ("A origem das cinco formas"),
+        img ("f_caged_cinco_formas", "As cinco formas de Dó maior: C, A, G, E, D."),
         p ("As cinco formas do CAGED nascem dos acordes abertos que todo iniciante "
            "aprende na primeira posição: Dó, Lá, Sol, Mi e Ré. Cada uma dessas "
            "formas pode ser transformada em uma forma móvel com o uso da pestana "
@@ -60,6 +61,7 @@ std::vector<ContentItem> topicF()
            "acordes com uma única forma."),
 
         h ("As formas se conectam"),
+        img ("f_caged_conexao", "As formas cobrem o braço em regiões que se conectam."),
         p ("O segundo conceito do CAGED é a conexão. As formas não são ilhas: cada "
            "uma termina onde a próxima começa. A última nota de uma forma é a "
            "primeira nota da forma seguinte. Isso permite deslizar de uma região "
@@ -77,6 +79,7 @@ std::vector<ContentItem> topicF()
            "qualquer melodia sem perder a mão."),
 
         h ("CAGED e escalas: cada forma contém uma escala"),
+        img ("f_caged_escala", "A escala de Dó maior sobre o braço."),
         p ("O terceiro conceito — e o mais poderoso para quem quer improvisar — é "
            "que cada forma de acorde contém a escala daquela tonalidade. Sobre a "
            "forma de Dó, você encontra a escala de Dó maior (e a pentatônica de "
@@ -127,8 +130,8 @@ std::vector<ContentItem> topicF()
            "outra, sentindo como a mão desliza pelo braço."),
         b ("Etapa 5 — escalas: sobre cada forma, toque a escala da tonalidade e "
            "identifique a fundamental e a quinta."),
-        c ("Progressão do app: o exercício EX-1.4 pede para montar C, G, D, Am e "
-           "Em e identificar a forma CAGED de cada um; o EX-1.6 pede para mover a "
+        c ("Progressão do app: o exercício EX-1.F.1 pede para montar C, G, D, Am e "
+           "Em e identificar a forma CAGED de cada um; o EX-1.F.2 pede para mover a "
            "forma de Mi e nomear o acorde resultante."),
 
         h ("O que é a \"posição local\" (home position)"),

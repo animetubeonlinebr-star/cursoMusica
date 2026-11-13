@@ -54,6 +54,7 @@ std::vector<ContentItem> topicH()
            "e B♭ para Si bemol, seguindo o padrão anglo-saxônico."),
 
         h ("Qualidades do acorde: maior, menor e as sétimas"),
+        img ("h_cifras_acordes", "O mesmo Dó em seis cifras diferentes."),
         p ("Depois da letra, os símbolos indicam a qualidade do acorde. A "
            "qualidade diz quais notas, além da fundamental, formam o acorde. "
            "Vamos das mais simples às mais complexas."),
@@ -180,6 +181,7 @@ std::vector<ContentItem> topicH()
            "de partitura é aprofundada em módulos posteriores."),
 
         h ("Tablatura: a terceira forma de escrever"),
+        img ("h_tablatura", "Tablatura: número = casa, linha = corda."),
         p ("Além da cifra e da partitura, existe a tablatura (tab), muito usada "
            "para guitarra. Ela mostra exatamente onde colocar os dedos: cada linha "
            "representa uma corda, e os números indicam as casas."),

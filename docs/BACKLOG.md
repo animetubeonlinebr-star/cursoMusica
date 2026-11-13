@@ -66,7 +66,7 @@ responda ao questionário.
 
 Critérios de aceite:
 - Dado o Módulo 1, quando abro cada um dos tópicos A–I, então cada tópico tem
-  **≥1 exercício executável** associado (não só o questionário EX-1.1).
+  **≥1 exercício executável** associado (não só o questionário EX-1.A.1).
 - Dado o exercício do tópico, então ele mede o desempenho (nota/acertos/grade)
   pelo motor de medição (CM-008) e respeita o gate de 90%.
 - Dado o tópico, então o exercício cobre o assunto do tópico (validado pelo
@@ -314,7 +314,7 @@ Progresso (2026-11-02, Módulo 1):
   contagem TÁ/TÁ-KI), extraído do capítulo "Rítmica" de `pdf-fraseado-melodico`;
   sustenta o `on_grid_ratio` do gate (REQ-015).
 - [x] Tópico A detalhado a partir de `explica_painelEsquerdo.pdf` (16 páginas);
-  `Questionario_m1.pdf` virou o exercício **EX-1.1** (7 questões, gate 90%).
+  `Questionario_m1.pdf` virou o exercício **EX-1.A.1** (7 questões, gate 90%).
 - [x] Apostilas da branch `adequacao` varridas por duplicatas (hash LFS +
   assinatura de imagem); 3 cópias `(1)` removidas, 18 apostilas únicas.
 - [x] Revisão da `adequacao` reescrita (2026-11-05): 4 apostilas novas por hash

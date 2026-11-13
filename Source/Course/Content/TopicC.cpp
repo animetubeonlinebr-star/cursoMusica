@@ -69,6 +69,7 @@ std::vector<ContentItem> topicC()
            "Fá é Mi, o sustenido de Si é Dó e o bemol de Dó é Si."),
 
         h ("Enarmonia: dois nomes, um som"),
+        img ("c_enarmonia_teclado", "Cada tecla preta tem dois nomes (sustenido e bemol)."),
         p ("Enarmonia é o fenômeno de duas notas com nomes diferentes soarem "
            "exatamente igual. Dó♯ e Ré♭ são a mesma altura; Fá♯ e Sol♭ são a mesma "
            "altura; Sol♯ e Lá♭ são a mesma altura. No instrumento, você toca a "
@@ -91,6 +92,7 @@ std::vector<ContentItem> topicC()
            "escrita de um jeito para respeitar a lógica da tonalidade."),
 
         h ("A escala cromática"),
+        img ("c_escala_cromatica_corda6", "Da 6ª solta (Mi) à casa 12 (Mi): doze semitons."),
         p ("A escala cromática é a sequência de todas as doze alturas dentro da "
            "oitava, subindo de semitom em semitom. É a escala mais completa do "
            "sistema temperado e serve de mapa para o braço: cada casa é um passo "

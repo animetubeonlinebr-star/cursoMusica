@@ -40,6 +40,7 @@ std::vector<ContentItem> topicB()
            "ao longo do braço."),
 
         h ("As sete notas naturais"),
+        img ("b_teclado_notas_naturais", "As notas naturais são as teclas brancas; de Dó a Dó."),
         p ("A música ocidental usa sete nomes básicos, as chamadas notas "
            "naturais. Na leitura em português e na leitura latina, elas são Dó, "
            "Ré, Mi, Fá, Sol, Lá e Si. Na notação anglo-saxônica, muito usada em "
@@ -66,6 +67,7 @@ std::vector<ContentItem> topicB()
            "vamos usá-lo como ponto de partida para montar escalas adiante."),
 
         h ("Tom e semitom: a menor distância entre duas notas"),
+        img ("b_tons_e_semitons", "Padrão T–T–S–T–T–T–S da escala maior."),
         p ("Entre duas notas vizinhas existem duas distâncias possíveis: o "
            "semitom, que é o menor intervalo usado na nossa música, e o tom, "
            "que equivale a dois semitons. Entender onde há tom e onde há "

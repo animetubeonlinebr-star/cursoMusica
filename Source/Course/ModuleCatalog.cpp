@@ -149,34 +149,34 @@ namespace
         };
 
         m.exercises = {
-            exercise ("EX-1.1", juce::String::fromUTF8 ("Questionário: conhecendo o instrumento"),
+            exercise ("EX-1.A.1", juce::String::fromUTF8 ("Questionário: conhecendo o instrumento"),
                       juce::String::fromUTF8 ("Responder ao teste de aprendizagem do Módulo 1, uma questão por vez."),
                       juce::String::fromUTF8 ("Acerto ≥90% nas questões do questionário.")),
-            exercise ("EX-1.2", juce::String::fromUTF8 ("Corda 6ª e casa 5"),
+            exercise ("EX-1.D.1", juce::String::fromUTF8 ("Corda 6ª e casa 5"),
                       juce::String::fromUTF8 ("Tocar a 6ª solta (Mi) e a casa 5 (Lá)."),
                       juce::String::fromUTF8 ("Detector: E2 solto e A2 na 5ª casa.")),
-            exercise ("EX-1.3", juce::String::fromUTF8 ("Escala de Dó na 1ª posição"),
+            exercise ("EX-1.B.1", juce::String::fromUTF8 ("Escala de Dó na 1ª posição"),
                       juce::String::fromUTF8 ("Tocar a escala de Dó em 2 oitavas."),
                       juce::String::fromUTF8 ("Sequência de notas esperada, 90% de acerto.")),
-            exercise ("EX-1.4", juce::String::fromUTF8 ("Acordes simples"),
+            exercise ("EX-1.F.1", juce::String::fromUTF8 ("Acordes simples"),
                       juce::String::fromUTF8 ("Montar C, G, D, Am, Em e identificar a forma CAGED."),
                       juce::String::fromUTF8 ("Detecção de acorde (soma de notas).")),
-            exercise ("EX-1.5", juce::String::fromUTF8 ("Pestana de Fá"),
+            exercise ("EX-1.E.1", juce::String::fromUTF8 ("Pestana de Fá"),
                       juce::String::fromUTF8 ("Pestana de F na 1ª casa; todas as cordas soam."),
                       juce::String::fromUTF8 ("Nível/ataque presente em todas as cordas.")),
-            exercise ("EX-1.6", juce::String::fromUTF8 ("Mover a forma de E"),
+            exercise ("EX-1.F.2", juce::String::fromUTF8 ("Mover a forma de E"),
                       juce::String::fromUTF8 ("Deslizar a forma de E e nomear o acorde."),
                       juce::String::fromUTF8 ("Identificar acorde pela região do braço.")),
-            exercise ("EX-1.7", juce::String::fromUTF8 ("Cifrado e tonalidade"),
+            exercise ("EX-1.H.1", juce::String::fromUTF8 ("Cifrado e tonalidade"),
                       juce::String::fromUTF8 ("Dado Dm7, G7, C7M, dizer o campo harmônico e tocar as tríades."),
                       juce::String::fromUTF8 ("Detecção de acorde e resposta.")),
-            exercise ("EX-1.8", juce::String::fromUTF8 ("Contar e tocar na grade"),
+            exercise ("EX-1.I.1", juce::String::fromUTF8 ("Contar e tocar na grade"),
                       juce::String::fromUTF8 ("Contar em voz alta (TÁ / TÁ-KI) e tocar a 6ª solta em semínimas na grade do metrônomo a 60 BPM."),
                       juce::String::fromUTF8 ("on_grid_ratio ≥ 0,75 nas batidas (REQ-015).")),
-            exercise ("EX-1.9", juce::String::fromUTF8 ("Sustenidos, bemóis e enarmonia"),
+            exercise ("EX-1.C.1", juce::String::fromUTF8 ("Sustenidos, bemóis e enarmonia"),
                       juce::String::fromUTF8 ("Nomear a nota que falta e dizer quais nomes são o mesmo som (enarmonia)."),
                       juce::String::fromUTF8 ("Acerto ≥90% nas questões de sustenidos, bemóis e enarmonia.")),
-            exercise ("EX-1.10", juce::String::fromUTF8 ("Tonalidade e campo harmônico"),
+            exercise ("EX-1.G.1", juce::String::fromUTF8 ("Tonalidade e campo harmônico"),
                       juce::String::fromUTF8 ("Montar o campo harmônico maior de Dó e achar a relativa menor."),
                       juce::String::fromUTF8 ("Acerto ≥90% nas questões de campo harmônico e círculo das quintas.")),
         };
@@ -194,7 +194,7 @@ namespace
         m.exercises[8].lessonId = "C";   // sharps / flats / enharmony
         m.exercises[9].lessonId = "G";   // key organisation / harmonic field
 
-        // EX-1.1 is the learning quiz of the module (Questionario_m1). Questions
+        // EX-1.A.1 is the learning quiz of the module (Questionario_m1). Questions
         // are answered one at a time; the gate is the same 90% (REQ-009).
         m.exercises[0].quiz = {
             question ("Qual é a principal função das tarraxas?",
@@ -232,13 +232,13 @@ namespace
         };
 
         // Playable specs for the exercises the app can verify with the detector.
-        m.exercises[1].targets = notes ({ "E2", "A2" });                    // EX-1.2
-        m.exercises[2].targets = notes ({ "C4", "D4", "E4", "F4", "G4", "A4", "B4", "C5" }); // EX-1.3
-        m.exercises[3].chordPitchClasses = { 0, 4, 7 };                     // EX-1.4, first C
-        m.exercises[4].chordPitchClasses = { 5, 9, 0 };                     // EX-1.5, F barre
-        m.exercises[7].targets = notes ({ "E2" });                          // EX-1.8, on the grid
+        m.exercises[1].targets = notes ({ "E2", "A2" });                    // EX-1.D.1
+        m.exercises[2].targets = notes ({ "C4", "D4", "E4", "F4", "G4", "A4", "B4", "C5" }); // EX-1.B.1
+        m.exercises[3].chordPitchClasses = { 0, 4, 7 };                     // EX-1.F.1, first C
+        m.exercises[4].chordPitchClasses = { 5, 9, 0 };                     // EX-1.E.1, F barre
+        m.exercises[7].targets = notes ({ "E2" });                          // EX-1.I.1, on the grid
 
-        // EX-1.7 (topic H, cifrado) is playable: the student plays the ii–V–I of C
+        // EX-1.H.1 (topic H, cifrado) is playable: the student plays the ii–V–I of C
         // as the app recognises each chord (REQ-022 — every topic has an
         // executable exercise, not only a questionnaire).
         m.exercises[6].chordProgression = {
@@ -247,7 +247,7 @@ namespace
             { 0, 4, 7, 11 },   // C7M
         };
 
-        // EX-1.9 and EX-1.10 are quizzes on topics C and G, so every topic A..I
+        // EX-1.C.1 and EX-1.G.1 are quizzes on topics C and G, so every topic A..I
         // has at least one exercise (REQ-022). Answered one at a time, like the
         // module quiz, with the same 90% mark (REQ-009).
         m.exercises[8].quiz = {
@@ -299,11 +299,11 @@ namespace
         };
 
         // --- Extra exercises: at least three per topic (client request). ------
-        // The client asked for >= 3 exercises on every topic A..I. EX-1.1..EX-1.10
+        // The client asked for >= 3 exercises on every topic A..I. EX-1.A.1..EX-1.G.3
         // and the gate give each topic at least one; the exercises below complete
         // the set, mixing quizzes (verifiable) and playable specs (detector).
         m.exercises.emplace_back (exercise (
-            "EX-1.11", juce::String::fromUTF8 ("Partes do instrumento: nomear"),
+            "EX-1.A.2", juce::String::fromUTF8 ("Partes do instrumento: nomear"),
             juce::String::fromUTF8 ("Apontar e nomear as partes da guitarra e do violão."),
             juce::String::fromUTF8 ("Acerto ≥90% no questionário de partes do instrumento.")));
         m.exercises.back().lessonId = "A";
@@ -333,7 +333,7 @@ namespace
         };
 
         m.exercises.emplace_back (exercise (
-            "EX-1.12", juce::String::fromUTF8 ("Identificar partes por região"),
+            "EX-1.A.3", juce::String::fromUTF8 ("Identificar partes por região"),
             juce::String::fromUTF8 ("Dizer a que região do instrumento pertence cada peça."),
             juce::String::fromUTF8 ("Acerto ≥90% no questionário de regiões.")));
         m.exercises.back().lessonId = "A";
@@ -350,7 +350,7 @@ namespace
 
         // Topic B — notes.
         m.exercises.emplace_back (exercise (
-            "EX-1.13", juce::String::fromUTF8 ("Nomear as notas naturais"),
+            "EX-1.B.2", juce::String::fromUTF8 ("Nomear as notas naturais"),
             juce::String::fromUTF8 ("Dizer as sete notas naturais e suas cifras."),
             juce::String::fromUTF8 ("Acerto ≥90% no questionário de notas.")));
         m.exercises.back().lessonId = "B";
@@ -372,7 +372,7 @@ namespace
         };
 
         m.exercises.emplace_back (exercise (
-            "EX-1.14", juce::String::fromUTF8 ("Tons e semitons"),
+            "EX-1.B.3", juce::String::fromUTF8 ("Tons e semitons"),
             juce::String::fromUTF8 ("Dizer a distância (tom ou semitom) entre notas naturais."),
             juce::String::fromUTF8 ("Acerto ≥90% no questionário de intervalos.")));
         m.exercises.back().lessonId = "B";
@@ -390,22 +390,22 @@ namespace
         };
 
         m.exercises.emplace_back (exercise (
-            "EX-1.15", juce::String::fromUTF8 ("Cantar a nota junto com a corda"),
+            "EX-1.B.4", juce::String::fromUTF8 ("Cantar a nota junto com a corda"),
             juce::String::fromUTF8 ("Tocar a 6ª corda solta (Mi) e cantar a mesma nota."),
             juce::String::fromUTF8 ("Detector: E2 solto, sustentado por 2 segundos.")));
         m.exercises.back().lessonId = "B";
         m.exercises.back().targets = notes ({ "E2" });
 
-        // Topic C — sharps, flats and enharmony (EX-1.9 already covers the topic).
+        // Topic C — sharps, flats and enharmony (EX-1.C.1 already covers the topic).
         m.exercises.emplace_back (exercise (
-            "EX-1.16", juce::String::fromUTF8 ("Sustenido e bemol no braço"),
+            "EX-1.C.2", juce::String::fromUTF8 ("Sustenido e bemol no braço"),
             juce::String::fromUTF8 ("Tocar Fá e Fá♯ na 6ª corda; depois Si e Si♭."),
             juce::String::fromUTF8 ("Detector: F2, F♯2, B3, A♯3.")));
         m.exercises.back().lessonId = "C";
         m.exercises.back().targets = notes ({ "F2", "F#2", "B3", "A#3" });
 
         m.exercises.emplace_back (exercise (
-            "EX-1.17", juce::String::fromUTF8 ("Escala cromática na 6ª corda"),
+            "EX-1.C.3", juce::String::fromUTF8 ("Escala cromática na 6ª corda"),
             juce::String::fromUTF8 ("Tocar a 6ª corda da casa 0 à casa 12, casa a casa."),
             juce::String::fromUTF8 ("Detector: 13 notas cromáticas de E2 a E3.")));
         m.exercises.back().lessonId = "C";
@@ -413,31 +413,31 @@ namespace
             "E2", "F2", "F#2", "G2", "G#2", "A2", "A#2", "B2",
             "C3", "C#3", "D3", "D#3", "E3" });
 
-        // Topic D — fretboard location (EX-1.2 and EX-1.3 already cover it).
+        // Topic D — fretboard location (EX-1.D.1 and EX-1.B.1 already cover it).
         m.exercises.emplace_back (exercise (
-            "EX-1.18", juce::String::fromUTF8 ("Oitavas: mesma nota, duas cordas"),
+            "EX-1.D.2", juce::String::fromUTF8 ("Oitavas: mesma nota, duas cordas"),
             juce::String::fromUTF8 ("Tocar E2 na 6ª solta e E3 na casa 12 da 6ª."),
             juce::String::fromUTF8 ("Detector: E2 e E3, uma oitava de diferença.")));
         m.exercises.back().lessonId = "D";
         m.exercises.back().targets = notes ({ "E2", "E3" });
 
         m.exercises.emplace_back (exercise (
-            "EX-1.19", juce::String::fromUTF8 ("Casa 5 = corda de baixo solta"),
+            "EX-1.D.3", juce::String::fromUTF8 ("Casa 5 = corda de baixo solta"),
             juce::String::fromUTF8 ("Tocar a casa 5 da 6ª (Lá) e a 5ª corda solta (Lá)."),
             juce::String::fromUTF8 ("Detector: A2 tocado duas vezes (mesma nota).")));
         m.exercises.back().lessonId = "D";
         m.exercises.back().targets = notes ({ "A2", "A2" });
 
-        // Topic E — barre (EX-1.5 already covers it).
+        // Topic E — barre (EX-1.E.1 already covers it).
         m.exercises.emplace_back (exercise (
-            "EX-1.20", juce::String::fromUTF8 ("Meio barré de Si menor"),
+            "EX-1.E.2", juce::String::fromUTF8 ("Meio barré de Si menor"),
             juce::String::fromUTF8 ("Fazer o meio barré de Bm na 2ª casa; cordas limpas."),
             juce::String::fromUTF8 ("Detector: acorde Bm (Si Ré Fá♯).")));
         m.exercises.back().lessonId = "E";
         m.exercises.back().chordPitchClasses = { 11, 2, 6 };
 
         m.exercises.emplace_back (exercise (
-            "EX-1.21", juce::String::fromUTF8 ("Pestana: teoria e posição"),
+            "EX-1.E.3", juce::String::fromUTF8 ("Pestana: teoria e posição"),
             juce::String::fromUTF8 ("Responder sobre pestana completa, meio barré e posição."),
             juce::String::fromUTF8 ("Acerto ≥90% no questionário de pestana.")));
         m.exercises.back().lessonId = "E";
@@ -462,9 +462,9 @@ namespace
                         "Porque o traste está gasto" }, 1),
         };
 
-        // Topic F — CAGED (EX-1.4 and EX-1.6 already cover it).
+        // Topic F — CAGED (EX-1.F.1 and EX-1.F.2 already cover it).
         m.exercises.emplace_back (exercise (
-            "EX-1.22", juce::String::fromUTF8 ("As cinco formas do CAGED"),
+            "EX-1.F.3", juce::String::fromUTF8 ("As cinco formas do CAGED"),
             juce::String::fromUTF8 ("Tocar as formas C, A, G, E, D de Dó maior."),
             juce::String::fromUTF8 ("Detector: C maior em cinco regiões do braço.")));
         m.exercises.back().lessonId = "F";
@@ -477,7 +477,7 @@ namespace
         };
 
         m.exercises.emplace_back (exercise (
-            "EX-1.23", juce::String::fromUTF8 ("Nomear o acorde pela forma"),
+            "EX-1.F.4", juce::String::fromUTF8 ("Nomear o acorde pela forma"),
             juce::String::fromUTF8 ("Mover a forma de A e dizer o acorde em cada casa."),
             juce::String::fromUTF8 ("Acerto ≥90% no questionário de formas móveis.")));
         m.exercises.back().lessonId = "F";
@@ -498,9 +498,9 @@ namespace
                         "Não, apenas para escalas" }, 0),
         };
 
-        // Topic G — key organisation (EX-1.10 already covers it).
+        // Topic G — key organisation (EX-1.G.1 already covers it).
         m.exercises.emplace_back (exercise (
-            "EX-1.24", juce::String::fromUTF8 ("Campo harmônico de Dó"),
+            "EX-1.G.2", juce::String::fromUTF8 ("Campo harmônico de Dó"),
             juce::String::fromUTF8 ("Tocar I–vi–IV–V em Dó: C – Am – F – G."),
             juce::String::fromUTF8 ("Detector: sequência C, Am, F, G.")));
         m.exercises.back().lessonId = "G";
@@ -512,15 +512,15 @@ namespace
         };
 
         m.exercises.emplace_back (exercise (
-            "EX-1.25", juce::String::fromUTF8 ("Escala maior: padrão de tons"),
+            "EX-1.G.3", juce::String::fromUTF8 ("Escala maior: padrão de tons"),
             juce::String::fromUTF8 ("Tocar a escala de Dó maior e confirmar o padrão T–T–S–T–T–T–S."),
             juce::String::fromUTF8 ("Detector: C4 a C5 (oito notas da escala).")));
         m.exercises.back().lessonId = "G";
         m.exercises.back().targets = notes ({ "C4", "D4", "E4", "F4", "G4", "A4", "B4", "C5" });
 
-        // Topic H — chord symbols (EX-1.7 already covers it).
+        // Topic H — chord symbols (EX-1.H.1 already covers it).
         m.exercises.emplace_back (exercise (
-            "EX-1.26", juce::String::fromUTF8 ("Ler cifras de acorde"),
+            "EX-1.H.2", juce::String::fromUTF8 ("Ler cifras de acorde"),
             juce::String::fromUTF8 ("Dizer o significado de C, Cm, C7, C7M, Cm7 e C/E."),
             juce::String::fromUTF8 ("Acerto ≥90% no questionário de cifras.")));
         m.exercises.back().lessonId = "H";
@@ -540,7 +540,7 @@ namespace
         };
 
         m.exercises.emplace_back (exercise (
-            "EX-1.27", juce::String::fromUTF8 ("Tocar uma cifra com inversão"),
+            "EX-1.H.3", juce::String::fromUTF8 ("Tocar uma cifra com inversão"),
             juce::String::fromUTF8 ("Tocar C/E (Dó maior com Mi no baixo)."),
             juce::String::fromUTF8 ("Detector: acorde C maior com baixo em E.")));
         m.exercises.back().lessonId = "H";
@@ -548,9 +548,9 @@ namespace
             { 0, 4, 7 },   // C with E in the bass
         };
 
-        // Topic I — rhythm (EX-1.8 already covers it).
+        // Topic I — rhythm (EX-1.I.1 already covers it).
         m.exercises.emplace_back (exercise (
-            "EX-1.28", juce::String::fromUTF8 ("Colcheias na grade"),
+            "EX-1.I.2", juce::String::fromUTF8 ("Colcheias na grade"),
             juce::String::fromUTF8 ("Tocar a 6ª solta em colcheias (TÁ-KI) a 60 BPM."),
             juce::String::fromUTF8 ("on_grid_ratio ≥ 0,75 em subdivisão de colcheia.")));
         m.exercises.back().lessonId = "I";
@@ -559,7 +559,7 @@ namespace
         m.exercises.back().onGridTarget = 0.75f;
 
         m.exercises.emplace_back (exercise (
-            "EX-1.29", juce::String::fromUTF8 ("Figuras rítmicas e valores"),
+            "EX-1.I.3", juce::String::fromUTF8 ("Figuras rítmicas e valores"),
             juce::String::fromUTF8 ("Dizer o valor das figuras e as sílabas rítmicas."),
             juce::String::fromUTF8 ("Acerto ≥90% no questionário de rítmica.")));
         m.exercises.back().lessonId = "I";

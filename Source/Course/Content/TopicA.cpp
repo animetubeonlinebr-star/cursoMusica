@@ -117,6 +117,7 @@ std::vector<ContentItem> topicA()
                     "Violão: toque na corda → vibração → cavalete transmite ao corpo → tampo e caixa de ressonância movimentam o ar → som projetado naturalmente."),
 
                 h ("Nomenclatura completa (Manual de regulagem e manutenção)"),
+                img ("a_partes_do_instrumento", "Peças da guitarra e do violão, da cabeça ao cavalete."),
                 p ("O manual de regulagem e manutenção de Mozart Carvalho, uma das "
                    "fontes deste módulo, usa uma nomenclatura precisa para cada peça. "
                    "Conhecer esses nomes ajuda a conversar com luthier, a entender "

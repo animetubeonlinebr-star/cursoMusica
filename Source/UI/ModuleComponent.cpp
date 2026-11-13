@@ -2,10 +2,12 @@
 
 #include "Course/ModuleCatalog.h"
 #include "Course/QuizSession.h"
+#include "Course/Content/Diagrams.h"
 #include "UI/Design/Theme.h"
 #include "UI/PracticePanel.h"
 
 #include <functional>
+#include <unordered_map>
 
 namespace cursomusica
 {
@@ -32,6 +34,36 @@ namespace
         juce::TextLayout layout;
         layout.createLayout (s, (float) juce::jmax (40, width));
         return juce::jmax (18, juce::roundToInt (layout.getHeight()));
+    }
+
+    // The teaching diagrams ship inside the binary (juce_add_binary_data). They
+    // are decoded once and kept, so scrolling and relayout do not hit the JPEG
+    // decoder repeatedly.
+    const juce::Image& diagramImage (const juce::String& name)
+    {
+        static std::unordered_map<std::string, juce::Image> cache;
+
+        const std::string key = name.toStdString();
+        auto it = cache.find (key);
+        if (it != cache.end())
+            return it->second;
+
+        int size = 0;
+        const auto* data = content::diagramData (name, size);
+        juce::Image image;
+        if (data != nullptr && size > 0)
+            image = juce::ImageFileFormat::loadFrom (data, (size_t) size);
+
+        return cache.emplace (std::move (key), std::move (image)).first->second;
+    }
+
+    int diagramHeightForWidth (const juce::String& name, int width)
+    {
+        const auto& image = diagramImage (name);
+        if (! image.isValid() || image.getWidth() <= 0)
+            return 120; // placeholder box for a missing resource
+        return juce::roundToInt ((float) width * (float) image.getHeight()
+                                     / (float) image.getWidth());
     }
 }
 
@@ -216,6 +248,13 @@ private:
             case ContentKind::bullet:    return textHeight (th::type::makeFont (th::type::body), item.text, width - 18) + 4;
             case ContentKind::callout:   return textHeight (th::type::makeFont (th::type::body), item.text, width - 20) + 16;
             case ContentKind::table:     return 22 + 20 * (int) item.rows.size() + th::spacing::sm;
+            case ContentKind::image:
+            {
+                int height = diagramHeightForWidth (item.imageName, width) + th::spacing::sm;
+                if (item.text.isNotEmpty())
+                    height += 20 + textHeight (th::type::makeFont (th::type::caption), item.text, width);
+                return height;
+            }
         }
         return 20;
     }
@@ -468,6 +507,37 @@ private:
                                     line.removeFromLeft (columnWidth).reduced (8, 0),
                                     juce::Justification::centredLeft, false);
                     }
+                }
+                bounds.removeFromTop (th::spacing::sm);
+                break;
+            }
+            case ContentKind::image:
+            {
+                const int height = diagramHeightForWidth (item.imageName, width);
+                auto area = bounds.removeFromTop (height);
+                const auto& image = diagramImage (item.imageName);
+
+                if (image.isValid())
+                    g.drawImage (image, area.toFloat(),
+                                 juce::RectanglePlacement::stretchToFit);
+                else
+                {
+                    // Missing resource: draw a labelled box instead of failing
+                    // silently, so the gap is obvious while authoring content.
+                    g.setColour (th::colour::surfaceRaised);
+                    g.fillRoundedRectangle (area.toFloat(), th::radius::sm);
+                    g.setColour (th::colour::textDisabled);
+                    g.setFont (th::type::makeFont (th::type::caption));
+                    g.drawText (juce::String::fromUTF8 ("Diagrama indisponível: ") + item.imageName,
+                                area, juce::Justification::centred, false);
+                }
+
+                if (item.text.isNotEmpty())
+                {
+                    g.setColour (th::colour::textDisabled);
+                    g.setFont (th::type::makeFont (th::type::caption));
+                    g.drawFittedText (item.text, bounds.removeFromTop (20),
+                                      juce::Justification::centredLeft, 1);
                 }
                 bounds.removeFromTop (th::spacing::sm);
                 break;

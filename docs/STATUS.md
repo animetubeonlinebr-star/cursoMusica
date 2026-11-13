@@ -8,11 +8,11 @@ do repositório (commits, CI, resultados de QA), nunca de otimismo.
 - **Milestone em foco:** M1 — Módulo 1 jogável com gate de progressão.
 - **Progresso:** **Módulo 1 fechado de ponta a ponta.** O aluno lê a explicação
   (blocos A–I, incluindo rítmica/contagem), vê CAGED, trilha de prática
-  (`PTN-R-PALM`, guitarristas citados, REQ-007), os exercícios EX-1.1–EX-1.10 e o
+  (`PTN-R-PALM`, guitarristas citados, REQ-007), os exercícios EX-1.A.1–EX-1.I.3 e o
   desafio de gate; as apostilas curadas são citadas na seção "Apostilas"
   (REQ-006). A execução é por **seleção de tópico**: o menu de módulos é
   expansível, o tópico escolhido carrega a explicação detalhada no centro e
-  filtra os exercícios à direita; o **EX-1.1** é um questionário de 7 questões
+  filtra os exercícios à direita; o **EX-1.A.1** é um questionário de 7 questões
   (`QuizSession`, gate 90%). O motor de medição (`NoteMath`, `ExerciseEvaluator`, `TempoGrid`,
   `PracticeSession`) e o metrônomo RT-safe (CM-014) medem a execução; ao atingir
   **≥90%** o Módulo 2 desbloqueia e o resultado é persistido (`ProgressStore`).
@@ -22,13 +22,13 @@ do repositório (commits, CI, resultados de QA), nunca de otimismo.
   abrir um módulo nunca lido agora deixa o centro **em branco** (só o contexto
   do módulo: cabeçalho, nível/BPM/gate e objetivo), sem CAGED, rítmica, trilha
   nem fontes; **REQ-022** — o tópico H (cifrado) passou a ter exercício
-  **executável** (EX-1.7, progressão ii–V–I Dm7–G7–C7M), de modo que todo tópico
+  **executável** (EX-1.H.1, progressão ii–V–I Dm7–G7–C7M), de modo que todo tópico
   A–I tem ≥1 exercício que o app verifica, não só questionário. REQ-020 (mantém o
   tópico ao voltar ao mesmo módulo, limpa ao trocar de módulo), REQ-021
   (exercício à direita, explicação no centro) e REQ-023 (classificador de portas
   do VoiceMeeter) já estavam corretos.
 - **Revisão do painel de quiz (2026-11-07).** A pedido do cliente, o
-  **questionário (EX-1.1) passou a rodar no painel central** (REQ-021 revisado):
+  **questionário (EX-1.A.1) passou a rodar no painel central** (REQ-021 revisado):
   o centro mostra o cabeçalho do módulo (nível/BPM/gate), a instrução "Responda
   uma questão por vez.", "Questão X de Y", o enunciado e as alternativas
   clicáveis A–D; o **painel direito** ficou com os controles — cabeçalho com o
@@ -56,9 +56,10 @@ do repositório (commits, CI, resultados de QA), nunca de otimismo.
 
 | Ciclo | Milestone | Resultado | Evidência |
 |---|---|---|---|
+| 2026-11-13 | M1 | Diagramas do curso como **imagens embutidas** (19 JPG gerados por `tools/make_diagrams.py`, `juce_add_binary_data`) renderizadas no painel central, e **IDs de exercício por tópico** (`EX-1.<tópico>.<n>`, EX-1.A.1…EX-1.I.3) | `Source/Course/Content/Diagrams.*`; `CMakeLists.txt`; `ModuleComponent.cpp`; `ModuleCatalog.cpp`; `docs/MUSIC.md`; 295/295 testes |
 | 2026-11-07 | M1 | Correção do painel de quiz (REQ-021, revisão do cliente): o **questionário roda no painel central** — cabeçalho do módulo (nível/BPM/gate), instrução "Responda uma questão por vez.", "Questão X de Y", enunciado e alternativas clicáveis A–D; o **painel direito** fica só com os controles (cabeçalho + link "Todos os tópicos do módulo", seletor, botão de play com `id — título`, placar e caixa de orientação "Neste exercício…") | `ModuleComponent.cpp` (`ContentView`); `PracticePanel.cpp/.h`; validado sob Xvfb (1040×680); 160/160 testes |
 | 2026-11-05 | M1 | Correção do painel de prática (REQ-021): exercício vira linha clicável com ícone de play e id/título no painel direito, como no mock-up; centro mostra só a explicação (sem repetir o id/título) | `PracticePanel.cpp/.h`; `ModuleComponent.cpp`; instalador `9f5f70e` na `test` |
-| 2026-11-05 | M1 | Conformidade com o `musica.docx`: REQ-019 (módulo abre em branco) e REQ-022 (tópico H com exercício executável); app validado contra as 9 capturas | `ModuleComponent.cpp`; `ModuleCatalog.cpp` (EX-1.7); 160/160 testes |
+| 2026-11-05 | M1 | Conformidade com o `musica.docx`: REQ-019 (módulo abre em branco) e REQ-022 (tópico H com exercício executável); app validado contra as 9 capturas | `ModuleComponent.cpp`; `ModuleCatalog.cpp` (EX-1.H.1); 160/160 testes |
 | 2026-11-05 | M1 | Curadoria ampliada com as 4 apostilas novas da `adequacao` (CAGED, teoria elementar, teoria da música, regulagem); instalador de teste atualizado | `docs/MUSIC.md` §1.1; `CourseModule::sources` (7); 150/150 testes |
 | 2026-11-04 | M1 | Ajustes do `musica.docx` (REQ-019..023) publicados na branch `test` com instalador de teste | merge `3603ee6`; instalador commit `d031d86`; 146/146 testes |
 | 2026-11-02 | M1 | Módulo 1 jogável + gate ≥90% com desbloqueio persistido + pattern/links REQ-007 | commit do Módulo 1 na branch `feat/measurement-engine`; 85/85 testes |
