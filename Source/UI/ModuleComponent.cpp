@@ -922,6 +922,17 @@ ModuleComponent::ModuleComponent (AudioEngine& engine)
         progressStore.recordGateResult (moduleNumber, passed);
         refreshSubjectTree();
     };
+
+    // The last percentage of each exercise is persisted and read back, so
+    // reopening an exercise that was already done shows the previous result.
+    practicePanel->onExerciseResult = [this] (const juce::String& exerciseId, double accuracyPercent)
+    {
+        progressStore.recordExerciseResult (exerciseId, accuracyPercent);
+    };
+    practicePanel->onQueryExerciseAccuracy = [this] (const juce::String& exerciseId)
+    {
+        return progressStore.getExerciseAccuracy (exerciseId);
+    };
     practicePanel->onExerciseSelected = [this] (const Exercise* exercise) { showExercise (exercise); };
 
     // The quiz runs in the centre: mirror its state whenever it advances, and

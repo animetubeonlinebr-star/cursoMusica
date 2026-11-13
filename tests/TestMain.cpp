@@ -534,6 +534,17 @@ void testProgressDatabase()
     check (scoped.recordModuleResult (5, true), "gate result is appended");
     check (scoped.recordModuleResult (5, false), "a failed attempt is appended too");
 
+    // Per-exercise accuracy: last value wins, and reading an unknown id misses.
+    check (scoped.loadExerciseResult ("gate-1") == -1, "an unseen exercise has no result");
+    check (scoped.saveExerciseResult ("gate-1", 80.0), "exercise result is saved");
+    check (scoped.loadExerciseResult ("gate-1") == 80, "the exercise result is read back");
+    check (scoped.saveExerciseResult ("gate-1", 95.0), "a later attempt overwrites it");
+    check (scoped.loadExerciseResult ("gate-1") == 95, "the last percentage is what stays");
+    check (scoped.saveExerciseResult ("gate-2", 100.0), "a second exercise is saved");
+
+    const auto all = scoped.loadExerciseResults();
+    check (all.size() == 2, "all exercise results of the student are listed");
+
     std::cout << "  (integration against PostgreSQL verified)\n";
 }
 
@@ -568,9 +579,39 @@ void testProgressStore()
         check (reopened.getHighestPassedModule() == 1,
                "local progress survives a restart");
 
+        // Per-exercise accuracy is remembered locally too (client request).
+        check (reopened.getExerciseAccuracy ("never-attempted") == -1,
+               "an exercise never attempted has no stored percentage");
+        reopened.recordExerciseResult ("gate-1", 80.4);
+        check (reopened.getExerciseAccuracy ("gate-1") == 80,
+               "the last accuracy is stored (rounded)");
+
+        // A later attempt replaces the previous percentage.
+        reopened.recordExerciseResult ("gate-1", 92.0);
+        check (reopened.getExerciseAccuracy ("gate-1") == 92,
+               "a new attempt updates the stored percentage");
+
+        // Out-of-range values are clamped, so the UI can never show 130%.
+        reopened.recordExerciseResult ("gate-1", 130.0);
+        check (reopened.getExerciseAccuracy ("gate-1") == 100,
+               "the stored percentage is clamped to 100");
+
         // Clean up the shared local record so reruns start from scratch.
         reopened.reset();
         check (reopened.getHighestPassedModule() == 0, "reset clears the record");
+        check (reopened.getExerciseAccuracy ("gate-1") == -1,
+               "reset clears the per-exercise percentages too");
+    }
+
+    // And the per-exercise percentage survives a restart as well.
+    {
+        ProgressStore store;
+        store.recordExerciseResult ("gate-9", 55.0);
+
+        ProgressStore reopened;
+        check (reopened.getExerciseAccuracy ("gate-9") == 55,
+               "the per-exercise percentage survives a restart");
+        reopened.reset();
     }
 }
 

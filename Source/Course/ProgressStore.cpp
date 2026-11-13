@@ -8,6 +8,18 @@ namespace cursomusica::course
 namespace
 {
     constexpr const char* highestPassedKey = "course/highestPassedModule";
+    constexpr const char* exerciseKeyPrefix = "exercise/";
+
+    // One pending write for the background thread: either a module gate result
+    // or the accuracy of an exercise attempt.
+    struct QueueItem
+    {
+        enum class Kind { gate, exercise } kind = Kind::gate;
+        int moduleNumber = 0;
+        bool passed = false;
+        juce::String exerciseId;
+        double accuracyPercent = 0.0;
+    };
 }
 
 // Mirrors the student's progress to PostgreSQL off the audio and UI threads
@@ -42,7 +54,25 @@ public:
     {
         {
             const juce::ScopedLock lock (queueLock);
-            queue.emplace_back (moduleNumber, passed);
+            QueueItem item;
+            item.kind = QueueItem::Kind::gate;
+            item.moduleNumber = moduleNumber;
+            item.passed = passed;
+            queue.push_back (std::move (item));
+        }
+
+        wake.signal();
+    }
+
+    void enqueueExercise (const juce::String& exerciseId, double accuracyPercent)
+    {
+        {
+            const juce::ScopedLock lock (queueLock);
+            QueueItem item;
+            item.kind = QueueItem::Kind::exercise;
+            item.exerciseId = exerciseId;
+            item.accuracyPercent = accuracyPercent;
+            queue.push_back (std::move (item));
         }
 
         wake.signal();
@@ -81,7 +111,7 @@ private:
     // to do (so the caller can idle instead of spinning).
     bool drainQueue()
     {
-        std::vector<std::pair<int, bool>> pending;
+        std::vector<QueueItem> pending;
 
         {
             const juce::ScopedLock lock (queueLock);
@@ -96,7 +126,7 @@ private:
 
         if (connected.load())
             for (const auto& item : pending)
-                pushResult (item.first, item.second);
+                pushItem (item);
 
         return true;
     }
@@ -135,7 +165,29 @@ private:
         if (merged > local)
             owner.highestPassedModule.store (merged);
 
+        // Per-exercise results: the local record of this profile wins (it is the
+        // most recent attempt on this machine); the database fills in the ones
+        // this profile has never seen, so progress made elsewhere reappears.
+        for (const auto& [exerciseId, accuracy] : database.loadExerciseResults())
+        {
+            const juce::ScopedLock lock (owner.exerciseLock);
+
+            if (owner.exerciseAccuracy.find (exerciseId) == owner.exerciseAccuracy.end())
+            {
+                owner.exerciseAccuracy[exerciseId] = accuracy;
+                owner.properties->setValue (ProgressStore::exerciseKey (exerciseId), accuracy);
+            }
+        }
+
         return true;
+    }
+
+    void pushItem (const QueueItem& item)
+    {
+        if (item.kind == QueueItem::Kind::gate)
+            pushResult (item.moduleNumber, item.passed);
+        else if (! database.saveExerciseResult (item.exerciseId, item.accuracyPercent))
+            connected.store (false);
     }
 
     void pushResult (int moduleNumber, bool passed)
@@ -154,7 +206,7 @@ private:
     data::PostgresConfig config;
     data::ProgressDatabase database;
     juce::CriticalSection queueLock;
-    std::vector<std::pair<int, bool>> queue;
+    std::vector<QueueItem> queue;
     juce::WaitableEvent wake;
     std::atomic<bool> connected { false };
 };
@@ -218,6 +270,49 @@ void ProgressStore::enqueueRemote (int moduleNumber, bool passed)
         sync->enqueue (moduleNumber, passed);
 }
 
+void ProgressStore::enqueueRemoteExercise (const juce::String& exerciseId, double accuracyPercent)
+{
+    if (sync != nullptr)
+        sync->enqueueExercise (exerciseId, accuracyPercent);
+}
+
+juce::String ProgressStore::exerciseKey (const juce::String& exerciseId)
+{
+    return juce::String (exerciseKeyPrefix) + exerciseId;
+}
+
+void ProgressStore::recordExerciseResult (const juce::String& exerciseId, double accuracyPercent)
+{
+    if (exerciseId.isEmpty())
+        return;
+
+    const int value = juce::jlimit (0, 100, juce::roundToInt (accuracyPercent));
+
+    {
+        const juce::ScopedLock lock (exerciseLock);
+        exerciseAccuracy[exerciseId] = value;
+    }
+
+    properties->setValue (exerciseKey (exerciseId), value);
+    properties->saveIfNeeded();
+
+    if (remoteConfigured)
+        enqueueRemoteExercise (exerciseId, (double) value);
+}
+
+int ProgressStore::getExerciseAccuracy (const juce::String& exerciseId) const
+{
+    if (exerciseId.isEmpty())
+        return -1;
+
+    const juce::ScopedLock lock (exerciseLock);
+
+    if (const auto it = exerciseAccuracy.find (exerciseId); it != exerciseAccuracy.end())
+        return it->second;
+
+    return -1;
+}
+
 juce::String ProgressStore::getRemoteStatus() const
 {
     if (! data::ProgressDatabase::isCompiledIn())
@@ -234,6 +329,15 @@ juce::String ProgressStore::getRemoteStatus() const
 void ProgressStore::load()
 {
     highestPassedModule.store ((int) properties->getIntValue (highestPassedKey, 0));
+
+    const juce::ScopedLock lock (exerciseLock);
+    exerciseAccuracy.clear();
+
+    const auto& all = properties->getAllProperties();
+    for (const auto& key : all.getAllKeys())
+        if (key.startsWith (exerciseKeyPrefix))
+            exerciseAccuracy[key.fromFirstOccurrenceOf (exerciseKeyPrefix, false, false)]
+                = all.getValue (key, {}).getIntValue();
 }
 
 void ProgressStore::save() const
@@ -245,7 +349,18 @@ void ProgressStore::save() const
 void ProgressStore::reset()
 {
     highestPassedModule.store (0);
+
+    {
+        const juce::ScopedLock lock (exerciseLock);
+
+        for (const auto& exerciseId : exerciseAccuracy)
+            properties->removeValue (exerciseKey (exerciseId.first));
+
+        exerciseAccuracy.clear();
+    }
+
     save();
+    properties->saveIfNeeded();
 }
 
 } // namespace cursomusica::course

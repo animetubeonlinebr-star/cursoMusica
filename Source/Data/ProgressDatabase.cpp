@@ -169,6 +169,13 @@ bool ProgressDatabase::ensureSchema()
         "  passed BOOLEAN NOT NULL,"
         "  recorded_at TIMESTAMPTZ NOT NULL DEFAULT now()"
         ");"
+        "CREATE TABLE IF NOT EXISTS " + schema + ".exercise_result ("
+        "  student_id TEXT NOT NULL,"
+        "  exercise_id TEXT NOT NULL,"
+        "  accuracy INTEGER NOT NULL,"
+        "  recorded_at TIMESTAMPTZ NOT NULL DEFAULT now(),"
+        "  PRIMARY KEY (student_id, exercise_id)"
+        ");"
         "CREATE INDEX IF NOT EXISTS module_result_student_idx"
         "  ON " + schema + ".module_result (student_id, module_id);";
 
@@ -322,6 +329,165 @@ bool ProgressDatabase::recordModuleResult (int moduleNumber, bool passed)
 
     PQclear (result);
     return ok;
+   #endif
+}
+
+bool ProgressDatabase::saveExerciseResult (const juce::String& exerciseId, double accuracyPercent)
+{
+   #ifndef CURSOMUSICA_HAS_POSTGRES
+    juce::ignoreUnused (exerciseId, accuracyPercent);
+    error = "built without libpq";
+    return false;
+   #else
+    if (connection == nullptr)
+    {
+        error = "not connected";
+        return false;
+    }
+
+    char* escapedSchema = PQescapeIdentifier (static_cast<PGconn*> (connection),
+                                              config.schema.toRawUTF8(),
+                                              (size_t) config.schema.getNumBytesAsUTF8());
+    if (escapedSchema == nullptr)
+    {
+        error = "invalid schema name";
+        return false;
+    }
+
+    const juce::String schema (escapedSchema);
+    PQfreemem (escapedSchema);
+
+    // One row per (student, exercise): the latest attempt replaces the previous
+    // one, which is exactly what "the last percentage" means. The client asked
+    // to see the last result, not the best.
+    const juce::String sql =
+        "INSERT INTO " + schema + ".exercise_result (student_id, exercise_id, accuracy, recorded_at)"
+        " VALUES ($1, $2, $3, now())"
+        " ON CONFLICT (student_id, exercise_id) DO UPDATE"
+        " SET accuracy = EXCLUDED.accuracy, recorded_at = now();";
+
+    const juce::String accuracyText (juce::roundToInt (accuracyPercent));
+    const char* values[] = { config.student.toRawUTF8(),
+                             exerciseId.toRawUTF8(),
+                             accuracyText.toRawUTF8() };
+
+    PGresult* result = PQexecParams (static_cast<PGconn*> (connection), sql.toRawUTF8(),
+                                     3, nullptr, values, nullptr, nullptr, 0);
+    const auto status = PQresultStatus (result);
+    const bool ok = status == PGRES_COMMAND_OK;
+
+    if (! ok)
+        error = PQresultErrorMessage (result);
+
+    PQclear (result);
+    return ok;
+   #endif
+}
+
+int ProgressDatabase::loadExerciseResult (const juce::String& exerciseId)
+{
+   #ifndef CURSOMUSICA_HAS_POSTGRES
+    juce::ignoreUnused (exerciseId);
+    error = "built without libpq";
+    return -1;
+   #else
+    if (connection == nullptr)
+    {
+        error = "not connected";
+        return -1;
+    }
+
+    char* escapedSchema = PQescapeIdentifier (static_cast<PGconn*> (connection),
+                                              config.schema.toRawUTF8(),
+                                              (size_t) config.schema.getNumBytesAsUTF8());
+    if (escapedSchema == nullptr)
+    {
+        error = "invalid schema name";
+        return -1;
+    }
+
+    const juce::String schema (escapedSchema);
+    PQfreemem (escapedSchema);
+
+    const juce::String sql =
+        "SELECT accuracy FROM " + schema + ".exercise_result"
+        " WHERE student_id = $1 AND exercise_id = $2;";
+
+    const char* values[] = { config.student.toRawUTF8(), exerciseId.toRawUTF8() };
+    PGresult* result = PQexecParams (static_cast<PGconn*> (connection), sql.toRawUTF8(),
+                                     2, nullptr, values, nullptr, nullptr, 0);
+
+    const auto status = PQresultStatus (result);
+    if (status != PGRES_TUPLES_OK)
+    {
+        error = PQresultErrorMessage (result);
+        PQclear (result);
+        return -1;
+    }
+
+    if (PQntuples (result) == 0)
+    {
+        PQclear (result);
+        return -1;
+    }
+
+    const int value = juce::String (PQgetvalue (result, 0, 0)).getIntValue();
+    PQclear (result);
+    return value;
+   #endif
+}
+
+std::vector<std::pair<juce::String, int>> ProgressDatabase::loadExerciseResults()
+{
+    std::vector<std::pair<juce::String, int>> results;
+
+   #ifndef CURSOMUSICA_HAS_POSTGRES
+    error = "built without libpq";
+    return results;
+   #else
+    if (connection == nullptr)
+    {
+        error = "not connected";
+        return results;
+    }
+
+    char* escapedSchema = PQescapeIdentifier (static_cast<PGconn*> (connection),
+                                              config.schema.toRawUTF8(),
+                                              (size_t) config.schema.getNumBytesAsUTF8());
+    if (escapedSchema == nullptr)
+    {
+        error = "invalid schema name";
+        return results;
+    }
+
+    const juce::String schema (escapedSchema);
+    PQfreemem (escapedSchema);
+
+    const juce::String sql =
+        "SELECT exercise_id, accuracy FROM " + schema + ".exercise_result"
+        " WHERE student_id = $1;";
+
+    const char* values[] = { config.student.toRawUTF8() };
+    PGresult* result = PQexecParams (static_cast<PGconn*> (connection), sql.toRawUTF8(),
+                                     1, nullptr, values, nullptr, nullptr, 0);
+
+    const auto status = PQresultStatus (result);
+    if (status != PGRES_TUPLES_OK)
+    {
+        error = PQresultErrorMessage (result);
+        PQclear (result);
+        return results;
+    }
+
+    const int rows = PQntuples (result);
+    results.reserve ((size_t) rows);
+
+    for (int i = 0; i < rows; ++i)
+        results.emplace_back (juce::String (PQgetvalue (result, i, 0)),
+                              juce::String (PQgetvalue (result, i, 1)).getIntValue());
+
+    PQclear (result);
+    return results;
    #endif
 }
 

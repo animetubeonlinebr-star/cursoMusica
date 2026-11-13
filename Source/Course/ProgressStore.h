@@ -4,6 +4,7 @@
 
 #include <atomic>
 #include <memory>
+#include <unordered_map>
 
 #include "Course/ProgressionRule.h"
 #include "Data/ProgressDatabase.h"
@@ -15,6 +16,9 @@ namespace cursomusica::course
 // passed. The gate result of a module (>= 90%, REQ-009) is recorded here and
 // unlocks the next one. The test override of ADR 0003 (item 7) opens every
 // module without touching the real record.
+//
+// It also remembers the last accuracy of every exercise, so reopening one shows
+// the student their previous percentage.
 //
 // Storage is offline-first (ADR 0006): the local PropertiesFile is the fast,
 // always-available source, and a background thread mirrors every result to a
@@ -37,6 +41,15 @@ public:
 
     int getHighestPassedModule() const noexcept { return highestPassedModule.load(); }
 
+    // Records the accuracy (0..100) of one exercise attempt. Mirrored to the
+    // database in the background, like the module gate.
+    void recordExerciseResult (const juce::String& exerciseId, double accuracyPercent);
+
+    // Last accuracy (0..100) of the exercise, or -1 when it was never attempted.
+    // Falls back to the database value when this profile has no local record
+    // (progress made on another machine).
+    int getExerciseAccuracy (const juce::String& exerciseId) const;
+
     // ADR 0003, item 7: release builds on the test branch open everything.
     void setUnlockAll (bool shouldUnlockAll) noexcept { unlockAll = shouldUnlockAll; }
     bool isUnlockAll() const noexcept { return unlockAll.load(); }
@@ -56,6 +69,10 @@ private:
     void load();
     void save() const;
     void enqueueRemote (int moduleNumber, bool passed);
+    void enqueueRemoteExercise (const juce::String& exerciseId, double accuracyPercent);
+
+    // The key is "exercise/<id>", the value is the accuracy in percent.
+    static juce::String exerciseKey (const juce::String& exerciseId);
 
     std::atomic<int> highestPassedModule { 0 };
     std::atomic<bool> unlockAll { false };
@@ -65,6 +82,10 @@ private:
     std::unique_ptr<juce::PropertiesFile> properties;
     data::PostgresConfig config;
     std::unique_ptr<SyncThread> sync;
+
+    // Last accuracy per exercise, mirrored to the local file on every write.
+    mutable juce::CriticalSection exerciseLock;
+    std::unordered_map<juce::String, int> exerciseAccuracy;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProgressStore)
 };

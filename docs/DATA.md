@@ -205,8 +205,32 @@ Regras de integridade:
 - **Load:** `UPSERT` idempotente no PostgreSQL, numa **thread dedicada**
   (`ProgressStore::SyncThread`); a thread de áudio nunca toca o banco
   (`AGENTS.md` §1). No encerramento há um flush final de melhor esforço.
-- **Serve:** consultas diretas às tabelas (`progress`, `module_result`) para
-  relatório e suporte; views agregadas ficam para M2/M5.
+- **Serve:** consultas diretas às tabelas (`progress`, `module_result`,
+  `exercise_result`) para relatório e suporte; views agregadas ficam para M2/M5.
+
+## Aproveitamento por exercício — migração v5
+
+Pedido do cliente: ao reabrir um exercício já realizado, mostrar a **última
+percentagem de acertos**. O `ProgressStore` passa a guardar, por exercício, o
+resultado da última tentativa.
+
+| Tabela | Colunas | Chaves | Versão |
+|---|---|---|---|
+| `exercise_result` | student_id, exercise_id, accuracy, recorded_at | PK (student_id, exercise_id) | v5 |
+
+Regras de integridade:
+
+- Uma linha por **(aluno, exercício)**: o `UPSERT` grava a **última**
+  tentativa, que é exatamente o que o cliente pediu ("última percentagem", não
+  "melhor percentagem").
+- `accuracy` é um inteiro de **0 a 100** (o app arredonda e limita antes de
+  gravar).
+- Local-first: o mesmo valor é guardado no `PropertiesFile`
+  (chave `exercise/<id>`) e espelhado no banco na thread de sincronização. Ao
+  abrir um exercício, a UI lê o valor local; se este perfil nunca o fez aqui, o
+  valor vindo do banco (feito em outra máquina) é mesclado no `connect`.
+- O `exercise_id` é o identificador estável do exercício no catálogo
+  (`Exercise::id`); não é dado pessoal.
 
 ## Governança
 

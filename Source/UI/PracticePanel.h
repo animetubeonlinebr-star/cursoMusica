@@ -33,6 +33,14 @@ public:
     // Reports the gate result of a finished attempt (module number, passed).
     std::function<void (int, bool)> onGateResult;
 
+    // Reports the accuracy (0..100) of a finished exercise attempt, so the
+    // owner can persist it and show it again next time (client request).
+    std::function<void (const juce::String&, double)> onExerciseResult;
+
+    // Last stored accuracy (0..100) of an exercise, or -1 when never attempted.
+    // Read when the student arms an exercise, to show the previous result.
+    std::function<int (const juce::String&)> onQueryExerciseAccuracy;
+
     // Reports the exercise currently armed, so the centre can demonstrate it.
     std::function<void (const Exercise*)> onExerciseSelected;
 
@@ -58,6 +66,7 @@ private:
     void updateButtonStates();
     void updateFeedback();
     void updateApplication();
+    void showPreviousResult();
 
     const Exercise* selectedExercise() const;
     bool isQuizSelected() const;
@@ -77,6 +86,14 @@ private:
     std::vector<int> filteredIndices;
     int selectedExerciseIndex = 0;
     bool metronomeOn = false;
+
+    // Last stored accuracy (percent) of the armed exercise, -1 when never
+    // attempted. Shown until a new attempt produces a fresh verdict.
+    int previousAccuracy = -1;
+
+    // Guards against reporting the same finished attempt more than once (the
+    // verdict is reached from both poll() and finish()).
+    bool attemptReported = false;
 
     juce::Label headingLabel;
 

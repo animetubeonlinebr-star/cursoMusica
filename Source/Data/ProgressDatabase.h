@@ -2,6 +2,9 @@
 
 #include <juce_core/juce_core.h>
 
+#include <utility>
+#include <vector>
+
 namespace cursomusica::data
 {
 
@@ -30,10 +33,11 @@ struct PostgresConfig
 };
 
 // Thin wrapper over libpq that stores the student's progress in a PostgreSQL
-// schema (default "curso-musica"). Two tables (ADR 0006, docs/DATA.md v4):
+// schema (default "curso-musica"). Three tables (ADR 0006, docs/DATA.md v5):
 //
-//   progress        one row per student: highest_passed_module (monotonic)
-//   module_result   append-only history of gate results, for audit/BI
+//   progress         one row per student: highest_passed_module (monotonic)
+//   module_result    append-only history of gate results, for audit/BI
+//   exercise_result  last accuracy per exercise, so the UI can show it again
 //
 // The class is deliberately low-level and synchronous: the caller decides the
 // thread. The ProgressStore calls it from a background thread so neither the
@@ -70,6 +74,18 @@ public:
 
     // Appends one gate result to the history (never updates, never deletes).
     bool recordModuleResult (int moduleNumber, bool passed);
+
+    // Upserts the last accuracy (0..100) of one exercise, so reopening it can
+    // show the student their previous result. `accuracyPercent` is rounded.
+    bool saveExerciseResult (const juce::String& exerciseId, double accuracyPercent);
+
+    // Last stored accuracy of the exercise in percent, or -1 when there is no
+    // row or the query fails.
+    int loadExerciseResult (const juce::String& exerciseId);
+
+    // Every stored exercise result of the student: (exercise_id, accuracy).
+    // Loaded once when the connection opens, so the UI thread never queries.
+    std::vector<std::pair<juce::String, int>> loadExerciseResults();
 
     // Last error text, for logs and diagnostics. Never contains the password.
     const juce::String& lastError() const noexcept { return error; }
