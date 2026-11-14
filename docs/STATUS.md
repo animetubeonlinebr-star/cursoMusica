@@ -36,7 +36,7 @@ do repositório (commits, CI, resultados de QA), nunca de otimismo.
   `id — título`, placar "Acertos x/y · aproveitamento z%" e a caixa de orientação
   ("Neste exercício, você deverá responder as questões…"). Validado sob Xvfb
   (1040×680): responder uma alternativa avança a questão e atualiza o placar.
-- **Métricas:** suíte de lógica pura com **320 checagens, 100% verdes**, rodando no
+- **Métricas:** suíte de lógica pura com **356 checagens, 100% verdes**, rodando no
   CI (`ctest` no job Linux, agora com um PostgreSQL 17 de serviço). Velocity/Lead
   Time ainda sem baseline.
 - **Persistência em PostgreSQL (2026-11-13, pedido do cliente):** o progresso
@@ -47,6 +47,12 @@ do repositório (commits, CI, resultados de QA), nunca de otimismo.
   O app **não fixa a versão do servidor** (usa libpq; o CI já
   compilou com 18.6): um PostgreSQL 18 na máquina do cliente é suportado, com o
   caminho de configuração em `docs/POSTGRESQL.md`.
+- **Pastas de plugins VST3 configuráveis (2026-11-14, pedido do cliente):** o
+  botão **"Pastas…"**, ao lado da tabela de plugins nas Configurações, abre a
+  janela **"Pastas de plugins VST3"** (grid de duas colunas) para o aluno indicar
+  onde o app deve procurar plugins, **além** dos locais padrão do sistema. A lista
+  é lembrada entre execuções (`vst3SearchPaths`) e a varredura soma os dois
+  conjuntos sem duplicar (REQ-024, ADR 0007).
 - **Blockers:** nenhum para M1. Pendente para M2+: decisão D4 (estratégia de
   síntese) — owner: architect.
 - **Riscos (top 3):** R-10 (avaliação de improvisação injusta), R-13 (meta de BPM
@@ -66,6 +72,7 @@ do repositório (commits, CI, resultados de QA), nunca de otimismo.
 
 | Ciclo | Milestone | Resultado | Evidência |
 |---|---|---|---|
+| 2026-11-14 | M1 | **Pastas de plugins VST3 configuráveis** (REQ-024, ADR 0007): botão "Pastas…" nas Configurações abre a janela "Pastas de plugins VST3" (grid de duas colunas); a lista é persistida em `vst3SearchPaths` e somada aos locais padrão do VST3 na varredura | `Source/Audio/PluginSearchPaths.*`; `Source/UI/PluginPathsComponent.*`; `PluginHost.cpp`; validado sob Xvfb; 356/356 testes |
 | 2026-11-13 | M1 | Diagramas do curso como **imagens embutidas** (19 JPG gerados por `tools/make_diagrams.py`, `juce_add_binary_data`) renderizadas no painel central, e **IDs de exercício por tópico** (`EX-1.<tópico>.<n>`, EX-1.A.1…EX-1.I.3). Instalador de teste republicado (`89b0498`) | `Source/Course/Content/Diagrams.*`; `CMakeLists.txt`; `ModuleComponent.cpp`; `ModuleCatalog.cpp`; `docs/MUSIC.md`; 295/295 testes |
 | 2026-11-07 | M1 | Correção do painel de quiz (REQ-021, revisão do cliente): o **questionário roda no painel central** — cabeçalho do módulo (nível/BPM/gate), instrução "Responda uma questão por vez.", "Questão X de Y", enunciado e alternativas clicáveis A–D; o **painel direito** fica só com os controles (cabeçalho + link "Todos os tópicos do módulo", seletor, botão de play com `id — título`, placar e caixa de orientação "Neste exercício…") | `ModuleComponent.cpp` (`ContentView`); `PracticePanel.cpp/.h`; validado sob Xvfb (1040×680); 160/160 testes |
 | 2026-11-05 | M1 | Correção do painel de prática (REQ-021): exercício vira linha clicável com ícone de play e id/título no painel direito, como no mock-up; centro mostra só a explicação (sem repetir o id/título) | `PracticePanel.cpp/.h`; `ModuleComponent.cpp`; instalador `9f5f70e` na `test` |
