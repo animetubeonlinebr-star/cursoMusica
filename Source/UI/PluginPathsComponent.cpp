@@ -60,6 +60,11 @@ private:
             pathLabel.setInterceptsMouseClicks (false, false);
             addAndMakeVisible (pathLabel);
 
+            // Let the ListBox handle clicks on the row itself, so selecting a row
+            // works (the Remove button reads getSelectedRow()). The browse button
+            // stays clickable because children are still hit-tested.
+            setInterceptsMouseClicks (false, true);
+
             browseButton.setButtonText ("...");
             browseButton.setTooltip (juce::String::fromUTF8 ("Escolher a pasta"));
             browseButton.onClick = [this] { model.editRow (getRow()); };
