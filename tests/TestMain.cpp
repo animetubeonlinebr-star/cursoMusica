@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "Audio/AudioPortClassifier.h"
+#include "Audio/PluginSearchPaths.h"
 #include "Course/Content/Diagrams.h"
 #include "Course/Content/Topics.h"
 #include "Course/ExerciseEvaluator.h"
@@ -615,6 +616,58 @@ void testProgressStore()
     }
 }
 
+void testPluginSearchPaths()
+{
+    std::cout << "PluginSearchPaths\n";
+    using cursomusica::PluginSearchPaths;
+
+    PluginSearchPaths paths;
+    check (paths.isEmpty(), "a new list is empty");
+
+    check (paths.add ("C:/VST3"), "a folder is added");
+    check (paths.add ("C:/VST3/Second"), "a second folder is added");
+    check (paths.size() == 2, "both folders are kept");
+    check (! paths.add ("  C:/VST3  "), "an entry is de-duplicated after trimming");
+    check (! paths.add (""), "an empty entry is rejected");
+    check (! paths.add ("   "), "a blank entry is rejected");
+    check (paths.size() == 2, "rejected entries do not change the list");
+
+    // Normalisation drops the trailing separator, so the same folder written two
+    // ways is one entry.
+    check (paths.add ("C:/VST3/Third/"), "a folder with a trailing separator is added");
+    check (paths.size() == 3, "the normalised folder is stored once");
+    check (! paths.add ("C:/VST3/Third"), "the normalised form is a duplicate");
+    check (paths[2].endsWith ("Third"), "the stored entry has no trailing separator");
+
+    // Serialisation round-trips through the properties file format.
+    const auto serialised = paths.serialise();
+    check (serialised.contains ("\n"), "entries are newline-separated");
+    const auto restored = PluginSearchPaths::deserialise (serialised);
+    check (restored.size() == 3, "deserialise restores every entry");
+    check (restored[0] == paths[0] && restored[2] == paths[2], "deserialise preserves order and text");
+
+    check (paths.remove ("C:/VST3"), "an entry is removed");
+    check (paths.size() == 2, "removing drops exactly one entry");
+    check (! paths.remove ("C:/VST3"), "removing a missing entry reports failure");
+
+    // A stale entry stays in the list but is not searched.
+    check (paths.resolveExisting().getNumPaths() == 0, "non-existent folders are not searched");
+
+    paths.clear();
+    check (paths.isEmpty(), "clear empties the list");
+
+    // The list is capped, so a runaway config cannot grow without bound.
+    PluginSearchPaths capped;
+    for (int i = 0; i < PluginSearchPaths::maxEntries; ++i)
+        capped.add ("C:/Plugins/" + juce::String (i));
+    check (capped.size() == PluginSearchPaths::maxEntries, "the list fills up to the cap");
+    check (! capped.add ("C:/Plugins/overflow"), "an entry past the cap is rejected");
+
+    PluginSearchPaths fromArray;
+    fromArray.setFromArray ({ "C:/A", "", "C:/A", "C:/B" });
+    check (fromArray.size() == 2, "setFromArray drops blanks and duplicates");
+}
+
 int main()
 {
     testNoteMath();
@@ -624,6 +677,7 @@ int main()
     testPracticeSession();
     testProgression();
     testAudioPortClassifier();
+    testPluginSearchPaths();
     testModuleCatalog();
     testProgressDatabase();
     testProgressStore();

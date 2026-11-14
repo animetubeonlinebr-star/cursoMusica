@@ -7,6 +7,28 @@ namespace cursomusica
 
 namespace th = cursomusica::theme;
 
+namespace
+{
+    // The stock DocumentWindow ignores its close button, so route it to the
+    // owner that actually owns the window.
+    class PathsWindow final : public juce::DocumentWindow
+    {
+    public:
+        PathsWindow (const juce::String& name, juce::Colour backgroundColour)
+            : juce::DocumentWindow (name, backgroundColour, juce::DocumentWindow::closeButton)
+        {
+        }
+
+        std::function<void()> onClose;
+
+        void closeButtonPressed() override
+        {
+            if (onClose)
+                onClose();
+        }
+    };
+}
+
 // Bridges a list of plugin descriptions (available) or chain entries to a ListBox.
 class SettingsComponent::PluginListModel final : public juce::ListBoxModel
 {
@@ -110,6 +132,10 @@ SettingsComponent::SettingsComponent (AudioEngine& engine, PluginHost& host)
     };
     pluginPanel.addAndMakeVisible (scanButton);
 
+    pathsButton.onClick = [this] { openSearchPathsWindow(); };
+    pathsButton.setTooltip (juce::String::fromUTF8 ("Pastas onde procurar plugins VST3"));
+    pluginPanel.addAndMakeVisible (pathsButton);
+
     availableModel = std::make_unique<PluginListModel> (*this, PluginListModel::Kind::available);
     availableList.setModel (availableModel.get());
     availableList.setRowHeight (24);
@@ -145,6 +171,7 @@ SettingsComponent::SettingsComponent (AudioEngine& engine, PluginHost& host)
 SettingsComponent::~SettingsComponent()
 {
     audioEngine.getDeviceManager().removeChangeListener (this);
+    closeSearchPathsWindow();
 }
 
 void SettingsComponent::changeListenerCallback (juce::ChangeBroadcaster* source)
@@ -232,6 +259,45 @@ void SettingsComponent::openEditorForSelectedChainPlugin()
     }
 }
 
+void SettingsComponent::openSearchPathsWindow()
+{
+    if (searchPathsWindow != nullptr)
+    {
+        searchPathsWindow->toFront (true);
+        return;
+    }
+
+    auto content = std::make_unique<PluginPathsComponent> (pluginHost.getSearchPaths());
+    content->onCloseRequested = [this] { closeSearchPathsWindow(); };
+    content->onPathsChanged = [this] { searchPathsChanged(); };
+
+    auto window = std::make_unique<PathsWindow> (juce::String::fromUTF8 ("Pastas de plugins VST3"),
+                                                 th::colour::background);
+    window->onClose = [this] { closeSearchPathsWindow(); };
+    searchPathsWindow = std::move (window);
+
+    searchPathsWindow->setUsingNativeTitleBar (true);
+    searchPathsWindow->setContentOwned (content.release(), true);
+    searchPathsWindow->setResizable (true, false);
+    searchPathsWindow->centreWithSize (searchPathsWindow->getWidth(), searchPathsWindow->getHeight());
+    searchPathsWindow->setVisible (true);
+}
+
+void SettingsComponent::closeSearchPathsWindow()
+{
+    if (searchPathsWindow != nullptr)
+    {
+        searchPathsWindow->setVisible (false);
+        searchPathsWindow.reset();
+    }
+}
+
+void SettingsComponent::searchPathsChanged()
+{
+    pluginHost.saveSearchPaths();
+    refreshPluginList();
+}
+
 void SettingsComponent::resized()
 {
     auto bounds = getLocalBounds().reduced (th::spacing::lg);
@@ -268,6 +334,8 @@ void SettingsComponent::resized()
     auto topRow = content.removeFromTop (32);
     scanButton.setBounds (topRow.removeFromLeft (100));
     topRow.removeFromLeft (th::spacing::sm);
+    pathsButton.setBounds (topRow.removeFromRight (110));
+    topRow.removeFromRight (th::spacing::sm);
     scanStatus.setBounds (topRow);
 
     content.removeFromTop (th::spacing::md);
