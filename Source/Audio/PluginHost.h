@@ -5,6 +5,8 @@
 #include <functional>
 #include <memory>
 
+#include "Audio/PluginSearchPaths.h"
+
 namespace cursomusica
 {
 
@@ -27,8 +29,19 @@ public:
     // Saves the current plugin list so the next launch does not rescan.
     void saveKnownPlugins();
 
-    // Scans the default VST3 locations. Runs on a background thread; the
-    // callback is invoked on the message thread as the scan progresses.
+    // User-configured VST3 folders (client request). Message thread only.
+    PluginSearchPaths& getSearchPaths() noexcept { return searchPaths; }
+    const PluginSearchPaths& getSearchPaths() const noexcept { return searchPaths; }
+    // Persists the current folder list and drops the cached plugin types that
+    // came from folders no longer configured.
+    void saveSearchPaths();
+    // The folder list changed: forget the plugins that lived in removed folders
+    // so a rescan does not keep offering them.
+    void prunePluginsOutsideSearchPaths();
+
+    // Scans the configured VST3 locations (default locations plus the user's
+    // folders). Runs on a background thread; the callback is invoked on the
+    // message thread as the scan progresses.
     void scanForPlugins (std::function<void (float progress, const juce::String& current)> onProgress,
                          std::function<void()> onFinished);
 
@@ -46,6 +59,8 @@ private:
 
     juce::AudioPluginFormatManager formatManager;
     juce::KnownPluginList knownList;
+
+    PluginSearchPaths searchPaths;
 
     std::unique_ptr<juce::PropertiesFile> properties;
     std::unique_ptr<ScanJob> scanJob;
