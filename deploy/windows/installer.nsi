@@ -28,8 +28,9 @@ Unicode true
 !endif
 
 ; Installer/uninstaller icon and the icon the shortcuts point at. NSIS resolves
-; these relative to the script directory, so build-installer.sh and release.yml
-; pass an absolute -DAPPICON=.
+; these against the script's directory, so the release workflow passes an
+; absolute -DAPPICON= (the default below only works when makensis runs from the
+; repository root).
 Icon "${APPICON}"
 UninstallIcon "${APPICON}"
 !define MUI_ICON "${APPICON}"
