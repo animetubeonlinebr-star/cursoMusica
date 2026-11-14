@@ -148,6 +148,7 @@ solução.
 | REQ-021 | No estudo prático, o **painel central** demonstra o **exercício executável** (o questionário com a questão e as opções clicáveis) e o **painel lateral (direito)** apresenta apenas os **controles** (seletor, botão de play, placar e a caixa de orientação "Neste exercício…"), sem repetir a questão | Must | painel central = exercício (questão + opções); painel direito = controles, placar e orientação |
 | REQ-022 | O sistema oferece **≥1 exercício por tópico** do módulo, cobrindo o assunto daquele tópico, para o aluno praticar (não apenas o questionário) | Must | todo tópico tem ≥1 exercício executável próprio |
 | REQ-023 | A **lista de dispositivos de áudio** classifica cada porta na categoria correta: **entradas de captura** em *inputs* e **saídas de reprodução** em *outputs* (hoje o VoiceMeeter Banana aparece invertido) | Must | com VoiceMeeter Banana instalado, entradas em Input e saídas em Output |
+| REQ-024 | O aluno pode **configurar as pastas onde o app procura plugins VST3** numa janela própria ("Pastas de plugins VST3"), aberta por um botão ao lado da tabela de plugins nas Configurações; a varredura passa a procurar nessas pastas **além** dos locais padrão do sistema, e a lista é lembrada entre execuções | Should | Configurações → "Pastas…" → adicionar/remover pasta → varrer e o plugin da pasta aparece; reabrir o app mantém a lista |
 
 **Nota de elicitação (BA).** O item de "módulo sem conteúdo" é um problema de
 *jornada/UX*, não de dados: o catálogo tem conteúdo, mas o app o carrega no
@@ -190,6 +191,7 @@ conteúdo (REQ-006), não só de código.
 | REQ-021 | developer + ux-ui-designer | `Source/UI/PracticePanel.*`, `Source/UI/ModuleComponent.*` | **implementado** |
 | REQ-022 | musician + pm + business-analyst + developer | `Source/Course/ModuleCatalog.cpp` | **implementado (Módulo 1)** |
 | REQ-023 | developer + security-engineer | `Source/Audio/AudioPortClassifier.*`, `Source/UI/AudioPortsPanel.*`, `Source/UI/SettingsComponent.*` | **implementado** (validar no Windows com VoiceMeeter) |
+| REQ-024 | developer + designer | `Source/Audio/PluginSearchPaths.*`, `Source/Audio/PluginHost.*`, `Source/UI/PluginPathsComponent.*`, `Source/UI/SettingsComponent.*` | **implementado** |
 
 **Detalhe de REQ-018:** o sistema apresenta os **módulos do curso** dentro do
 software, com a **explicação antes de qualquer desafio** (REQ-003) e a lista de

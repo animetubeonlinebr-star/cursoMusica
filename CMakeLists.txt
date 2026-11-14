@@ -75,6 +75,7 @@ target_sources(CursoMusica PRIVATE
     Source/Audio/PitchDetector.cpp
     Source/Audio/PluginHost.cpp
     Source/Audio/PluginChain.cpp
+    Source/Audio/PluginSearchPaths.cpp
     Source/Audio/TuningSettings.cpp
     Source/Audio/Metronome.cpp
     Source/Audio/AudioPortClassifier.cpp
@@ -107,7 +108,8 @@ target_sources(CursoMusica PRIVATE
     Source/UI/AudioPortsPanel.cpp
     Source/UI/DevicePanel.cpp
     Source/UI/TransportPanel.cpp
-    Source/UI/SettingsComponent.cpp)
+    Source/UI/SettingsComponent.cpp
+    Source/UI/PluginPathsComponent.cpp)
 
 target_include_directories(CursoMusica PRIVATE Source)
 
@@ -246,7 +248,8 @@ target_sources(CursoMusicaTests PRIVATE
     Source/Course/Content/TopicG.cpp
     Source/Course/Content/TopicH.cpp
     Source/Course/Content/TopicI.cpp
-    Source/Audio/AudioPortClassifier.cpp)
+    Source/Audio/AudioPortClassifier.cpp
+    Source/Audio/PluginSearchPaths.cpp)
 
 target_include_directories(CursoMusicaTests PRIVATE Source)
 

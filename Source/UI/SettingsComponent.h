@@ -6,6 +6,7 @@
 #include "Audio/PluginHost.h"
 #include "UI/AudioPortsPanel.h"
 #include "UI/Design/Panel.h"
+#include "UI/PluginPathsComponent.h"
 
 namespace cursomusica
 {
@@ -32,6 +33,9 @@ private:
     void removeSelectedChainPlugin();
     void openEditorForSelectedChainPlugin();
     void refreshChainList();
+    void openSearchPathsWindow();
+    void closeSearchPathsWindow();
+    void searchPathsChanged();
 
     // Keeps the port list in step with the selected device (REQ-023).
     void changeListenerCallback (juce::ChangeBroadcaster* source) override;
@@ -50,6 +54,7 @@ private:
     // Plugin tab.
     Panel pluginPanel { "VST3 plugins" };
     juce::TextButton scanButton { "Scan" };
+    juce::TextButton pathsButton { juce::String::fromUTF8 ("Pastas…") };
     juce::TextButton addButton { "Add to input chain" };
     juce::Label scanStatus;
     juce::ListBox availableList;
@@ -62,6 +67,9 @@ private:
 
     // Holds the currently open plugin editor window, if any.
     std::unique_ptr<juce::DocumentWindow> editorWindow;
+
+    // Holds the VST3 folder-list window, if any.
+    std::unique_ptr<juce::DocumentWindow> searchPathsWindow;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SettingsComponent)
 };
