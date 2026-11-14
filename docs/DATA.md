@@ -149,3 +149,93 @@ Regras:
   determinístico.
 - Continua valendo: histórico append-only; override de teste (REQ-013) libera
   acesso mas não altera os dois cálculos.
+
+---
+
+# Progresso em PostgreSQL — migração v4 (ADR 0006)
+
+Pedido do cliente: "o progresso seja salvo, conecte o sistema ao banco de dados
+PostgreSQL, porta 5432, schema `curso-musica`". O `ProgressStore` passa a
+**espelhar** o progresso em um banco PostgreSQL, além do registro local. O
+banco é opcional: sem `libpq` no build, ou sem banco no ar, o app funciona
+localmente (offline-first).
+
+## Schema (migração v4)
+
+Banco: PostgreSQL, porta **5432** por padrão. Schema: **`curso-musica`** por
+padrão (configurável por `CURSOMUSICA_PG_SCHEMA`).
+
+| Tabela | Colunas | Chaves | Versão |
+|---|---|---|---|
+| `progress` | student_id, highest_passed_module, updated_at | PK student_id | v4 |
+| `module_result` | id, student_id, module_id, passed, recorded_at | PK id | v4 |
+
+Regras de integridade:
+
+- `progress.highest_passed_module` é **monotônico**: o `UPSERT` usa
+  `GREATEST(atual, novo)`, então um write atrasado ou fora de ordem nunca
+  regride o progresso.
+- `module_result` é **append-only** (auditoria e base para BI). Nada de
+  `UPDATE`/`DELETE` pela aplicação.
+- As duas tabelas são criadas de forma **idempotente**
+  (`CREATE ... IF NOT EXISTS`), incluindo o próprio schema
+  (`CREATE SCHEMA IF NOT EXISTS "curso-musica"`).
+- O identificador de aluno (`student_id`) é o `CURSOMUSICA_PG_STUDENT`
+  (default `local`); **não é dado pessoal** nesta fase.
+
+## Configuração (variáveis de ambiente)
+
+| Variável | Papel | Default |
+|---|---|---|
+| `PGHOST` | host do banco; **sem ele não há tentativa remota** | (vazio) |
+| `PGPORT` | porta | `5432` |
+| `PGUSER` | usuário | (vazio) |
+| `PGPASSWORD` | senha (nunca logada, nunca versionada) | (vazio) |
+| `PGDATABASE` | banco | (vazio) |
+| `CURSOMUSICA_PG_SCHEMA` | schema | `curso-musica` |
+| `CURSOMUSICA_PG_STUDENT` | id do aluno | `local` |
+| `CURSOMUSICA_PG_DISABLE` | força modo local | (desligado) |
+
+## Pipeline (offline-first, fora da thread de áudio)
+
+- **Extract:** `ProgressStore::recordGateResult` enfileira o resultado (thread de
+  UI, sem rede).
+- **Transform:** o merge local×remoto escolhe o **maior** `highest_passed_module`
+  e o propaga para os dois lados, convergindo sem perder progresso.
+- **Load:** `UPSERT` idempotente no PostgreSQL, numa **thread dedicada**
+  (`ProgressStore::SyncThread`); a thread de áudio nunca toca o banco
+  (`AGENTS.md` §1). No encerramento há um flush final de melhor esforço.
+- **Serve:** consultas diretas às tabelas (`progress`, `module_result`,
+  `exercise_result`) para relatório e suporte; views agregadas ficam para M2/M5.
+
+## Aproveitamento por exercício — migração v5
+
+Pedido do cliente: ao reabrir um exercício já realizado, mostrar a **última
+percentagem de acertos**. O `ProgressStore` passa a guardar, por exercício, o
+resultado da última tentativa.
+
+| Tabela | Colunas | Chaves | Versão |
+|---|---|---|---|
+| `exercise_result` | student_id, exercise_id, accuracy, recorded_at | PK (student_id, exercise_id) | v5 |
+
+Regras de integridade:
+
+- Uma linha por **(aluno, exercício)**: o `UPSERT` grava a **última**
+  tentativa, que é exatamente o que o cliente pediu ("última percentagem", não
+  "melhor percentagem").
+- `accuracy` é um inteiro de **0 a 100** (o app arredonda e limita antes de
+  gravar).
+- Local-first: o mesmo valor é guardado no `PropertiesFile`
+  (chave `exercise/<id>`) e espelhado no banco na thread de sincronização. Ao
+  abrir um exercício, a UI lê o valor local; se este perfil nunca o fez aqui, o
+  valor vindo do banco (feito em outra máquina) é mesclado no `connect`.
+- O `exercise_id` é o identificador estável do exercício no catálogo
+  (`Exercise::id`); não é dado pessoal.
+
+## Governança
+
+- **Nada de dado pessoal** nesta fase: `student_id` é um rótulo local.
+- Credenciais vêm **só do ambiente**; ver `docs/SECURITY.md`.
+- Como ligar o banco (Windows/Linux, inclusive PostgreSQL 18): `docs/POSTGRESQL.md`; script pronto em `tools/setup_postgres.sh`.
+- O app continua **local-first**: o banco é espelho, não dependência de
+  execução. `main` e o instalador permanecem funcionais sem banco.

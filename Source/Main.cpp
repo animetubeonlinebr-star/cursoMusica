@@ -1,5 +1,6 @@
 #include <juce_gui_extra/juce_gui_extra.h>
 
+#include "BrandingData.h"
 #include "MainComponent.h"
 #include "UI/Design/Theme.h"
 
@@ -16,6 +17,17 @@ public:
     void initialise (const juce::String&) override
     {
         mainWindow = std::make_unique<MainWindow> (getApplicationName());
+    }
+
+    // The window icon shown by the OS (taskbar, alt-tab). The .ico resource
+    // covers Windows; on Linux/dev builds the embedded PNG is what makes the
+    // window carry the logo.
+    static juce::Image getAppIcon()
+    {
+        static const juce::Image icon =
+            juce::ImageFileFormat::loadFrom (CursoMusicaBranding::AppIcon_png,
+                                             (size_t) CursoMusicaBranding::AppIcon_pngSize);
+        return icon;
     }
 
     void shutdown() override
@@ -36,6 +48,7 @@ private:
             : DocumentWindow (name, theme::colour::background, DocumentWindow::allButtons)
         {
             setUsingNativeTitleBar (true);
+            setIcon (CursoMusicaApplication::getAppIcon());
             setContentOwned (new MainComponent(), true);
             setResizable (true, false);
             // Below this the three-pane study layout clips its own header.

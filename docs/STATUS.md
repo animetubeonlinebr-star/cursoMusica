@@ -36,8 +36,17 @@ do repositório (commits, CI, resultados de QA), nunca de otimismo.
   `id — título`, placar "Acertos x/y · aproveitamento z%" e a caixa de orientação
   ("Neste exercício, você deverá responder as questões…"). Validado sob Xvfb
   (1040×680): responder uma alternativa avança a questão e atualiza o placar.
-- **Métricas:** suíte de lógica pura com **160 checagens, 100% verdes**, rodando no
-  CI (`ctest` no job Linux). Velocity/Lead Time ainda sem baseline.
+- **Métricas:** suíte de lógica pura com **320 checagens, 100% verdes**, rodando no
+  CI (`ctest` no job Linux, agora com um PostgreSQL 17 de serviço). Velocity/Lead
+  Time ainda sem baseline.
+- **Persistência em PostgreSQL (2026-11-13, pedido do cliente):** o progresso
+  passa a ser **espelhado** num banco PostgreSQL (porta 5432, schema
+  `curso-musica`) por uma thread dedicada, sem tocar a thread de áudio. O app é
+  **offline-first**: sem `libpq` no build ou sem banco no ar, o progresso continua
+  salvo localmente (ADR 0006, `docs/DATA.md` §v4, `docs/SECURITY.md`).
+  O app **não fixa a versão do servidor** (usa libpq; o CI já
+  compilou com 18.6): um PostgreSQL 18 na máquina do cliente é suportado, com o
+  caminho de configuração em `docs/POSTGRESQL.md`.
 - **Blockers:** nenhum para M1. Pendente para M2+: decisão D4 (estratégia de
   síntese) — owner: architect.
 - **Riscos (top 3):** R-10 (avaliação de improvisação injusta), R-13 (meta de BPM

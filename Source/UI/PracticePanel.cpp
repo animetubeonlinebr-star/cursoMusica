@@ -14,6 +14,11 @@ namespace
     {
         return juce::String (juce::roundToInt (value * 100.0)) + "%";
     }
+
+    juce::String percentFromInt (int value)
+    {
+        return juce::String (value) + "%";
+    }
 }
 
 void PracticePanel::ExerciseRowButton::setExerciseText (const juce::String& newText)
@@ -65,6 +70,7 @@ PracticePanel::PracticePanel (AudioEngine& engine)
         selectedExerciseIndex = 0;
         session = {};
         quiz = {};
+        previousAccuracy = -1;
         refreshExerciseList();
     };
     addAndMakeVisible (topicLink);
@@ -79,6 +85,8 @@ PracticePanel::PracticePanel (AudioEngine& engine)
         exerciseArmed = true;   // picking an exercise is what arms it (client step 4)
         session = {};
         quiz = {};
+        attemptReported = false;
+        showPreviousResult();
         refreshExerciseRow();
         updateApplication();
 
@@ -154,6 +162,8 @@ void PracticePanel::setModule (const CourseModule* module)
     selectedExerciseIndex = 0;
     session = {};
     quiz = {};
+    previousAccuracy = -1;
+    attemptReported = false;
     refreshExerciseList();
     syncMetronomeFromModule();
 }
@@ -166,6 +176,8 @@ void PracticePanel::setTopicFilter (const juce::String& lessonId)
     selectedExerciseIndex = 0;
     session = {};
     quiz = {};
+    previousAccuracy = -1;
+    attemptReported = false;
     refreshExerciseList();
 }
 
@@ -239,6 +251,18 @@ void PracticePanel::syncMetronomeFromModule()
     bpmLabel.setText (juce::String::fromUTF8 ("BPM meta ") + bpm
                         + juce::String::fromUTF8 ("  ·  alvo de grade ") + percent (currentModule->onGridTarget),
                       juce::dontSendNotification);
+}
+
+void PracticePanel::showPreviousResult()
+{
+    previousAccuracy = -1;
+
+    const auto* exercise = selectedExercise();
+    if (exercise == nullptr || exercise->id.isEmpty())
+        return;
+
+    if (onQueryExerciseAccuracy != nullptr)
+        previousAccuracy = onQueryExerciseAccuracy (exercise->id);
 }
 
 const Exercise* PracticePanel::selectedExercise() const
@@ -320,6 +344,7 @@ void PracticePanel::startSelectedExercise()
     }
 
     session.start (*exercise, currentModule->targetBpm, currentModule->onGridTarget);
+    attemptReported = false;
     audioEngine.resetNoteCapture();
 
     audioEngine.getMetronome().setBpm ((double) session.getTargetBpm());
@@ -336,6 +361,11 @@ void PracticePanel::finishExercise()
     session.finish();
     audioEngine.getMetronome().setRunning (false);
     metronomeOn = false;
+
+    // Publish the verdict: updateFeedback paints the message and reports the
+    // accuracy for persistence. Without it the finished attempt would be lost
+    // (poll() stops once the session is no longer running).
+    updateFeedback();
     updateButtonStates();
     repaint();
 
@@ -353,7 +383,10 @@ void PracticePanel::restartQuiz()
     if (! isQuizSelected())
         return;
 
+    // A fresh attempt: forget the previous result until the new one is reached.
     quiz.restart();
+    attemptReported = false;
+    previousAccuracy = -1;
     updateButtonStates();
     updateFeedback();
 
@@ -383,10 +416,17 @@ void PracticePanel::updateFeedback()
         const auto* exercise = selectedExercise();
         const int total = exercise != nullptr ? (int) exercise->quiz.size() : 0;
 
-        measurementLabel.setText (juce::String::fromUTF8 ("Acertos ") + juce::String (q.correct)
-                                    + "/" + juce::String (q.answered)
-                                    + juce::String::fromUTF8 ("   ·   aproveitamento ") + percent (q.accuracy),
-                                  juce::dontSendNotification);
+        // Client request: when the exercise was already done, the last accuracy
+        // is shown again as soon as it is reopened, before any new answer.
+        if (q.answered == 0 && previousAccuracy >= 0)
+            measurementLabel.setText (juce::String::fromUTF8 ("Último aproveitamento ")
+                                        + percentFromInt (previousAccuracy),
+                                      juce::dontSendNotification);
+        else
+            measurementLabel.setText (juce::String::fromUTF8 ("Acertos ") + juce::String (q.correct)
+                                        + "/" + juce::String (q.answered)
+                                        + juce::String::fromUTF8 ("   ·   aproveitamento ") + percent (q.accuracy),
+                                      juce::dontSendNotification);
 
         guidanceLabel.setColour (juce::Label::textColourId, th::colour::textSecondary);
 
@@ -410,6 +450,17 @@ void PracticePanel::updateFeedback()
             guidanceLabel.setColour (juce::Label::textColourId,
                                      q.passed ? th::colour::success : th::colour::danger);
             guidanceLabel.setText (q.message, juce::dontSendNotification);
+
+            // Same persistence as the playable exercises: the last percentage of
+            // the quiz is what reopening it must show.
+            if (! attemptReported)
+            {
+                attemptReported = true;
+                previousAccuracy = juce::roundToInt (q.accuracy * 100.0);
+
+                if (onExerciseResult != nullptr && exercise != nullptr)
+                    onExerciseResult (exercise->id, q.accuracy * 100.0);
+            }
         }
 
         return;
@@ -419,11 +470,32 @@ void PracticePanel::updateFeedback()
 
     if (! state.running && ! state.finished)
     {
-        measurementLabel.setText (juce::String::fromUTF8 ("Nota: --   ·   acertos 0/0   ·   grade --%"),
-                                  juce::dontSendNotification);
+        // Idle: either a fresh exercise or one already done before. When there
+        // is a previous result, show it (client request) instead of the dashes.
+        if (previousAccuracy >= 0)
+            measurementLabel.setText (juce::String::fromUTF8 ("Último aproveitamento ")
+                                        + percentFromInt (previousAccuracy),
+                                      juce::dontSendNotification);
+        else
+            measurementLabel.setText (juce::String::fromUTF8 ("Nota: --   ·   acertos 0/0   ·   grade --%"),
+                                      juce::dontSendNotification);
+
+        guidanceLabel.setColour (juce::Label::textColourId, th::colour::textSecondary);
         guidanceLabel.setText (juce::String::fromUTF8 ("Selecione um exercício e toque Iniciar."),
                                juce::dontSendNotification);
         return;
+    }
+
+    // The verdict is reached once: persist the accuracy so reopening the
+    // exercise shows this result again.
+    if (state.finished && ! attemptReported)
+    {
+        attemptReported = true;
+        previousAccuracy = juce::roundToInt (state.accuracy * 100.0);
+
+        if (onExerciseResult != nullptr)
+            if (const auto* exercise = selectedExercise())
+                onExerciseResult (exercise->id, state.accuracy * 100.0);
     }
 
     measurementLabel.setText (juce::String::fromUTF8 ("Nota: ")

@@ -16,6 +16,24 @@ jobs:
   linux-build:
     name: Linux build (compilation validation)
     runs-on: ubuntu-latest
+
+    # A real PostgreSQL so the progress-storage integration test runs against a
+    # live server (ADR 0006), not just the offline fallback.
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: cursomusica
+          POSTGRES_PASSWORD: cursomusica
+          POSTGRES_DB: curso-musica
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U cursomusica -d curso-musica"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
     steps:
       - uses: actions/checkout@v4
 
@@ -26,7 +44,7 @@ jobs:
             libasound2-dev libfreetype6-dev libfontconfig1-dev \
             libx11-dev libxcomposite-dev \
             libxcursor-dev libxinerama-dev libxrandr-dev libxrender-dev \
-            libglu1-mesa-dev libcurl4-openssl-dev
+            libglu1-mesa-dev libcurl4-openssl-dev libpq-dev
 
       - name: Clone JUCE (pinned)
         run: git clone --depth 1 --branch 8.0.4 https://github.com/juce-framework/JUCE.git External/JUCE
@@ -37,8 +55,24 @@ jobs:
       - name: Build
         run: cmake --build build
 
+      - name: Create progress schema
+        env:
+          PGPASSWORD: cursomusica
+        run: |
+          psql -h localhost -U cursomusica -d curso-musica \
+            -c 'CREATE SCHEMA IF NOT EXISTS "curso-musica" AUTHORIZATION cursomusica;'
+
       - name: Run tests
-        run: ctest --test-dir build --output-on-failure
+        env:
+          PGHOST: localhost
+          PGPORT: "5432"
+          PGUSER: cursomusica
+          PGPASSWORD: cursomusica
+          PGDATABASE: curso-musica
+          CURSOMUSICA_PG_SCHEMA: curso-musica
+        # -V so the integration evidence (online vs offline path) is visible
+        # in the CI log, not only on failure.
+        run: ctest --test-dir build -V
 
   windows-build:
     name: Windows build (target platform)
