@@ -1114,6 +1114,655 @@ namespace
         return m;
     }
 
+    // Module 10 — Etapa 10: análise harmônica, verticalização e reharmonização.
+    // The student learns to analyse a song (degree, function, scale) and then to
+    // find new ways to harmonise it (substitution, modal borrowing, target
+    // harmony). The explanation carries images, tables, audio examples and
+    // scores with their audio; every topic has >=5 pages (content::minTopicChars)
+    // and part of the exercises is played on the instrument and verified by the
+    // app (chord pitch classes / interval recognition).
+    CourseModule makeModule10()
+    {
+        CourseModule m;
+        m.number = 10;
+        m.title = juce::String::fromUTF8 ("Análise harmônica, verticalização e reharmonização");
+        m.objective = juce::String::fromUTF8 (
+            "Aprender a analisar músicas e descobrir diferentes caminhos para "
+            "modificar suas harmonias — do grau e da função de cada acorde até a "
+            "verticalização e a reharmonização, sempre respeitando a melodia.");
+        m.level = 4;          // MUSIC.md: módulos 8–10 = nível 4
+        m.targetBpm = 96;     // MUSIC.md, módulo 10
+        m.onGridTarget = 0.82f;
+        m.implemented = true;
+
+        m.lessons = {
+            detail (block ("A", juce::String::fromUTF8 ("Análise harmônica"), {
+                "Analisar é responder grau, função e escala para cada acorde.",
+                "O grau vem da escala; a função é tônica, subdominante ou dominante.",
+                "A análise é o mapa que sustenta toda a reharmonização."
+            }), content::topic10A()),
+            detail (block ("B", juce::String::fromUTF8 ("Análise melódica"), {
+                "Cada nota da melodia é repouso (nota do acorde) ou tensão.",
+                "A tensão precisa resolver; no tempo forte, prefira o repouso.",
+                "Converter a melodia em graus revela o desenho da frase."
+            }), content::topic10B()),
+            detail (block ("C", juce::String::fromUTF8 ("Escolha modal"), {
+                "O modo vem do acorde, não da escala da música.",
+                "Cada modo se distingue pela nota característica.",
+                "Escolher o modo é escolher a cor e as tensões."
+            }), content::topic10C()),
+            detail (block ("D", juce::String::fromUTF8 ("Verticalização"), {
+                "Verticalizar é construir acordes a partir das notas da melodia.",
+                "Empilhar terças a partir da nota é o caminho mais direto.",
+                "A melodia deve ser a voz de cima do acorde verticalizado."
+            }), content::topic10D()),
+            detail (block ("E", juce::String::fromUTF8 ("Conexão entre campos harmônicos"), {
+                "Conectar campos é passar de uma tonalidade a outra sem ruptura.",
+                "O acorde-pivo é a dobradiça entre os dois campos.",
+                "A modulação se prepara com o dominante ou o ii–V do novo tom."
+            }), content::topic10E()),
+            detail (block ("F", juce::String::fromUTF8 ("Estudo das vozes internas"), {
+                "Cada nota do acorde é uma voz; conduza cada linha pelo menor movimento.",
+                "Notas comuns ficam paradas; sem nota comum, move-se um grau.",
+                "Na guitarra, acordes de poucas notas facilitam a condução."
+            }), content::topic10F()),
+            detail (block ("G", juce::String::fromUTF8 ("Reharmonização"), {
+                "Reharmonizar é trocar a harmonia mantendo a melodia.",
+                "A melodia manda: as notas fortes precisam caber nos novos acordes.",
+                "Substituição, empréstimo modal e acordes de passagem são as técnicas básicas."
+            }), content::topic10G()),
+            detail (block ("H", juce::String::fromUTF8 ("Harmonia-alvo"), {
+                "Defina o alvo (a chegada) e construa a harmonia de trás para frente.",
+                "O alvo é o acorde de repouso, revelado muitas vezes pela melodia.",
+                "As aproximações (ii–V, subV, cromática) dão cores diferentes à chegada."
+            }), content::topic10H()),
+            detail (block ("I", juce::String::fromUTF8 ("Ferramentas de reharmonização"), {
+                "Reharmonizar é aplicar um conjunto pequeno de ferramentas conhecidas.",
+                "SubV, dominante secundário, empréstimo modal, passagem e verticalização.",
+                "Escolha a ferramenta pelo efeito que você quer."
+            }), content::topic10I()),
+            detail (block ("J", juce::String::fromUTF8 ("Relação entre estilos e sonoridades"), {
+                "A análise é a mesma em todos os estilos; a sonoridade é que muda.",
+                "Bossa: densidade. Jazz: substituições. Blues: dominantes. Rock: tríades.",
+                "Cada estilo tem convenções próprias de reharmonização."
+            }), content::topic10J()),
+        };
+
+        // Exercises: 3..5 per topic, mixing verifiable quizzes and playable
+        // exercises (the app recognises the notes). Ids follow EX-10.<topico>.<n>.
+        auto add = [&m] (Exercise e, const char* topic)
+        {
+            e.lessonId = topic;
+            m.exercises.push_back (std::move (e));
+            return (int) m.exercises.size() - 1;
+        };
+
+        // --- Topic A — análise harmônica -------------------------------------
+        add (exercise ("EX-10.A.1", juce::String::fromUTF8 ("Questionário: analisar a harmonia"),
+                       juce::String::fromUTF8 ("Responder ao questionário de análise harmônica."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões de análise.")), "A");
+        m.exercises.back().quiz = {
+            question ("Analisar uma harmonia é responder, por acorde:",
+                      { "grau, função e escala",
+                        "volume, timbre e andamento",
+                        "apenas o nome do acorde",
+                        "a duração de cada nota" }, 0),
+            question ("Em Dó maior, o acorde Dm7 é qual grau?",
+                      { "I", "ii", "IV", "V" }, 1),
+            question ("Qual é a função do acorde de dominante (V)?",
+                      { "repouso", "afastamento", "tensão que pede resolução", "nenhuma" }, 2),
+            question ("Um A7 dentro do campo de Dó maior é:",
+                      { "o I", "um dominante secundário (V/ii)", "o vii", "um erro" }, 1),
+            question ("Sobre um acorde de sétima maior (7M) cabe qual escala?",
+                      { "jônio / lídio", "lócrio", "alterada", "dórico" }, 0),
+        };
+        add (exercise ("EX-10.A.2", juce::String::fromUTF8 ("Tocar o ii–V–I em Dó"),
+                       juce::String::fromUTF8 ("Tocar Dm7 – G7 – C7M e confirmar a análise (subdominante, dominante, tônica)."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere a progressão ii–V–I.")), "A");
+        m.exercises.back().chordProgression = {
+            { 2, 5, 9, 0 },    // Dm7
+            { 7, 11, 2, 5 },   // G7
+            { 0, 4, 7, 11 },   // C7M
+        };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-10.A.3", juce::String::fromUTF8 ("Tocar o turnaround analisado"),
+                       juce::String::fromUTF8 ("Tocar C7M – A7 – Dm7 – G7, identificando o dominante secundário (A7)."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere os quatro acordes do turnaround.")), "A");
+        m.exercises.back().chordProgression = {
+            { 0, 4, 7, 11 },   // C7M
+            { 9, 1, 4, 7 },    // A7
+            { 2, 5, 9, 0 },    // Dm7
+            { 7, 11, 2, 5 },   // G7
+        };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-10.A.4", juce::String::fromUTF8 ("Questionário: graus e funções"),
+                       juce::String::fromUTF8 ("Identificar grau e função de acordes do campo harmônico."),
+                       juce::String::fromUTF8 ("Acerto ≥90% no questionário de graus.")), "A");
+        m.exercises.back().quiz = {
+            question ("Em Dó maior, o acorde F7M é qual grau e função?",
+                      { "IV, subdominante", "V, dominante", "I, tônica", "vi, tônica relativa" }, 0),
+            question ("Em Dó maior, o acorde Am7 é qual grau e função?",
+                      { "vi, tônica relativa", "ii, subdominante", "IV, subdominante", "vii, dominante" }, 0),
+            question ("O ciclo ii–V–I representa:",
+                      { "subdominante, dominante, tônica",
+                        "tônica, dominante, subdominante",
+                        "dominante, tônica, subdominante",
+                        "três tônicas" }, 0),
+            question ("Um acorde que não está no campo harmônico pode ser:",
+                      { "dominante secundário, empréstimo modal ou passagem",
+                        "sempre um erro",
+                        "sempre uma modulação",
+                        "sempre o I" }, 0),
+        };
+
+        // --- Topic B — análise melódica --------------------------------------
+        add (exercise ("EX-10.B.1", juce::String::fromUTF8 ("Questionário: notas de repouso e tensão"),
+                       juce::String::fromUTF8 ("Responder ao questionário de análise melódica."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões de análise melódica.")), "B");
+        m.exercises.back().quiz = {
+            question ("Sobre um acorde, as notas do acorde são:",
+                      { "notas de repouso", "notas de tensão", "notas erradas", "sempre a melodia" }, 0),
+            question ("Uma nota de tensão bem colocada:",
+                      { "resolve numa nota do acorde",
+                        "fica parada no tempo forte",
+                        "é sempre um erro",
+                        "substitui o acorde" }, 0),
+            question ("As notas fortes da melodia devem cair, de preferência, em:",
+                      { "notas do acorde", "notas estranhas", "qualquer nota", "silêncios" }, 0),
+            question ("A nona (E) sobre Dm7, resolvendo para a fundamental (D), é:",
+                      { "tensão resolvida (intenção)", "erro grave", "nota do acorde", "modulação" }, 0),
+            question ("Analisar a melodia sem considerar o acorde é:",
+                      { "errado: a nota só faz sentido contra o acorde",
+                        "o método correto",
+                        "a única forma",
+                        "indiferente" }, 0),
+        };
+        add (exercise ("EX-10.B.2", juce::String::fromUTF8 ("Tocar o repouso do acorde"),
+                       juce::String::fromUTF8 ("Tocar as notas do acorde Dm7 (D–F–A–C) como repouso."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere a cobertura do acorde.")), "B");
+        m.exercises.back().chordPitchClasses = { 2, 5, 9, 0 };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-10.B.3", juce::String::fromUTF8 ("Tensão que resolve"),
+                       juce::String::fromUTF8 ("Tocar a nona (E) resolvendo na terça (F) sobre Dm7, como tensão resolvida."),
+                       juce::String::fromUTF8 ("O app reconhece as notas tocadas e confere o movimento de tensão e resolução.")), "B");
+        m.exercises.back().targets = notes ({ "E4", "F4", "E4", "F4" });
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-10.B.4", juce::String::fromUTF8 ("Questionário: a melodia revela a harmonia"),
+                       juce::String::fromUTF8 ("Deduzir acordes a partir das notas fortes da melodia."),
+                       juce::String::fromUTF8 ("Acerto ≥90% no questionário de dedução.")), "B");
+        m.exercises.back().quiz = {
+            question ("A melodia insiste nas notas F e A. Qual acorde as contém?",
+                      { "F7M (ou Dm7)", "C7", "G7", "Bm7b5" }, 0),
+            question ("Na verticalização, a melodia serve para:",
+                      { "escolher os acordes que a contêm",
+                        "definir o andamento",
+                        "aumentar o volume",
+                        "substituir o baixo" }, 0),
+            question ("A tensão que não resolve soa como:",
+                      { "nota errada", "resolução", "tônica", "oitava" }, 0),
+            question ("Antes de analisar uma nota, é preciso saber:",
+                      { "o acorde que está soando", "o volume", "a corda usada", "o timbre" }, 0),
+        };
+
+        // --- Topic C — escolha modal -----------------------------------------
+        add (exercise ("EX-10.C.1", juce::String::fromUTF8 ("Questionário: escolha modal"),
+                       juce::String::fromUTF8 ("Responder ao questionário de modos."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões de escolha modal.")), "C");
+        m.exercises.back().quiz = {
+            question ("O modo a tocar sobre um acorde vem:",
+                      { "do acorde que está soando", "da escala da música", "do andamento", "da tonalidade fixa" }, 0),
+            question ("A nota característica que distingue o dórico do eólio é:",
+                      { "a sexta (maior x menor)", "a terça", "a quinta", "a sétima" }, 0),
+            question ("Sobre um acorde dominante que resolve (G7) cabe:",
+                      { "mixolídio / alterada", "jônio", "lócrio", "eólio" }, 0),
+            question ("A quarta aumentada (#11) é a nota característica do:",
+                      { "lídio", "dórico", "frígio", "eólio" }, 0),
+            question ("Escolher o modo é escolher:",
+                      { "a cor e as tensões do improviso", "o andamento", "a afinação", "o volume" }, 0),
+        };
+        add (exercise ("EX-10.C.2", juce::String::fromUTF8 ("Tocar o modo dórico"),
+                       juce::String::fromUTF8 ("Tocar as notas do modo dórico sobre Dm7, destacando a sexta maior."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere se o modo dórico foi tocado.")), "C");
+        m.exercises.back().targets = notes ({ "D4", "E4", "F4", "G4", "A4", "B4", "C5" });
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-10.C.3", juce::String::fromUTF8 ("Tocar o modo mixolídio"),
+                       juce::String::fromUTF8 ("Tocar as notas do modo mixolídio sobre G7, destacando a sétima menor."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere o modo mixolídio sobre o dominante.")), "C");
+        m.exercises.back().targets = notes ({ "G3", "A3", "B3", "C4", "D4", "E4", "F4" });
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-10.C.4", juce::String::fromUTF8 ("Tocar o modo lídio"),
+                       juce::String::fromUTF8 ("Tocar as notas do modo lídio sobre C7M, destacando a quarta aumentada."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere o modo lídio sobre a tônica.")), "C");
+        m.exercises.back().targets = notes ({ "C4", "D4", "E4", "F#4", "G4", "A4", "B4" });
+        m.exercises.back().usesGrid = false;
+
+        // --- Topic D — verticalização ----------------------------------------
+        add (exercise ("EX-10.D.1", juce::String::fromUTF8 ("Questionário: verticalização"),
+                       juce::String::fromUTF8 ("Responder ao questionário de verticalização."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "D");
+        m.exercises.back().quiz = {
+            question ("Verticalizar é:",
+                      { "construir acordes a partir das notas da melodia",
+                        "tocar a melodia mais rápido",
+                        "subir a melodia uma oitava",
+                        "afinar o instrumento" }, 0),
+            question ("Empilhando terças a partir da nota A, obtém-se:",
+                      { "Am7 (A, C, E, G)", "C7M", "G7", "Dm7" }, 0),
+            question ("Na verticalização, a melodia deve ficar:",
+                      { "na voz mais aguda do acorde", "no baixo", "no meio do acorde", "escondida" }, 0),
+            question ("Se a melodia toca D sobre C7M, o acorde verticalizado pode ser:",
+                      { "C7M9", "C7M (#11)", "Cdim", "Cm7b5" }, 0),
+            question ("A verticalização garante que:",
+                      { "a harmonia contenha as notas da melodia",
+                        "a música fique mais rápida",
+                        "a melodia mude de tom",
+                        "o acorde fique maior" }, 0),
+        };
+        add (exercise ("EX-10.D.2", juce::String::fromUTF8 ("Verticalizar a melodia A–G–F–E"),
+                       juce::String::fromUTF8 ("Tocar os acordes Am7 – G7 – F7M – Em7 que verticalizam a melodia A–G–F–E."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere os quatro acordes verticalizados.")), "D");
+        m.exercises.back().chordProgression = {
+            { 9, 0, 4, 7 },    // Am7
+            { 7, 11, 2, 5 },   // G7
+            { 5, 9, 0, 4 },    // F7M
+            { 4, 7, 11, 2 },   // Em7
+        };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-10.D.3", juce::String::fromUTF8 ("Verticalizar com tensão"),
+                       juce::String::fromUTF8 ("Tocar C7M9 (C–E–G–B–D), verticalizando a nona (D) sobre a tônica."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere a cobertura do acorde com a tensão.")), "D");
+        m.exercises.back().chordPitchClasses = { 0, 4, 7, 11, 2 };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-10.D.4", juce::String::fromUTF8 ("Questionário: empilhamento de terças"),
+                       juce::String::fromUTF8 ("Identificar o acorde resultante do empilhamento."),
+                       juce::String::fromUTF8 ("Acerto ≥90% no questionário.")), "D");
+        m.exercises.back().quiz = {
+            question ("Empilhando terças a partir de G (G, B, D, F), obtém-se:",
+                      { "G7", "G7M", "Gm7", "Gm7b5" }, 0),
+            question ("Empilhando terças a partir de F (F, A, C, E), obtém-se:",
+                      { "F7M", "F7", "Fm7", "Fdim" }, 0),
+            question ("Empilhando terças a partir de E (E, G, B, D), obtém-se:",
+                      { "Em7", "E7", "E7M", "Em7b5" }, 0),
+            question ("Verticalizar uma tensão (ex.: nona) significa:",
+                      { "escolher um acorde que contenha essa tensão",
+                        "evitar a nota",
+                        "tocar a nota mais grave",
+                        "mudar de tom" }, 0),
+        };
+
+        // --- Topic E — conexão entre campos ----------------------------------
+        add (exercise ("EX-10.E.1", juce::String::fromUTF8 ("Questionário: conectar campos"),
+                       juce::String::fromUTF8 ("Responder ao questionário de conexão entre campos harmônicos."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "E");
+        m.exercises.back().quiz = {
+            question ("Um acorde-pivo é:",
+                      { "um acorde que pertence (ou serve) aos dois campos",
+                        "um acorde fora de qualquer campo",
+                        "o acorde mais agudo",
+                        "um acorde de passagem sem função" }, 0),
+            question ("Para modular de Dó para Fá, o dominante do novo tom é:",
+                      { "C7", "G7", "D7", "A7" }, 0),
+            question ("Empréstimo modal é:",
+                      { "usar acordes do menor paralelo sem mudar de centro",
+                        "modular para outro tom",
+                        "tocar mais rápido",
+                        "mudar a afinação" }, 0),
+            question ("A técnica mais poderosa para modular é:",
+                      { "o ii–V do novo tom", "tocar a escala da tonalidade", "um acorde de passagem", "um silêncio" }, 0),
+            question ("Um dominante que resolve num acorde que não era a tônica indica:",
+                      { "modulação", "erro", "empréstimo", "fim da música" }, 0),
+        };
+        add (exercise ("EX-10.E.2", juce::String::fromUTF8 ("Tocar a modulação de Dó para Fá"),
+                       juce::String::fromUTF8 ("Tocar C7M – Gm7 – C7 – F7M: um ii–V do novo tom (Fá)."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere a progressão de modulação.")), "E");
+        m.exercises.back().chordProgression = {
+            { 0, 4, 7, 11 },   // C7M
+            { 7, 10, 2, 5 },   // Gm7
+            { 0, 4, 7, 10 },   // C7
+            { 5, 9, 0, 4 },    // F7M
+        };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-10.E.3", juce::String::fromUTF8 ("Tocar o empréstimo modal"),
+                       juce::String::fromUTF8 ("Tocar C7M – Fm7 – C7M: o Fm7 é o iv emprestado do menor paralelo."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere o empréstimo modal.")), "E");
+        m.exercises.back().chordProgression = {
+            { 0, 4, 7, 11 },   // C7M
+            { 5, 8, 0, 3 },    // Fm7
+            { 0, 4, 7, 11 },   // C7M
+        };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-10.E.4", juce::String::fromUTF8 ("Questionário: empréstimo e modulação"),
+                       juce::String::fromUTF8 ("Distinguir empréstimo modal de modulação."),
+                       juce::String::fromUTF8 ("Acerto ≥90% no questionário.")), "E");
+        m.exercises.back().quiz = {
+            question ("Em Dó maior, o acorde Fm7 é:",
+                      { "empréstimo modal (iv do menor)", "modulação para Fá", "o V", "o ii" }, 0),
+            question ("A diferença entre empréstimo modal e modulação é:",
+                      { "o empréstimo não muda o centro; a modulação sim",
+                        "o empréstimo é mais rápido",
+                        "a modulação não tem acordes",
+                        "são a mesma coisa" }, 0),
+            question ("Um acorde-pivo funcional em Dó e Fá é:",
+                      { "Dm7 (ii de Dó, vi de Fá)", "G7", "C#7", "Bdim" }, 0),
+            question ("Modular para um tom vizinho (uma quinta) é:",
+                      { "mais fácil: os campos se sobrepõem muito",
+                        "impossível",
+                        "igual a modular para longe",
+                        "sempre um erro" }, 0),
+        };
+
+        // --- Topic F — vozes internas ----------------------------------------
+        add (exercise ("EX-10.F.1", juce::String::fromUTF8 ("Questionário: vozes internas"),
+                       juce::String::fromUTF8 ("Responder ao questionário de condução de vozes."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "F");
+        m.exercises.back().quiz = {
+            question ("Conduzir vozes é:",
+                      { "mover cada voz pelo caminho mais curto",
+                        "tocar todas as vozes juntas",
+                        "aumentar o volume",
+                        "tocar mais rápido" }, 0),
+            question ("As quatro vozes são:",
+                      { "soprano, contralto, tenor e baixo",
+                        "primeira, segunda, terceira e quarta",
+                        "aguda, média, grave e mais grave",
+                        "melodia, harmonia, baixo e ritmo" }, 0),
+            question ("Quando dois acordes têm uma nota comum, ela deve:",
+                      { "ficar parada na mesma voz", "subir uma oitava", "ser omitida", "ser duplicada" }, 0),
+            question ("Inverter um acorde muda:",
+                      { "a nota do baixo", "as notas do acorde", "a tonalidade", "o número de notas" }, 0),
+            question ("Na guitarra, a condução de vozes é mais fácil com:",
+                      { "acordes de poucas notas (shell voicings)", "acordes de seis cordas", "power chords", "só o baixo" }, 0),
+        };
+        add (exercise ("EX-10.F.2", juce::String::fromUTF8 ("Conduzir as vozes num ii–V–I"),
+                       juce::String::fromUTF8 ("Tocar Dm7 – G7 – C7M mantendo a nota F comum entre Dm7 e G7."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere a progressão com a nota comum.")), "F");
+        m.exercises.back().chordProgression = {
+            { 2, 5, 9, 0 },    // Dm7 (com F)
+            { 7, 11, 2, 5 },   // G7 (com F)
+            { 0, 4, 7, 11 },   // C7M
+        };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-10.F.3", juce::String::fromUTF8 ("Tocar um shell voicing"),
+                       juce::String::fromUTF8 ("Tocar C7M com três notas (C, E, B), deixando a quinta de fora para conduzir as vozes."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere o shell voicing (tônica, terça, sétima).")), "F");
+        m.exercises.back().chordPitchClasses = { 0, 4, 11 };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-10.F.4", juce::String::fromUTF8 ("Questionário: inversões e baixo"),
+                       juce::String::fromUTF8 ("Identificar a nota do baixo nas inversões."),
+                       juce::String::fromUTF8 ("Acerto ≥90% no questionário.")), "F");
+        m.exercises.back().quiz = {
+            question ("Na primeira inversão (C/E), a nota do baixo é:",
+                      { "E (terça)", "C (tônica)", "G (quinta)", "B (sétima)" }, 0),
+            question ("Na segunda inversão (C/G), a nota do baixo é:",
+                      { "G (quinta)", "C (tônica)", "E (terça)", "B (sétima)" }, 0),
+            question ("Conduzir o baixo por graus próximos serve para:",
+                      { "dar fluidez à harmonia", "aumentar o volume", "mudar o tom", "tocar mais rápido" }, 0),
+            question ("Movimento oblíquo entre vozes significa:",
+                      { "uma voz fica parada enquanto as outras se movem",
+                        "todas as vozes sobem",
+                        "todas as vozes descem",
+                        "as vozes se cruzam" }, 0),
+        };
+
+        // --- Topic G — reharmonização ----------------------------------------
+        add (exercise ("EX-10.G.1", juce::String::fromUTF8 ("Questionário: reharmonização"),
+                       juce::String::fromUTF8 ("Responder ao questionário de reharmonização."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "G");
+        m.exercises.back().quiz = {
+            question ("Reharmonizar é:",
+                      { "trocar a harmonia mantendo a melodia",
+                        "trocar a melodia",
+                        "mudar o andamento",
+                        "afinar o instrumento" }, 0),
+            question ("A substituição de trítono de G7 é:",
+                      { "Db7", "D7", "C7", "A7" }, 0),
+            question ("Reharmonizar sem olhar a melodia pode causar:",
+                      { "atrito entre a melodia e os novos acordes",
+                        "melhora automática",
+                        "mudança de tom",
+                        "aumento do volume" }, 0),
+            question ("O substituto relativo de C7M é:",
+                      { "Am7", "G7", "Dm7", "Fm7" }, 0),
+            question ("Reharmonizar com parcimônia serve para:",
+                      { "manter a identidade da música", "tocar mais rápido", "mudar de tom", "simplificar tudo" }, 0),
+        };
+        add (exercise ("EX-10.G.2", juce::String::fromUTF8 ("Reharmonizar com o subV"),
+                       juce::String::fromUTF8 ("Tocar Dm7 – Db7 – C7M: o Db7 substitui o G7 (substituição de trítono)."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere a progressão com o subV.")), "G");
+        m.exercises.back().chordProgression = {
+            { 2, 5, 9, 0 },    // Dm7
+            { 1, 5, 8, 0 },    // Db7
+            { 0, 4, 7, 11 },   // C7M
+        };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-10.G.3", juce::String::fromUTF8 ("Reharmonizar com dominante secundário"),
+                       juce::String::fromUTF8 ("Tocar C7M – A7 – Dm7 – G7 – C7M: o A7 prepara o ii (Dm7)."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere a progressão com o dominante secundário.")), "G");
+        m.exercises.back().chordProgression = {
+            { 0, 4, 7, 11 },   // C7M
+            { 9, 1, 4, 7 },    // A7
+            { 2, 5, 9, 0 },    // Dm7
+            { 7, 11, 2, 5 },   // G7
+            { 0, 4, 7, 11 },   // C7M
+        };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-10.G.4", juce::String::fromUTF8 ("Reharmonizar com empréstimo modal"),
+                       juce::String::fromUTF8 ("Tocar C7M – Fm7 – C7M, escurecendo a tônica com o iv emprestado."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere a reharmonização por empréstimo.")), "G");
+        m.exercises.back().chordProgression = {
+            { 0, 4, 7, 11 },   // C7M
+            { 5, 8, 0, 3 },    // Fm7
+            { 0, 4, 7, 11 },   // C7M
+        };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-10.G.5", juce::String::fromUTF8 ("Questionário: técnicas de reharmonização"),
+                       juce::String::fromUTF8 ("Identificar a técnica usada em cada reharmonização."),
+                       juce::String::fromUTF8 ("Acerto ≥90% no questionário.")), "G");
+        m.exercises.back().quiz = {
+            question ("Trocar G7 por Db7 é:",
+                      { "substituição de trítono", "empréstimo modal", "relativo", "modulação" }, 0),
+            question ("Trocar C7M por Cm7 é:",
+                      { "empréstimo modal (paralelo)", "substituição de trítono", "dominante secundário", "inversão" }, 0),
+            question ("Inserir um Bm7b5 entre C7M e Dm7 é:",
+                      { "acorde de passagem", "modulação", "substituição de trítono", "relativo" }, 0),
+            question ("A melodia é, na reharmonização:",
+                      { "a restrição que não pode ser quebrada", "opcional", "sempre substituída", "irrelevante" }, 0),
+        };
+
+        // --- Topic H — harmonia-alvo -----------------------------------------
+        add (exercise ("EX-10.H.1", juce::String::fromUTF8 ("Questionário: harmonia-alvo"),
+                       juce::String::fromUTF8 ("Responder ao questionário de harmonia-alvo."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "H");
+        m.exercises.back().quiz = {
+            question ("O alvo de uma frase é:",
+                      { "o acorde de chegada (o repouso)", "o primeiro acorde", "o acorde mais agudo", "o mais rápido" }, 0),
+            question ("Construir a harmonia-alvo é trabalhar:",
+                      { "de trás para frente, do alvo para as aproximações",
+                        "do começo para o fim",
+                        "sem ordem",
+                        "só pelo baixo" }, 0),
+            question ("Antes de um alvo C7M, um subV seria:",
+                      { "Db7", "G7", "D7", "B7" }, 0),
+            question ("O alvo é revelado, muitas vezes, por:",
+                      { "onde a melodia repousa", "o volume", "o andamento", "o timbre" }, 0),
+            question ("Aproximações diferentes do mesmo alvo produzem:",
+                      { "cores diferentes na chegada", "o mesmo som", "erros", "modulações" }, 0),
+        };
+        add (exercise ("EX-10.H.2", juce::String::fromUTF8 ("Construir a aproximação do alvo"),
+                       juce::String::fromUTF8 ("Tocar Em7b5 – A7 – Dm7 – G7 – C7M: uma cadência construída de trás para frente até o alvo."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere a progressão que chega ao alvo C7M.")), "H");
+        m.exercises.back().chordProgression = {
+            { 4, 7, 10, 2 },   // Em7b5
+            { 9, 1, 4, 7 },    // A7
+            { 2, 5, 9, 0 },    // Dm7
+            { 7, 11, 2, 5 },   // G7
+            { 0, 4, 7, 11 },   // C7M
+        };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-10.H.3", juce::String::fromUTF8 ("Chegar ao alvo por subV"),
+                       juce::String::fromUTF8 ("Tocar Dm7 – Db7 – C7M, chegando ao alvo com baixo cromático."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere a chegada ao alvo por subV.")), "H");
+        m.exercises.back().chordProgression = {
+            { 2, 5, 9, 0 },    // Dm7
+            { 1, 5, 8, 0 },    // Db7
+            { 0, 4, 7, 11 },   // C7M
+        };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-10.H.4", juce::String::fromUTF8 ("Questionário: alvos na forma"),
+                       juce::String::fromUTF8 ("Identificar os alvos de uma forma AABA."),
+                       juce::String::fromUTF8 ("Acerto ≥90% no questionário.")), "H");
+        m.exercises.back().quiz = {
+            question ("Numa forma AABA, cada seção tem:",
+                      { "um alvo (ponto de chegada)", "um único acorde", "a mesma melodia", "nenhum acorde" }, 0),
+            question ("O turnaround serve para:",
+                      { "levar a música de volta ao alvo do início", "encerrar a música", "modular", "mudar o andamento" }, 0),
+            question ("Improvisar pensando no alvo faz a frase:",
+                      { "ter direção e contar uma história", "ficar mais rápida", "perder a tonalidade", "repetir notas" }, 0),
+            question ("O alvo deve conter:",
+                      { "a nota de repouso da melodia", "a nota mais aguda", "só a fundamental", "qualquer nota" }, 0),
+        };
+
+        // --- Topic I — ferramentas de reharmonização -------------------------
+        add (exercise ("EX-10.I.1", juce::String::fromUTF8 ("Questionário: ferramentas de reharmonização"),
+                       juce::String::fromUTF8 ("Responder ao questionário das ferramentas."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "I");
+        m.exercises.back().quiz = {
+            question ("Qual ferramenta cria um baixo cromático?",
+                      { "substituição de trítono", "empréstimo modal", "relativo", "inversão" }, 0),
+            question ("Para criar movimento antes de cada acorde, use:",
+                      { "dominantes secundários", "relativos", "power chords", "oitavas" }, 0),
+            question ("Para escurecer a harmonia sem modular, use:",
+                      { "empréstimo modal", "substituição de trítono", "inversão", "power chords" }, 0),
+            question ("Para garantir que a melodia caiba na harmonia, use:",
+                      { "verticalização", "empréstimo modal", "modulação", "baixo pedal" }, 0),
+            question ("Usar todas as ferramentas ao mesmo tempo:",
+                      { "faz a harmonia perder a identidade", "melhora a música", "é obrigatório", "não tem efeito" }, 0),
+        };
+        add (exercise ("EX-10.I.2", juce::String::fromUTF8 ("Combinar ferramentas"),
+                       juce::String::fromUTF8 ("Tocar C7M – A7 – Dm7 – Db7 – C7M: dominante secundário e subV combinados."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere a progressão reharmonizada.")), "I");
+        m.exercises.back().chordProgression = {
+            { 0, 4, 7, 11 },   // C7M
+            { 9, 1, 4, 7 },    // A7
+            { 2, 5, 9, 0 },    // Dm7
+            { 1, 5, 8, 0 },    // Db7
+            { 0, 4, 7, 11 },   // C7M
+        };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-10.I.3", juce::String::fromUTF8 ("Ferramenta com baixo pedal"),
+                       juce::String::fromUTF8 ("Tocar C7M – Fm7 – C7M mantendo a intenção de baixo pedal (suspensão)."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere a progressão com o empréstimo.")), "I");
+        m.exercises.back().chordProgression = {
+            { 0, 4, 7, 11 },   // C7M
+            { 5, 8, 0, 3 },    // Fm7
+            { 0, 4, 7, 11 },   // C7M
+        };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-10.I.4", juce::String::fromUTF8 ("Questionário: escolher a ferramenta"),
+                       juce::String::fromUTF8 ("Associar cada efeito desejado à ferramenta certa."),
+                       juce::String::fromUTF8 ("Acerto ≥90% no questionário.")), "I");
+        m.exercises.back().quiz = {
+            question ("Efeito desejado: suavidade e fluidez. Ferramenta:",
+                      { "relativos, inversões e condução de vozes", "substituição de trítono", "dominante secundário", "baixo pedal" }, 0),
+            question ("Efeito desejado: tensão suspensa. Ferramenta:",
+                      { "baixo pedal", "relativo", "inversão", "oitavas" }, 0),
+            question ("Efeito desejado: mais movimento. Ferramenta:",
+                      { "dominantes secundários e acordes de passagem", "relativo", "inversão", "empréstimo modal" }, 0),
+            question ("A restrição final de toda reharmonização é:",
+                      { "a melodia", "o andamento", "o timbre", "o volume" }, 0),
+        };
+
+        // --- Topic J — estilos e sonoridades ---------------------------------
+        add (exercise ("EX-10.J.1", juce::String::fromUTF8 ("Questionário: estilos e sonoridades"),
+                       juce::String::fromUTF8 ("Responder ao questionário de estilos."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "J");
+        m.exercises.back().quiz = {
+            question ("A análise harmônica, entre estilos, é:",
+                      { "a mesma; o que muda é a sonoridade", "sempre diferente", "irrelevante", "impossível" }, 0),
+            question ("Qual estilo usa mais densidade harmônica (9, 13)?",
+                      { "bossa nova", "rock", "blues", "punk" }, 0),
+            question ("Qual estilo usa tríades e power chords?",
+                      { "rock / pop", "jazz", "bossa nova", "bebop" }, 0),
+            question ("As blue notes são típicas do:",
+                      { "blues", "rock progressivo", "bossa nova", "clássico" }, 0),
+            question ("Cada estilo tem:",
+                      { "convenções próprias de reharmonização", "a mesma reharmonização", "nenhuma harmonia", "só tríades" }, 0),
+        };
+        add (exercise ("EX-10.J.2", juce::String::fromUTF8 ("Tocar o ii–V–I em estilo de bossa"),
+                       juce::String::fromUTF8 ("Tocar Dm7 – G7 – C7M com nonas (Dm9 – G9 – C7M9), sonoridade de bossa."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere os acordes com tensão de bossa.")), "J");
+        m.exercises.back().chordProgression = {
+            { 2, 5, 9, 0, 4 },    // Dm9
+            { 7, 11, 2, 5, 9 },   // G9
+            { 0, 4, 7, 11, 2 },   // C7M9
+        };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-10.J.3", juce::String::fromUTF8 ("Tocar o ii–V–I em estilo de rock"),
+                       juce::String::fromUTF8 ("Tocar Dm – G – C com tríades (sem sétimas), sonoridade de rock."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere as tríades do ii–V–I.")), "J");
+        m.exercises.back().chordProgression = {
+            { 2, 5, 9 },    // Dm
+            { 7, 11, 2 },   // G
+            { 0, 4, 7 },    // C
+        };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-10.J.4", juce::String::fromUTF8 ("Questionário: vestir a mesma estrutura"),
+                       juce::String::fromUTF8 ("Identificar como cada estilo veste o mesmo ii–V–I."),
+                       juce::String::fromUTF8 ("Acerto ≥90% no questionário.")), "J");
+        m.exercises.back().quiz = {
+            question ("O mesmo ii–V–I em blues tende a virar:",
+                      { "dominantes com sétima e blue notes", "tríades limpas", "acordes sus", "só o baixo" }, 0),
+            question ("O ii–V–I em jazz costuma trazer:",
+                      { "substituições e tensões alteradas", "power chords", "só a fundamental", "nenhuma tensão" }, 0),
+            question ("A sonoridade também depende de:",
+                      { "instrumentação, timbre e ataque", "apenas dos acordes", "só do andamento", "só da tonalidade" }, 0),
+            question ("Reharmonizar fora do estilo da música pode:",
+                      { "soar deslocado", "sempre melhorar", "não ter efeito", "mudar o tom" }, 0),
+        };
+
+        // The gate closes the module: reharmonise a ii–V–I with a secondary
+        // dominant and a tritone substitution, ending on the target (REQ-009,
+        // REQ-015). Built from the module's material.
+        auto& gate = m.exercises.emplace_back (exercise (
+            "GATE-10", juce::String::fromUTF8 ("Desafio de gate — ii–V–I reharmonizado"),
+            juce::String::fromUTF8 ("Tocar Dm7 – A7 – Dm7 – Db7 – C7M a 96 BPM, na grade do metrônomo: um ii–V–I com dominante secundário e subV."),
+            juce::String::fromUTF8 ("Acordes reconhecidos e alinhados à grade (≥ 0,82).")));
+        gate.isGate = true;
+        gate.lessonId = "J";
+        gate.chordProgression = {
+            { 2, 5, 9, 0 },    // Dm7
+            { 9, 1, 4, 7 },    // A7 (dominante secundário)
+            { 2, 5, 9, 0 },    // Dm7
+            { 1, 5, 8, 0 },    // Db7 (subV)
+            { 0, 4, 7, 11 },   // C7M (alvo)
+        };
+
+        m.gateChallenge = juce::String::fromUTF8 (
+            "Reharmonizar e tocar Dm7 – A7 – Dm7 – Db7 – C7M (um ii–V–I com "
+            "dominante secundário e substituição de trítono) a 96 BPM, com ≥90% "
+            "de acerto de acordes e on_grid_ratio ≥ 0,82. A progressão usa as "
+            "ferramentas de reharmonização estudadas no módulo.");
+
+        // Pattern and link the module must cite (REQ-007, REQ-010).
+        m.practice.patternId = "PTN-A-DROP2";
+        m.practice.patternUse = juce::String::fromUTF8 (
+            "Arpejos de sétima em Drop 2: a digitação fixa 1-3-5-7 permite ouvir "
+            "cada voz do acorde separadamente, o que é a base da condução de vozes "
+            "e da verticalização. Complemento: PTN-M-3rds para ouvir os intervalos "
+            "do acorde em movimento.");
+        m.practice.guitarists = { "Joe Pass", "Wes Montgomery", "Chick Corea" };
+
+        // Curated apostilas (REQ-006, CM-012); see docs/MUSIC.md.
+        m.sources = {
+            "pdf-teoria-elementar-da-musica-ricordi-osvaldo-lacerda",
+            "pdf-p-classtruncatedtext-module-lineclamped-85ulhh-style-max-lines5bohumil-med-teoria-da-musica-5-edicao-p",
+            "pdf-desvendando-os-segredos-da-guitarra-fusion",
+            "pdf-caged-e-derivaoes-de-acordes-marcelo-mello-apostila-de-violao-e-guitarra-vol1",
+        };
+
+        return m;
+    }
+
     // Modules 3..20 exist as placeholders so the list is honest about what is
     // coming (ADR 0005): level, target BPM and alignment come from MUSIC.md.
     CourseModule makePlaceholder (int number, const char* title, int level,
@@ -1145,7 +1794,7 @@ const std::vector<CourseModule>& ModuleCatalog::getModules()
         makePlaceholder (7,  "II–V–I (aplicação)",                  3,  84,  0.80f),
         makePlaceholder (8,  "Turnarounds",                         4,  88,  0.81f),
         makePlaceholder (9,  "Turnarounds (variações)",             4,  92,  0.81f),
-        makePlaceholder (10, "Turnarounds (aplicação)",             4,  96,  0.82f),
+        makeModule10(),
         makePlaceholder (11, "Blues de 12 compassos",               5, 100,  0.82f),
         makePlaceholder (12, "Blues menor",                         5, 104,  0.82f),
         makePlaceholder (13, "Blues (variações)",                   5, 108,  0.82f),
