@@ -64,7 +64,7 @@ Restrições:
 ## Notas de implementação
 
 Três armadilhas apareceram só no runner Windows (o `makensis`/CMake no Linux
-escondia as duas) e valem como aviso para futuros passos de empacotamento:
+escondia as três) e valem como aviso para futuros passos de empacotamento:
 
 1. **Caminhos com espaço não podem ir pela linha de comando.** O Ninja entrega
    o comando ao `cmd.exe`, que partia `-DPG_DIRS="C:/Program Files/..."` e
