@@ -179,6 +179,39 @@ if(PostgreSQL_FOUND)
     target_include_directories(CursoMusica PRIVATE ${PostgreSQL_INCLUDE_DIRS})
     target_link_libraries(CursoMusica PRIVATE PostgreSQL::PostgreSQL)
     target_compile_definitions(CursoMusica PRIVATE CURSOMUSICA_HAS_POSTGRES=1)
+
+    # On Windows the import library links against libpq.dll, so the binary only
+    # starts where that DLL is on PATH. Stage the DLL (and the libraries it
+    # pulls in) under build/runtime so the installer can bundle them (REQ-014:
+    # "ready to use" after install, no manual steps).
+    if(WIN32)
+        # The import library lives in lib/, the runtime DLL in bin/; both the
+        # resolved location and the configured root are offered as search hints.
+        set(_pg_hint_dirs "")
+        foreach(_lib IN LISTS PostgreSQL_LIBRARIES)
+            if(_lib MATCHES "\\.lib$")
+                get_filename_component(_dir "${_lib}" DIRECTORY)
+                list(APPEND _pg_hint_dirs "${_dir}" "${_dir}/../bin")
+            endif()
+        endforeach()
+        if(PostgreSQL_ROOT)
+            list(APPEND _pg_hint_dirs "${PostgreSQL_ROOT}/bin" "${PostgreSQL_ROOT}/lib")
+        endif()
+        list(REMOVE_DUPLICATES _pg_hint_dirs)
+        # Written to a generated script instead of -D arguments: the PostgreSQL
+        # path contains spaces ("Program Files") and Ninja hands the command to
+        # cmd.exe, which splits it ("'C:' is not recognized as an internal or
+        # external command").
+        file(GENERATE OUTPUT "${CMAKE_BINARY_DIR}/stage-windows-runtime.cmake" CONTENT
+"set(EXE \"$<TARGET_FILE:CursoMusica>\")
+set(OUT_DIR \"${CMAKE_BINARY_DIR}/runtime\")
+set(PG_DIRS \"${_pg_hint_dirs}\")
+include(\"${CMAKE_CURRENT_SOURCE_DIR}/cmake/StageWindowsRuntime.cmake\")
+")
+        add_custom_command(TARGET CursoMusica POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -P "${CMAKE_BINARY_DIR}/stage-windows-runtime.cmake"
+            COMMENT "Staging Windows runtime DLLs (libpq) into build/runtime")
+    endif()
 elseif(CURSOMUSICA_REQUIRE_POSTGRES)
     message(FATAL_ERROR
         "libpq not found, but CURSOMUSICA_REQUIRE_POSTGRES=ON.\n"

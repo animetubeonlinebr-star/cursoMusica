@@ -75,7 +75,21 @@ jobs:
             exit 1
           }
           New-Item -ItemType Directory -Force -Path (Split-Path $out) | Out-Null
-          $defines = @("-DAPPEXE=$app", "-DOUTFILE=$out", "-DAPPICON=$icon")
+          # The app links libpq through its import library, so shipping without
+          # libpq.dll makes it fail to start with "LIBPQ.dll was not found"
+          # (REQ-014: ready to use after install). Fail the build instead of
+          # publishing an installer that cannot run.
+          if (-not (Test-Path "build/runtime/libpq.dll")) {
+            Write-Error "build/runtime/libpq.dll is missing; the installer would ship an app that cannot start."
+            Get-ChildItem -Recurse -Filter *.dll build | Select-Object FullName
+            exit 1
+          }
+          # NSIS resolves File against the script's directory, so RUNTIMEDIR must
+          # be absolute (same reason as APPEXE above). Keep Join-Path's native
+          # backslashes: on Windows NSIS matches the pattern with FindFirstFile,
+          # which rejects forward slashes ("no files found").
+          $runtime = Join-Path $PWD "build/runtime"
+          $defines = @("-DAPPEXE=$app", "-DOUTFILE=$out", "-DAPPICON=$icon", "-DRUNTIMEDIR=$runtime")
           if (Test-Path "build/runtime") {
             $defines += "-DRUNTIME"
           }

@@ -17,7 +17,7 @@ fi
 
 nsis_defines=("-DAPPEXE=$root/$app" "-DOUTFILE=$root/instalador/Instalador CursoMusica.exe")
 if [[ -d build/runtime ]]; then
-    nsis_defines+=("-DRUNTIME")
+    nsis_defines+=("-DRUNTIME" "-DRUNTIMEDIR=$root/build/runtime")
 fi
 
 mkdir -p "$root/instalador"

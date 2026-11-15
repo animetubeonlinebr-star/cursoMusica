@@ -113,15 +113,20 @@ export CURSOMUSICA_PG_SCHEMA=curso-musica
 
 O app precisa achar a `libpq.dll`. Duas opções:
 
-- **Simples:** adicione `C:\Program Files\PostgreSQL\18\bin` ao `PATH` antes de
-  abrir o app.
-- **Distribuível:** copie `libpq.dll` (e as dependências que ela puxa — no
-  PostgreSQL 18, tipicamente `libssl-3-x64.dll`, `libcrypto-3-x64.dll`,
-  `libintl-*.dll`, `libwinpthread-1.dll`) para a pasta do `.exe`.
+- **Instalador (recomendado):** o instalador já embute a `libpq.dll` e as
+  bibliotecas que ela puxa (OpenSSL etc.) ao lado do `.exe`. O CMake as estagia
+  em `build/runtime` (`cmake/StageWindowsRuntime.cmake`, ADR 0008) e o
+  `installer.nsi` as copia quando o build passa `-DRUNTIME`. Nada a fazer após
+  instalar.
+- **Build de desenvolvimento:** adicione
+  `C:\Program Files\PostgreSQL\<versão>\bin` ao `PATH` antes de abrir o app, ou
+  copie a `libpq.dll` (e as dependências que ela puxa — no PostgreSQL 18,
+  tipicamente `libssl-3-x64.dll`, `libcrypto-3-x64.dll`, `libintl-*.dll`,
+  `libwinpthread-1.dll`) para a pasta do `.exe`.
 
-> O instalador (`release.yml`) ainda é gerado **sem** libpq. Empacotar a
-> `libpq.dll` no instalador é um passo seguinte do devops, para o app entregue já
-> sair com o espelhamento ligado.
+> Se o build do Windows não encontrar a `libpq.dll` para estagiar, ele falha com
+> uma mensagem apontando `-DPostgreSQL_ROOT`. É proposital: um instalador sem a
+> DLL abre com "LIBPQ.dll não foi encontrado" na máquina do aluno (ADR 0008).
 
 ## 6. Confirmar que está funcionando
 

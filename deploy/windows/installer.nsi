@@ -76,7 +76,10 @@ Section "CursoMusica" SecMain
     ; Bundled runtime (SoundFont/samples/DLLs) when the build produced it; the
     ; installer still succeeds when it did not (the build passes -DRUNTIME).
 !ifdef RUNTIME
-    File /r "${RUNTIMEDIR}/*.*"
+    ; Backslash wildcard on purpose: on Windows NSIS matches with FindFirstFile,
+    ; which rejects a "/" separator ("no files found"). RUNTIMEDIR is absolute
+    ; and native (see release.yml and build-installer.sh).
+    File /r "${RUNTIMEDIR}\*.*"
 !endif
 
     ; Remember the chosen directory for upgrades and uninstall.
