@@ -2,6 +2,8 @@
 
 #include <juce_data_structures/juce_data_structures.h>
 
+#include "Data/AppSettings.h"
+
 #include <atomic>
 #include <memory>
 
@@ -36,7 +38,8 @@ private:
     void save() const;
 
     std::atomic<float> referenceHz { defaultReferenceHz };
-    std::unique_ptr<juce::PropertiesFile> properties;
+    // Shared with every other persisting component (see AppSettings).
+    juce::PropertiesFile& properties;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TuningSettings)
 };

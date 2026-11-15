@@ -1,5 +1,6 @@
 #include "UI/SettingsComponent.h"
 
+#include "UI/DatabaseSettingsComponent.h"
 #include "UI/Design/Theme.h"
 
 namespace cursomusica
@@ -136,6 +137,10 @@ SettingsComponent::SettingsComponent (AudioEngine& engine, PluginHost& host)
     pathsButton.setTooltip (juce::String::fromUTF8 ("Pastas onde procurar plugins VST3"));
     pluginPanel.addAndMakeVisible (pathsButton);
 
+    databaseButton.onClick = [this] { openDatabaseWindow(); };
+    databaseButton.setTooltip (juce::String::fromUTF8 ("Servidor PostgreSQL onde o progresso é espelhado"));
+    pluginPanel.addAndMakeVisible (databaseButton);
+
     availableModel = std::make_unique<PluginListModel> (*this, PluginListModel::Kind::available);
     availableList.setModel (availableModel.get());
     availableList.setRowHeight (24);
@@ -172,6 +177,7 @@ SettingsComponent::~SettingsComponent()
 {
     audioEngine.getDeviceManager().removeChangeListener (this);
     closeSearchPathsWindow();
+    closeDatabaseWindow();
 }
 
 void SettingsComponent::changeListenerCallback (juce::ChangeBroadcaster* source)
@@ -298,6 +304,54 @@ void SettingsComponent::searchPathsChanged()
     refreshPluginList();
 }
 
+void SettingsComponent::openDatabaseWindow()
+{
+    if (databaseWindow != nullptr)
+    {
+        databaseWindow->toFront (true);
+        return;
+    }
+
+    // Start from what is already configured (Settings window first, environment
+    // as fallback), so opening the window never silently blanks a working setup.
+    auto current = data::PostgresConfig::fromSettings();
+
+    if (! current.isEnabled())
+    {
+        const auto fromEnv = data::PostgresConfig::fromEnvironment();
+
+        if (fromEnv.isEnabled())
+            current = fromEnv;
+    }
+
+    auto content = std::make_unique<DatabaseSettingsComponent> (current);
+    content->onCloseRequested = [this] { closeDatabaseWindow(); };
+    content->onSave = [](const data::PostgresConfig& config)
+    {
+        config.saveToSettings();
+    };
+
+    auto window = std::make_unique<PathsWindow> (juce::String::fromUTF8 ("Banco de dados do progresso"),
+                                                 th::colour::background);
+    window->onClose = [this] { closeDatabaseWindow(); };
+    databaseWindow = std::move (window);
+
+    databaseWindow->setUsingNativeTitleBar (true);
+    databaseWindow->setContentOwned (content.release(), true);
+    databaseWindow->setResizable (false, false);
+    databaseWindow->centreWithSize (databaseWindow->getWidth(), databaseWindow->getHeight());
+    databaseWindow->setVisible (true);
+}
+
+void SettingsComponent::closeDatabaseWindow()
+{
+    if (databaseWindow != nullptr)
+    {
+        databaseWindow->setVisible (false);
+        databaseWindow.reset();
+    }
+}
+
 void SettingsComponent::resized()
 {
     auto bounds = getLocalBounds().reduced (th::spacing::lg);
@@ -334,6 +388,8 @@ void SettingsComponent::resized()
     auto topRow = content.removeFromTop (32);
     scanButton.setBounds (topRow.removeFromLeft (100));
     topRow.removeFromLeft (th::spacing::sm);
+    databaseButton.setBounds (topRow.removeFromRight (140));
+    topRow.removeFromRight (th::spacing::sm);
     pathsButton.setBounds (topRow.removeFromRight (110));
     topRow.removeFromRight (th::spacing::sm);
     scanStatus.setBounds (topRow);

@@ -1039,13 +1039,15 @@ void ModuleComponent::showModule (int number)
 
     if (practicePanel != nullptr)
     {
-        practicePanel->setModule (unlocked ? module : nullptr);
-
         // The right pane depends on the left one (client): it only knows what to
         // show after a topic is selected. Opening a module without a topic keeps
         // it blank; only a module already read restores that topic's exercises.
+        // Module and topic are set together, so the filter never runs against the
+        // previously shown module.
         if (hasMemory)
-            practicePanel->setTopicFilter (module->lessons[(size_t) remembered].id);
+            practicePanel->setModuleAndTopic (module, module->lessons[(size_t) remembered].id);
+        else
+            practicePanel->setModule (unlocked ? module : nullptr);
     }
 
     // Highlight the remembered topic in the tree without loading it, so the
@@ -1090,7 +1092,12 @@ void ModuleComponent::selectTopic (int moduleNumber, int topicIndex)
     rememberTopic (moduleNumber, topicIndex);
 
     if (practicePanel != nullptr)
-        practicePanel->setTopicFilter (module->lessons[(size_t) topicIndex].id);
+    {
+        // Point the pane at the clicked module *before* filtering: the pane
+        // filters the exercises of the module it currently holds, so applying the
+        // lesson filter alone would search the previous module's exercises.
+        practicePanel->setModuleAndTopic (module, module->lessons[(size_t) topicIndex].id);
+    }
 
     updateContent();
 }

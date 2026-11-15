@@ -9,21 +9,14 @@ namespace
 }
 
 TuningSettings::TuningSettings()
+    : properties (data::AppSettings::get())
 {
-    juce::PropertiesFile::Options options;
-    options.applicationName = "CursoMusica";
-    options.filenameSuffix = ".settings";
-    options.folderName = "CursoMusica";
-    options.osxLibrarySubFolder = "Application Support";
-    options.storageFormat = juce::PropertiesFile::storeAsXML;
-
-    properties = std::make_unique<juce::PropertiesFile> (options);
     load();
 }
 
 void TuningSettings::load()
 {
-    const auto stored = (float) properties->getDoubleValue (referenceKey, defaultReferenceHz);
+    const auto stored = (float) properties.getDoubleValue (referenceKey, defaultReferenceHz);
     referenceHz.store (juce::jlimit (minReferenceHz, maxReferenceHz, stored));
 }
 
@@ -40,8 +33,8 @@ void TuningSettings::setReferenceHz (float newReferenceHz)
 
 void TuningSettings::save() const
 {
-    properties->setValue (referenceKey, (double) referenceHz.load());
-    properties->saveIfNeeded();
+    properties.setValue (referenceKey, (double) referenceHz.load());
+    properties.saveIfNeeded();
 }
 
 } // namespace cursomusica

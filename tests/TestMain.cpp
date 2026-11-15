@@ -15,7 +15,9 @@
 #include "Course/ProgressionRule.h"
 #include "Course/QuizSession.h"
 #include "Course/TempoGrid.h"
+#include "Course/ExerciseFilter.h"
 #include "Course/ProgressStore.h"
+#include "Data/AppSettings.h"
 #include "Data/ProgressDatabase.h"
 
 // Minimal dependency-free test runner for the pure course logic (QA).
@@ -616,6 +618,129 @@ void testProgressStore()
     }
 }
 
+
+
+void testExerciseFilter()
+{
+    std::cout << "ExerciseFilter (topic -> exercises)\n";
+    using namespace cursomusica;
+    using namespace cursomusica::course;
+
+    const auto* m1 = ModuleCatalog::findModule (1);
+    check (m1 != nullptr, "module 1 is available");
+    if (m1 == nullptr)
+        return;
+
+    // The scenario from the client: module 2 has no exercises, so filtering
+    // module 1's topic against module 2 returns nothing. Filtering the same topic
+    // against module 1 must list its exercises.
+    const auto* m2 = ModuleCatalog::findModule (2);
+    check (m2 != nullptr, "module 2 is available");
+
+    const juce::String topicC = "C";
+    const auto inM1 = exercisesForTopic (*m1, topicC);
+    const auto inM2 = exercisesForTopic (*m2, topicC);
+
+    check (! inM1.empty(), "module 1's topic C has exercises");
+    check (inM2.empty(), "module 2 has no exercises for topic C (placeholder)");
+
+    // Every returned index really belongs to the topic, and none is missed.
+    int totalC = 0;
+    for (const auto& e : m1->exercises)
+        if (e.lessonId == topicC)
+            ++totalC;
+
+    check ((int) inM1.size() == totalC, "every topic C exercise is returned");
+    for (int index : inM1)
+        check (m1->exercises[(size_t) index].lessonId == topicC,
+               "a returned exercise belongs to topic C");
+
+    // An empty filter means "all exercises of the module" (the all-topics link).
+    check ((int) exercisesForTopic (*m1, {}).size() == (int) m1->exercises.size(),
+           "an empty filter lists the whole module");
+}
+
+void testDatabaseConfigPersistence()
+{
+    std::cout << "PostgresConfig persistence (Settings window)\n";
+    using namespace cursomusica::data;
+
+    auto& settings = AppSettings::get();
+
+    // Clean slate: with nothing saved and no PGHOST, the mirror is off, so the
+    // app never tried to create the schema (the reported bug).
+    settings.removeValue ("database/enabled");
+    settings.removeValue ("database/host");
+    check (! PostgresConfig::fromSettings().isEnabled(),
+           "no saved configuration means local-only mode");
+
+    // What the Settings window writes must round-trip, host and all.
+    PostgresConfig saved;
+    saved.host   = "db.example";
+    saved.port   = "5433";
+    saved.user   = "cursomusica";
+    saved.dbname = "curso-musica";
+    saved.schema = "curso-musica";
+    saved.disabled = false;
+    saved.saveToSettings();
+
+    const auto loaded = PostgresConfig::fromSettings();
+    check (loaded.isEnabled(), "a saved host turns the mirror on");
+    check (loaded.host == "db.example", "the host round-trips");
+    check (loaded.port == "5433", "the port round-trips");
+    check (loaded.user == "cursomusica", "the user round-trips");
+    check (loaded.schema == "curso-musica", "the schema round-trips");
+
+    // The password must never be written to the settings file (docs/SECURITY.md).
+    const auto text = settings.getFile().loadFileAsString();
+    check (! text.contains ("PGPASSWORD"), "the settings file never mentions the password");
+    check (! text.contains ("database/password"), "no password key is stored");
+
+    // Turning the mirror off again is honoured.
+    auto off = saved;
+    off.disabled = true;
+    off.saveToSettings();
+    check (! PostgresConfig::fromSettings().isEnabled(),
+           "clearing the toggle returns to local-only mode");
+
+    settings.removeValue ("database/enabled");
+    settings.removeValue ("database/host");
+    settings.removeValue ("database/port");
+    settings.removeValue ("database/user");
+    settings.removeValue ("database/name");
+    settings.removeValue ("database/schema");
+    settings.saveIfNeeded();
+}
+
+void testSharedSettings()
+{
+    std::cout << "AppSettings (single shared properties file)\n";
+    using cursomusica::data::AppSettings;
+
+    auto& settings = AppSettings::get();
+    check (&settings == &AppSettings::get(),
+           "every caller gets the same shared instance");
+
+    // The shutdown bug: two components each held their own PropertiesFile over
+    // this file, and the one that saved last rewrote the whole map, dropping the
+    // other's keys (the course progress among them). Writing both through the
+    // shared instance must keep both on disk.
+    settings.setValue ("test/component-a", "progress");
+    settings.saveIfNeeded();
+    settings.setValue ("test/component-b", "plugins");
+    settings.saveIfNeeded();
+
+    const auto text = settings.getFile().loadFileAsString();
+    check (text.contains ("test/component-a"),
+           "the first component's key survives the second component's save");
+    check (text.contains ("test/component-b"),
+           "the second component's key is written too");
+
+    settings.removeValue ("test/component-a");
+    settings.removeValue ("test/component-b");
+    settings.saveIfNeeded();
+}
+
 void testPluginSearchPaths()
 {
     std::cout << "PluginSearchPaths\n";
@@ -681,6 +806,9 @@ int main()
     testModuleCatalog();
     testProgressDatabase();
     testProgressStore();
+    testSharedSettings();
+    testExerciseFilter();
+    testDatabaseConfigPersistence();
 
     std::cout << "\n" << (checks - failures) << "/" << checks << " checks passed\n";
     if (failures > 0)

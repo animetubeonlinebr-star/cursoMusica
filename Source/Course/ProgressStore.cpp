@@ -175,7 +175,7 @@ private:
             if (owner.exerciseAccuracy.find (exerciseId) == owner.exerciseAccuracy.end())
             {
                 owner.exerciseAccuracy[exerciseId] = accuracy;
-                owner.properties->setValue (ProgressStore::exerciseKey (exerciseId), accuracy);
+                owner.properties.setValue (ProgressStore::exerciseKey (exerciseId), accuracy);
             }
         }
 
@@ -212,18 +212,23 @@ private:
 };
 
 ProgressStore::ProgressStore()
+    : properties (data::AppSettings::get())
 {
-    juce::PropertiesFile::Options options;
-    options.applicationName = "CursoMusica";
-    options.filenameSuffix = ".settings";
-    options.folderName = "CursoMusica";
-    options.osxLibrarySubFolder = "Application Support";
-    options.storageFormat = juce::PropertiesFile::storeAsXML;
-
-    properties = std::make_unique<juce::PropertiesFile> (options);
     load();
 
-    config = data::PostgresConfig::fromEnvironment();
+    // The Settings window is the primary way to point the app at a server (a GUI
+    // app started from Explorer never sees PGHOST). The environment stays as a
+    // fallback for CI and scripted runs, and only when nothing was configured in
+    // the UI.
+    config = data::PostgresConfig::fromSettings();
+
+    if (! config.isEnabled())
+    {
+        const auto fromEnv = data::PostgresConfig::fromEnvironment();
+
+        if (fromEnv.isEnabled())
+            config = fromEnv;
+    }
 
     // Remote storage needs both a configured environment and a build with libpq.
     remoteConfigured = config.isEnabled() && data::ProgressDatabase::isCompiledIn();
@@ -293,8 +298,8 @@ void ProgressStore::recordExerciseResult (const juce::String& exerciseId, double
         exerciseAccuracy[exerciseId] = value;
     }
 
-    properties->setValue (exerciseKey (exerciseId), value);
-    properties->saveIfNeeded();
+    properties.setValue (exerciseKey (exerciseId), value);
+    properties.saveIfNeeded();
 
     if (remoteConfigured)
         enqueueRemoteExercise (exerciseId, (double) value);
@@ -328,12 +333,12 @@ juce::String ProgressStore::getRemoteStatus() const
 
 void ProgressStore::load()
 {
-    highestPassedModule.store ((int) properties->getIntValue (highestPassedKey, 0));
+    highestPassedModule.store ((int) properties.getIntValue (highestPassedKey, 0));
 
     const juce::ScopedLock lock (exerciseLock);
     exerciseAccuracy.clear();
 
-    const auto& all = properties->getAllProperties();
+    const auto& all = properties.getAllProperties();
     for (const auto& key : all.getAllKeys())
         if (key.startsWith (exerciseKeyPrefix))
             exerciseAccuracy[key.fromFirstOccurrenceOf (exerciseKeyPrefix, false, false)]
@@ -342,8 +347,8 @@ void ProgressStore::load()
 
 void ProgressStore::save() const
 {
-    properties->setValue (highestPassedKey, highestPassedModule.load());
-    properties->saveIfNeeded();
+    properties.setValue (highestPassedKey, highestPassedModule.load());
+    properties.saveIfNeeded();
 }
 
 void ProgressStore::reset()
@@ -354,13 +359,13 @@ void ProgressStore::reset()
         const juce::ScopedLock lock (exerciseLock);
 
         for (const auto& exerciseId : exerciseAccuracy)
-            properties->removeValue (exerciseKey (exerciseId.first));
+            properties.removeValue (exerciseKey (exerciseId.first));
 
         exerciseAccuracy.clear();
     }
 
     save();
-    properties->saveIfNeeded();
+    properties.saveIfNeeded();
 }
 
 } // namespace cursomusica::course

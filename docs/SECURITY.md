@@ -12,6 +12,10 @@ PostgreSQL; este documento cobre essa superfície.
 
 - As credenciais vêm **apenas do ambiente** (`PGHOST`, `PGPORT`, `PGUSER`,
   `PGPASSWORD`, `PGDATABASE`). Nunca são embutidas no binário nem versionadas.
+- **O que a janela "Banco de dados…" guarda:** apenas os campos **não secretos**
+  (host, porta, usuário, banco, schema e o ligar/desligar) no `PropertiesFile`
+  local. A **senha nunca é gravada** — nem digitada na janela: vem sempre de
+  `PGPASSWORD`.
 - A senha **nunca é escrita em log**. A conexão usa `PQconnectdbParams` com
   array de parâmetros, e não uma string de conexão montada à mão — assim a senha
   não pode vazar por interpolação nem aparecer em `lastError()`.

@@ -36,9 +36,20 @@ do repositório (commits, CI, resultados de QA), nunca de otimismo.
   `id — título`, placar "Acertos x/y · aproveitamento z%" e a caixa de orientação
   ("Neste exercício, você deverá responder as questões…"). Validado sob Xvfb
   (1040×680): responder uma alternativa avança a questão e atualiza o placar.
-- **Métricas:** suíte de lógica pura com **356 checagens, 100% verdes**, rodando no
-  CI (`ctest` no job Linux, agora com um PostgreSQL 17 de serviço). Velocity/Lead
-  Time ainda sem baseline.
+- **Métricas:** suíte de lógica pura com **377 checagens, 100% verdes** (359 no
+  caminho offline), rodando no CI (`ctest` no job Linux, agora com um PostgreSQL
+  17 de serviço). Velocity/Lead Time ainda sem baseline.
+- **Correções do cliente (2026-11-16):** (1) o **progresso deixava de ser salvo
+  ao fechar** — `ProgressStore`, `TuningSettings` e `PluginHost` abriam três
+  `PropertiesFile` sobre o mesmo `CursoMusica.settings` e a última gravação
+  apagava as chaves das outras; agora há uma instância única
+  (`Source/Data/AppSettings.*`). (2) **Clicar num tópico de outro módulo não
+  listava exercícios** — o painel filtrava pelo módulo anterior; agora
+  módulo+tópico são aplicados juntos (`PracticePanel::setModuleAndTopic`,
+  filtro puro em `Course/ExerciseFilter.h`). (3) O app passou a ter **onde
+  configurar o banco** (janela **Configurações → Banco de dados…**), sem a qual
+  um app aberto pelo menu Iniciar nunca herdava `PGHOST`, não criava o schema
+  `curso-musica` e não espelhava o progresso.
 - **Persistência em PostgreSQL (2026-11-13, pedido do cliente):** o progresso
   passa a ser **espelhado** num banco PostgreSQL (porta 5432, schema
   `curso-musica`) por uma thread dedicada, sem tocar a thread de áudio. O app é
@@ -72,6 +83,7 @@ do repositório (commits, CI, resultados de QA), nunca de otimismo.
 
 | Ciclo | Milestone | Resultado | Evidência |
 |---|---|---|---|
+| 2026-11-16 | M1 | **Progresso perdido ao fechar e tópico sem exercícios (bugs do cliente).** Progresso: três `PropertiesFile` sobre o mesmo `CursoMusica.settings` (ProgressStore, TuningSettings, PluginHost) — a última gravação apagava as chaves das outras; corrigido com instância única `Source/Data/AppSettings.*`. Tópico: `selectTopic`/`showModule` filtravam pelo módulo anterior; novo `PracticePanel::setModuleAndTopic` + filtro puro `Course/ExerciseFilter.h`. Também: janela **Configurações → Banco de dados…** (sem ela o app instalado não herdava `PGHOST`, não criava o schema `curso-musica` e não espelhava o progresso) | `Source/Data/AppSettings.*`; `Source/Course/ExerciseFilter.h`; `Source/UI/DatabaseSettingsComponent.*`; `Source/UI/PracticePanel.*`; `Source/UI/ModuleComponent.cpp`; `docs/POSTGRESQL.md` §4.1/§7; 377/377 testes (359 offline) |
 | 2026-11-15 | M1 | **Instalador Windows empacota a `libpq.dll`** (ADR 0008, correção de REQ-014): o `.exe` linka contra `libpq` e o instalador não embutia a DLL, então o app abria com "LIBPQ.dll não foi encontrado" numa máquina sem PostgreSQL. `cmake/StageWindowsRuntime.cmake` (`POST_BUILD`, só `WIN32` + `PostgreSQL_FOUND`) estagia a DLL e o fecho transitivo em `build/runtime` via `file(GET_RUNTIME_DEPENDENCIES)`; o `release.yml` falha se a DLL não estiver no bundle | `cmake/StageWindowsRuntime.cmake`; `CMakeLists.txt`; `.github/workflows/release.yml`; `docs/adr/0008-windows-libpq-bundling.md`; 338/338 testes |
 | 2026-11-14 | M1 | **Correção do grid de pastas VST3** (REQ-024): a seleção de linha do grid passou a funcionar e **"Remover" deixa de ser inerte** (a `Row` não intercepta mais o clique; `setInterceptsMouseClicks (false, true)`), preservando o botão `…` por linha. Verificado sob Xvfb (OCR): adicionar grava `vst3SearchPaths`, remover zera a chave, recarrega após reiniciar e o canal único de áudio segue intacto | `Source/UI/PluginPathsComponent.cpp`; `AudioEngine.cpp` (`inputChannelData[0]` → `pluginChain.process`); 338/338 testes |
 | 2026-11-14 | M1 | **Pastas de plugins VST3 configuráveis** (REQ-024, ADR 0007): botão "Pastas…" nas Configurações abre a janela "Pastas de plugins VST3" (grid de duas colunas); a lista é persistida em `vst3SearchPaths` e somada aos locais padrão do VST3 na varredura | `Source/Audio/PluginSearchPaths.*`; `Source/UI/PluginPathsComponent.*`; `PluginHost.cpp`; validado sob Xvfb; 356/356 testes |

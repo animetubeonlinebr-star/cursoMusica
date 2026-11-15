@@ -196,6 +196,11 @@ Regras de integridade:
 | `CURSOMUSICA_PG_STUDENT` | id do aluno | `local` |
 | `CURSOMUSICA_PG_DISABLE` | força modo local | (desligado) |
 
+Os mesmos campos **não secretos** (host, porta, usuário, banco, schema e o
+ligar/desligar) podem ser guardados pela janela **Configurações → Banco de
+dados…** no `CursoMusica.settings`; nesse caso valem sobre o ambiente. A **senha
+nunca** é guardada ali (`docs/SECURITY.md`).
+
 ## Pipeline (offline-first, fora da thread de áudio)
 
 - **Extract:** `ProgressStore::recordGateResult` enfileira o resultado (thread de

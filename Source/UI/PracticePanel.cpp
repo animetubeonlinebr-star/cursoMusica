@@ -1,5 +1,6 @@
 #include "UI/PracticePanel.h"
 
+#include "Course/ExerciseFilter.h"
 #include "Course/NoteMath.h"
 #include "UI/Design/Theme.h"
 
@@ -181,6 +182,12 @@ void PracticePanel::setTopicFilter (const juce::String& lessonId)
     refreshExerciseList();
 }
 
+void PracticePanel::setModuleAndTopic (const CourseModule* module, const juce::String& lessonId)
+{
+    setModule (module);
+    setTopicFilter (lessonId);
+}
+
 void PracticePanel::refreshExerciseList()
 {
     exerciseBox.clear (juce::dontSendNotification);
@@ -188,14 +195,11 @@ void PracticePanel::refreshExerciseList()
 
     if (currentModule != nullptr && topicChosen)
     {
-        for (int i = 0; i < (int) currentModule->exercises.size(); ++i)
-        {
-            const auto& e = currentModule->exercises[(size_t) i];
-            if (topicFilter.isNotEmpty() && e.lessonId != topicFilter)
-                continue;
-
-            filteredIndices.push_back (i);
-        }
+        // Filtered through the pure helper so the "which module does this topic
+        // belong to" rule is unit-tested (the module must be the one the topic
+        // was clicked in, not the previously shown one).
+        for (int index : course::exercisesForTopic (*currentModule, topicFilter))
+            filteredIndices.push_back (index);
     }
 
     if (currentModule != nullptr)

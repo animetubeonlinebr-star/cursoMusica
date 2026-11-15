@@ -37,6 +37,10 @@ private:
     void closeSearchPathsWindow();
     void searchPathsChanged();
 
+    // Opens the PostgreSQL progress-database window (ADR 0006).
+    void openDatabaseWindow();
+    void closeDatabaseWindow();
+
     // Keeps the port list in step with the selected device (REQ-023).
     void changeListenerCallback (juce::ChangeBroadcaster* source) override;
 
@@ -55,6 +59,7 @@ private:
     Panel pluginPanel { "VST3 plugins" };
     juce::TextButton scanButton { "Scan" };
     juce::TextButton pathsButton { juce::String::fromUTF8 ("Pastas…") };
+    juce::TextButton databaseButton { juce::String::fromUTF8 ("Banco de dados…") };
     juce::TextButton addButton { "Add to input chain" };
     juce::Label scanStatus;
     juce::ListBox availableList;
@@ -70,6 +75,9 @@ private:
 
     // Holds the VST3 folder-list window, if any.
     std::unique_ptr<juce::DocumentWindow> searchPathsWindow;
+
+    // Holds the PostgreSQL progress-database window, if any.
+    std::unique_ptr<juce::DocumentWindow> databaseWindow;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SettingsComponent)
 };
