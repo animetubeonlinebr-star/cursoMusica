@@ -819,3 +819,76 @@ iniciante que nunca tocou guitarra e conferido contra as fontes curadas de §1.1
 **Verificação de uso (REQ-010):** o módulo registra o pattern (`PTN-R-PALM`) e o
 link; a avaliação confere a assinatura do pattern no trecho tocado (ver
 §"Detecção do uso de pattern"). Sem assinatura detectada, o exercício não conta.
+
+
+# Módulo 7 — Empilhamentos, estruturas modais e sonoridades
+
+**Nível:** 3 (II–V–I) · **BPM meta:** 84 (REQ-015) · **Gate:** 90% (REQ-009) ·
+**`on_grid_ratio`:** 0,80 (faixa de estudo 75–82%)
+**Objetivo:** conhecer estruturas harmônicas além das tríades e tétrades
+convencionais — empilhamentos, estruturas modais, tríades do meio e as
+sonoridades modais do dórico ao alterado.
+
+> **Regra de ouro (REQ-003):** a explicação vem **antes** de qualquer desafio.
+> Nenhum desafio abre sem que o conteúdo abaixo tenha sido apresentado.
+
+## 7.1 Conteúdo (curadoria — REQ-006)
+
+| Tópico | Tema | Apostila de referência |
+|---|---|---|
+| A | Empilhamentos de terças | `pdf-caged-e-derivaoes-de-acordes-marcelo-mello-…-vol1` |
+| B | Empilhamentos quartais | `pdf-caged-e-derivaoes-de-acordes-marcelo-mello-…-vol1` |
+| C | Outros empilhamentos | `pdf-caged-e-derivaoes-de-acordes-marcelo-mello-…-vol1` |
+| D | Estruturas modais e tríades do meio | `pdf-caged-e-derivaoes-de-acordes-marcelo-mello-…-vol1` |
+| E | Acordes e famílias modais | `pdf-teoria-elementar-…-lacerda`, `pdf-p-…-bohumil-med-…` |
+| F | Modos estruturais pelo CAGED | `pdf-caged-e-derivaoes-de-acordes-marcelo-mello-…-vol1` |
+| G | Dórico, Lídio e Mixolídio | `pdf-desvendando-os-segredos-da-guitarra-fusion` |
+| H | Mixolídio sus e Mixolídio #4 | `pdf-desvendando-os-segredos-da-guitarra-fusion` |
+| I | Lócrio 9 e Alterado (Alt.7) | `pdf-desvendando-os-segredos-da-guitarra-fusion` |
+| J | Aplicações modais no rock e pop-rock | `pdf-mozart-mello-livroestudosdeguitarra4em1` |
+
+## 7.2 Teoria apresentada no módulo
+
+- **A — Empilhamentos de terças.** Somar terças sobrepostas; a mistura de
+  terças maiores e menores define a qualidade; as tensões 9, 11 e 13 são os
+  graus 2, 4 e 6 uma oitava acima.
+- **B — Empilhamentos quartais.** Quartas justas (5 semitons) produzem um som
+  suspenso e modal (o acorde de *So What* empilha quartas com uma terça no topo);
+  sem a terça, o acorde não é maior nem menor.
+- **C — Outros empilhamentos.** Quintas dão força (power chords); segundas dão
+  tensão (clusters); mistos dão cor sob medida.
+- **D — Estruturas modais e tríades do meio.** Estruturas que reforçam um modo
+  sem criar resolução; tríades construídas sobre graus internos da escala.
+- **E — Acordes e famílias modais.** Cada acorde carrega uma família de modos:
+  maiores (jônio, lídio), menores (dórico, eólio, frígio), dominantes
+  (mixolídio, lídio dominante, alterado, sus), meio-diminuto (lócrio).
+- **F — Modos estruturais pelo CAGED.** O CAGED como mapa do braço: cada forma
+  contém a escala do tom; os modos são a mesma escala vista de graus diferentes.
+- **G — Dórico, Lídio e Mixolídio.** Fórmulas 1 2 b3 4 5 6 b7 (dórico),
+  1 2 3 #4 5 6 7 (lídio) e 1 2 3 4 5 6 b7 (mixolídio); notas características e
+  de repouso.
+- **H — Mixolídio sus e Mixolídio #4.** 1 2 4 5 6 b7 (sus, combina com X7sus4) e
+  1 2 3 #4 5 6 b7 (#4, combina com X7#11).
+- **I — Lócrio 9 e Alterado (Alt.7).** 1 2 b3 4 b5 b6 b7 (lócrio 9, II grau do
+  II–V–I menor) e 1 b9 #9 3 b5 #5 b7 (alterado, V grau; resolve meio-tom abaixo).
+- **J — Aplicações modais no rock e pop-rock.** Vamps de um ou dois acordes; cada
+  modo tem um tipo de vamp e uma cor; do modal se chega à harmonia funcional.
+
+## 7.3 Prática (exercícios e desafios — REQ-008)
+
+Cada tópico A–J tem **de 3 a 5 exercícios** (ids `EX-7.<tópico>.<n>`), misturando
+questionários verificáveis e exercícios **tocados no instrumento** que o app
+reconhece (por classes de altura ou por sequência de notas). Os exercícios de
+identificação **não** são presos à grade (`usesGrid = false`).
+
+**Desafio de gate (REQ-009/REQ-015):** tocar `Dm7 – G7 – C7M – C7M` (II–V–I,
+nível 3) a **84 BPM** com **≥90% de acerto** de acordes e `on_grid_ratio ≥ 0,80`.
+
+## 7.4 Patterns e links do módulo (REQ-007, REQ-010)
+
+- **Pattern de acordes:** `PTN-A-DROP2` (tétrades em drop 2 nas quatro cordas),
+  que mostra na prática os empilhamentos de terça e as tríades do meio.
+- **Complemento:** `PTN-M-4ths` (empilhamento de quartas) para as estruturas
+  modais.
+- **Links (guitarristas de referência — REQ-007):** Joe Satriani, Steve Vai e
+  Guthrie Govan (uso de estruturas modais e empilhamentos).

@@ -70,4 +70,16 @@ std::vector<ContentItem> topic2F();  // Relação entre intervalos e construçã
 std::vector<ContentItem> topic2G();  // Cantar e tocar os intervalos
 std::vector<ContentItem> topic2H();  // Identificar intervalos no instrumento e de ouvido
 
+// Module 7 (Etapa 7 — empilhamentos, estruturas modais e sonoridades).
+std::vector<ContentItem> topic7A();  // Empilhamentos de terças
+std::vector<ContentItem> topic7B();  // Empilhamentos quartais
+std::vector<ContentItem> topic7C();  // Outros empilhamentos
+std::vector<ContentItem> topic7D();  // Estruturas modais e tríades do meio
+std::vector<ContentItem> topic7E();  // Acordes e famílias modais
+std::vector<ContentItem> topic7F();  // Modos estruturais pelo CAGED
+std::vector<ContentItem> topic7G();  // Dórico, Lídio e Mixolídio
+std::vector<ContentItem> topic7H();  // Mixolídio sus e Mixolídio #4
+std::vector<ContentItem> topic7I();  // Lócrio 9 e Alterado (Alt.7)
+std::vector<ContentItem> topic7J();  // Aplicações modais no rock e pop-rock
+
 } // namespace cursomusica::content

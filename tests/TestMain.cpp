@@ -439,9 +439,13 @@ void testModuleCatalog()
         if (m.number > 1)
             check (m.usesTempo, "modules 2..20 still use a BPM target");
 
-    for (const auto& m : modules)
-        if (m.number > 2)
-            check (! m.implemented, "modules 3..20 are still placeholders");
+    // The catalogue lists each module number exactly once (generic rule: a
+    // module branch replaces its own placeholder with an implemented module, so
+    // the set of implemented modules grows without duplicating a number).
+    for (std::size_t i = 0; i < modules.size(); ++i)
+        for (std::size_t j = i + 1; j < modules.size(); ++j)
+            check (modules[i].number != modules[j].number,
+                   "catalogue lists each module number once");
 
     // The client asked the graphical material (fretboard, CAGED shapes, rhythm
     // figures) to be shown as images instead of text art. Every diagram named by
@@ -1045,11 +1049,194 @@ void testModule2()
         }
     check (hasGate, "module 2 has a gate exercise");
 
-    // Modules 3..20 are still placeholders.
+    // Generic rule for the implemented modules (so parallel module branches do
+    // not conflict): every implemented module has a unique number in the
+    // catalogue, and findModule returns each implemented module. A branch
+    // implements only its own module, so the set of implemented modules is not
+    // necessarily contiguous until every module branch has merged; the rule
+    // therefore does not assert contiguity (that would fail on a single-module
+    // branch), it asserts uniqueness and reachability.
     const auto& modules = ModuleCatalog::getModules();
+
+    for (std::size_t i = 0; i < modules.size(); ++i)
+        for (std::size_t j = i + 1; j < modules.size(); ++j)
+            check (modules[i].number != modules[j].number,
+                   "catalogue lists each module number once");
+
+    int implemented = 0;
     for (const auto& m : modules)
-        if (m.number > 2)
-            check (! m.implemented, "modules 3..20 are still placeholders");
+        if (m.implemented)
+        {
+            ++implemented;
+            const auto* found = ModuleCatalog::findModule (m.number);
+            check (found != nullptr && found->implemented,
+                   juce::String ("findModule returns implemented module ")
+                       + juce::String (m.number));
+        }
+    check (implemented >= 2, "modules 1 and 2 are implemented");
+    check (ModuleCatalog::findModule (1) != nullptr && ModuleCatalog::findModule (1)->implemented,
+           "findModule(1) returns an implemented module");
+    check (ModuleCatalog::findModule (2) != nullptr && ModuleCatalog::findModule (2)->implemented,
+           "findModule(2) returns an implemented module");
+}
+
+// Module 7 — Etapa 7 (empilhamentos, estruturas modais e sonoridades). Same
+// shape as module 2: >=5 pages per topic with images and tables, audio and
+// scores with audio, 3..5 exercises per topic, part of them played on the
+// instrument, and a gate on the grid.
+void testModule7()
+{
+    std::cout << "Module7\n";
+    using namespace cursomusica;
+
+    const auto* m7 = ModuleCatalog::findModule (7);
+    check (m7 != nullptr, "module 7 exists");
+    if (m7 == nullptr)
+        return;
+
+    check (m7->implemented, "module 7 is implemented");
+    check (m7->number == 7, "module 7 has number 7");
+    check (m7->level == 3, "module 7 is level 3 (MUSIC.md)");
+    check (m7->usesTempo, "module 7 uses a BPM target");
+    check (m7->targetBpm == 84, "module 7 target BPM is 84 (MUSIC.md)");
+    checkClose (m7->onGridTarget, 0.80, 1e-6, "module 7 on_grid target is 0.80");
+    check (m7->lessons.size() == 10, "module 7 has ten topics (A..J)");
+    check (m7->lessons.front().id == "A" && m7->lessons.back().id == "J",
+           "module 7 topics run A..J in order");
+
+    // Every topic A..J has 3..5 exercises (client: "de 3 a 5 exercícios por tópico").
+    for (const auto& topic : m7->lessons)
+    {
+        int count = 0;
+        for (const auto& e : m7->exercises)
+            if (e.lessonId == topic.id)
+                ++count;
+        check (count >= 3, juce::String ("topic ") + topic.id + " has at least three exercises");
+        check (count <= 5, juce::String ("topic ") + topic.id + " has at most five exercises");
+    }
+
+    // Every exercise is tied to a topic and its id follows EX-7.<topico>.<n>.
+    for (const auto& e : m7->exercises)
+    {
+        check (e.lessonId.isNotEmpty(), "exercise " + e.id + " is tied to a topic");
+        if (! e.isGate)
+            check (e.id.startsWith ("EX-7."), "exercise " + e.id + " follows EX-7.<topico>.<n>");
+    }
+
+    // Part of the exercises is played on the instrument and verified by the
+    // detector: at least one playable exercise per topic.
+    for (const auto& topic : m7->lessons)
+    {
+        bool playable = false;
+        for (const auto& e : m7->exercises)
+            if (e.lessonId == topic.id
+                && (! e.targets.empty() || ! e.chordPitchClasses.empty() || e.interval.semitones > 0))
+                playable = true;
+        check (playable, juce::String ("topic ") + topic.id + " has a playable exercise");
+    }
+
+    // Playable identification exercises must not gate on the grid, and the app
+    // must be able to verify them.
+    for (const auto& e : m7->exercises)
+        if (e.interval.semitones > 0 || ! e.chordPitchClasses.empty() || ! e.targets.empty())
+        {
+            if (! e.isGate)
+                check (! e.usesGrid, "playable exercise " + e.id + " is not grid-gated");
+            check (e.interval.semitones >= 0 && e.interval.semitones <= 12,
+                   "exercise " + e.id + " has a valid semitone distance");
+        }
+
+    // Explanation: >=5 pages per topic, at least one table and one image, and
+    // the media the client asked for (images, audio, scores with audio).
+    auto detailChars = [] (const LessonBlock& topic)
+    {
+        int total = 0;
+        for (const auto& item : topic.detail)
+        {
+            total += item.text.length();
+            for (const auto& cell : item.columns)
+                total += cell.length();
+            for (const auto& row : item.rows)
+                for (const auto& cell : row)
+                    total += cell.length();
+        }
+        return total;
+    };
+
+    bool anyAudio = false;
+    bool anyScore = false;
+    for (const auto& topic : m7->lessons)
+    {
+        const int chars = detailChars (topic);
+        check (chars >= content::minTopicChars,
+               juce::String ("topic ") + topic.id + " has at least "
+                   + juce::String (content::minPages) + " pages (" + juce::String (chars) + " chars)");
+
+        int images = 0, tables = 0, audios = 0, scores = 0;
+        for (const auto& item : topic.detail)
+        {
+            if (item.kind == ContentKind::image) ++images;
+            else if (item.kind == ContentKind::table) ++tables;
+            else if (item.kind == ContentKind::audio) ++audios;
+            else if (item.kind == ContentKind::score) ++scores;
+        }
+        check (images >= 1, juce::String ("topic ") + topic.id + " has at least one image");
+        check (tables >= 1, juce::String ("topic ") + topic.id + " has at least one table");
+        check (scores >= 1, juce::String ("topic ") + topic.id + " has a score");
+        anyAudio = anyAudio || audios > 0;
+        anyScore = anyScore || scores > 0;
+    }
+    check (anyAudio, "module 7 demonstrates the material with audio (REQ-004)");
+    check (anyScore, "module 7 has scores with their audio (REQ-004)");
+
+    // Every diagram and score named by the content is embedded in the binary,
+    // and every audio/score item actually carries notes to play.
+    for (const auto& topic : m7->lessons)
+        for (const auto& item : topic.detail)
+        {
+            if (item.kind == ContentKind::image || item.kind == ContentKind::score)
+                check (content::diagramExists (item.imageName),
+                       juce::String ("topic ") + topic.id + " references the image '"
+                           + item.imageName + "'");
+            if (item.kind == ContentKind::audio || item.kind == ContentKind::score)
+            {
+                check (! item.notes.empty(),
+                       juce::String ("topic ") + topic.id + " has a playable example");
+                for (const int midi : item.notes)
+                    check (midi >= 0 && midi <= 127,
+                           juce::String ("topic ") + topic.id + " example uses a valid MIDI note");
+            }
+        }
+
+    // The module cites >=1 pattern and >=1 guitarist (REQ-007, REQ-010).
+    check (m7->practice.patternId.isNotEmpty(), "module 7 cites a pattern");
+    check (! m7->practice.guitarists.isEmpty(), "module 7 cites at least one guitarist");
+
+    // Curated apostilas (REQ-006, CM-012).
+    check (m7->sources.size() >= 1, "module 7 cites its curated apostilas");
+
+    // The gate closes the module as a II–V–I on the grid (REQ-009).
+    bool hasGate = false;
+    for (const auto& e : m7->exercises)
+        if (e.isGate)
+        {
+            hasGate = true;
+            check (e.chordProgression.size() == 4, "module 7 gate has four chords");
+            check (e.chordProgression.front() == std::vector<int> ({ 2, 5, 9, 0 }),
+                   "module 7 gate opens on Dm7 (the II of the II–V–I)");
+        }
+    check (hasGate, "module 7 has a gate exercise");
+
+    // findModule(7) returns the implemented module, and the catalogue lists
+    // each number once (generic rule; parallel module branches add 3..6, 8..20).
+    check (ModuleCatalog::findModule (7) != nullptr && ModuleCatalog::findModule (7)->implemented,
+           "findModule(7) returns an implemented module");
+    const auto& modules = ModuleCatalog::getModules();
+    int seen7 = 0;
+    for (const auto& m : modules)
+        if (m.number == 7)
+            ++seen7;
+    check (seen7 == 1, "module 7 appears exactly once in the catalogue");
 }
 
 int main()
@@ -1066,6 +1253,7 @@ int main()
     testIntervalEvaluation();
     testModuleCatalog();
     testModule2();
+    testModule7();
     testProgressDatabase();
     testProgressStore();
     testSharedSettings();
