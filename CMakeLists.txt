@@ -109,6 +109,16 @@ target_sources(CursoMusica PRIVATE
     Source/Course/Content/Topic2F.cpp
     Source/Course/Content/Topic2G.cpp
     Source/Course/Content/Topic2H.cpp
+    Source/Course/Content/Topic5A.cpp
+    Source/Course/Content/Topic5B.cpp
+    Source/Course/Content/Topic5C.cpp
+    Source/Course/Content/Topic5D.cpp
+    Source/Course/Content/Topic5E.cpp
+    Source/Course/Content/Topic5F.cpp
+    Source/Course/Content/Topic5G.cpp
+    Source/Course/Content/Topic5H.cpp
+    Source/Course/Content/Topic5I.cpp
+    Source/Course/Content/Topic5J.cpp
     Source/UI/Design/LookAndFeel.cpp
     Source/UI/Design/Panel.cpp
     Source/UI/LevelMeter.cpp
@@ -303,6 +313,16 @@ target_sources(CursoMusicaTests PRIVATE
     Source/Course/Content/Topic2F.cpp
     Source/Course/Content/Topic2G.cpp
     Source/Course/Content/Topic2H.cpp
+    Source/Course/Content/Topic5A.cpp
+    Source/Course/Content/Topic5B.cpp
+    Source/Course/Content/Topic5C.cpp
+    Source/Course/Content/Topic5D.cpp
+    Source/Course/Content/Topic5E.cpp
+    Source/Course/Content/Topic5F.cpp
+    Source/Course/Content/Topic5G.cpp
+    Source/Course/Content/Topic5H.cpp
+    Source/Course/Content/Topic5I.cpp
+    Source/Course/Content/Topic5J.cpp
     Source/Audio/AudioPortClassifier.cpp
     Source/Audio/PluginSearchPaths.cpp)
 

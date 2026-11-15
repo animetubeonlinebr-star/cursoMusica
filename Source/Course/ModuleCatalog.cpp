@@ -1114,6 +1114,505 @@ namespace
         return m;
     }
 
+    // Module 5 — Etapa 5: campo harmônico maior e funções harmônicas. The student
+    // builds the harmonic field of a key and identifies the function of each
+    // chord (tonic, subdominant, dominant). Part of the exercises is played on
+    // the instrument: the app recognises the notes and checks the chord, the
+    // scale or the progression (Exercise::targets / chordPitchClasses /
+    // chordProgression). Every topic has >=5 pages (content::minTopicChars),
+    // images, tables, audio examples and scores with their audio.
+    CourseModule makeModule5()
+    {
+        CourseModule m;
+        m.number = 5;
+        m.title = juce::String::fromUTF8 ("Campo harmônico maior e funções harmônicas");
+        m.objective = juce::String::fromUTF8 (
+            "Entender como os acordes se relacionam dentro de uma tonalidade: "
+            "construir o campo harmônico maior e identificar a função de cada acorde.");
+        m.level = 3;          // MUSIC.md: módulos 5–7 = nível 3 (II–V–I)
+        m.targetBpm = 76;     // MUSIC.md, módulo 5
+        m.onGridTarget = 0.79f;
+        m.implemented = true;
+
+        m.lessons = {
+            detail (block ("A", juce::String::fromUTF8 ("Escala maior"), {
+                "A escala maior segue o padrão T – T – S – T – T – T – S.",
+                "Os semitons ficam entre os graus 3–4 e 7–8.",
+                "Cada grau tem um número romano; é a matéria-prima da harmonia."
+            }), content::topic5A()),
+            detail (block ("B", juce::String::fromUTF8 ("Campo harmônico maior e graus da escala"), {
+                "Campo harmônico = sete acordes que nascem da escala maior.",
+                "A qualidade segue o padrão I – ii – iii – IV – V – vi – vii°.",
+                "Em Dó maior: C – Dm – Em – F – G – Am – Bdim."
+            }), content::topic5B()),
+            detail (block ("C", juce::String::fromUTF8 ("Função tônica"), {
+                "Função tônica é o repouso da tonalidade.",
+                "Exercida pelo grau I e pelos substitutos iii e vi.",
+                "Soa estável e conclusiva; é o ponto de chegada da frase."
+            }), content::topic5C()),
+            detail (block ("D", juce::String::fromUTF8 ("Função subdominante"), {
+                "Função subdominante é o afastamento da tônica.",
+                "Exercida pelo grau IV e pelo substituto ii.",
+                "Prepara o dominante, sem a tensão forte dele."
+            }), content::topic5D()),
+            detail (block ("E", juce::String::fromUTF8 ("Função dominante"), {
+                "Função dominante é a tensão da tonalidade.",
+                "Exercida pelo grau V (e V7) e pelo substituto vii°.",
+                "Pede resolução na tônica; V → I é a cadência mais forte."
+            }), content::topic5E()),
+            detail (block ("F", juce::String::fromUTF8 ("Acordes relativos"), {
+                "Relativos: par maior/menor com a mesma armadura de clave.",
+                "O relativo menor está três semitons abaixo do maior.",
+                "No campo: I–vi, IV–ii e V–iii; trocar a cor sem mudar a função."
+            }), content::topic5F()),
+            detail (block ("G", juce::String::fromUTF8 ("Armaduras de clave e tonalidades"), {
+                "Armadura de clave é o conjunto de acidentes que define a tonalidade.",
+                "Sustenidos: Fá–Dó–Sol–Ré–Lá–Mi–Si; bemóis, a ordem inversa.",
+                "O ciclo das quintas organiza todas as tonalidades."
+            }), content::topic5G()),
+            detail (block ("H", juce::String::fromUTF8 ("Cadências e progressões harmônicas"), {
+                "Cadência é a pontuação da frase musical.",
+                "Autêntica (V → I), plagal (IV → I), meia cadência (I → V), de engano (V → vi).",
+                "As progressões comuns combinam as três funções."
+            }), content::topic5H()),
+            detail (block ("I", juce::String::fromUTF8 ("Modos gerados pela escala maior"), {
+                "Modo é a escala maior começando em um grau diferente.",
+                "Jônio, dórico, frígio, lídio, mixolídio, eólio e lócrio.",
+                "As notas são as mesmas; muda o centro e o intervalo característico."
+            }), content::topic5I()),
+            detail (block ("J", juce::String::fromUTF8 ("Harmonização da escala maior"), {
+                "Harmonizar é construir um acorde sobre cada grau da escala.",
+                "O empilhamento 1–3–5 produz as tríades do campo.",
+                "A harmonização é a base do acompanhamento e da transposição."
+            }), content::topic5J()),
+        };
+
+        // Exercises: three per topic, mixing verifiable quizzes with playable
+        // exercises the app checks by recognising the notes. Ids follow
+        // EX-5.<topico>.<n>, numbered per topic, as modules 1 and 2.
+        auto add = [&m] (Exercise e, const char* topic)
+        {
+            e.lessonId = topic;
+            m.exercises.push_back (std::move (e));
+            return (int) m.exercises.size() - 1;
+        };
+
+        // Plays a chord whose pitch classes the evaluator checks (the student may
+        // use any shape/position on the neck). Identification, not tempo: no grid.
+        auto chordExercise = [&add] (const char* id, const char* title, const char* goal,
+                                     const char* chordName, std::vector<int> pitchClasses,
+                                     const char* topic)
+        {
+            auto e = exercise (id, juce::String::fromUTF8 (title), juce::String::fromUTF8 (goal),
+                               juce::String::fromUTF8 ("O app reconhece as notas tocadas e confere se formam ")
+                                   + juce::String::fromUTF8 (chordName)
+                                   + juce::String::fromUTF8 (", em qualquer posição do braço."));
+            e.chordPitchClasses = std::move (pitchClasses);
+            e.usesGrid = false;
+            add (std::move (e), topic);
+        };
+
+        // Plays an ordered set of notes (a scale or a mode); any position works.
+        auto noteExercise = [&add] (const char* id, const char* title, const char* goal,
+                                    std::initializer_list<const char*> pitchNames, const char* topic)
+        {
+            auto e = exercise (id, juce::String::fromUTF8 (title), juce::String::fromUTF8 (goal),
+                               juce::String::fromUTF8 (
+                                   "O app reconhece as notas tocadas e confere se a sequência está correta."));
+            e.targets = notes (pitchNames);
+            e.usesGrid = false;
+            add (std::move (e), topic);
+        };
+
+        // --- Topic A — escala maior ------------------------------------------
+        add (exercise ("EX-5.A.1", juce::String::fromUTF8 ("Questionário: a escala maior"),
+                       juce::String::fromUTF8 ("Responder ao questionário sobre a escala maior."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "A");
+        m.exercises.back().quiz = {
+            question ("Qual é o padrão de tons e semitons da escala maior?",
+                      { "T – T – S – T – T – T – S",
+                        "T – S – T – T – S – T – T",
+                        "S – T – T – T – S – T – T",
+                        "T – T – T – S – T – T – S" }, 0),
+            question ("Em Dó maior, os semitons ficam entre os graus:",
+                      { "3–4 e 7–8", "1–2 e 5–6", "2–3 e 6–7", "4–5 e 8–9" }, 0),
+            question ("Quantas notas tem a escala maior (dentro da oitava)?",
+                      { "sete", "cinco", "oito", "doze" }, 0),
+            question ("A tônica da escala é o grau:",
+                      { "1", "3", "5", "7" }, 0),
+            question ("Mudar a tonalidade de uma escala maior:",
+                      { "mantém o padrão e troca a nota de partida",
+                        "muda o padrão de tons e semitons",
+                        "elimina os semitons",
+                        "acrescenta uma oitava" }, 0),
+        };
+        noteExercise ("EX-5.A.2", "Tocar a escala de Dó maior",
+                      "Tocar a escala de Dó maior (Dó a Dó) subindo, em qualquer posição.",
+                      { "C4", "D4", "E4", "F4", "G4", "A4", "B4", "C5" }, "A");
+        add (exercise ("EX-5.A.3", juce::String::fromUTF8 ("Questionário: graus da escala"),
+                       juce::String::fromUTF8 ("Responder ao questionário sobre os graus."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "A");
+        m.exercises.back().quiz = {
+            question ("O grau 3 da escala de Dó maior é:",
+                      { "Mi", "Fá", "Sol", "Lá" }, 0),
+            question ("O grau 5 da escala de Dó maior é:",
+                      { "Sol", "Fá", "Lá", "Si" }, 0),
+            question ("Em algarismo romano, um acorde menor se escreve:",
+                      { "com letra minúscula (ii)", "com letra maiúscula (II)",
+                        "com um círculo (ii°)", "com um sustenido" }, 0),
+        };
+
+        // --- Topic B — campo harmônico maior ---------------------------------
+        add (exercise ("EX-5.B.1", juce::String::fromUTF8 ("Questionário: campo harmônico"),
+                       juce::String::fromUTF8 ("Responder ao questionário do campo harmônico."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "B");
+        m.exercises.back().quiz = {
+            question ("Qual é o padrão de qualidades do campo harmônico maior?",
+                      { "I – ii – iii – IV – V – vi – vii°",
+                        "I – ii – iii – IV – V – VI – vii°",
+                        "i – II – III – iv – V – vi – VII",
+                        "I – III – V – vii" }, 0),
+            question ("O campo harmônico de Dó maior é:",
+                      { "C – Dm – Em – F – G – Am – Bdim",
+                        "C – Dm – Em – F – Gm – Am – Bdim",
+                        "C – D – E – F – G – A – B",
+                        "C – Dm – Em – F – G – Am – B" }, 0),
+            question ("Os acordes maiores do campo maior estão nos graus:",
+                      { "I, IV e V", "ii, iii e vi", "I, ii e iii", "V, vi e vii" }, 0),
+            question ("O acorde do grau vii do campo maior é:",
+                      { "diminuto", "maior", "menor", "aumentado" }, 0),
+            question ("O campo harmônico é construído:",
+                      { "empilhando as notas da própria escala sobre cada grau",
+                        "usando notas de fora da escala",
+                        "somando acordes aleatórios",
+                        "tomando só os acordes maiores" }, 0),
+        };
+        chordExercise ("EX-5.B.2", "Tocar o acorde de tônica (I)",
+                       "Tocar a tríade de C (grau I de Dó maior) em qualquer posição.",
+                       "a tríade de Dó maior (I)", { 0, 4, 7 }, "B");
+        chordExercise ("EX-5.B.3", "Tocar o acorde de subdominante (IV)",
+                       "Tocar a tríade de F (grau IV de Dó maior) em qualquer posição.",
+                       "a tríade de Fá maior (IV)", { 5, 9, 0 }, "B");
+
+        // --- Topic C — função tônica -----------------------------------------
+        add (exercise ("EX-5.C.1", juce::String::fromUTF8 ("Questionário: função tônica"),
+                       juce::String::fromUTF8 ("Responder ao questionário da função tônica."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "C");
+        m.exercises.back().quiz = {
+            question ("A função tônica é a função de:",
+                      { "repouso", "tensão", "afastamento", "modulação" }, 0),
+            question ("A tônica de Dó maior é exercida pelo acorde de:",
+                      { "C (grau I)", "G (grau V)", "F (grau IV)", "Am (grau vi)" }, 0),
+            question ("Além do grau I, também exercem função tônica:",
+                      { "iii e vi", "ii e IV", "V e vii°", "apenas o I" }, 0),
+            question ("A função tônica soa:",
+                      { "estável e conclusiva", "tensa e instável",
+                        "suspensa e pedindo continuação", "sempre menor" }, 0),
+        };
+        chordExercise ("EX-5.C.2", "Tocar a tônica e ouvir o repouso",
+                       "Tocar a tríade de C (tônica) e perceber a sensação de repouso.",
+                       "a tríade de Dó maior (tônica)", { 0, 4, 7 }, "C");
+        add (exercise ("EX-5.C.3", juce::String::fromUTF8 ("Questionário: substitutos da tônica"),
+                       juce::String::fromUTF8 ("Responder ao questionário dos substitutos."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "C");
+        m.exercises.back().quiz = {
+            question ("O relativo menor do acorde de C é:",
+                      { "Am", "Em", "Dm", "G" }, 0),
+            question ("Trocar C por Am numa progressão:",
+                      { "mantém a função de repouso com outra cor",
+                        "muda a tonalidade",
+                        "cria tensão de dominante",
+                        "sai do campo harmônico" }, 0),
+            question ("Os substitutos da tônica compartilham com o I:",
+                      { "duas notas", "nenhuma nota", "todas as notas", "só a fundamental" }, 0),
+        };
+
+        // --- Topic D — função subdominante -----------------------------------
+        add (exercise ("EX-5.D.1", juce::String::fromUTF8 ("Questionário: função subdominante"),
+                       juce::String::fromUTF8 ("Responder ao questionário da subdominante."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "D");
+        m.exercises.back().quiz = {
+            question ("A função subdominante é a função de:",
+                      { "afastamento", "repouso", "tensão máxima", "modulação" }, 0),
+            question ("A subdominante de Dó maior é exercida pelo acorde de:",
+                      { "F (grau IV)", "C (grau I)", "G (grau V)", "Em (grau iii)" }, 0),
+            question ("O principal substituto da subdominante é o acorde de:",
+                      { "ii", "vi", "vii°", "iii" }, 0),
+            question ("A tarefa principal da subdominante é:",
+                      { "preparar o dominante",
+                        "concluir a música",
+                        "substituir a tônica",
+                        "criar a tensão máxima" }, 0),
+        };
+        chordExercise ("EX-5.D.2", "Tocar a subdominante (IV)",
+                       "Tocar a tríade de F (grau IV de Dó maior) em qualquer posição.",
+                       "a tríade de Fá maior (IV)", { 5, 9, 0 }, "D");
+        chordExercise ("EX-5.D.3", "Tocar o substituto da subdominante (ii)",
+                       "Tocar a tríade de Dm (grau ii de Dó maior) em qualquer posição.",
+                       "a tríade de Ré menor (ii)", { 2, 5, 9 }, "D");
+
+        // --- Topic E — função dominante --------------------------------------
+        add (exercise ("EX-5.E.1", juce::String::fromUTF8 ("Questionário: função dominante"),
+                       juce::String::fromUTF8 ("Responder ao questionário da dominante."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "E");
+        m.exercises.back().quiz = {
+            question ("A função dominante é a função de:",
+                      { "tensão", "repouso", "afastamento suave", "modulação" }, 0),
+            question ("A dominante de Dó maior é exercida pelo acorde de:",
+                      { "G (grau V)", "C (grau I)", "F (grau IV)", "Am (grau vi)" }, 0),
+            question ("A força do dominante vem principalmente do:",
+                      { "trítono", "uníssono", "intervalo de oitava", "baixo pedal" }, 0),
+            question ("O dominante resolve, naturalmente, na:",
+                      { "tônica", "subdominante", "relativa menor", "mediante" }, 0),
+            question ("O substituto do dominante no campo é o acorde de:",
+                      { "vii°", "ii", "vi", "IV" }, 0),
+        };
+        chordExercise ("EX-5.E.2", "Tocar a dominante (V)",
+                       "Tocar a tríade de G (grau V de Dó maior) em qualquer posição.",
+                       "a tríade de Sol maior (V)", { 7, 11, 2 }, "E");
+        chordExercise ("EX-5.E.3", "Tocar o substituto do dominante (vii°)",
+                       "Tocar a tríade de Bdim (grau vii° de Dó maior) em qualquer posição.",
+                       "a tríade de Si diminuto (vii°)", { 11, 2, 5 }, "E");
+
+        // --- Topic F — acordes relativos -------------------------------------
+        add (exercise ("EX-5.F.1", juce::String::fromUTF8 ("Questionário: acordes relativos"),
+                       juce::String::fromUTF8 ("Responder ao questionário dos relativos."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "F");
+        m.exercises.back().quiz = {
+            question ("O relativo menor de um acorde maior está:",
+                      { "três semitons abaixo", "três semitons acima",
+                        "cinco semitons abaixo", "sete semitons acima" }, 0),
+            question ("O relativo menor de C é:",
+                      { "Am", "Dm", "Em", "Gm" }, 0),
+            question ("Dois acordes relativos compartilham:",
+                      { "a mesma armadura de clave", "a mesma fundamental",
+                        "o mesmo baixo", "a mesma terça" }, 0),
+            question ("Os pares de relativos no campo de Dó são:",
+                      { "I–vi, IV–ii e V–iii", "I–ii, IV–V e vi–vii",
+                        "I–IV, V–vi e ii–iii", "I–iii, IV–vi e V–vii" }, 0),
+        };
+        chordExercise ("EX-5.F.2", "Tocar o relativo menor (vi)",
+                       "Tocar a tríade de Am (grau vi de Dó maior), relativo menor de C.",
+                       "a tríade de Lá menor (vi)", { 9, 0, 4 }, "F");
+        add (exercise ("EX-5.F.3", juce::String::fromUTF8 ("Questionário: usar os relativos"),
+                       juce::String::fromUTF8 ("Responder ao questionário do uso dos relativos."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "F");
+        m.exercises.back().quiz = {
+            question ("Trocar um acorde pelo seu relativo serve para:",
+                      { "mudar a cor sem mudar a função",
+                        "mudar a tonalidade",
+                        "criar um dominante secundário",
+                        "sair da música" }, 0),
+            question ("Substituir o I pelo vi deixa a progressão:",
+                      { "mais melancólica", "mais tensa", "mais rápida", "sem tônica" }, 0),
+            question ("Uma música com armadura de Dó maior pode estar em:",
+                      { "Dó maior ou Lá menor", "Dó maior ou Sol maior",
+                        "Lá menor ou Mi menor", "Fá maior ou Ré menor" }, 0),
+        };
+
+        // --- Topic G — armaduras de clave ------------------------------------
+        add (exercise ("EX-5.G.1", juce::String::fromUTF8 ("Questionário: armaduras de clave"),
+                       juce::String::fromUTF8 ("Responder ao questionário das armaduras."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "G");
+        m.exercises.back().quiz = {
+            question ("A ordem dos sustenidos na armadura é:",
+                      { "Fá–Dó–Sol–Ré–Lá–Mi–Si", "Si–Mi–Lá–Ré–Sol–Dó–Fá",
+                        "Dó–Ré–Mi–Fá–Sol–Lá–Si", "Lá–Si–Dó–Ré–Mi–Fá–Sol" }, 0),
+            question ("Uma armadura com um sustenido indica a tonalidade de:",
+                      { "Sol maior", "Fá maior", "Ré maior", "Lá maior" }, 0),
+            question ("Uma armadura com um bemol indica a tonalidade de:",
+                      { "Fá maior", "Sol maior", "Dó maior", "Sib maior" }, 0),
+            question ("O ciclo das quintas subindo acrescenta:",
+                      { "um sustenido por passo", "um bemol por passo",
+                        "nenhum acidente", "dois acidentes por passo" }, 0),
+            question ("Tonalidades vizinhas no ciclo das quintas diferem por:",
+                      { "um acidente", "três acidentes", "nenhum acidente", "meio tom" }, 0),
+        };
+        chordExercise ("EX-5.G.2", "Tocar a tônica de Sol maior",
+                       "Tocar a tríade de G (tônica de Sol maior, armadura de 1 sustenido).",
+                       "a tríade de Sol maior (I de Sol)", { 7, 11, 2 }, "G");
+        chordExercise ("EX-5.G.3", "Tocar a tônica de Fá maior",
+                       "Tocar a tríade de F (tônica de Fá maior, armadura de 1 bemol).",
+                       "a tríade de Fá maior (I de Fá)", { 5, 9, 0 }, "G");
+
+        // --- Topic H — cadências e progressões -------------------------------
+        add (exercise ("EX-5.H.1", juce::String::fromUTF8 ("Questionário: cadências"),
+                       juce::String::fromUTF8 ("Responder ao questionário das cadências."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "H");
+        m.exercises.back().quiz = {
+            question ("A cadência autêntica é:",
+                      { "V → I", "IV → I", "I → V", "V → vi" }, 0),
+            question ("A cadência plagal é:",
+                      { "IV → I", "V → I", "I → V", "ii → V" }, 0),
+            question ("A meia cadência termina:",
+                      { "no dominante, sem resolver", "na tônica",
+                        "no relativo menor", "na subdominante" }, 0),
+            question ("A cadência de engano é:",
+                      { "V → vi", "V → I", "IV → I", "I → V" }, 0),
+            question ("A cadência mais conclusiva é a:",
+                      { "autêntica", "plagal", "meia cadência", "de engano" }, 0),
+        };
+        {
+            auto e = exercise ("EX-5.H.2", juce::String::fromUTF8 ("Tocar a cadência IV – V – I"),
+                               juce::String::fromUTF8 ("Tocar a progressão IV – V – I (F – G – C) em qualquer posição."),
+                               juce::String::fromUTF8 (
+                                   "O app reconhece os acordes, na ordem, e confere a progressão."));
+            e.chordProgression = {
+                { 5, 9, 0 },    // F (IV)
+                { 7, 11, 2 },   // G (V)
+                { 0, 4, 7 },    // C (I)
+            };
+            e.usesGrid = false;
+            add (std::move (e), "H");
+        }
+        add (exercise ("EX-5.H.3", juce::String::fromUTF8 ("Questionário: progressões"),
+                       juce::String::fromUTF8 ("Responder ao questionário das progressões."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "H");
+        m.exercises.back().quiz = {
+            question ("A progressão ii – V – I é chamada de:",
+                      { "cadência preparada (jazz)", "cadência plagal",
+                        "meia cadência", "cadência de engano" }, 0),
+            question ("A progressão pop mais usada é:",
+                      { "I – V – vi – IV", "ii – V – I", "I – IV – V – I", "V – vi – IV – I" }, 0),
+            question ("Reconhecer as cadências permite:",
+                      { "prever o próximo acorde e acompanhar de ouvido",
+                        "afinar o instrumento",
+                        "aumentar o volume",
+                        "mudar a afinação das cordas" }, 0),
+        };
+
+        // --- Topic I — modos --------------------------------------------------
+        add (exercise ("EX-5.I.1", juce::String::fromUTF8 ("Questionário: modos"),
+                       juce::String::fromUTF8 ("Responder ao questionário dos modos."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "I");
+        m.exercises.back().quiz = {
+            question ("Um modo é obtido:",
+                      { "começando a escala maior em um grau diferente",
+                        "trocando as notas da escala",
+                        "subindo meio tom a escala",
+                        "tocando só os acordes maiores" }, 0),
+            question ("Os modos da escala maior usam:",
+                      { "as mesmas notas da escala maior",
+                        "notas de várias tonalidades",
+                        "apenas cinco notas",
+                        "só as notas do acorde" }, 0),
+            question ("O modo que começa no grau II é o:",
+                      { "dórico", "frígio", "lídio", "mixolídio" }, 0),
+            question ("O modo que começa no grau V é o:",
+                      { "mixolídio", "jônio", "eólio", "lócrio" }, 0),
+            question ("O intervalo característico do lídio é a:",
+                      { "quarta aumentada", "sexta menor", "sétima menor", "segunda menor" }, 0),
+        };
+        noteExercise ("EX-5.I.2", "Tocar o modo dórico",
+                      "Tocar o modo dórico (notas de Dó maior a partir de Ré), subindo.",
+                      { "D4", "E4", "F4", "G4", "A4", "B4", "C5", "D5" }, "I");
+        add (exercise ("EX-5.I.3", juce::String::fromUTF8 ("Questionário: modo por acorde"),
+                       juce::String::fromUTF8 ("Responder ao questionário da aplicação dos modos."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "I");
+        m.exercises.back().quiz = {
+            question ("Sobre o acorde de ii (Dm) em Dó maior, o modo natural é o:",
+                      { "dórico", "frígio", "lídio", "lócrio" }, 0),
+            question ("Sobre o acorde de V (G) em Dó maior, o modo natural é o:",
+                      { "mixolídio", "jônio", "eólio", "dórico" }, 0),
+            question ("O jônio é o mesmo que:",
+                      { "a escala maior", "a escala menor natural",
+                        "a pentatônica", "o blues" }, 0),
+        };
+
+        // --- Topic J — harmonização da escala maior --------------------------
+        add (exercise ("EX-5.J.1", juce::String::fromUTF8 ("Questionário: harmonização"),
+                       juce::String::fromUTF8 ("Responder ao questionário da harmonização."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "J");
+        m.exercises.back().quiz = {
+            question ("Harmonizar a escala maior é:",
+                      { "construir um acorde sobre cada grau",
+                        "tocar a escala mais rápido",
+                        "somar duas escalas",
+                        "trocar a tonalidade" }, 0),
+            question ("O empilhamento que forma uma tríade é:",
+                      { "1 – 3 – 5", "1 – 2 – 3", "1 – 4 – 5", "1 – 2 – 5" }, 0),
+            question ("Os acordes de I, IV e V do campo maior são:",
+                      { "maiores", "menores", "diminutos", "meio-diminutos" }, 0),
+            question ("Os acordes de ii, iii e vi do campo maior são:",
+                      { "menores", "maiores", "aumentados", "diminutos" }, 0),
+        };
+        {
+            auto e = exercise ("EX-5.J.2", juce::String::fromUTF8 ("Tocar o campo harmônico de Dó"),
+                               juce::String::fromUTF8 ("Tocar I – IV – V – I (C – F – G – C) em qualquer posição."),
+                               juce::String::fromUTF8 (
+                                   "O app reconhece os acordes, na ordem, e confere a progressão do campo."));
+            e.chordProgression = {
+                { 0, 4, 7 },    // C (I)
+                { 5, 9, 0 },    // F (IV)
+                { 7, 11, 2 },   // G (V)
+                { 0, 4, 7 },    // C (I)
+            };
+            e.usesGrid = false;
+            add (std::move (e), "J");
+        }
+        add (exercise ("EX-5.J.3", juce::String::fromUTF8 ("Questionário: tríades e tétrades"),
+                       juce::String::fromUTF8 ("Responder ao questionário das tríades e tétrades."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "J");
+        m.exercises.back().quiz = {
+            question ("As tétrades do campo de Dó maior são:",
+                      { "C7M – Dm7 – Em7 – F7M – G7 – Am7 – Bm7(b5)",
+                        "C7 – Dm7 – Em7 – F7 – G7 – Am7 – Bdim",
+                        "C7M – D7 – E7 – F7M – G7 – A7 – B7",
+                        "Cm – Dm – Em – Fm – Gm – Am – Bdim" }, 0),
+            question ("A harmonização serve de base para:",
+                      { "acompanhar, compor e transpor",
+                        "afinar o instrumento",
+                        "regular o metrônomo",
+                        "escolher o captador" }, 0),
+            question ("Transpor uma progressão mantém:",
+                      { "as distâncias entre os graus",
+                        "os nomes dos acordes",
+                        "a mesma tônica",
+                        "a mesma armadura" }, 0),
+        };
+
+        // The gate closes the module: play the I–IV–V–I progression of the field
+        // on the metronome grid (REQ-009, REQ-015), built from the material of
+        // the module (the harmonic field of the key).
+        auto& gate = m.exercises.emplace_back (exercise (
+            "GATE-5", juce::String::fromUTF8 ("Desafio de gate — campo harmônico C–F–G–C"),
+            juce::String::fromUTF8 ("Tocar C – F – G – C a 76 BPM, na grade do metrônomo."),
+            juce::String::fromUTF8 ("Acordes reconhecidos e alinhados à grade (≥ 0,79).")));
+        gate.isGate = true;
+        gate.lessonId = "J";
+        gate.chordProgression = {
+            { 0, 4, 7 },    // C (I)
+            { 5, 9, 0 },    // F (IV)
+            { 7, 11, 2 },   // G (V)
+            { 0, 4, 7 },    // C (I)
+        };
+
+        m.gateChallenge = juce::String::fromUTF8 (
+            "Tocar a progressão do campo harmônico maior C – F – G – C (I – IV – V – I) "
+            "a 76 BPM com ≥90% de acerto de acordes e on_grid_ratio ≥ 0,79. A "
+            "progressão percorre as três funções estudadas no módulo: tônica, "
+            "subdominante e dominante.");
+
+        // Pattern and link the module must cite (REQ-007, REQ-010).
+        m.practice.patternId = "PTN-A-TRIAD";
+        m.practice.patternUse = juce::String::fromUTF8 (
+            "Arpejos de tríade: o padrão PTN-A-TRIAD varre as três notas do acorde "
+            "(1–3–5) e faz o aluno ouvir, na mão, as notas que formam cada grau do "
+            "campo harmônico. Complemento: PTN-M-3rds (terças) mostra como os "
+            "acordes nascem do empilhamento de terças sobre a escala.");
+        m.practice.guitarists = { "Wes Montgomery", "Joe Pass", "Kiko Loureiro" };
+
+        // Curated apostilas (REQ-006, CM-012); see docs/MUSIC.md §2.1.
+        m.sources = {
+            "pdf-desvendando-os-segredos-da-guitarra-fusion",
+            "pdf-teoria-elementar-da-musica-ricordi-osvaldo-lacerda",
+            "pdf-p-classtruncatedtext-module-lineclamped-85ulhh-style-max-lines5bohumil-med-teoria-da-musica-5-edicao-p",
+            "pdf-caged-e-derivaoes-de-acordes-marcelo-mello-apostila-de-violao-e-guitarra-vol1",
+        };
+
+        return m;
+    }
+
     // Modules 3..20 exist as placeholders so the list is honest about what is
     // coming (ADR 0005): level, target BPM and alignment come from MUSIC.md.
     CourseModule makePlaceholder (int number, const char* title, int level,
@@ -1140,7 +1639,7 @@ const std::vector<CourseModule>& ModuleCatalog::getModules()
         makeModule2(),
         makePlaceholder (3,  "Vamps de 2 acordes",                  2,  68,  0.77f),
         makePlaceholder (4,  "Vamps de 2 acordes (aplicação)",      2,  72,  0.78f),
-        makePlaceholder (5,  "II–V–I",                              3,  76,  0.79f),
+        makeModule5(),
         makePlaceholder (6,  "II–V–I (menor)",                      3,  80,  0.80f),
         makePlaceholder (7,  "II–V–I (aplicação)",                  3,  84,  0.80f),
         makePlaceholder (8,  "Turnarounds",                         4,  88,  0.81f),
