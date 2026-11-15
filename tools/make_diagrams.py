@@ -947,6 +947,402 @@ DIAGRAMS.update({
 })
 
 
+# --------------------------------------------------------------------------
+# Modulo 3 — ritmo, leitura e levadas.
+# --------------------------------------------------------------------------
+def _rhythm_row(d, x, y, w, cells, gap_after=0):
+    """Faixa de figuras ritmicas: `cells` = [(kind, silaba)] em uma linha."""
+    n = len(cells)
+    step = w / max(1, n)
+    for i, (kind, syll) in enumerate(cells):
+        cx = x + step * (i + 0.5)
+        _note_glyph(d, cx, y, kind, ACCENT)
+        d.text((cx, y + 46), syll, font=font(18, True), fill=CYAN, anchor="mm")
+    return y + gap_after
+
+
+def _bullets(d, y, items, color=ACCENT):
+    for i, item in enumerate(items):
+        yy = y + i * 54
+        d.rounded_rectangle([MARGIN, yy, W - MARGIN, yy + 46], radius=8,
+                            fill=RAISED if i % 2 == 0 else SURFACE)
+        d.text((MARGIN + 18, yy + 23), item[0], font=font(21, True), fill=color, anchor="lm")
+        d.text((MARGIN + 300, yy + 23), item[1], font=font(20), fill=TXT, anchor="lm")
+        if len(item) > 2:
+            d.text((W - MARGIN - 18, yy + 23), item[2], font=font(19), fill=TXT2, anchor="rm")
+    return y + len(items) * 54
+
+
+def d_m3_leitura_ritmica():
+    h = 720
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Leitura ritmica: figuras, valores e silabas")
+    y = subtitle(d, "Cada figura vale metade da anterior; a silaba ajuda a contar em voz alta.", y)
+    figures = [("whole", "Semibreve", "4 tempos", "TA-A-A-A"),
+               ("half", "Minima", "2 tempos", "TA-A"),
+               ("quarter", "Seminima", "1 tempo", "TA"),
+               ("eighth", "Colcheia", "1/2 tempo", "TA-KI"),
+               ("sixteenth", "Semicolcheia", "1/4 tempo", "TA-KI-TA-KI")]
+    top = y + 70
+    for i, (kind, name, value, syll) in enumerate(figures):
+        yy = top + i * 88
+        _note_glyph(d, MARGIN + 60, yy + 26, kind)
+        d.text((MARGIN + 130, yy + 4), name, font=font(25, True), fill=TXT, anchor="la")
+        d.text((MARGIN + 130, yy + 40), f"{value}   -   {syll}", font=font(20),
+               fill=CYAN, anchor="la")
+        d.rounded_rectangle([MARGIN + 620, yy + 12, W - MARGIN, yy + 44], radius=6,
+                            fill=ACCENT_MUTED)
+        d.text((MARGIN + 636, yy + 28), "contar antes de tocar", font=font(18), fill=TXT2, anchor="lm")
+    d.text((W / 2, h - 52), "Ler o ritmo e contar a subdivisao: a base de tocar na grade.",
+           font=font(20, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m3_pulsacao_subdivisao():
+    h = 700
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Pulsacao e subdivisao")
+    y = subtitle(d, "O pulso e constante; a subdivisao divide cada pulso em partes iguais.", y)
+    x0, x1 = MARGIN + 80, W - MARGIN - 20
+    top = y + 90
+    beat_w = (x1 - x0) / 4
+    d.line([x0, top - 20, x1, top - 20], fill=TXT, width=3)
+    for b in range(4):
+        bx = x0 + b * beat_w
+        d.line([bx, top - 30, bx, top + 150], fill=BORDER, width=2)
+        d.text((bx + beat_w / 2, top), "1", font=font(30, True), fill=TXT, anchor="mm")
+        d.text((bx + beat_w / 2, top + 46), "TA", font=font(22, True), fill=CYAN, anchor="mm")
+        d.text((bx + beat_w / 2, top + 88), "TA-KI", font=font(20), fill=TXT2, anchor="mm")
+        d.text((bx + beat_w / 2, top + 126), "TA-KI-TA-KI", font=font(18), fill=TXT_DIS, anchor="mm")
+    d.line([x1, top - 30, x1, top + 150], fill=BORDER, width=2)
+    d.text((MARGIN, h - 150), "Semínima (1x por pulso) -> colcheia (2x) -> semicolcheia (4x).",
+           font=font(21), fill=TXT2, anchor="la")
+    d.text((MARGIN, h - 108), "A subdivisao dobra a cada nivel: e o que o metronomo faz para voce.",
+           font=font(21), fill=TXT2, anchor="la")
+    d.text((MARGIN, h - 60), "Tocar na grade = alinhar a nota ao pulso ou a sua subdivisao.",
+           font=font(21, True), fill=GOLD, anchor="la")
+    return img
+
+
+def d_m3_cifrado_divisao():
+    h = 620
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Cifrado com divisao: o acorde repartido no compasso")
+    y = subtitle(d, "A cifra diz o acorde; a divisao diz como ele e tocado no tempo.", y)
+    items = [("C", "acorde inteiro no tempo 1", "1 acorde = 1 compasso"),
+             ("C  C  C  C", "um acorde por tempo", "4 ataques"),
+             ("C  -  G  -", "dois acordes, com contratempo", "ritmo de base"),
+             ("C  C/G  C/E", "acorde com baixo (slash chord)", "baixo em movimento"),
+             ("C7  C6  C7M", "acordes por grau dentro do compasso", "conducao harmonica")]
+    _bullets(d, y + 40, items)
+    d.text((W / 2, h - 50), "Ler a cifra e dividir o compasso: e o que transforma o acorde em levada.",
+           font=font(20, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m3_celulas_ritmicas():
+    h = 700
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Celulas ritmicas de acompanhamento")
+    y = subtitle(d, "Uma celula e um desenho de ataques que se repete no compasso.", y)
+    top = y + 70
+    cells = [("Semininas", "TA TA TA TA", ["quarter"] * 4),
+             ("Colcheias", "TA-KI TA-KI TA-KI TA-KI", ["eighth"] * 8),
+             ("Rock", "TA  TA-KI TA  TA-KI", ["quarter", "eighth", "eighth", "quarter", "eighth", "eighth"]),
+             ("Samba", "TA-KI  TA  TA-KI", ["eighth", "eighth", "quarter", "eighth", "eighth"])]
+    for i, (name, syll, kinds) in enumerate(cells):
+        yy = top + i * 120
+        d.text((MARGIN, yy), name, font=font(23, True), fill=ACCENT, anchor="la")
+        _rhythm_row(d, MARGIN + 150, yy + 20, W - 2 * MARGIN - 150, [(k, "") for k in kinds])
+        d.text((MARGIN + 150, yy + 86), syll, font=font(18), fill=CYAN, anchor="la")
+    d.text((W / 2, h - 46), "Repetir a celula mantendo o pulso firme e o que cria o groove.",
+           font=font(20, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m3_acentuacoes():
+    h = 620
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Acentuacoes: onde o ataque fica forte")
+    y = subtitle(d, "Acento (>) reforca um tempo ou contratempo; o resto fica mais leve.", y)
+    x0, x1 = MARGIN + 60, W - MARGIN - 20
+    top = y + 100
+    beat_w = (x1 - x0) / 4
+    accented = {0, 2}
+    for b in range(4):
+        bx = x0 + b * beat_w
+        d.line([bx, top - 40, bx, top + 120], fill=BORDER, width=2)
+        strong = b in accented
+        d.text((bx + beat_w / 2, top), ">", font=font(34, True),
+               fill=GOLD if strong else TXT_DIS, anchor="mm")
+        d.text((bx + beat_w / 2, top + 54), str(b + 1), font=font(28, True),
+               fill=TXT if strong else TXT2, anchor="mm")
+        d.text((bx + beat_w / 2, top + 96), "TA", font=font(20, True),
+               fill=CYAN if strong else TXT_DIS, anchor="mm")
+    d.line([x1, top - 40, x1, top + 120], fill=BORDER, width=2)
+    d.text((MARGIN, h - 140), "Tempos fortes (1 e 3) sustentam a danca; fracos (2 e 4) pedem resposta.",
+           font=font(21), fill=TXT2, anchor="la")
+    d.text((MARGIN, h - 96), "No samba e no funk o acento cai no contratempo (o 'e' do tempo).",
+           font=font(21), fill=TXT2, anchor="la")
+    d.text((MARGIN, h - 52), "Acentuar sem perder o pulso: o detalhe que faz a levada soar viva.",
+           font=font(21, True), fill=GOLD, anchor="la")
+    return img
+
+
+def d_m3_levadas_palheta():
+    h = 700
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Levadas com palheta: direcoes e padroes")
+    y = subtitle(d, "A palheta alterna para baixo (v) e para cima (^); o pulso manda.", y)
+    top = y + 70
+    rows = [("Alternada (colcheias)", ["v", "^", "v", "^", "v", "^", "v", "^"]),
+            ("Rock (semininas)", ["v", "v", "v", "v"]),
+            ("Palm mute", ["v", "^", "v", "^", "v", "^", "v", "^"]),
+            ("Tres por tempo", ["v", "^", "v", "^", "v", "^"])]
+    for i, (name, strokes) in enumerate(rows):
+        yy = top + i * 120
+        d.text((MARGIN, yy + 20), name, font=font(22, True), fill=ACCENT, anchor="la")
+        x = MARGIN + 320
+        step = (W - MARGIN - 20 - x) / len(strokes)
+        for k, s in enumerate(strokes):
+            cx = x + step * (k + 0.5)
+            d.text((cx, yy + 30), s, font=font(34, True),
+                   fill=CYAN if s == "v" else GOLD, anchor="mm")
+    d.text((W / 2, h - 46), "Palhetada alternada economiza movimento e mantem o tempo estavel.",
+           font=font(20, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m3_direcoes_palheta():
+    h = 560
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Palhetada: para baixo e para cima")
+    y = subtitle(d, "v = ataque para baixo (mais forte); ^ = ataque para cima (mais leve).", y)
+    cx = W / 2
+    for i, (symbol, label, color, dy) in enumerate(
+            [("v", "downstroke (para baixo)", CYAN, 0), ("^", "upstroke (para cima)", GOLD, 200)]):
+        yy = y + 80 + dy
+        d.text((cx - 200, yy), symbol, font=font(90, True), fill=color, anchor="mm")
+        d.text((cx + 60, yy - 20), label, font=font(28, True), fill=TXT, anchor="lm")
+        d.text((cx + 60, yy + 30),
+               "ataque no tempo forte" if i == 0 else "ataque no contratempo",
+               font=font(21), fill=TXT2, anchor="lm")
+    d.text((W / 2, h - 50), "Alternar as direcoes mantem a mao relaxada e o tempo regular.",
+           font=font(20, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m3_mapa_mao_direita():
+    h = 720
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Mapa da mao direita")
+    y = subtitle(d, "Polegar, indicador, medio e anelar: cada dedo cuida de um grupo de cordas.", y)
+    x0 = MARGIN + 90
+    lines = ["e (1a)", "B (2a)", "G (3a)", "D (4a)", "A (5a)", "E (6a)"]
+    top, gap = y + 60, 70
+    for i, name in enumerate(lines):
+        yy = top + i * gap
+        d.line([x0, yy, W - MARGIN - 20, yy], fill=(200, 200, 210), width=2)
+        d.text((x0 - 20, yy), name, font=font(20, True), fill=ACCENT, anchor="rm")
+    fingers = [("polegar (p)", 5, "cordas graves (6a, 5a, 4a)"),
+               ("indicador (i)", 2, "3a corda"),
+               ("medio (m)", 1, "2a corda"),
+               ("anelar (a)", 0, "1a corda")]
+    for j, (name, line_idx, desc) in enumerate(fingers):
+        yy = top + line_idx * gap
+        d.ellipse([x0 + 140 + j * 60 - 16, yy - 16, x0 + 140 + j * 60 + 16, yy + 16],
+                  fill=ACCENT if j == 0 else CYAN)
+        d.text((W - MARGIN - 20, yy), desc, font=font(18), fill=TXT2, anchor="rm")
+    d.text((W / 2, h - 52), "O polegar marca o baixo; os dedos puxam as cordas agudas do acorde.",
+           font=font(20, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m3_levadas_dedos():
+    h = 660
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Levadas com os dedos (fingerstyle)")
+    y = subtitle(d, "Polegar nos tempos, dedos nas cordas agudas: a base da bossa e do violao.", y)
+    top = y + 70
+    rows = [("Polegar alterna o baixo", ["p", "-", "p", "-", "p", "-", "p", "-"]),
+            ("Bossa: polegar + dedos", ["p", "i", "p", "m", "p", "i", "p", "a"]),
+            ("Arpejo ascendente", ["p", "i", "m", "a", "p", "i", "m", "a"]),
+            ("Travis picking", ["p", "m", "i", "m", "p", "m", "i", "m"])]
+    for i, (name, seq) in enumerate(rows):
+        yy = top + i * 120
+        d.text((MARGIN, yy + 20), name, font=font(22, True), fill=ACCENT, anchor="la")
+        x = MARGIN + 360
+        step = (W - MARGIN - 20 - x) / len(seq)
+        for k, s in enumerate(seq):
+            cx = x + step * (k + 0.5)
+            color = TXT_DIS if s == "-" else (ACCENT if s == "p" else CYAN)
+            d.text((cx, yy + 30), s, font=font(30, True), fill=color, anchor="mm")
+    d.text((W / 2, h - 46), "Separar grave e agudo e o que da independencia a mao direita.",
+           font=font(20, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m3_compassos():
+    h = 700
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Compassos simples e compostos")
+    y = subtitle(d, "O numero de cima conta os tempos; o de baixo diz qual figura vale 1 tempo.", y)
+    items = [("2/4", "dois tempos de seminima", "marcha, baião"),
+             ("3/4", "tres tempos de seminima", "valsa"),
+             ("4/4", "quatro tempos de seminima", "pop, rock, samba"),
+             ("6/8", "seis tempos de colcheia (composto)", "balada, baião"),
+             ("12/8", "doze colcheias (composto)", "blues lento, shuffle"),
+             ("5/4 e 7/8", "formulas incomuns", "prog rock, jazz moderno")]
+    _bullets(d, y + 40, items)
+    d.text((W / 2, h - 50), "Simples: subdivide em 2. Composto: subdivide em 3 (o tempo vira tercina).",
+           font=font(20, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m3_formulas_incomuns():
+    h = 640
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Formulas de compasso incomuns")
+    y = subtitle(d, "Agrupar os tempos em blocos de 2 e 3 mantem a pulsacao compreensivel.", y)
+    top = y + 70
+    patterns = [("5/4", ["3", "2"], "Take Five"),
+                ("5/4", ["2", "3"], "Mission Impossible"),
+                ("7/8", ["2", "2", "3"], "prog rock"),
+                ("7/8", ["3", "2", "2"], "balkan"),
+                ("9/8", ["3", "3", "3"], "compasso composto")]
+    for i, (meter, groups, note) in enumerate(patterns):
+        yy = top + i * 96
+        d.text((MARGIN, yy + 20), meter, font=font(28, True), fill=ACCENT, anchor="la")
+        x = MARGIN + 200
+        for g in groups:
+            w = int(g) * 60
+            d.rounded_rectangle([x, yy, x + w - 10, yy + 52], radius=8,
+                                fill=RAISED, outline=CYAN, width=2)
+            d.text((x + (w - 10) / 2, yy + 26), g, font=font(26, True), fill=CYAN, anchor="mm")
+            x += w + 10
+        d.text((W - MARGIN, yy + 26), note, font=font(19), fill=TXT2, anchor="rm")
+    d.text((W / 2, h - 46), "Contar os grupos (ex.: 1-2-3 / 1-2) e o que torna o compasso tocavel.",
+           font=font(20, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m3_konokol():
+    h = 660
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Silabas ritmicas (Konokol) e percussao vocal")
+    y = subtitle(d, "Falar o ritmo com silabas antes de tocar organiza a subdivisao.", y)
+    items = [("TA", "seminima (1 pulso)", "TA"),
+             ("TA-KI", "duas colcheias", "TA-KI"),
+             ("TA-KI-TA-KI", "quatro semicolcheias", "TA-KI-TA-KI"),
+             ("TA-KA", "duas tercinas (Konokol)", "TA-KA"),
+             ("TA-KI-TA", "grupo de tres com pausa", "TA-KI-TA"),
+             ("DIN", "acento/ataque forte", "DIN")]
+    _bullets(d, y + 40, items)
+    d.text((W / 2, h - 50), "Falar a celula em voz alta antes de tocar alinha mao, ouvido e tempo.",
+           font=font(20, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m3_percussao_sanfona():
+    h = 640
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Percussao no violao e efeito sanfona")
+    y = subtitle(d, "Bater na madeira e usar o efeito sanfona dao groove sem mudar o acorde.", y)
+    items = [("Batida na madeira", "percussao no tampo", "marca o tempo"),
+             ("Percussao no cavalete", "som seco e curto", "contratempo"),
+             ("Efeito sanfona", "abre e fecha o acorde", "levada de samba/choro"),
+             ("Abafamento (mute)", "corda abafada pela mao", "chuck"),
+             ("Harmonico percussivo", "toque leve sobre o traste", "cor ritmica")]
+    _bullets(d, y + 40, items)
+    d.text((W / 2, h - 50), "O efeito sanfona alterna o acorde aberto e abafado, criando pulsacao.",
+           font=font(20, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m3_partitura_leitura():
+    return _score_image("leitura", [("C", 4, None), ("C", 4, None), ("D", 4, None), ("E", 4, None)],
+                        "Partitura: leitura ritmica em Do (contar e tocar)")
+
+
+def d_m3_partitura_subdivisao():
+    return _score_image("subdivisao", [("C", 4, None), ("D", 4, None), ("E", 4, None), ("F", 4, None),
+                                       ("G", 4, None), ("F", 4, None), ("E", 4, None), ("D", 4, None)],
+                        "Partitura: escala em Do, um passo por pulso")
+
+
+def d_m3_partitura_cifrado():
+    return _score_image("cifrado", [("C", 4, None), ("E", 4, None), ("G", 4, None), ("G", 4, None),
+                                    ("E", 4, None), ("C", 4, None)],
+                        "Partitura: arpejo de Do maior dividindo o compasso")
+
+
+def d_m3_partitura_celula():
+    return _score_image("celula", [("C", 4, None), ("E", 4, None), ("G", 4, None), ("E", 4, None)],
+                        "Partitura: celula de acompanhamento (Do maior)")
+
+
+def d_m3_partitura_palheta():
+    return _score_image("palheta", [("E", 3, None), ("E", 3, None), ("E", 3, None), ("E", 3, None),
+                                    ("E", 3, None), ("E", 3, None), ("E", 3, None), ("E", 3, None)],
+                        "Partitura: palhetada alternada na corda 6 (Mi)")
+
+
+def d_m3_partitura_dedos():
+    return _score_image("dedos", [("C", 4, None), ("E", 4, None), ("G", 4, None), ("C", 5, None),
+                                  ("G", 4, None), ("E", 4, None), ("C", 4, None), ("G", 3, None)],
+                        "Partitura: arpejo com os dedos (Do maior)")
+
+
+def d_m3_partitura_compasso():
+    return _score_image("compasso", [("C", 4, None), ("D", 4, None), ("E", 4, None),
+                                     ("D", 4, None), ("C", 4, None), ("D", 4, None)],
+                        "Partitura: 6/8 em Do (agrupar as colcheias em 3 + 3)")
+
+
+def d_m3_partitura_konokol():
+    return _score_image("konokol", [("C", 4, None), ("E", 4, None), ("D", 4, None), ("F", 4, None),
+                                    ("E", 4, None), ("G", 4, None), ("C", 5, None), ("G", 4, None)],
+                        "Partitura: celula ritmica em Do para falar e tocar")
+
+
+DIAGRAMS.update({
+    "m3_leitura_ritmica": d_m3_leitura_ritmica,
+    "m3_pulsacao_subdivisao": d_m3_pulsacao_subdivisao,
+    "m3_cifrado_divisao": d_m3_cifrado_divisao,
+    "m3_celulas_ritmicas": d_m3_celulas_ritmicas,
+    "m3_acentuacoes": d_m3_acentuacoes,
+    "m3_levadas_palheta": d_m3_levadas_palheta,
+    "m3_direcoes_palheta": d_m3_direcoes_palheta,
+    "m3_mapa_mao_direita": d_m3_mapa_mao_direita,
+    "m3_levadas_dedos": d_m3_levadas_dedos,
+    "m3_compassos": d_m3_compassos,
+    "m3_formulas_incomuns": d_m3_formulas_incomuns,
+    "m3_konokol": d_m3_konokol,
+    "m3_percussao_sanfona": d_m3_percussao_sanfona,
+    "m3_partitura_leitura": d_m3_partitura_leitura,
+    "m3_partitura_subdivisao": d_m3_partitura_subdivisao,
+    "m3_partitura_cifrado": d_m3_partitura_cifrado,
+    "m3_partitura_celula": d_m3_partitura_celula,
+    "m3_partitura_palheta": d_m3_partitura_palheta,
+    "m3_partitura_dedos": d_m3_partitura_dedos,
+    "m3_partitura_compasso": d_m3_partitura_compasso,
+    "m3_partitura_konokol": d_m3_partitura_konokol,
+})
+
+
 def main() -> None:
     out_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                            "Source", "Course", "Content", "Diagrams")

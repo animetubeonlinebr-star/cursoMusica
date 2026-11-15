@@ -1114,7 +1114,496 @@ namespace
         return m;
     }
 
-    // Modules 3..20 exist as placeholders so the list is honest about what is
+    // Module 3 — Etapa 3: ritmo, leitura e levadas. The most rhythmic module of
+    // the level: the playable exercises are graded on the metronome grid
+    // (usesGrid = true) and the rhythmic cell of the topic appears in m.rhythm
+    // (REQ-015). Level 2, target BPM 68, on-grid target 0.77 (MUSIC.md).
+    CourseModule makeModule3()
+    {
+        CourseModule m;
+        m.number = 3;
+        m.title = juce::String::fromUTF8 ("Ritmo, leitura e levadas");
+        m.objective = juce::String::fromUTF8 (
+            "Desenvolver a compreensão rítmica e a capacidade de acompanhar "
+            "diferentes estilos — lendo o ritmo e tocando levadas na grade.");
+        m.level = 2;          // MUSIC.md: módulos 3–4 = nível 2 (vamps de 2 acordes)
+        m.targetBpm = 68;     // MUSIC.md, módulo 3
+        m.onGridTarget = 0.77f;
+        m.implemented = true;
+
+        m.lessons = {
+            detail (block ("A", juce::String::fromUTF8 ("Leitura rítmica e convenções de escrita"), {
+                "Ritmo é a organização do som no tempo: pulso, tempo e compasso.",
+                "Figuras: semibreve (4), mínima (2), semínima (1), colcheia (1/2), semicolcheia (1/4).",
+                "Pausas, ponto de aumento e ligadura completam a escrita do ritmo."
+            }), content::topic3A()),
+            detail (block ("B", juce::String::fromUTF8 ("Pulsação e subdivisão"), {
+                "Pulso é a batida constante; subdivisão é reparti-lo em partes iguais.",
+                "Binária divide em 2 ou 4; ternária divide em 3.",
+                "Cada nível de subdivisão dobra as notas sem mudar o pulso."
+            }), content::topic3B()),
+            detail (block ("C", juce::String::fromUTF8 ("Cifrado com divisão"), {
+                "A cifra diz o acorde; a divisão diz como ele se distribui no tempo.",
+                "Acorde sustentado, marcado ou sincopado: escolha por estilo.",
+                "O baixo em movimento (C/E, C/G) enriquece a levada sem trocar o acorde."
+            }), content::topic3C()),
+            detail (block ("D", juce::String::fromUTF8 ("Células rítmicas e acentuações"), {
+                "Célula rítmica é um desenho curto de ataques que se repete.",
+                "Combinando células, você monta qualquer levada.",
+                "Acentuar (tempo forte, fraco ou contratempo) dá o groove."
+            }), content::topic3D()),
+            detail (block ("E", juce::String::fromUTF8 ("Levadas com palheta"), {
+                "A mão direita, com a palheta, faz o ritmo.",
+                "Palhetada alternada (para baixo e para cima) economiza movimento.",
+                "Palm mute e dinâmica dão relevo à levada de rock."
+            }), content::topic3E()),
+            detail (block ("F", juce::String::fromUTF8 ("Levadas com os dedos e mapa da mão direita"), {
+                "Cada dedo cuida de um grupo de cordas: p nos graves, i/m/a nos agudos.",
+                "A levada básica separa o baixo (polegar) do acorde (dedos).",
+                "A bossa nova usa polegar nos tempos e dedos nas síncopes."
+            }), content::topic3F()),
+            detail (block ("G", juce::String::fromUTF8 ("Compassos simples, compostos e fórmulas incomuns"), {
+                "A fórmula de compasso diz quantos tempos e qual figura vale um tempo.",
+                "Simples divide o tempo em 2; compostos dividem em 3.",
+                "5/4 e 7/8 agrupam os tempos em blocos de 2 e 3."
+            }), content::topic3G()),
+            detail (block ("H", juce::String::fromUTF8 ("Sílabas rítmicas (Konokol), percussões e efeito sanfona"), {
+                "Falar o ritmo com sílabas (TÁ, TÁ-KI) antes de tocar.",
+                "O Konokol é a solfa rítmica indiana, ótima para ritmos irregulares.",
+                "Percussão no violão e efeito sanfona dão groove ao acompanhamento."
+            }), content::topic3H()),
+        };
+
+        // Exercises: at least three per topic, mixing verifiable quizzes (reading
+        // and counting) and playable exercises graded on the metronome grid (the
+        // app recognises the notes and checks the alignment, REQ-008/REQ-015).
+        // Ids follow EX-3.<topico>.<n>, numbered per topic.
+        auto add = [&m] (Exercise e, const char* topic)
+        {
+            e.lessonId = topic;
+            m.exercises.push_back (std::move (e));
+            return (int) m.exercises.size() - 1;
+        };
+
+        // --- Topic A — leitura rítmica ---------------------------------------
+        add (exercise ("EX-3.A.1", juce::String::fromUTF8 ("Questionário: figuras e valores"),
+                       juce::String::fromUTF8 ("Responder ao questionário das figuras rítmicas e seus valores."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões de leitura rítmica.")), "A");
+        m.exercises.back().quiz = {
+            question ("Quantos tempos vale uma semibreve em 4/4?",
+                      { "1", "2", "4", "8" }, 2),
+            question ("Quantos tempos vale uma semínima?",
+                      { "1", "2", "1/2", "4" }, 0),
+            question ("Quanto vale uma colcheia?",
+                      { "1 tempo", "meio tempo", "1/4 de tempo", "dois tempos" }, 1),
+            question ("O que o ponto de aumento faz?",
+                      { "Acrescenta metade do valor da figura",
+                        "Dobra o valor da figura",
+                        "Nada",
+                        "Divide a figura por dois" }, 0),
+            question ("Para que serve a ligadura de valor?",
+                      { "Somar a duração de duas notas de mesma altura",
+                        "Separar duas notas",
+                        "Aumentar o volume",
+                        "Mudar a altura" }, 0),
+        };
+        add (exercise ("EX-3.A.2", juce::String::fromUTF8 ("Tocar semínimas na grade"),
+                       juce::String::fromUTF8 ("Tocar quatro semínimas (Dó) na grade do metrônomo, a 68 BPM."),
+                       juce::String::fromUTF8 ("Notas reconhecidas e alinhadas à grade (on_grid_ratio ≥ 0,77).")), "A");
+        m.exercises.back().targets = notes ({ "C4", "C4", "C4", "C4" });
+        m.exercises.back().subdivision = course::TempoGrid::Subdivision::quarter;
+        add (exercise ("EX-3.A.3", juce::String::fromUTF8 ("Questionário: pulso, tempo e compasso"),
+                       juce::String::fromUTF8 ("Responder ao questionário de pulso, tempo e compasso."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões de compasso.")), "A");
+        m.exercises.back().quiz = {
+            question ("O que é o pulso?",
+                      { "A batida regular e constante da música",
+                        "O volume da nota",
+                        "A altura da nota",
+                        "O número de cordas" }, 0),
+            question ("Em 4/4, quantos tempos há por compasso?",
+                      { "2", "3", "4", "6" }, 2),
+            question ("O que a barra de compasso faz?",
+                      { "Separa um compasso do seguinte",
+                        "Indica o volume",
+                        "Muda a tonalidade",
+                        "Aumenta o tempo" }, 0),
+            question ("O andamento mede o quê?",
+                      { "A velocidade do pulso (BPM)",
+                        "O volume",
+                        "A altura",
+                        "O número de notas" }, 0),
+        };
+
+        // --- Topic B — pulsação e subdivisão --------------------------------
+        add (exercise ("EX-3.B.1", juce::String::fromUTF8 ("Questionário: pulso e subdivisão"),
+                       juce::String::fromUTF8 ("Responder ao questionário de pulso e subdivisão."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões de subdivisão.")), "B");
+        m.exercises.back().quiz = {
+            question ("Subdividir é:",
+                      { "Repartir o pulso em partes iguais",
+                        "Tocar mais rápido",
+                        "Aumentar o volume",
+                        "Mudar a tonalidade" }, 0),
+            question ("A subdivisão binária divide o pulso em:",
+                      { "2 partes iguais", "3 partes iguais", "5 partes", "nenhuma" }, 0),
+            question ("A subdivisão ternária divide o pulso em:",
+                      { "2 partes iguais", "3 partes iguais", "4 partes iguais", "6 partes" }, 1),
+            question ("Contar '1 e 2 e 3 e 4 e' corresponde a qual subdivisão?",
+                      { "Colcheias", "Tercinas", "Semínimas", "Semibreves" }, 0),
+            question ("Qual estilo usa subdivisão ternária?",
+                      { "Blues / shuffle", "Rock", "Pop", "Funk" }, 0),
+        };
+        add (exercise ("EX-3.B.2", juce::String::fromUTF8 ("Tocar colcheias na grade"),
+                       juce::String::fromUTF8 ("Tocar oito colcheias (Dó) na grade, dois ataques por tempo."),
+                       juce::String::fromUTF8 ("Notas reconhecidas e alinhadas à grade (on_grid_ratio ≥ 0,77).")), "B");
+        m.exercises.back().targets = notes ({ "C4", "C4", "C4", "C4", "C4", "C4", "C4", "C4" });
+        m.exercises.back().subdivision = course::TempoGrid::Subdivision::eighth;
+        add (exercise ("EX-3.B.3", juce::String::fromUTF8 ("Tocar semicolcheias na grade"),
+                       juce::String::fromUTF8 ("Tocar dezesseis semicolcheias (Dó) na grade, quatro ataques por tempo."),
+                       juce::String::fromUTF8 ("Notas reconhecidas e alinhadas à grade (on_grid_ratio ≥ 0,77).")), "B");
+        m.exercises.back().targets = notes ({ "C4", "C4", "C4", "C4", "C4", "C4", "C4", "C4",
+                                              "C4", "C4", "C4", "C4", "C4", "C4", "C4", "C4" });
+        m.exercises.back().subdivision = course::TempoGrid::Subdivision::sixteenth;
+        add (exercise ("EX-3.B.4", juce::String::fromUTF8 ("Tempo forte e fraco"),
+                       juce::String::fromUTF8 ("Dizer o peso de cada tempo e o papel do contratempo."),
+                       juce::String::fromUTF8 ("Acerto ≥90% no questionário de acentos.")), "B");
+        m.exercises.back().quiz = {
+            question ("Em 4/4, qual tempo é o mais forte?",
+                      { "1", "2", "3", "4" }, 0),
+            question ("O contratempo é:",
+                      { "A subdivisão entre dois tempos",
+                        "O tempo mais forte",
+                        "Uma pausa",
+                        "Um acorde" }, 0),
+            question ("Acentuar o contratempo é a marca de qual estilo?",
+                      { "Samba, funk e bossa", "Marcha", "Valsa", "Hino" }, 0),
+            question ("Perder o pulso significa:",
+                      { "Não manter a batida constante",
+                        "Tocar baixo",
+                        "Mudar de acorde",
+                        "Parar de tocar" }, 0),
+        };
+
+        // --- Topic C — cifrado com divisão ----------------------------------
+        add (exercise ("EX-3.C.1", juce::String::fromUTF8 ("Questionário: cifra e divisão"),
+                       juce::String::fromUTF8 ("Responder ao questionário de cifra com divisão."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões de cifra.")), "C");
+        m.exercises.back().quiz = {
+            question ("O que a cifra descreve?",
+                      { "O acorde", "O ritmo exato", "O volume", "O andamento" }, 0),
+            question ("O que a divisão do compasso acrescenta à cifra?",
+                      { "Quando e como o acorde é tocado",
+                        "A tonalidade",
+                        "O volume",
+                        "O número de cordas" }, 0),
+            question ("Em C/E, o que significa a barra?",
+                      { "A nota do baixo é Mi",
+                        "O acorde é menor",
+                        "Toca duas vezes",
+                        "O acorde é suspenso" }, 0),
+            question ("Tocar o mesmo acorde em colcheias em vez de semínimas muda:",
+                      { "A levada (o ritmo)", "A harmonia", "A tonalidade", "Nada" }, 0),
+        };
+        add (exercise ("EX-3.C.2", juce::String::fromUTF8 ("Progressão C–G–Am–F na grade"),
+                       juce::String::fromUTF8 ("Tocar C – G – Am – F, um acorde por tempo, na grade a 68 BPM."),
+                       juce::String::fromUTF8 ("Acordes reconhecidos e alinhados à grade (on_grid_ratio ≥ 0,77).")), "C");
+        m.exercises.back().chordProgression = {
+            { 0, 4, 7 },    // C
+            { 7, 11, 2 },   // G
+            { 9, 0, 4 },    // Am
+            { 5, 9, 0 },    // F
+        };
+        add (exercise ("EX-3.C.3", juce::String::fromUTF8 ("Arpejo de Dó na grade"),
+                       juce::String::fromUTF8 ("Tocar o arpejo de Dó maior em colcheias, dividindo o compasso."),
+                       juce::String::fromUTF8 ("Notas reconhecidas e alinhadas à grade (on_grid_ratio ≥ 0,77).")), "C");
+        m.exercises.back().targets = notes ({ "C4", "E4", "G4", "C5", "G4", "E4", "C4", "G3" });
+        m.exercises.back().subdivision = course::TempoGrid::Subdivision::eighth;
+
+        // --- Topic D — células rítmicas e acentuações -----------------------
+        add (exercise ("EX-3.D.1", juce::String::fromUTF8 ("Questionário: células e acentos"),
+                       juce::String::fromUTF8 ("Responder ao questionário de células rítmicas e acentuações."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões de células.")), "D");
+        m.exercises.back().quiz = {
+            question ("O que é uma célula rítmica?",
+                      { "Um desenho curto de ataques que se repete",
+                        "Um acorde de três notas",
+                        "Uma escala",
+                        "Um tipo de palheta" }, 0),
+            question ("Para que serve uma célula?",
+                      { "Montar levadas a partir de um padrão",
+                        "Afinar o instrumento",
+                        "Aumentar o volume",
+                        "Mudar a tonalidade" }, 0),
+            question ("Acentuar é:",
+                      { "Dar relevo a um tempo ou contratempo",
+                        "Tocar mais rápido",
+                        "Tocar mais grave",
+                        "Parar" }, 0),
+            question ("No samba e no funk, o acento cai:",
+                      { "No contratempo (o 'e')", "No tempo 1", "Na pausa", "Nunca" }, 0),
+        };
+        add (exercise ("EX-3.D.2", juce::String::fromUTF8 ("Tocar uma célula de rock na grade"),
+                       juce::String::fromUTF8 ("Tocar a célula TA (TA-KI) TA (TA-KI) em Dó, na grade."),
+                       juce::String::fromUTF8 ("Notas reconhecidas e alinhadas à grade (on_grid_ratio ≥ 0,77).")), "D");
+        m.exercises.back().targets = notes ({ "C4", "C4", "C4", "C4", "C4", "C4" });
+        m.exercises.back().subdivision = course::TempoGrid::Subdivision::eighth;
+        add (exercise ("EX-3.D.3", juce::String::fromUTF8 ("Células e pausas"),
+                       juce::String::fromUTF8 ("Reconhecer o papel das pausas e do abafamento na célula."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões de pausas.")), "D");
+        m.exercises.back().quiz = {
+            question ("Na célula, a pausa serve para:",
+                      { "Dar respiração e groove à levada",
+                        "Aumentar o volume",
+                        "Mudar o acorde",
+                        "Afundar o tempo" }, 0),
+            question ("Uma 'dead note' (nota abafada) produz:",
+                      { "Um som percussivo, sem altura definida",
+                        "Uma nota longa",
+                        "Um acorde maior",
+                        "Silêncio total" }, 0),
+            question ("O groove nasce de:",
+                      { "Célula + acento + pulso firme",
+                        "Volume alto",
+                        "Muitas notas",
+                        "Tocar rápido" }, 0),
+        };
+
+        // --- Topic E — levadas com palheta ----------------------------------
+        add (exercise ("EX-3.E.1", juce::String::fromUTF8 ("Questionário: levadas com palheta"),
+                       juce::String::fromUTF8 ("Responder ao questionário de levadas com palheta."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões de palhetada.")), "E");
+        m.exercises.back().quiz = {
+            question ("A palhetada alternada é:",
+                      { "Alternar ataques para baixo e para cima",
+                        "Tocar só para baixo",
+                        "Tocar só para cima",
+                        "Tocar com os dedos" }, 0),
+            question ("O que é palm mute?",
+                      { "Abafar as cordas com a base da mão, perto da ponte",
+                        "Tocar mais forte",
+                        "Usar os dedos",
+                        "Afinar a corda" }, 0),
+            question ("No rock, a levada típica com palheta:",
+                      { "Marca acordes nos tempos fortes, muitas vezes com palm mute",
+                        "Usa só notas abafadas",
+                        "Toca apenas no contratempo",
+                        "Não usa acordes" }, 0),
+            question ("A vantagem da palhetada alternada é:",
+                      { "Economizar movimento e manter o tempo",
+                        "Aumentar o volume",
+                        "Mudar a tonalidade",
+                        "Tocar mais grave" }, 0),
+        };
+        add (exercise ("EX-3.E.2", juce::String::fromUTF8 ("Palhetada alternada na corda 6"),
+                       juce::String::fromUTF8 ("Tocar oito colcheias na 6ª corda solta (Mi) na grade, a 68 BPM."),
+                       juce::String::fromUTF8 ("Notas reconhecidas e alinhadas à grade (on_grid_ratio ≥ 0,77).")), "E");
+        m.exercises.back().targets = notes ({ "E2", "E2", "E2", "E2", "E2", "E2", "E2", "E2" });
+        m.exercises.back().subdivision = course::TempoGrid::Subdivision::eighth;
+        add (exercise ("EX-3.E.3", juce::String::fromUTF8 ("Power chord na grade"),
+                       juce::String::fromUTF8 ("Tocar um power chord de Mi (E5: tônica e quinta) na grade."),
+                       juce::String::fromUTF8 ("Notas reconhecidas e alinhadas à grade (on_grid_ratio ≥ 0,77).")), "E");
+        m.exercises.back().chordPitchClasses = { 4, 11 };   // E5: E + B
+        add (exercise ("EX-3.E.4", juce::String::fromUTF8 ("Varredura de acorde"),
+                       juce::String::fromUTF8 ("Reconhecer os tipos de varredura (cheia, parcial, alternada)."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões de varredura.")), "E");
+        m.exercises.back().quiz = {
+            question ("A varredura (strumming) é:",
+                      { "Passar a palheta por várias cordas em um movimento",
+                        "Tocar uma corda só",
+                        "Usar os dedos",
+                        "Afinar" }, 0),
+            question ("Varredura parcial atinge:",
+                      { "Apenas algumas cordas (ex.: as agudas)",
+                        "Todas as cordas",
+                        "Nenhuma corda",
+                        "Só a 6ª corda" }, 0),
+            question ("Alternar para baixo e para cima na varredura dá:",
+                      { "Fluidez à levada",
+                        "Mais volume",
+                        "Menos groove",
+                        "Nada" }, 0),
+        };
+
+        // --- Topic F — levadas com os dedos ---------------------------------
+        add (exercise ("EX-3.F.1", juce::String::fromUTF8 ("Questionário: mapa da mão direita"),
+                       juce::String::fromUTF8 ("Responder ao questionário do fingerstyle e do mapa da mão direita."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões de dedos.")), "F");
+        m.exercises.back().quiz = {
+            question ("No fingerstyle, o polegar (p) cuida de quais cordas?",
+                      { "As graves (6ª, 5ª, 4ª)", "As agudas (1ª, 2ª, 3ª)",
+                        "Só a 1ª", "Todas" }, 0),
+            question ("Na nomenclatura clássica, 'i', 'm' e 'a' são:",
+                      { "Indicador, médio e anelar",
+                        "Polegar, indicador e médio",
+                        "Três cordas",
+                        "Três acordes" }, 0),
+            question ("Na levada básica de dedos:",
+                      { "O polegar marca o baixo e os dedos o acorde",
+                        "Os dedos marcam o baixo",
+                        "Só o polegar toca",
+                        "Nenhum dedo toca" }, 0),
+            question ("A bossa nova usa:",
+                      { "Polegar nos tempos e dedos nas síncopes",
+                        "Só palheta",
+                        "Só polegar",
+                        "Só o dedo mindinho" }, 0),
+        };
+        add (exercise ("EX-3.F.2", juce::String::fromUTF8 ("Arpejo com os dedos na grade"),
+                       juce::String::fromUTF8 ("Tocar o arpejo de Dó maior com os dedos, em colcheias, na grade."),
+                       juce::String::fromUTF8 ("Notas reconhecidas e alinhadas à grade (on_grid_ratio ≥ 0,77).")), "F");
+        m.exercises.back().targets = notes ({ "C4", "E4", "G4", "C5", "G4", "E4", "C4", "G3" });
+        m.exercises.back().subdivision = course::TempoGrid::Subdivision::eighth;
+        add (exercise ("EX-3.F.3", juce::String::fromUTF8 ("Baixo alternado"),
+                       juce::String::fromUTF8 ("Tocar o baixo alternado (tônica e quinta de Dó) com o polegar."),
+                       juce::String::fromUTF8 ("Notas reconhecidas e alinhadas à grade (on_grid_ratio ≥ 0,77).")), "F");
+        m.exercises.back().targets = notes ({ "C4", "G4", "C4", "G4" });
+        m.exercises.back().subdivision = course::TempoGrid::Subdivision::quarter;
+        add (exercise ("EX-3.F.4", juce::String::fromUTF8 ("Polifonia: duas vozes"),
+                       juce::String::fromUTF8 ("Reconhecer as duas vozes do fingerstyle (baixo e agudo)."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões de polifonia.")), "F");
+        m.exercises.back().quiz = {
+            question ("A grande vantagem dos dedos é:",
+                      { "Tocar duas vozes (baixo e agudo) ao mesmo tempo",
+                        "Tocar mais alto",
+                        "Tocar mais rápido",
+                        "Afinar melhor" }, 0),
+            question ("O arpejo ascendente básico é:",
+                      { "p, i, m, a", "a, m, i, p", "p, p, p", "i, i, i" }, 0),
+            question ("Hybrid picking combina:",
+                      { "Palheta (graves) e dedos (agudos)",
+                        "Só dedos",
+                        "Só palheta",
+                        "Duas palhetas" }, 0),
+        };
+
+        // --- Topic G — compassos --------------------------------------------
+        add (exercise ("EX-3.G.1", juce::String::fromUTF8 ("Questionário: fórmulas de compasso"),
+                       juce::String::fromUTF8 ("Responder ao questionário de compassos simples, compostos e incomuns."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões de compasso.")), "G");
+        m.exercises.back().quiz = {
+            question ("Em uma fórmula de compasso, o número de cima indica:",
+                      { "Quantos tempos há no compasso",
+                        "Qual figura vale um tempo",
+                        "O volume",
+                        "O andamento" }, 0),
+            question ("Um compasso composto divide o tempo em:",
+                      { "3 partes iguais", "2 partes iguais", "4 partes iguais", "5 partes" }, 0),
+            question ("O compasso 6/8 é sentido como:",
+                      { "Dois grupos de três colcheias", "Três tempos de dois",
+                        "Quatro tempos", "Um tempo só" }, 0),
+            question ("Um 7/8 pode ser agrupado como:",
+                      { "2 + 2 + 3", "5 + 5", "3 + 3 + 3", "sempre 4 + 3" }, 0),
+        };
+        add (exercise ("EX-3.G.2", juce::String::fromUTF8 ("Tocar em 6/8 na grade"),
+                       juce::String::fromUTF8 ("Tocar seis colcheias (Dó, Ré, Mi) em 6/8, na grade, agrupando 3 + 3."),
+                       juce::String::fromUTF8 ("Notas reconhecidas e alinhadas à grade (on_grid_ratio ≥ 0,77).")), "G");
+        m.exercises.back().targets = notes ({ "C4", "C4", "C4", "D4", "D4", "D4" });
+        m.exercises.back().subdivision = course::TempoGrid::Subdivision::eighth;
+        add (exercise ("EX-3.G.3", juce::String::fromUTF8 ("Formula incomum 5/4"),
+                       juce::String::fromUTF8 ("Reconhecer os agrupamentos de um 5/4 e de um 7/8."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões de fórmulas incomuns.")), "G");
+        m.exercises.back().quiz = {
+            question ("Um 5/4 agrupado como 3 + 2 conta-se:",
+                      { "1 2 3 / 1 2", "1 2 / 1 2 3 / 1 2", "1 2 3 4 5", "1 / 2 / 3 / 4 / 5" }, 0),
+            question ("Qual estilo costuma usar 5/4 e 7/8?",
+                      { "Jazz moderno e prog rock", "Valsa", "Marcha", "Hino" }, 0),
+            question ("Contar o agrupamento de um compasso incomum serve para:",
+                      { "Não se perder no meio do compasso",
+                        "Aumentar o volume",
+                        "Mudar a tonalidade",
+                        "Afinar" }, 0),
+        };
+
+        // --- Topic H — Konokol, percussão e efeito sanfona ------------------
+        add (exercise ("EX-3.H.1", juce::String::fromUTF8 ("Questionário: sílabas, percussão e sanfona"),
+                       juce::String::fromUTF8 ("Responder ao questionário de sílabas rítmicas, percussão e efeito sanfona."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões de sílabas e percussão.")), "H");
+        m.exercises.back().quiz = {
+            question ("A sílaba 'TÁ-KI' representa:",
+                      { "Duas colcheias", "Uma semínima", "Quatro semicolcheias", "Uma pausa" }, 0),
+            question ("O Konokol é:",
+                      { "Um sistema de solfa rítmica indiana",
+                        "Um tipo de acorde",
+                        "Uma afinação",
+                        "Um estilo de rock" }, 0),
+            question ("O efeito sanfona consiste em:",
+                      { "Alternar o acorde aberto e abafado",
+                        "Tocar mais rápido",
+                        "Afinar a corda",
+                        "Usar só os dedos" }, 0),
+            question ("Bater na madeira do violão serve para:",
+                      { "Marcar o tempo com percussão",
+                        "Aumentar o volume",
+                        "Mudar a tonalidade",
+                        "Afinar" }, 0),
+        };
+        add (exercise ("EX-3.H.2", juce::String::fromUTF8 ("Célula rítmica falada e tocada"),
+                       juce::String::fromUTF8 ("Falar as sílabas e tocar a célula em Dó na grade, a 68 BPM."),
+                       juce::String::fromUTF8 ("Notas reconhecidas e alinhadas à grade (on_grid_ratio ≥ 0,77).")), "H");
+        m.exercises.back().targets = notes ({ "C4", "E4", "D4", "F4", "E4", "G4", "C5", "G4" });
+        m.exercises.back().subdivision = course::TempoGrid::Subdivision::eighth;
+        add (exercise ("EX-3.H.3", juce::String::fromUTF8 ("Efeito sanfona na grade"),
+                       juce::String::fromUTF8 ("Tocar o acorde de Dó maior alternando aberto e abafado, na grade."),
+                       juce::String::fromUTF8 ("Acorde reconhecido e alinhado à grade (on_grid_ratio ≥ 0,77).")), "H");
+        m.exercises.back().chordPitchClasses = { 0, 4, 7 };   // C major
+
+        // The gate closes the module: a two-chord vamp (C–G) on the grid, built
+        // from the material of the module (REQ-009, REQ-015). Level 2 = vamps of
+        // two chords (MUSIC.md).
+        auto& gate = m.exercises.emplace_back (exercise (
+            "GATE-3", juce::String::fromUTF8 ("Desafio de gate — vamp C–G a 68 BPM"),
+            juce::String::fromUTF8 ("Tocar C – G – C – G (vamp de 2 acordes) a 68 BPM, na grade do metrônomo."),
+            juce::String::fromUTF8 ("Acordes reconhecidos e alinhados à grade (≥ 0,77).")));
+        gate.isGate = true;
+        gate.lessonId = "H";
+        gate.chordProgression = {
+            { 0, 4, 7 },    // C
+            { 7, 11, 2 },   // G
+            { 0, 4, 7 },    // C
+            { 7, 11, 2 },   // G
+        };
+
+        m.gateChallenge = juce::String::fromUTF8 (
+            "Tocar C – G (vamp de 2 acordes, nível 2) a 68 BPM com ≥90% de acerto "
+            "de acordes e on_grid_ratio ≥ 0,77. Os acordes são tocados na levada "
+            "estudada no módulo, mantendo o pulso firme.");
+
+        // Pattern and link the module must cite (REQ-007, REQ-010).
+        m.practice.patternId = "PTN-R-PALM";
+        m.practice.patternUse = juce::String::fromUTF8 (
+            "Pedal point abafado + power chords: a base rítmica do módulo, com "
+            "palm mute e palhetada alternada. Complemento: PTN-R-BOSSA (polegar "
+            "nos tempos, dedos nas síncopes) para a levada de dedos.");
+        m.practice.guitarists = { "Kiko Loureiro", "Juninho Afram", "John Petrucci" };
+
+        // Counting cells for the metronome (REQ-015); syllables from the
+        // rhythmic reading chapter of the curated apostila (MUSIC.md, block I).
+        m.rhythm = {
+            { juce::String::fromUTF8 ("Semínima"), juce::String::fromUTF8 ("1 tempo (1/4)"),
+              juce::String::fromUTF8 ("TÁ") },
+            { juce::String::fromUTF8 ("Colcheias"), juce::String::fromUTF8 ("2 por tempo (2/8)"),
+              juce::String::fromUTF8 ("TÁ-KI") },
+            { juce::String::fromUTF8 ("Semicolcheias"), juce::String::fromUTF8 ("4 por tempo (4/16)"),
+              juce::String::fromUTF8 ("TA-KI-TA-KI") },
+            { juce::String::fromUTF8 ("Tercinas"), juce::String::fromUTF8 ("3 por tempo (ternário)"),
+              juce::String::fromUTF8 ("TÁ-KA") },
+        };
+
+        // Curated apostilas (REQ-006, CM-012); see docs/MUSIC.md. The rhythm
+        // chapter of fraseado-melodico, the metric chapter of Bohumil Med and
+        // the studies of Mozart Mello back the module.
+        m.sources = {
+            "pdf-fraseado-melodico",
+            "pdf-p-classtruncatedtext-module-lineclamped-85ulhh-style-max-lines5bohumil-med-teoria-da-musica-5-edicao-p",
+            "pdf-mozart-mello-livroestudosdeguitarra4em1",
+            "pdf-teoria-elementar-da-musica-ricordi-osvaldo-lacerda",
+        };
+
+        return m;
+    }
+
+    // Modules 4..20 exist as placeholders so the list is honest about what is
     // coming (ADR 0005): level, target BPM and alignment come from MUSIC.md.
     CourseModule makePlaceholder (int number, const char* title, int level,
                                   int targetBpm, float onGridTarget)
@@ -1138,7 +1627,7 @@ const std::vector<CourseModule>& ModuleCatalog::getModules()
     static const std::vector<CourseModule> modules {
         makeModule1(),
         makeModule2(),
-        makePlaceholder (3,  "Vamps de 2 acordes",                  2,  68,  0.77f),
+        makeModule3(),
         makePlaceholder (4,  "Vamps de 2 acordes (aplicação)",      2,  72,  0.78f),
         makePlaceholder (5,  "II–V–I",                              3,  76,  0.79f),
         makePlaceholder (6,  "II–V–I (menor)",                      3,  80,  0.80f),
