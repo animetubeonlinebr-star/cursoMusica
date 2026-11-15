@@ -85,8 +85,10 @@ jobs:
             exit 1
           }
           # NSIS resolves File against the script's directory, so RUNTIMEDIR must
-          # be absolute (same reason as APPEXE above).
-          $runtime = Join-Path $PWD "build/runtime"
+          # be absolute (same reason as APPEXE above). Join-Path yields backslashes,
+          # which mixed with the "/*.*" wildcard in installer.nsi makes NSIS report
+          # "no files found"; normalize to forward slashes.
+          $runtime = (Join-Path $PWD "build/runtime") -replace '\\', '/'
           $defines = @("-DAPPEXE=$app", "-DOUTFILE=$out", "-DAPPICON=$icon", "-DRUNTIMEDIR=$runtime")
           if (Test-Path "build/runtime") {
             $defines += "-DRUNTIME"
