@@ -84,7 +84,10 @@ jobs:
             Get-ChildItem -Recurse -Filter *.dll build | Select-Object FullName
             exit 1
           }
-          $defines = @("-DAPPEXE=$app", "-DOUTFILE=$out", "-DAPPICON=$icon")
+          # NSIS resolves File against the script's directory, so RUNTIMEDIR must
+          # be absolute (same reason as APPEXE above).
+          $runtime = Join-Path $PWD "build/runtime"
+          $defines = @("-DAPPEXE=$app", "-DOUTFILE=$out", "-DAPPICON=$icon", "-DRUNTIMEDIR=$runtime")
           if (Test-Path "build/runtime") {
             $defines += "-DRUNTIME"
           }
