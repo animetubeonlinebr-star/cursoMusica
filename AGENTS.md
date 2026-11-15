@@ -191,6 +191,30 @@ docs/MUSIC.md (Etapa N)
                             ↳ merge de `test` em `main` + instalador de teste
 ```
 
+**Agentes por Etapa (3–10).** Além dos agentes genéricos
+(`module-author`, `module-reviewer`, `release-reviewer`), cada Etapa 3–10 tem um
+autor e um revisor próprios, já com objetivo, conteúdos, prática, tópicos
+sugeridos e os dados fixados (nível, BPM meta, `on_grid_ratio`, branch) daquela
+Etapa:
+
+| Etapa | Autor | Revisor | Branch |
+|---|---|---|---|
+| 3 — Ritmo, leitura e levadas | `mc-modulo-3` | `mc-rv-modulo-3` | `feat/modulo-3-ritmo-leitura-e-levadas` |
+| 4 — Construção de acordes: tríades e tétrades | `mc-modulo-4` | `mc-rv-modulo-4` | `feat/modulo-4-construcao-de-acordes-triades-e-tetrades` |
+| 5 — Campo harmônico maior e funções harmônicas | `mc-modulo-5` | `mc-rv-modulo-5` | `feat/modulo-5-campo-harmonico-maior-e-funcoes-harmonicas` |
+| 6 — Escalas menores e campos harmônicos | `mc-modulo-6` | `mc-rv-modulo-6` | `feat/modulo-6-escalas-menores-e-campos-harmonicos` |
+| 7 — Empilhamentos, estruturas modais e sonoridades | `mc-modulo-7` | `mc-rv-modulo-7` | `feat/modulo-7-empilhamentos-estruturas-modais-e-sonoridades` |
+| 8 — Dominantes, cadências e substituições harmônicas | `mc-modulo-8` | `mc-rv-modulo-8` | `feat/modulo-8-dominantes-cadencias-e-substituicoes-harmonicas` |
+| 9 — Harmonia avançada e estruturas especiais | `mc-modulo-9` | `mc-rv-modulo-9` | `feat/modulo-9-harmonia-avancada-e-estruturas-especiais` |
+| 10 — Análise harmônica, verticalização e reharmonização | `mc-modulo-10` | `mc-rv-modulo-10` | `feat/modulo-10-analise-harmonica-verticalizacao-e-reharmonizacao` |
+
+As Etapas 3–10 são construídas **em paralelo** (uma branch por Etapa, a partir de
+`test`). Como cada branch altera a mesma asserção final de `testModule2()` ("os
+módulos 3..20 são placeholders"), essa asserção deve ser trocada por uma regra
+que valha para qualquer conjunto implementado (números únicos, implementados
+contíguos a partir de 1, `findModule(N)` devolve o módulo), de modo que as
+branches não conflitem entre si.
+
 **Regras do pipeline:**
 
 - Um módulo por branch; um PR por módulo.
@@ -332,6 +356,8 @@ Uma entrega só é "pronta" quando:
 | 2026-11-16 | architect + developer + data-engineer + designer | **Dois bugs do cliente: progresso perdido ao fechar e tópico de outro módulo sem exercícios.** (1) *Progresso perdido:* `ProgressStore`, `TuningSettings` e `PluginHost` abriam **três `PropertiesFile` sobre o mesmo `CursoMusica.settings`**; cada `save` reescreve o mapa inteiro, então a última instância a gravar (o `PluginHost`, no shutdown) apagava as chaves que não tinha carregado — o progresso entre elas. Reproduzido em teste. Correção: instância única compartilhada `Source/Data/AppSettings.*` (referência, não `unique_ptr`), consumida pelos três. (2) *Tópico sem exercícios:* `ModuleComponent::selectTopic`/`showModule` chamavam `PracticePanel::setTopicFilter` **sem antes apontar o painel para o módulo clicado**, então o filtro corria sobre o módulo anterior (o 2 é *placeholder*, sem exercícios) e a lista saía vazia; novo `PracticePanel::setModuleAndTopic(module, lessonId)` fixa módulo+tópico juntos e a filtragem virou a função pura `Course/ExerciseFilter.h` (testável). Bônus do mesmo pedido: o app **não tinha como configurar o banco** (só `PGHOST` do ambiente, que um app aberto pelo menu Iniciar não herda), então o schema `curso-musica` nunca era criado — nova janela **Configurações → Banco de dados…** (`Source/UI/DatabaseSettingsComponent.*`) grava host/porta/usuário/banco/schema no settings (**senha nunca**, vem de `PGPASSWORD`) e tem **Testar conexão**; `PostgresConfig::fromSettings()` passa a ter precedência sobre o ambiente | Progresso sobrevive ao fechamento, tópico lista os exercícios certos e o aluno liga o espelhamento pela UI; suíte em **377 checagens verdes** (359 offline) |
 | 2026-11-16 | orquestrador + musician + pm + po + tech-lead + architect + developer + qa + security-engineer + set | **Pipeline de módulos (Etapas) e painel de revisão.** Criados três sub-agentes: `module-author` (transforma uma Etapa de `docs/MUSIC.md` em módulo completo, no padrão do Módulo 2 — teoria ≥5 páginas/tópico, imagens, áudios, partituras com áudio, 3–5 exercícios/tópico, exercícios tocados no instrumento reconhecidos pelo app), `module-reviewer` (painel: Músico, PM, PO, Tech Lead, Arquiteto, Tech Lead, Software Engineers, Tech Lead, QA, Security, SET; qualquer problema volta ao autor e o painel **reinicia do começo**) e `release-reviewer` (revisão final cross-módulo: Arquiteto, Tech Lead, Software Engineers, Tech Lead; merge para `main` + instalador de teste). Um módulo por branch/PR; nenhum módulo aceito sem painel verde na mesma rodada; merge só por PR, sem reescrever histórico, backup antes de todo push (§11) | Todo o curso (Etapas 2–10) passa a ser produzido e revisado pelo mesmo pipeline, com qualidade e padrão verificáveis |
 | 2026-11-16 | musician + developer + architect + qa + set | **Módulo 2 (Etapa 2 — Teoria dos intervalos e percepção musical) implementado** como referência do padrão: `Source/Course/Intervals.*` (teoria pura de intervalos), `Source/Audio/TonePlayer.*` (áudio de exemplos, RT-safe, REQ-004), `ContentKind::audio`/`score` no modelo e na UI, `Exercise::interval` + `Exercise::usesGrid` e `evaluateIntervals` (o app reconhece as notas tocadas e confere a distância em semitons, em qualquer posição do braço); 8 tópicos (A–H), cada um com ≥5 páginas, imagens, tabelas, áudios e partitura com áudio; 3–5 exercícios por tópico (EX-2.*), gate `C–F–G–C` a 64 BPM; suíte em **950 checagens verdes** | Módulo 2 jogável e auditável; serve de gabarito para as Etapas seguintes |
+| 2026-11-16 | orquestrador + musician + pm + po + tech-lead + architect + developer + qa + security-engineer + set | **16 sub-agentes por Etapa (3–10) criados.** Cada Etapa 3–10 ganhou um **autor** (`mc-modulo-<N>`) e um **revisor** (`mc-rv-modulo-<N>`), já com objetivo, conteúdos, prática, tópicos sugeridos e os dados fixados da Etapa (nível, BPM meta, `on_grid_ratio`, branch). O autor segue o padrão do Módulo 2 (teoria ≥5 páginas/tópico, imagens, áudios, partituras com áudio, 3–5 exercícios/tópico, exercícios tocados reconhecidos pelo app) numa branch própria; o revisor roda o painel completo (Músico, PM, PO, Tech Lead, Arquiteto, Tech Lead, Software Engineers, Tech Lead, QA, Security, SET) e qualquer achado devolve o item ao autor, reiniciando o painel até todos passarem. As Etapas 3–10 são construídas **em paralelo**; a asserção final de `testModule2()` ("3..20 são placeholders") passa a ser uma regra genérica para as branches não conflitarem | As Etapas 3–10 passam a ser produzidas e revisadas em paralelo pelo mesmo pipeline verificável do Módulo 2 |
+
 
 ## 8. Convenções de código
 
