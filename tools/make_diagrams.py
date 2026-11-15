@@ -947,6 +947,247 @@ DIAGRAMS.update({
 })
 
 
+# --------------------------------------------------------------------------
+# Modulo 6 — escalas menores e campos harmonicos.
+# --------------------------------------------------------------------------
+def _m6_scale_image(title_text, subtitle_text, pcs, root_pc, footnote):
+    h = 720
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, title_text)
+    y = subtitle(d, subtitle_text, y)
+    fretboard(d, MARGIN + 44, y + 40, W - 2 * MARGIN - 88, 300,
+              n_frets=12, start_fret=0, show_notes=True, highlight=pcs, root_pc=root_pc)
+    string_labels(d, MARGIN + 12, y + 40, 300)
+    d.text((MARGIN, h - 118), "Roxo: tonica. Ciano: notas da escala. Cada corda e uma regua de semitons.",
+           font=font(20), fill=TXT2, anchor="la")
+    d.text((MARGIN, h - 74), footnote, font=font(21, True), fill=GOLD, anchor="la")
+    return img
+
+
+def d_m6_escala_menor_natural():
+    return _m6_scale_image(
+        "Escala menor natural (La menor)",
+        "Graus: 1  2  b3  4  5  b6  b7. Em La menor: A B C D E F G.",
+        {9, 11, 0, 2, 4, 5, 7}, 9,
+        "Menor natural = relativa maior comecando no 6o grau (La menor = Do maior).")
+
+
+def d_m6_menor_harmonica():
+    return _m6_scale_image(
+        "Escala menor harmonica (La menor harmonica)",
+        "Graus: 1  2  b3  4  5  b6  7. Em La menor harmonica: A B C D E F G#.",
+        {9, 11, 0, 2, 4, 5, 8}, 9,
+        "O 7o grau sobe (G#): cria a sensivel e o intervalo de 2a aumentada (F -> G#).")
+
+
+def d_m6_menor_melodica():
+    return _m6_scale_image(
+        "Escala menor melodica (La menor melodica)",
+        "Graus: 1  2  b3  4  5  6  7. Em La menor melodica: A B C D E F# G#.",
+        {9, 11, 0, 2, 4, 6, 8}, 9,
+        "Sobem o 6o e o 7o graus (F# e G#): sobe suave e resolve a sensivel sem o salto.")
+
+
+def d_m6_campo_harmonico_menor():
+    h = 720
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Campo harmonico menor de La (menor natural)")
+    y = subtitle(d, "i  ii  III  iv  v  VI  VII — os acordes que nascem da escala.", y)
+    chords = [("Am", "i", "tonica", [-1, 0, 2, 2, 1, 0]),
+              ("Bm7b5", "ii", "subdominante", [-1, 2, 3, 2, 3, -1]),
+              ("Cmaj7", "III", "relativa maior", [-1, 3, 2, 0, 0, 0]),
+              ("Dm7", "iv", "subdominante", [-1, -1, 0, 2, 1, 1]),
+              ("Em7", "v", "dominante fraco", [0, 2, 2, 0, 3, 0]),
+              ("Fmaj7", "VI", "subdominante", [-1, -1, 3, 2, 1, 0]),
+              ("G7", "VII", "dominante", [3, 2, 0, 0, 0, 1])]
+    bw = (W - 2 * MARGIN) / 4
+    for i, (name, deg, func, frets) in enumerate(chords):
+        cx = MARGIN + bw * (i % 4 + 0.5)
+        cy = y + 70 + (i // 4) * 300
+        chord_box(d, cx, cy, 130, 140, frets, f"{name} ({deg})", start_fret=1,
+                  caption=func, note_font=font(12, True))
+    return img
+
+
+def _m6_modes_image(title_text, subtitle_text, items, footnote):
+    h = 120 + len(items) * 62
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, title_text)
+    y = subtitle(d, subtitle_text, y)
+    top = y + 34
+    for i, (name, degrees, color) in enumerate(items):
+        yy = top + i * 62
+        d.rounded_rectangle([MARGIN, yy, W - MARGIN, yy + 52], radius=8,
+                            fill=RAISED if i % 2 == 0 else SURFACE)
+        d.text((MARGIN + 18, yy + 26), name, font=font(22, True), fill=color, anchor="lm")
+        d.text((MARGIN + 420, yy + 26), degrees, font=font(20), fill=TXT, anchor="lm")
+    d.text((W / 2, h - 40), footnote, font=font(20, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m6_modos_harmonica():
+    items = [("1. Menor harmonica", "1  2  b3  4  5  b6  7", ACCENT),
+             ("2. Locrio 6 natural", "1  b2  b3  4  b5  6  b7", CYAN),
+             ("3. Jonio #5", "1  2  3  4  #5  6  7", CYAN),
+             ("4. Dorico #4", "1  2  b3  #4  5  6  b7", CYAN),
+             ("5. Frigio dominante", "1  b2  3  4  5  b6  b7", GOLD),
+             ("6. Lidio #2", "1  #2  3  #4  5  6  7", CYAN),
+             ("7. Superlocrio bb7", "1  b2  b3  b4  b5  b6  bb7", DANGER)]
+    return _m6_modes_image(
+        "Modos da escala menor harmonica",
+        "Cada modo comeca num grau diferente da mesma escala de La menor harmonica.",
+        items, "O 5o modo (frigio dominante) e a sonoridade do flamenco e do V7(b9).")
+
+
+def d_m6_modos_melodica():
+    items = [("1. Menor melodica", "1  2  b3  4  5  6  7", ACCENT),
+             ("2. Dorico b2", "1  b2  b3  4  5  6  b7", CYAN),
+             ("3. Lidio aumentado", "1  2  3  #4  #5  6  7", CYAN),
+             ("4. Lidio dominante", "1  2  3  #4  5  6  b7", GOLD),
+             ("5. Mixolidio b6", "1  2  3  4  5  b6  b7", CYAN),
+             ("6. Locrio 2 natural", "1  2  b3  4  b5  b6  b7", CYAN),
+             ("7. Escala alterada", "1  b2  b3  b4  b5  b6  b7", DANGER)]
+    return _m6_modes_image(
+        "Modos da escala menor melodica",
+        "A menor melodica gera sete sonoridades, muito usadas no jazz e na bossa.",
+        items, "O 4o (lidio dominante) e o 7o (alterada) sao os mais usados sobre dominantes.")
+
+
+def d_m6_relacao_maior_menor():
+    h = 560
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Maior, menor relativa e menor paralela")
+    y = subtitle(d, "Tres escalas com a mesma tonica ou a mesma armadura — e sons bem diferentes.", y)
+    cols = [("Do maior", ["C  Dm  Em  F  G  Am  Bdim"], "1 2 3 4 5 6 7", ACCENT),
+            ("La menor (relativa)", ["Am  Bdim  C  Dm  Em  F  G"], "1 2 b3 4 5 b6 b7", CYAN),
+            ("Do menor (paralela)", ["Cm  Ddim  Eb  Fm  Gm  Ab  Bb"], "1 2 b3 4 5 b6 b7", GOLD)]
+    top = y + 50
+    col_w = (W - 2 * MARGIN) / 3
+    for c, (name, field, degrees, color) in enumerate(cols):
+        x = MARGIN + c * col_w
+        d.rounded_rectangle([x + 12, top, x + col_w - 12, top + 330], radius=12, fill=RAISED)
+        d.text((x + col_w / 2, top + 34), name, font=font(24, True), fill=color, anchor="mm")
+        d.text((x + col_w / 2, top + 92), field[0], font=font(19, True), fill=TXT, anchor="mm")
+        d.text((x + col_w / 2, top + 150), degrees, font=font(19), fill=TXT2, anchor="mm")
+        d.text((x + col_w / 2, top + 230), "mesma tonica" if c != 1 else "mesma armadura",
+               font=font(18), fill=CYAN, anchor="mm")
+    d.text((W / 2, h - 46), "Relativa: mesma armadura, outra tonica. Paralela: mesma tonica, outra armadura.",
+           font=font(20), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m6_subdominante_menor():
+    h = 660
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Subdominantes menores emprestados (em Do maior)")
+    y = subtitle(d, "Acordes do campo menor paralelo usados dentro do campo maior.", y)
+    items = [("iv — Fm7", "empresta o b6 (Ab) e o b3 (Eb)", "menor"),
+             ("ii — Dm7(b5)", "subdominante menor meio-diminuto", "instavel"),
+             ("bVI — Abmaj7", "cor de MPB e bossa", "suave"),
+             ("bVII — Bb7", "dominante do bIII", "modal"),
+             ("bIII — Eb", "relativa do campo menor", "escura"),
+             ("bII — Db (napolitano)", "bII maior, cadencia dramatica", "dramatico")]
+    top = y + 40
+    for i, (name, role, feel) in enumerate(items):
+        yy = top + i * 62
+        d.rounded_rectangle([MARGIN, yy, W - MARGIN, yy + 52], radius=8,
+                            fill=RAISED if i % 2 == 0 else SURFACE)
+        d.text((MARGIN + 18, yy + 26), name, font=font(22, True), fill=ACCENT, anchor="lm")
+        d.text((MARGIN + 470, yy + 26), role, font=font(20), fill=TXT, anchor="lm")
+        d.text((MARGIN + 1020, yy + 26), feel, font=font(20, True), fill=CYAN, anchor="lm")
+    return img
+
+
+def d_m6_modos_gregos():
+    items = [("Jonio (maior)", "1  2  3  4  5  6  7", ACCENT),
+             ("Dorico", "1  2  b3  4  5  6  b7", CYAN),
+             ("Frigio", "1  b2  b3  4  5  b6  b7", CYAN),
+             ("Lidio", "1  2  3  #4  5  6  7", CYAN),
+             ("Mixolidio", "1  2  3  4  5  6  b7", CYAN),
+             ("Eolio (menor natural)", "1  2  b3  4  5  b6  b7", ACCENT),
+             ("Locrio", "1  b2  b3  4  b5  b6  b7", DANGER)]
+    return _m6_modes_image(
+        "Os sete modos gregos (a partir da escala maior)",
+        "Cada modo e a escala maior comecando num grau diferente.",
+        items, "Tres sao maiores (jonio, lidio, mixolidio), tres menores (dorico, frigio, eolio) e um diminuto.")
+
+
+def d_m6_partitura_menor_natural():
+    return _score_image("menor natural", [("A", 3, None), ("B", 3, None), ("C", 4, None),
+                                          ("D", 4, None), ("E", 4, None), ("F", 4, None),
+                                          ("G", 4, None), ("A", 4, None)],
+                        "Partitura: escala de La menor natural (A B C D E F G A)")
+
+
+def d_m6_partitura_menor_harmonica():
+    return _score_image("menor harmonica", [("A", 3, None), ("B", 3, None), ("C", 4, None),
+                                            ("D", 4, None), ("E", 4, None), ("F", 4, None),
+                                            ("G", 4, "#"), ("A", 4, None)],
+                        "Partitura: escala de La menor harmonica (G# como sensivel)")
+
+
+def d_m6_partitura_menor_melodica():
+    return _score_image("menor melodica", [("A", 3, None), ("B", 3, None), ("C", 4, None),
+                                           ("D", 4, None), ("E", 4, None), ("F", 4, "#"),
+                                           ("G", 4, "#"), ("A", 4, None)],
+                        "Partitura: escala de La menor melodica (F# e G#)")
+
+
+def d_m6_partitura_campo_menor():
+    return _score_image("campo menor", [("A", 3, None), ("C", 4, None), ("E", 4, None),
+                                        ("D", 4, None), ("F", 4, None), ("A", 4, None),
+                                        ("E", 4, None), ("G", 4, "#"), ("B", 4, None),
+                                        ("A", 3, None), ("C", 4, None), ("E", 4, None)],
+                        "Partitura: i - iv - V - i em La menor (Am / Dm / E7 / Am)")
+
+
+def d_m6_partitura_subdominante():
+    return _score_image("subdominante", [("C", 4, None), ("E", 4, None), ("G", 4, None),
+                                         ("B", 4, None), ("F", 4, None), ("A", 4, "b"),
+                                         ("C", 5, None), ("E", 5, "b"),
+                                         ("C", 4, None), ("E", 4, None), ("G", 4, None)],
+                        "Partitura: I - iv - I em Do (C7M / Fm7 / C7M)")
+
+
+def d_m6_partitura_dorico():
+    return _score_image("dorico", [("D", 4, None), ("E", 4, None), ("F", 4, None),
+                                   ("G", 4, None), ("A", 4, None), ("B", 4, None),
+                                   ("C", 5, None), ("D", 5, None)],
+                        "Partitura: escala de Re dorico (D E F G A B C D)")
+
+
+def d_m6_partitura_gregos():
+    return _score_image("modos gregos", [("C", 4, None), ("D", 4, None), ("E", 4, None),
+                                         ("F", 4, None), ("G", 4, None), ("A", 4, None),
+                                         ("B", 4, None), ("C", 5, None)],
+                        "Partitura: Do jonio (= escala de Do maior) — base dos modos")
+
+
+DIAGRAMS.update({
+    "m6_escala_menor_natural": d_m6_escala_menor_natural,
+    "m6_menor_harmonica": d_m6_menor_harmonica,
+    "m6_menor_melodica": d_m6_menor_melodica,
+    "m6_modos_harmonica": d_m6_modos_harmonica,
+    "m6_modos_melodica": d_m6_modos_melodica,
+    "m6_campo_harmonico_menor": d_m6_campo_harmonico_menor,
+    "m6_subdominante_menor": d_m6_subdominante_menor,
+    "m6_relacao_maior_menor": d_m6_relacao_maior_menor,
+    "m6_modos_gregos": d_m6_modos_gregos,
+    "m6_partitura_menor_natural": d_m6_partitura_menor_natural,
+    "m6_partitura_menor_harmonica": d_m6_partitura_menor_harmonica,
+    "m6_partitura_menor_melodica": d_m6_partitura_menor_melodica,
+    "m6_partitura_campo_menor": d_m6_partitura_campo_menor,
+    "m6_partitura_subdominante": d_m6_partitura_subdominante,
+    "m6_partitura_dorico": d_m6_partitura_dorico,
+    "m6_partitura_gregos": d_m6_partitura_gregos,
+})
+
+
 def main() -> None:
     out_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                            "Source", "Course", "Content", "Diagrams")

@@ -70,4 +70,15 @@ std::vector<ContentItem> topic2F();  // Relação entre intervalos e construçã
 std::vector<ContentItem> topic2G();  // Cantar e tocar os intervalos
 std::vector<ContentItem> topic2H();  // Identificar intervalos no instrumento e de ouvido
 
+// Module 6 (Etapa 6 — escalas menores e campos harmônicos).
+std::vector<ContentItem> topic6A();  // Escala menor natural
+std::vector<ContentItem> topic6B();  // Escala menor harmônica
+std::vector<ContentItem> topic6C();  // Modos da menor harmônica
+std::vector<ContentItem> topic6D();  // Escala menor melódica
+std::vector<ContentItem> topic6E();  // Modos da menor melódica
+std::vector<ContentItem> topic6F();  // Campos harmônicos menores e funções
+std::vector<ContentItem> topic6G();  // Subdominantes menores
+std::vector<ContentItem> topic6H();  // Relações entre os campos maior e menor
+std::vector<ContentItem> topic6I();  // Modos dórico, frígio, lídio, mixolídio e lócrio
+
 } // namespace cursomusica::content
