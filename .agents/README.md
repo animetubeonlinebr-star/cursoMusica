@@ -35,6 +35,14 @@ arquivo (quem escreve onde), o protocolo de handoff e a definição de pronto.
 | Security Engineer | `security-engineer.md` | `docs/SECURITY.md` | Está seguro? É lícito? |
 | DevOps | `devops.md` | `.github/workflows/**`, `deploy/**`, infra | Entregar automatizado |
 
+### Pipeline de módulos (Etapas)
+
+| Agente | Arquivo | Dono de | Responde |
+|---|---|---|---|
+| Autor de Módulo | `module-author.md` | conteúdo de um módulo (`Source/Course/Content/Topic<N>*.cpp`) | Transformar uma Etapa em módulo completo |
+| Painel de Revisão do Módulo | `module-reviewer.md` | veredito do módulo (sem diretório) | O módulo passa no painel? |
+| Revisor de Release | `release-reviewer.md` | veredito final (sem diretório) | O curso integrado pode ir para `main`? |
+
 ## Como o trabalho flui
 
 ```

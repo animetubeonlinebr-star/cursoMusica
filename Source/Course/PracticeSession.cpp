@@ -50,6 +50,8 @@ void PracticeSession::start (const Exercise& exercise, int moduleTargetBpm, floa
     grid = TempoGrid ((double) targetBpm, exercise.subdivision);
 
     target = exercise.targets;
+    intervalSpec = exercise.interval;
+    gridGated = exercise.usesGrid;
     played.clear();
     noteTimes.clear();
     detectedPitchClasses.clear();
@@ -60,6 +62,8 @@ void PracticeSession::start (const Exercise& exercise, int moduleTargetBpm, floa
 
     if (! exercise.chordProgression.empty())
         state.targetCount = (int) exercise.chordProgression.size();
+    else if (intervalSpec.semitones > 0)
+        state.targetCount = juce::jmax (1, intervalSpec.repeats);
 }
 
 void PracticeSession::stop()
@@ -124,12 +128,20 @@ void PracticeSession::recompute()
         state.accuracy = evaluator::chordCoverage (current->chordPitchClasses, detectedPitchClasses);
         state.matched = (int) std::llround (state.accuracy * 3.0);
     }
+    else if (intervalSpec.semitones > 0)
+    {
+        const auto result = evaluator::evaluateIntervals (intervalSpec, played);
+        state.matched = result.matched;
+        state.accuracy = result.accuracy;
+    }
 
     const auto& gridTimes = onsets.empty() ? noteTimes : onsets;
     state.onGridRatio = TempoGrid::onGridRatio (gridTimes, grid);
 
     state.accuracyPassed = evaluator::gatePassed (state.accuracy);
-    state.gridPassed = state.onGridRatio >= (double) onGridTarget;
+    // Interval exercises are not measured against the grid: the client asked to
+    // identify the interval, not to play it in time.
+    state.gridPassed = ! gridGated || state.onGridRatio >= (double) onGridTarget;
     state.passed = state.accuracyPassed && state.gridPassed;
 }
 

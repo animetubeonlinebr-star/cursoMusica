@@ -39,6 +39,17 @@ inline ContentItem img (const char* name, const char* caption = "")
 ContentItem tbl (std::initializer_list<const char*> header,
                  std::initializer_list<std::initializer_list<const char*>> rows);
 
+// MIDI notes from pitch names ("C4", "E4"), for the playable examples below.
+std::vector<int> midiNotes (std::initializer_list<const char*> names);
+
+// A playable audio example (REQ-004): the app plays the notes when the student
+// presses the button under `caption`. Used to demonstrate an interval by ear.
+ContentItem aud (std::initializer_list<const char*> names, const char* caption);
+
+// A score with its audio (REQ-004): `imageName` is the embedded score image, the
+// notes are what the app plays for it. Every score in the course carries audio.
+ContentItem part (const char* imageName, std::initializer_list<const char*> names, const char* caption);
+
 std::vector<ContentItem> topicA();  // Partes da guitarra e do violão
 std::vector<ContentItem> topicB();  // Notas musicais
 std::vector<ContentItem> topicC();  // Sustenidos e bemóis
@@ -48,5 +59,15 @@ std::vector<ContentItem> topicF();  // Sistema 5 (CAGED)
 std::vector<ContentItem> topicG();  // Organização das tonalidades
 std::vector<ContentItem> topicH();  // Introdução ao cifrado
 std::vector<ContentItem> topicI();  // Rítmica: pulsação e figuras
+
+// Module 2 (Etapa 2 — teoria dos intervalos e percepção musical).
+std::vector<ContentItem> topic2A();  // Intervalos musicais
+std::vector<ContentItem> topic2B();  // Quadro móvel de intervalos
+std::vector<ContentItem> topic2C();  // Maiores, menores, justos, aumentados e diminutos
+std::vector<ContentItem> topic2D();  // Percepção de intervalos
+std::vector<ContentItem> topic2E();  // Terças, quartas, quintas, sextas, sétimas e nonas
+std::vector<ContentItem> topic2F();  // Relação entre intervalos e construção de acordes
+std::vector<ContentItem> topic2G();  // Cantar e tocar os intervalos
+std::vector<ContentItem> topic2H();  // Identificar intervalos no instrumento e de ouvido
 
 } // namespace cursomusica::content

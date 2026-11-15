@@ -207,7 +207,7 @@ void PracticePanel::refreshExerciseList()
         {
             const auto& e = currentModule->exercises[(size_t) filteredIndices[slot]];
             const bool playable = e.isQuiz() || ! e.targets.empty() || ! e.chordPitchClasses.empty()
-                                    || ! e.chordProgression.empty();
+                                    || ! e.chordProgression.empty() || e.interval.semitones > 0;
             exerciseBox.addItem (e.id + " — " + e.title
                                    + (playable ? juce::String()
                                                : juce::String::fromUTF8 ("  (leitura)")),

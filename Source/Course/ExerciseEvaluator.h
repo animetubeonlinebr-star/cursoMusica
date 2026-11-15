@@ -58,6 +58,27 @@ namespace evaluator
 
     // The gate of REQ-009: >= 90% accuracy.
     bool gatePassed (double accuracy, double threshold = 0.90);
+
+    // Interval recognition (module 2): the student plays a root and then the note
+    // at a given distance, so the app verifies the *distance* the instrument
+    // produced, not absolute pitches. Any position on the neck is accepted.
+    //
+    // Scans consecutive detected notes and counts an execution whenever the
+    // distance matches `semitones` in an accepted direction. `matched` is capped
+    // at `repeats` (how many correct executions the exercise asks for), so
+    // accuracy = matched / repeats.
+    struct IntervalSpec
+    {
+        int semitones = 0;
+        int repeats = 1;
+        bool ascending = true;
+        bool descending = false;
+    };
+
+    SequenceResult evaluateIntervals (const IntervalSpec& spec,
+                                      const std::vector<NoteEvent>& played,
+                                      float centsTolerance = 25.0f,
+                                      double passThreshold = 0.90);
 }
 
 } // namespace cursomusica::course

@@ -66,6 +66,8 @@ private:
     std::vector<double> noteTimes;
     std::vector<int> detectedPitchClasses;
     std::vector<NoteEvent> played;
+    evaluator::IntervalSpec intervalSpec;
+    bool gridGated = true;
 
     PracticeState state;
 };

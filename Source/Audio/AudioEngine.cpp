@@ -173,6 +173,7 @@ void AudioEngine::audioDeviceAboutToStart (juce::AudioIODevice* device)
     pitchDetector.prepare (sr);
     audioFifo.reset();
     metronome.prepare (sr);
+    tonePlayer.prepare (sr);
 
     // Allocate the plugin scratch buffer once, on the device-open (non-audio) thread.
     pluginBuffer.setSize (2, juce::jmax (block, 2048), false, true, true);
@@ -205,6 +206,7 @@ void AudioEngine::audioDeviceIOCallbackWithContext (const float* const* inputCha
     {
         juce::AudioBuffer<float> outputView (outputChannelData, numOutputChannels, numSamples);
         metronome.process (outputView, numSamples);
+        tonePlayer.process (outputView, numSamples);
     }
 
     const double blockSeconds = numSamples / juce::jmax (1.0, currentSampleRate.load());

@@ -97,6 +97,9 @@ public:
     // The centre answers the quiz by proxy: the pane owns the session.
     std::function<void (int)> onAnswerOption;
 
+    // The centre asks the engine to sound an audio example (REQ-004).
+    std::function<void (const std::vector<int>&)> onPlayExample;
+
     void setLockedMessage (const juce::String& message)
     {
         lockedMessage = message;
@@ -156,6 +159,10 @@ public:
 
     void paint (juce::Graphics& g) override
     {
+        // Rebuilt below by paintAudioButton as the topic is laid out.
+        audioButtonBounds.clear();
+        audioNotes.clear();
+
         auto bounds = getLocalBounds().reduced (th::spacing::lg);
 
         if (current == nullptr)
@@ -254,6 +261,22 @@ private:
                 if (item.text.isNotEmpty())
                     height += 20 + textHeight (th::type::makeFont (th::type::caption), item.text, width);
                 return height;
+            }
+            case ContentKind::audio:
+            {
+                // Caption + a play button that demonstrates the example (REQ-004).
+                int height = 30 + th::spacing::xs;
+                if (item.text.isNotEmpty())
+                    height += textHeight (th::type::makeFont (th::type::caption), item.text, width) + 4;
+                return height + th::spacing::sm;
+            }
+            case ContentKind::score:
+            {
+                // Every score carries its own audio (REQ-004): image + caption + play.
+                int height = diagramHeightForWidth (item.imageName, width) + th::spacing::sm;
+                if (item.text.isNotEmpty())
+                    height += textHeight (th::type::makeFont (th::type::caption), item.text, width) + 4;
+                return height + 30 + th::spacing::sm;
             }
         }
         return 20;
@@ -542,7 +565,73 @@ private:
                 bounds.removeFromTop (th::spacing::sm);
                 break;
             }
+            case ContentKind::audio:
+            {
+                if (item.text.isNotEmpty())
+                {
+                    g.setColour (th::colour::textSecondary);
+                    g.setFont (th::type::makeFont (th::type::caption));
+                    g.drawFittedText (item.text,
+                                      bounds.removeFromTop (textHeight (th::type::makeFont (th::type::caption),
+                                                                        item.text, width) + 4),
+                                      juce::Justification::topLeft, 3);
+                }
+                paintAudioButton (g, bounds.removeFromTop (30), (int) audioButtonBounds.size(), item.notes);
+                bounds.removeFromTop (th::spacing::sm);
+                break;
+            }
+            case ContentKind::score:
+            {
+                const int height = diagramHeightForWidth (item.imageName, width);
+                auto area = bounds.removeFromTop (height);
+                const auto& image = diagramImage (item.imageName);
+
+                if (image.isValid())
+                    g.drawImage (image, area.toFloat(), juce::RectanglePlacement::stretchToFit);
+                else
+                {
+                    g.setColour (th::colour::surfaceRaised);
+                    g.fillRoundedRectangle (area.toFloat(), th::radius::sm);
+                    g.setColour (th::colour::textDisabled);
+                    g.setFont (th::type::makeFont (th::type::caption));
+                    g.drawText (juce::String::fromUTF8 ("Partitura indisponível: ") + item.imageName,
+                                area, juce::Justification::centred, false);
+                }
+
+                if (item.text.isNotEmpty())
+                {
+                    g.setColour (th::colour::textDisabled);
+                    g.setFont (th::type::makeFont (th::type::caption));
+                    g.drawFittedText (item.text,
+                                      bounds.removeFromTop (textHeight (th::type::makeFont (th::type::caption),
+                                                                        item.text, width) + 4),
+                                      juce::Justification::topLeft, 2);
+                }
+                paintAudioButton (g, bounds.removeFromTop (30), (int) audioButtonBounds.size(), item.notes);
+                bounds.removeFromTop (th::spacing::sm);
+                break;
+            }
         }
+    }
+
+    // A play button for an audio/score example; its rectangle is remembered so
+    // mouseDown can ask the player to sound it (REQ-004).
+    void paintAudioButton (juce::Graphics& g, juce::Rectangle<int> area, int index,
+                           const std::vector<int>& notes)
+    {
+        auto button = area.withWidth (juce::jmin (170, area.getWidth()));
+        const bool hovered = index == hoveredAudio;
+        g.setColour (hovered ? th::colour::accentMuted : th::colour::surfaceRaised);
+        g.fillRoundedRectangle (button.toFloat(), th::radius::sm);
+        g.setColour (th::colour::accentAlt);
+        g.setFont (th::type::makeFont (th::type::body, true));
+        g.drawText (juce::String::fromUTF8 ("\u25B6  Ouvir exemplo"),
+                    button.reduced (10, 0), juce::Justification::centredLeft, false);
+
+        while ((int) audioButtonBounds.size() <= index)
+            audioButtonBounds.push_back ({});
+        audioButtonBounds[(size_t) index] = button;
+        audioNotes[(size_t) index] = notes;
     }
 
     void paintExercise (juce::Graphics& g, juce::Rectangle<int> bounds, const Exercise& exercise)
@@ -699,6 +788,16 @@ private:
                 return;
             }
         }
+
+        for (size_t i = 0; i < audioButtonBounds.size(); ++i)
+        {
+            if (audioButtonBounds[i].contains (e.getPosition()))
+            {
+                if (onPlayExample != nullptr && i < audioNotes.size())
+                    onPlayExample (audioNotes[i]);
+                return;
+            }
+        }
     }
 
     void mouseMove (const juce::MouseEvent& e) override
@@ -708,18 +807,25 @@ private:
             if (optionBounds[i].contains (e.getPosition()))
                 hovered = (int) i;
 
-        if (hovered != hoveredOption)
+        int hoveredSound = -1;
+        for (size_t i = 0; i < audioButtonBounds.size(); ++i)
+            if (audioButtonBounds[i].contains (e.getPosition()))
+                hoveredSound = (int) i;
+
+        if (hovered != hoveredOption || hoveredSound != hoveredAudio)
         {
             hoveredOption = hovered;
+            hoveredAudio = hoveredSound;
             repaint();
         }
     }
 
     void mouseExit (const juce::MouseEvent&) override
     {
-        if (hoveredOption != -1)
+        if (hoveredOption != -1 || hoveredAudio != -1)
         {
             hoveredOption = -1;
+            hoveredAudio = -1;
             repaint();
         }
     }
@@ -731,6 +837,13 @@ private:
     course::QuizState quizState;
     std::vector<juce::Rectangle<int>> optionBounds;
     int hoveredOption = -1;
+
+    // Rectangles and notes of the "Ouvir exemplo" buttons painted in the current
+    // topic, rebuilt on every paint (REQ-004).
+    std::vector<juce::Rectangle<int>> audioButtonBounds;
+    std::vector<std::vector<int>> audioNotes;
+    int hoveredAudio = -1;
+
     bool showOverviewLessons = false;
     juce::String lockedMessage;
 };
@@ -912,6 +1025,10 @@ ModuleComponent::ModuleComponent (AudioEngine& engine)
     addAndMakeVisible (subjectTree);
 
     contentView = std::make_unique<ContentView>();
+    contentView->onPlayExample = [this] (const std::vector<int>& notes)
+    {
+        audioEngine.getTonePlayer().play (notes);
+    };
     contentViewport.setViewedComponent (contentView.get(), false);
     contentViewport.setScrollBarsShown (true, false);
     addAndMakeVisible (contentViewport);

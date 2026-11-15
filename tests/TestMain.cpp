@@ -9,6 +9,7 @@
 #include "Course/Content/Diagrams.h"
 #include "Course/Content/Topics.h"
 #include "Course/ExerciseEvaluator.h"
+#include "Course/Intervals.h"
 #include "Course/ModuleCatalog.h"
 #include "Course/NoteMath.h"
 #include "Course/PracticeSession.h"
@@ -439,8 +440,8 @@ void testModuleCatalog()
             check (m.usesTempo, "modules 2..20 still use a BPM target");
 
     for (const auto& m : modules)
-        if (m.number > 1)
-            check (! m.implemented, "modules 2..20 are still placeholders");
+        if (m.number > 2)
+            check (! m.implemented, "modules 3..20 are still placeholders");
 
     // The client asked the graphical material (fretboard, CAGED shapes, rhythm
     // figures) to be shown as images instead of text art. Every diagram named by
@@ -631,18 +632,18 @@ void testExerciseFilter()
     if (m1 == nullptr)
         return;
 
-    // The scenario from the client: module 2 has no exercises, so filtering
-    // module 1's topic against module 2 returns nothing. Filtering the same topic
-    // against module 1 must list its exercises.
-    const auto* m2 = ModuleCatalog::findModule (2);
-    check (m2 != nullptr, "module 2 is available");
+    // The scenario from the client: a module without content has no exercises,
+    // so filtering another module's topic against it returns nothing. Filtering
+    // the same topic against module 1 must list its exercises.
+    const auto* m3 = ModuleCatalog::findModule (3);
+    check (m3 != nullptr, "module 3 is available (still a placeholder)");
 
     const juce::String topicC = "C";
     const auto inM1 = exercisesForTopic (*m1, topicC);
-    const auto inM2 = exercisesForTopic (*m2, topicC);
+    const auto inM3 = exercisesForTopic (*m3, topicC);
 
     check (! inM1.empty(), "module 1's topic C has exercises");
-    check (inM2.empty(), "module 2 has no exercises for topic C (placeholder)");
+    check (inM3.empty(), "module 3 has no exercises for topic C (placeholder)");
 
     // Every returned index really belongs to the topic, and none is missed.
     int totalC = 0;
@@ -793,6 +794,264 @@ void testPluginSearchPaths()
     check (fromArray.size() == 2, "setFromArray drops blanks and duplicates");
 }
 
+// Interval theory (module 2): the mapping between semitones and interval names
+// is the single source of truth for the lesson text, the quizzes and the
+// detector-based exercises, so it is checked here.
+void testIntervals()
+{
+    std::cout << "Intervals\n";
+    using namespace cursomusica::course;
+
+    check (intervalShortName (0) == "1J", "0 semitons is a perfect unison");
+    check (describeInterval (3).name == juce::String::fromUTF8 ("terça menor"),
+           "3 semitons is a minor third");
+    check (describeInterval (4).name == juce::String::fromUTF8 ("terça maior"),
+           "4 semitons is a major third");
+    check (intervalShortName (5) == "4J", "5 semitones is a perfect fourth");
+    check (intervalShortName (6) == "4A", "6 semitones is an augmented fourth (tritone)");
+    check (intervalShortName (7) == "5J", "7 semitones is a perfect fifth");
+    check (intervalShortName (11) == "7M", "11 semitones is a major seventh");
+    check (intervalShortName (12) == "8J", "12 semitones is a perfect octave");
+
+    check (describeInterval (7).perfect, "the fifth is a perfect interval");
+    check (describeInterval (4).major, "the major third is major");
+    check (describeInterval (3).minor, "the minor third is minor");
+    check (describeInterval (6).augmented, "the tritone reads as augmented");
+    check (! describeInterval (7).major, "the fifth is not major");
+
+    // Just intervals have no major/minor form.
+    for (int s : { 0, 5, 7, 12 })
+        check (describeInterval (s).perfect, "perfect interval at " + juce::String (s));
+
+    check (semitonesBetween (60, 64) == 4, "C4 to E4 is 4 semitones");
+    check (semitonesBetween (64, 60) == 4, "the distance is absolute");
+
+    const auto frame = mobileFrame (0);   // C
+    check (frame.size() == 13, "the movable frame lists 0..12 semitones");
+    check (frame[0].noteName == "C", "frame row 0 from C is C");
+    check (frame[4].noteName == "E", "4 semitones from C is E (major third)");
+    check (frame[7].noteName == "G", "7 semitones from C is G (perfect fifth)");
+    check (frame[12].noteName == "C", "12 semitones from C is C again");
+    check (frame[4].interval == juce::String::fromUTF8 ("terça maior"),
+           "frame row 4 names the major third");
+
+    // The frame is movable: from G the same distances land on transposed notes.
+    const auto fromG = mobileFrame (7);
+    check (fromG[4].noteName == "B", "4 semitones from G is B");
+    check (fromG[7].noteName == "D", "7 semitones from G is D");
+
+    check (isConsonant (7), "the fifth is consonant");
+    check (isConsonant (4), "the major third is consonant");
+    check (! isConsonant (6), "the tritone is not consonant");
+    check (! isConsonant (11), "the major seventh is not consonant");
+}
+
+// The interval recogniser: the app verifies the distance the instrument
+// produced, not absolute pitches, so any position on the neck passes.
+void testIntervalEvaluation()
+{
+    std::cout << "IntervalEvaluation\n";
+    using namespace cursomusica::course;
+
+    auto note = [] (int midi) { return NoteEvent { 0.0, midi, 0.0f }; };
+
+    evaluator::IntervalSpec majorThird;
+    majorThird.semitones = 4;
+    majorThird.repeats = 3;
+
+    // C4->E4, D4->F#4, G3->B3: three major thirds, different positions.
+    std::vector<NoteEvent> correct { note (60), note (64), note (62), note (66), note (55), note (59) };
+    auto r = evaluator::evaluateIntervals (majorThird, correct);
+    check (r.matched == 3, "three major thirds are recognised");
+    check (r.passed, "three of three passes the 90% gate");
+
+    // A wrong distance (minor third) does not count.
+    std::vector<NoteEvent> wrong { note (60), note (63) };
+    auto rWrong = evaluator::evaluateIntervals (majorThird, wrong);
+    check (rWrong.matched == 0, "a minor third does not count as a major third");
+    check (! rWrong.passed, "a wrong interval fails the gate");
+
+    // Descending intervals do not count when only ascending is accepted.
+    std::vector<NoteEvent> descending { note (64), note (60) };
+    check (evaluator::evaluateIntervals (majorThird, descending).matched == 0,
+           "a descending interval does not count when only ascending is asked");
+
+    // An out-of-tune note is rejected by the cents tolerance.
+    NoteEvent detuned { 0.0, 64, 60.0f };
+    std::vector<NoteEvent> offPitch { note (60), detuned };
+    check (evaluator::evaluateIntervals (majorThird, offPitch).matched == 0,
+           "a note far from the tempered pitch is rejected");
+
+    // Two correct executions of two asked: 100%; one of two: 50%.
+    evaluator::IntervalSpec twice = majorThird;
+    twice.repeats = 2;
+    std::vector<NoteEvent> two { note (60), note (64), note (62), note (66) };
+    check (evaluator::evaluateIntervals (twice, two).matched == 2, "two thirds recognised");
+    std::vector<NoteEvent> one { note (60), note (64) };
+    auto rOne = evaluator::evaluateIntervals (twice, one);
+    check (rOne.matched == 1, "one third recognised");
+    checkClose (rOne.accuracy, 0.5, 1e-9, "one of two is 50%");
+    check (! rOne.passed, "one of two fails the gate");
+
+    // No notes at all: never passes.
+    check (! evaluator::evaluateIntervals (majorThird, {}).passed, "an empty attempt fails");
+
+    // An interval exercise does not gate on the metronome grid (client asked
+    // only to identify the interval, at any tempo).
+    cursomusica::Exercise intervalEx;
+    intervalEx.interval = twice;
+    intervalEx.usesGrid = false;
+    PracticeSession session;
+    session.start (intervalEx, 64, 0.76f);
+    session.consume (two);
+    session.finish();
+    check (session.getState().passed, "an interval exercise passes without the grid gate");
+}
+
+// Module 2 — Etapa 2. It must follow the same shape as module 1: explanation
+// (>=5 pages per topic) with images, audio and scores, 3..5 exercises per topic,
+// and part of the exercises played on the instrument and verified by the app.
+void testModule2()
+{
+    std::cout << "Module2\n";
+    using namespace cursomusica;
+
+    const auto* m2 = ModuleCatalog::findModule (2);
+    check (m2 != nullptr, "module 2 exists");
+    if (m2 == nullptr)
+        return;
+
+    check (m2->implemented, "module 2 is implemented");
+    check (m2->number == 2, "module 2 has number 2");
+    check (m2->usesTempo, "module 2 uses a BPM target");
+    check (m2->targetBpm == 64, "module 2 target BPM is 64 (MUSIC.md)");
+    check (m2->lessons.size() == 8, "module 2 has eight topics (A..H)");
+    check (m2->exercises.size() >= 30, "module 2 lists a full exercise set");
+
+    // Every topic A..H has 3..5 exercises (client: "de 3 a 5 exercícios por tópico").
+    for (const auto& topic : m2->lessons)
+    {
+        int count = 0;
+        for (const auto& e : m2->exercises)
+            if (e.lessonId == topic.id)
+                ++count;
+        check (count >= 3, juce::String ("topic ") + topic.id + " has at least three exercises");
+        check (count <= 5, juce::String ("topic ") + topic.id + " has at most five exercises");
+    }
+
+    // Every exercise is tied to a topic and its id follows EX-2.<topico>.<n>.
+    for (const auto& e : m2->exercises)
+    {
+        check (e.lessonId.isNotEmpty(), "exercise " + e.id + " is tied to a topic");
+        if (! e.isGate)
+            check (e.id.startsWith ("EX-2."), "exercise " + e.id + " follows EX-2.<topico>.<n>");
+    }
+
+    // Part of the exercises is played on the instrument and verified by the
+    // detector: at least one interval exercise per topic (client request).
+    juce::StringArray intervalTopics;
+    for (const auto& e : m2->exercises)
+        if (e.interval.semitones > 0 && e.lessonId.isNotEmpty())
+            intervalTopics.addIfNotAlreadyThere (e.lessonId);
+    for (const auto& topic : { "A", "B", "C", "D", "E", "G", "H" })
+        check (intervalTopics.contains (topic),
+               juce::String ("topic ") + topic + " has a playable interval exercise");
+
+    // An interval exercise must not gate on the grid, and the app must be able
+    // to verify it (playable = quiz or a spec the evaluator understands).
+    for (const auto& e : m2->exercises)
+        if (e.interval.semitones > 0)
+        {
+            check (! e.usesGrid, "interval exercise " + e.id + " is not grid-gated");
+            check (e.interval.repeats >= 1, "interval exercise " + e.id + " asks for at least one repeat");
+            check (e.interval.semitones >= 1 && e.interval.semitones <= 12,
+                   "interval exercise " + e.id + " has a valid semitone distance");
+        }
+
+    // Explanation: >=5 pages per topic, at least one table and one image, and
+    // the media the client asked for (images, audio, scores with audio).
+    auto detailChars = [] (const LessonBlock& topic)
+    {
+        int total = 0;
+        for (const auto& item : topic.detail)
+        {
+            total += item.text.length();
+            for (const auto& cell : item.columns)
+                total += cell.length();
+            for (const auto& row : item.rows)
+                for (const auto& cell : row)
+                    total += cell.length();
+        }
+        return total;
+    };
+
+    bool anyAudio = false;
+    bool anyScore = false;
+    for (const auto& topic : m2->lessons)
+    {
+        const int chars = detailChars (topic);
+        check (chars >= content::minTopicChars,
+               juce::String ("topic ") + topic.id + " has at least "
+                   + juce::String (content::minPages) + " pages (" + juce::String (chars) + " chars)");
+
+        int images = 0, tables = 0, audios = 0, scores = 0;
+        for (const auto& item : topic.detail)
+        {
+            if (item.kind == ContentKind::image) ++images;
+            else if (item.kind == ContentKind::table) ++tables;
+            else if (item.kind == ContentKind::audio) ++audios;
+            else if (item.kind == ContentKind::score) ++scores;
+        }
+        check (images >= 1, juce::String ("topic ") + topic.id + " has at least one image");
+        check (tables >= 1, juce::String ("topic ") + topic.id + " has at least one table");
+        anyAudio = anyAudio || audios > 0;
+        anyScore = anyScore || scores > 0;
+    }
+    check (anyAudio, "module 2 demonstrates intervals with audio (REQ-004)");
+    check (anyScore, "module 2 has scores with their audio (REQ-004)");
+
+    // Every diagram and score named by the content is embedded in the binary,
+    // and every audio/score item actually carries notes to play.
+    for (const auto& topic : m2->lessons)
+        for (const auto& item : topic.detail)
+        {
+            if (item.kind == ContentKind::image || item.kind == ContentKind::score)
+                check (content::diagramExists (item.imageName),
+                       juce::String ("topic ") + topic.id + " references the image '"
+                           + item.imageName + "'");
+            if (item.kind == ContentKind::audio || item.kind == ContentKind::score)
+            {
+                check (! item.notes.empty(),
+                       juce::String ("topic ") + topic.id + " has a playable example");
+                for (const int midi : item.notes)
+                    check (midi >= 0 && midi <= 127,
+                           juce::String ("topic ") + topic.id + " example uses a valid MIDI note");
+            }
+        }
+
+    // The module cites >=1 pattern and >=1 guitarist (REQ-007, REQ-010).
+    check (m2->practice.patternId.isNotEmpty(), "module 2 cites a pattern");
+    check (! m2->practice.guitarists.isEmpty(), "module 2 cites at least one guitarist");
+
+    // The gate closes the module as a I–IV–V–I vamp on the grid (REQ-009).
+    bool hasGate = false;
+    for (const auto& e : m2->exercises)
+        if (e.isGate)
+        {
+            hasGate = true;
+            check (e.chordProgression.size() == 4, "module 2 gate has four chords");
+            check (e.chordProgression.front() == std::vector<int> ({ 0, 4, 7 }),
+                   "module 2 gate opens on C major");
+        }
+    check (hasGate, "module 2 has a gate exercise");
+
+    // Modules 3..20 are still placeholders.
+    const auto& modules = ModuleCatalog::getModules();
+    for (const auto& m : modules)
+        if (m.number > 2)
+            check (! m.implemented, "modules 3..20 are still placeholders");
+}
+
 int main()
 {
     testNoteMath();
@@ -803,7 +1062,10 @@ int main()
     testProgression();
     testAudioPortClassifier();
     testPluginSearchPaths();
+    testIntervals();
+    testIntervalEvaluation();
     testModuleCatalog();
+    testModule2();
     testProgressDatabase();
     testProgressStore();
     testSharedSettings();

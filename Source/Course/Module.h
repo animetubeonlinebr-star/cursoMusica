@@ -14,20 +14,21 @@ namespace cursomusica
 // truth for the wording is docs/MUSIC.md (owner: musician).
 
 // One rich piece of the detailed explanation rendered in the central panel.
-enum class ContentKind { heading, paragraph, bullet, callout, table, image };
+enum class ContentKind { heading, paragraph, bullet, callout, table, image, audio, score };
 
 struct ContentItem
 {
     ContentKind kind = ContentKind::paragraph;
-    juce::String text;                    // heading / paragraph / bullet / callout
+    juce::String text;                    // heading / paragraph / bullet / callout / caption
     juce::StringArray columns;            // table header cells (kind == table)
     std::vector<juce::StringArray> rows;  // table rows (kind == table)
-    juce::String imageName;               // diagram stem (kind == image), e.g. "f_caged_conexao"
+    juce::String imageName;               // diagram stem (kind == image / score), e.g. "f_caged_conexao"
+    std::vector<int> notes;               // MIDI notes played by an audio / score example
 
-    static ContentItem heading (juce::String t) { return { ContentKind::heading, std::move (t), {}, {}, {} }; }
-    static ContentItem paragraph (juce::String t) { return { ContentKind::paragraph, std::move (t), {}, {}, {} }; }
-    static ContentItem bullet (juce::String t) { return { ContentKind::bullet, std::move (t), {}, {}, {} }; }
-    static ContentItem callout (juce::String t) { return { ContentKind::callout, std::move (t), {}, {}, {} }; }
+    static ContentItem heading (juce::String t) { return { ContentKind::heading, std::move (t), {}, {}, {}, {} }; }
+    static ContentItem paragraph (juce::String t) { return { ContentKind::paragraph, std::move (t), {}, {}, {}, {} }; }
+    static ContentItem bullet (juce::String t) { return { ContentKind::bullet, std::move (t), {}, {}, {}, {} }; }
+    static ContentItem callout (juce::String t) { return { ContentKind::callout, std::move (t), {}, {}, {}, {} }; }
 
     static ContentItem table (juce::StringArray header, std::vector<juce::StringArray> body)
     {
@@ -45,6 +46,30 @@ struct ContentItem
         ContentItem item;
         item.kind = ContentKind::image;
         item.imageName = std::move (name);
+        item.text = std::move (caption);
+        return item;
+    }
+
+    // A playable audio example (REQ-004): `notes` are MIDI notes the app plays
+    // when the student presses the play button under the caption. Used to
+    // demonstrate an interval or a musical excerpt by ear.
+    static ContentItem audio (std::vector<int> notes, juce::String caption)
+    {
+        ContentItem item;
+        item.kind = ContentKind::audio;
+        item.notes = std::move (notes);
+        item.text = std::move (caption);
+        return item;
+    }
+
+    // A score (embedded image) that the app also plays (REQ-004): every score has
+    // its audio. `name` is the score's image stem, `notes` what the app plays.
+    static ContentItem score (juce::String name, std::vector<int> notes, juce::String caption)
+    {
+        ContentItem item;
+        item.kind = ContentKind::score;
+        item.imageName = std::move (name);
+        item.notes = std::move (notes);
         item.text = std::move (caption);
         return item;
     }
@@ -87,6 +112,19 @@ struct Exercise
     int targetBpm = 0;            // 0 -> inherit the module's target BPM
     float onGridTarget = 0.0f;    // 0 -> inherit the module's alignment target
     course::TempoGrid::Subdivision subdivision = course::TempoGrid::Subdivision::quarter;
+
+    // Interval recognition (module 2): the student plays a root and then the note
+    // at this distance, and the app verifies the distance the instrument
+    // produced (any position on the neck is accepted). `repeats` is how many
+    // correct executions the exercise asks for. Mutually exclusive with
+    // `targets`/`chordPitchClasses`/`chordProgression`.
+    course::evaluator::IntervalSpec interval;
+
+    // Whether the attempt is graded against the metronome grid (REQ-015). The
+    // gate and the rhythmic exercises are; the interval-recognition exercises
+    // are not, because the client asked only to identify the interval, at any
+    // tempo. Defaults to true so existing exercises keep their grid gate.
+    bool usesGrid = true;
 
     // Topic this exercise belongs to ("A".."I"), so the right panel can filter
     // the exercises for the topic selected on the left. Empty -> module-wide.
