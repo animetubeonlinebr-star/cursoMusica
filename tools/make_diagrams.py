@@ -947,6 +947,274 @@ DIAGRAMS.update({
 })
 
 
+# --------------------------------------------------------------------------
+# Modulo 8 — dominantes, cadencias e substituicoes harmonicas.
+# --------------------------------------------------------------------------
+def rows_box(d, top, rows, height=52, gap=8, cols=(0, 300, 640, 900),
+             colors=(ACCENT, TXT, CYAN, GOLD), font_size=20):
+    """Lista de linhas de texto alinhadas em colunas."""
+    for i, row in enumerate(rows):
+        yy = top + i * (height + gap)
+        d.rounded_rectangle([MARGIN, yy, W - MARGIN, yy + height], radius=8,
+                            fill=RAISED if i % 2 == 0 else SURFACE)
+        for k, cell in enumerate(row):
+            if k >= len(cols) or not cell:
+                continue
+            d.text((MARGIN + cols[k] + 16, yy + height / 2), cell,
+                   font=font(font_size, k == 0), fill=colors[k % len(colors)],
+                   anchor="lm")
+    return top + len(rows) * (height + gap)
+
+
+def d_m8_dominante_v7():
+    h = 720
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "O dominante V7 e a sua tensao")
+    y = subtitle(d, "O V7 traz a terca e a setima em tritono; elas resolvem por semitom.", y)
+    # Acorde G7 em destaque + notas.
+    chord_box(d, W / 2, y + 90, 320, 240, [-1, -1, -1, 0, 0, 3], "G7 (V7 de Do)",
+              start_fret=1, caption="3a = Si, 7a = Fa: o tritono pede resolucao")
+    notes = [("G", "tonica", "5a da escala"),
+             ("B", "terca maior", "sensivel de Do"),
+             ("D", "quinta justa", "estavel"),
+             ("F", "setima menor", "resolves para Mi")]
+    top = y + 400
+    for i, (n, role, res) in enumerate(notes):
+        yy = top + i * 58
+        d.rounded_rectangle([MARGIN, yy, W - MARGIN, yy + 50], radius=8,
+                            fill=RAISED if i % 2 == 0 else SURFACE)
+        d.text((MARGIN + 18, yy + 25), n, font=font(24, True), fill=ACCENT, anchor="lm")
+        d.text((MARGIN + 120, yy + 25), role, font=font(21), fill=TXT, anchor="lm")
+        d.text((MARGIN + 460, yy + 25), res, font=font(20, True), fill=CYAN, anchor="lm")
+    d.text((W / 2, h - 40), "Fa (7a) desce para Mi; Si (3a) sobe para Do: resolucao V7 -> I.",
+           font=font(20, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m8_dominantes_secundarios():
+    h = 680
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Dominantes secundarios em Do maior")
+    y = subtitle(d, "Qualquer grau vira tonica temporaria com o seu proprio V7.", y)
+    rows = [("V7/ii", "A7", "-> Dm", "La-Do#-Mi-Sol"),
+            ("V7/iii", "B7", "-> Em", "Si-Re#-Fa#-La"),
+            ("V7/IV", "C7", "-> F", "Do-Mi-Sol-Sib"),
+            ("V7/V", "D7", "-> G", "Re-Fa#-La-Do"),
+            ("V7/vi", "E7", "-> Am", "Mi-Sol#-Si-Re")]
+    rows_box(d, y + 40, rows, cols=(0, 180, 480, 720))
+    d.text((W / 2, h - 46), "O acidente (sustenido/bemol) cria a sensivel do novo alvo.",
+           font=font(20, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m8_dominantes_alterados():
+    h = 700
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Dominantes alterados sobre G7")
+    y = subtitle(d, "A alteracao acrescenta tensao e aponta o caminho para Do.", y)
+    rows = [("G7b9", "Ab na ponta", "tensao forte sobre o V"),
+            ("G7#9", "A# (Bb)", "som de blues, 'acorde hendrix'"),
+            ("G7b5", "Db", "substitui a 5a justa"),
+            ("G7#5", "D# (Eb)", "5a aumentada, som suspenso"),
+            ("G7#11", "C#", "cor lidia dominante"),
+            ("G7alt", "todas juntas", "maxima tensao antes do I")]
+    rows_box(d, y + 40, rows, height=56)
+    d.text((W / 2, h - 44), "Quanto mais alteracoes, mais o ouvido espera a resolucao.",
+           font=font(20, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m8_subv7():
+    h = 680
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "SubV7: o dominante substituto")
+    y = subtitle(d, "Db7 toma o lugar de G7: o mesmo tritono, o baixo desce meio-tom.", y)
+    left = W / 2 - 300
+    chord_box(d, left, y + 90, 300, 230, [-1, -1, -1, 1, 2, 1], "G7",
+              start_fret=1, caption="G-B-D-F (tritono B-F)")
+    chord_box(d, W / 2 + 300, y + 90, 300, 230, [-1, -1, -1, 4, 2, 1], "Db7",
+              start_fret=1, caption="Db-F-Ab-Cb (tritono F-Cb=B)")
+    d.text((W / 2, y + 150), "=", font=font(48, True), fill=GOLD, anchor="mm")
+    rows = [("G7", "5a -> 1a: baixo sobe (G -> C)", "resolucao forte"),
+            ("Db7", "5a -> 1a: baixo desce (Db -> C)", "cromatismo"),
+            ("Tritono comum", "B (=Cb) e F nos dois acordes", "ligacao")]
+    rows_box(d, y + 360, rows, cols=(0, 300, 720))
+    d.text((W / 2, h - 44), "SubV7 entra em qualquer lugar onde caberia o V7 do alvo.",
+           font=font(20, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m8_subiim():
+    h = 660
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "SubIIm: o segundo grau menor")
+    y = subtitle(d, "O ii vira meio-diminuto (Dm7b5) e empresta a cor do menor.", y)
+    rows = [("IIm7 (normal)", "Dm7 -> G7 -> C", "Do maior puro"),
+            ("SubIIm", "Dm7b5 -> G7(b9) -> C", "cor menor no ii"),
+            ("iv menor", "Fm7 (emprestado)", "SubIIm na subdominante"),
+            ("Efeito", "G7 ganha b9 (Ab)", "tensao extra")]
+    rows_box(d, y + 50, rows, height=58)
+    d.text((W / 2, h - 44), "SubIIm = o ii do campo menor, usado dentro do maior.",
+           font=font(20, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m8_emprestimos_modais():
+    h = 720
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Emprestimos modais: acordes do Do menor no Do maior")
+    y = subtitle(d, "O modo paralelo (mesma tonica, outra qualidade) doa acordes.", y)
+    rows = [("Cm", "i menor", "Do menor paralelo"),
+            ("Fm7", "iv menor", "subdominante menor"),
+            ("Gm7", "v menor", "dominante enfraquecido"),
+            ("Ab7M", "bVI", "cor dramatica"),
+            ("Bb7", "bVII", "cadencia mixolidia"),
+            ("Eb7M", "bIII", "brilho modal")]
+    rows_box(d, y + 40, rows, height=56)
+    d.text((W / 2, h - 44), "Emprestimo modal = pegar acorde do campo paralelo emprestado.",
+           font=font(20, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m8_dilatacao_maior():
+    h = 760
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Dilatacao do campo harmonico maior")
+    y = subtitle(d, "Do campo de 7 acordes para as 12 funcoes com dominantes e emprestimos.", y)
+    # Circulo de quintas simplificado com as funcoes.
+    center = (W / 2, y + 240)
+    radius = 190
+    names = ["I", "V7/V", "V7", "V7/vi", "V7/ii", "SubV7", "SubIIm", "bVII", "ivm"]
+    for i, name in enumerate(names):
+        ang = -math.pi / 2 + i * (2 * math.pi / len(names))
+        cx = center[0] + radius * math.cos(ang)
+        cy = center[1] + radius * math.sin(ang)
+        color = ACCENT if i == 0 else CYAN
+        d.ellipse([cx - 44, cy - 44, cx + 44, cy + 44], fill=RAISED, outline=color, width=3)
+        d.text((cx, cy), name, font=font(18, True), fill=TXT, anchor="mm")
+    d.text((center[0], center[1]), "Do", font=font(40, True), fill=GOLD, anchor="mm")
+    d.text((W / 2, h - 50), "Tudo gira em torno do I: os dominantes apontam para ele ou para um grau proximo.",
+           font=font(20), fill=TXT2, anchor="mm")
+    return img
+
+
+def d_m8_dilatacao_menor():
+    h = 720
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Dilatacao do campo harmonico menor")
+    y = subtitle(d, "Do menor natural ao harmonico: o V7 volta a existir e resolve em i.", y)
+    rows = [("im7", "Cm7", "tonica menor"),
+            ("iim7b5", "Dm7b5", "ii do menor"),
+            ("bIII7M", "Eb7M", "relativo maior"),
+            ("ivm7", "Fm7", "subdominante menor"),
+            ("V7", "G7", "dominante (menor harmonico)"),
+            ("bVI7M", "Ab7M", "cor dramatica"),
+            ("bVII7", "Bb7", "dominante do bIII")]
+    rows_box(d, y + 40, rows, height=54)
+    d.text((W / 2, h - 44), "O V7 e o emprestimo do menor harmonico: cria a sensivel (Si) no menor.",
+           font=font(20, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m8_ii_v_i():
+    h = 720
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "II-V-I maior e menor")
+    y = subtitle(d, "O voice leading guia: a 7a de um acorde desce para a 3a do proximo.", y)
+    rows = [("Maior", "Dm7 - G7 - CM7", "F->F->E, C->B->B", "resolucao luminosa"),
+            ("Menor", "Dm7b5 - G7 - Cm7", "F->F->Eb, Ab->G->G", "resolucao sombria"),
+            ("Menor (b9)", "Dm7b5 - G7b9 - Cm7", "Ab como b9 de G7", "tensao do menor")]
+    rows_box(d, y + 50, rows, height=70, cols=(0, 160, 560, 900))
+    # Mini pauta com a resolucao.
+    staff(d, MARGIN + 40, y + 340, W - 2 * MARGIN - 80,
+          [("D", 4, None), ("F", 4, None), ("G", 4, None), ("B", 4, None),
+           ("C", 5, None), ("E", 5, None)],
+          caption="Dm7 -> G7 -> CM7: a setima desce meio-tom para a terca seguinte")
+    return img
+
+
+def d_m8_nao_ii_v_i():
+    h = 700
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Quando NAO e um II-V-I")
+    y = subtitle(d, "Nem toda tensao que resolve e um ii-V-I: reconheca o alvo real.", y)
+    rows = [("Cadencia deceptiva", "G7 -> Am", "resolve no vi, nao no I"),
+            ("Cadencia de backdoor", "Fm7 - Bb7 -> CM7", "ivm7 e bVII7, sem ii-V"),
+            ("Dominante sem resolucao", "G7 -> F", "nao vai para o I"),
+            ("Vamp modal", "Dm7 - G7 (e volta)", "falta o I: nao fecha"),
+            ("II-V-I de verdade", "Dm7 - G7 - CM7", "ii -> V -> I, alvo claro")]
+    rows_box(d, y + 40, rows, height=60)
+    d.text((W / 2, h - 44), "Pergunte sempre: qual e o alvo e como ele e alcancado?",
+           font=font(20, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m8_partitura_v7():
+    return _score_image("v7", [("G", 4, None), ("B", 4, None), ("D", 5, None), ("F", 5, None)],
+                        "Partitura: arpejo de G7 (V7 de Do)")
+
+
+def d_m8_partitura_alterado():
+    return _score_image("alterado", [("G", 4, None), ("B", 4, None), ("D", 4, "b"), ("F", 4, None),
+                                     ("A", 4, "b")],
+                        "Partitura: G7b5(b9) alterado resolvendo")
+
+
+def d_m8_partitura_subv7():
+    return _score_image("subv7", [("D", 4, "b"), ("F", 4, None), ("A", 4, "b"), ("C", 5, "b")],
+                        "Partitura: arpejo de Db7 (SubV7 de Do)")
+
+
+def d_m8_partitura_ii_v_i():
+    return _score_image("ii_v_i", [("D", 4, None), ("F", 4, None), ("A", 4, None), ("C", 5, None),
+                                   ("G", 4, None), ("B", 4, None), ("D", 5, None), ("F", 5, None),
+                                   ("C", 5, None), ("E", 5, None), ("G", 5, None)],
+                        "Partitura: II-V-I maior (Dm7 - G7 - CM7)")
+
+
+def d_m8_partitura_ii_v_i_menor():
+    return _score_image("ii_v_i_menor",
+                        [("D", 4, None), ("F", 4, None), ("A", 4, "b"), ("C", 5, None),
+                         ("G", 4, None), ("B", 4, None), ("D", 5, None), ("F", 5, None),
+                         ("C", 5, None), ("E", 5, "b"), ("G", 5, None)],
+                        "Partitura: II-V-I menor (Dm7b5 - G7 - Cm7)")
+
+
+def d_m8_partitura_v7_do_v():
+    return _score_image("v7_do_v", [("D", 4, None), ("F", 4, "#"), ("A", 4, None), ("C", 5, None)],
+                        "Partitura: arpejo de D7 (V7/V de Do)")
+
+
+DIAGRAMS.update({
+    "m8_dominante_v7": d_m8_dominante_v7,
+    "m8_dominantes_secundarios": d_m8_dominantes_secundarios,
+    "m8_dominantes_alterados": d_m8_dominantes_alterados,
+    "m8_subv7": d_m8_subv7,
+    "m8_subiim": d_m8_subiim,
+    "m8_emprestimos_modais": d_m8_emprestimos_modais,
+    "m8_dilatacao_maior": d_m8_dilatacao_maior,
+    "m8_dilatacao_menor": d_m8_dilatacao_menor,
+    "m8_ii_v_i": d_m8_ii_v_i,
+    "m8_nao_ii_v_i": d_m8_nao_ii_v_i,
+    "m8_partitura_v7": d_m8_partitura_v7,
+    "m8_partitura_alterado": d_m8_partitura_alterado,
+    "m8_partitura_subv7": d_m8_partitura_subv7,
+    "m8_partitura_ii_v_i": d_m8_partitura_ii_v_i,
+    "m8_partitura_ii_v_i_menor": d_m8_partitura_ii_v_i_menor,
+    "m8_partitura_v7_do_v": d_m8_partitura_v7_do_v,
+})
+
+
 def main() -> None:
     out_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                            "Source", "Course", "Content", "Diagrams")
