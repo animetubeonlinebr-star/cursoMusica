@@ -27,6 +27,13 @@ public:
     void setModule (const CourseModule* module);
     void setTopicFilter (const juce::String& lessonId);
 
+    // Sets the module and the topic filter together. The pane filters the
+    // exercises of the module it currently holds, so applying a lesson filter
+    // without pointing it at the right module first lists the wrong module's
+    // exercises (empty when the lesson id does not occur there). Use this from
+    // the tree, where both values come from the clicked topic.
+    void setModuleAndTopic (const CourseModule* module, const juce::String& lessonId);
+
     // Polled by the owner at UI rate: drains the engine and repaints the state.
     void poll();
 

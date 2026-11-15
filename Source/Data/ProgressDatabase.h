@@ -27,6 +27,18 @@ struct PostgresConfig
 
     static PostgresConfig fromEnvironment();
 
+    // Reads the connection settings saved from the Settings window. Unlike
+    // fromEnvironment(), a host here means the student turned the mirror on, so
+    // `disabled` is false only when the saved toggle is on.
+    //
+    // The password is never read from (nor written to) the settings file
+    // (docs/SECURITY.md): it comes from the PGPASSWORD environment variable.
+    static PostgresConfig fromSettings();
+
+    // Persists the non-secret fields (never the password) so the choice survives
+    // a restart.
+    void saveToSettings() const;
+
     // Remote persistence is only attempted when a host is set and the build was
     // not told to stay local. The password is optional (peer/trust auth).
     bool isEnabled() const noexcept { return host.isNotEmpty() && ! disabled; }

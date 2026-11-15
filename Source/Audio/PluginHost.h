@@ -62,7 +62,8 @@ private:
 
     PluginSearchPaths searchPaths;
 
-    std::unique_ptr<juce::PropertiesFile> properties;
+    // Shared with every other persisting component (see AppSettings).
+    juce::PropertiesFile& properties;
     std::unique_ptr<ScanJob> scanJob;
     std::atomic<bool> scanning { false };
 

@@ -87,6 +87,7 @@ target_sources(CursoMusica PRIVATE
     Source/Course/ProgressStore.cpp
     Source/Course/ModuleCatalog.cpp
     Source/Data/ProgressDatabase.cpp
+    Source/Data/AppSettings.cpp
     Source/Course/Content/Topics.cpp
     Source/Course/Content/Diagrams.cpp
     Source/Course/Content/TopicA.cpp
@@ -109,7 +110,8 @@ target_sources(CursoMusica PRIVATE
     Source/UI/DevicePanel.cpp
     Source/UI/TransportPanel.cpp
     Source/UI/SettingsComponent.cpp
-    Source/UI/PluginPathsComponent.cpp)
+    Source/UI/PluginPathsComponent.cpp
+    Source/UI/DatabaseSettingsComponent.cpp)
 
 target_include_directories(CursoMusica PRIVATE Source)
 
@@ -270,6 +272,7 @@ target_sources(CursoMusicaTests PRIVATE
     Source/Course/ModuleCatalog.cpp
     Source/Course/ProgressStore.cpp
     Source/Data/ProgressDatabase.cpp
+    Source/Data/AppSettings.cpp
     Source/Course/Content/Topics.cpp
     Source/Course/Content/Diagrams.cpp
     Source/Course/Content/TopicA.cpp

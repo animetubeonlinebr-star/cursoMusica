@@ -7,6 +7,7 @@
 #include <unordered_map>
 
 #include "Course/ProgressionRule.h"
+#include "Data/AppSettings.h"
 #include "Data/ProgressDatabase.h"
 
 namespace cursomusica::course
@@ -79,7 +80,9 @@ private:
     std::atomic<bool> remoteConnected { false };
     bool remoteConfigured = false;
 
-    std::unique_ptr<juce::PropertiesFile> properties;
+    // Shared with every other persisting component (see AppSettings): a second
+    // PropertiesFile over the same file would drop the keys it never loaded.
+    juce::PropertiesFile& properties;
     data::PostgresConfig config;
     std::unique_ptr<SyncThread> sync;
 

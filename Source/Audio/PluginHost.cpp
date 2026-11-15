@@ -1,5 +1,7 @@
 #include "Audio/PluginHost.h"
 
+#include "Data/AppSettings.h"
+
 namespace cursomusica
 {
 
@@ -112,17 +114,9 @@ private:
 };
 
 PluginHost::PluginHost()
+    : properties (data::AppSettings::get())
 {
     formatManager.addDefaultFormats();
-
-    juce::PropertiesFile::Options options;
-    options.applicationName = "CursoMusica";
-    options.filenameSuffix = ".settings";
-    options.folderName = "CursoMusica";
-    options.osxLibrarySubFolder = "Application Support";
-    options.storageFormat = juce::PropertiesFile::storeAsXML;
-
-    properties = std::make_unique<juce::PropertiesFile> (options);
 }
 
 PluginHost::~PluginHost()
@@ -138,12 +132,9 @@ PluginHost::~PluginHost()
 
 void PluginHost::loadKnownPlugins()
 {
-    if (properties == nullptr)
-        return;
+    searchPaths = PluginSearchPaths::deserialise (properties.getValue (pluginSearchPathsKey));
 
-    searchPaths = PluginSearchPaths::deserialise (properties->getValue (pluginSearchPathsKey));
-
-    const auto xmlText = properties->getValue (pluginListXmlKey);
+    const auto xmlText = properties.getValue (pluginListXmlKey);
     if (xmlText.isEmpty())
         return;
 
@@ -153,22 +144,20 @@ void PluginHost::loadKnownPlugins()
 
 void PluginHost::saveKnownPlugins()
 {
-    if (properties == nullptr)
-        return;
-
     if (auto xml = knownList.createXml())
-        properties->setValue (pluginListXmlKey, xml->toString());
+        properties.setValue (pluginListXmlKey, xml->toString());
+
+    // Flush now: the shared instance is not torn down at exit, so a scan that
+    // finishes just before the app closes must not wait for the properties timer.
+    properties.saveIfNeeded();
 }
 
 void PluginHost::saveSearchPaths()
 {
-    if (properties == nullptr)
-        return;
-
-    properties->setValue (pluginSearchPathsKey, searchPaths.serialise());
+    properties.setValue (pluginSearchPathsKey, searchPaths.serialise());
     // Flush now: the window writes through on every edit, and the app may be
     // closed before the properties timer fires.
-    properties->saveIfNeeded();
+    properties.saveIfNeeded();
     prunePluginsOutsideSearchPaths();
 }
 

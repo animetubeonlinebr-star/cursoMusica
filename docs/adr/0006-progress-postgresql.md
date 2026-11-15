@@ -47,15 +47,23 @@ Restrições que a decisão precisa respeitar:
    banco. A UI só enfileira o resultado; a conexão e o `UPSERT` acontecem numa
    thread dedicada do `ProgressStore`.
 
-5. **Schema `curso-musica`, configurável por ambiente.** O nome do schema é
-   `curso-musica` por padrão (o pedido do cliente), mas vem de
-   `CURSOMUSICA_PG_SCHEMA` para não engessar. Host/porta/usuário/senha/banco
-   seguem as variáveis padrão do `libpq` (`PGHOST`, `PGPORT`, `PGUSER`,
-   `PGPASSWORD`, `PGDATABASE`), com `PGPORT` default **5432**. O esquema é criado
-   de forma idempotente (`CREATE SCHEMA IF NOT EXISTS`).
+5. **Schema `curso-musica`, configurável no app.** O nome do schema é
+   `curso-musica` por padrão (o pedido do cliente), mas é editável para não
+   engessar. Host/porta/usuário/banco/schema são informados na janela
+   **Configurações → Banco de dados…** (`UI/DatabaseSettingsComponent`) e
+   guardados no `CursoMusica.settings`; as variáveis do `libpq` (`PGHOST`,
+   `PGPORT`, `PGUSER`, `PGPASSWORD`, `PGDATABASE`) ficam como alternativa para
+   CI/script. `PGPORT` default **5432**. O esquema é criado de forma idempotente
+   (`CREATE SCHEMA IF NOT EXISTS`), inclusive pelo botão **Testar conexão**.
 
-6. **Credenciais só no ambiente.** Senha nunca é embutida no binário, no
-   repositório nem escrita em log. A conexão usa `PQconnectdbParams` (array de
+   > Correção pós-entrega (2026-11-16): a versão original só lia o ambiente. Um
+   > app aberto pelo menu Iniciar do Windows **não herda `PGHOST`**, então nunca
+   > conectava — o schema não existia e o progresso não era gravado. A janela de
+   > configuração fecha essa lacuna.
+
+6. **Credenciais: senha só no ambiente.** Senha nunca é embutida no binário, no
+   repositório nem escrita em log, e **não é gravada** no `PropertiesFile`
+   (só os campos não secretos). A conexão usa `PQconnectdbParams` (array de
    parâmetros), nunca uma string de conexão montada à mão que possa vazar em
    `lastError()`.
 

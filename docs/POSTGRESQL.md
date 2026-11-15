@@ -11,7 +11,9 @@ O app **não fixa a versão do servidor**. Ele fala com o PostgreSQL pelo client
 espelhamento é:
 
 1. o app ter sido **compilado com `libpq`** (`find_package(PostgreSQL)`); e
-2. o ambiente informar as variáveis de conexão (`PGHOST`, …).
+2. o app estar **apontado para um servidor** — pela janela **Configurações →
+   Banco de dados…** (normal no Windows) ou pelas variáveis de ambiente
+   (`PGHOST`, …) como alternativa.
 
 Sem qualquer um dos dois, o app roda **local** (offline-first) e nada quebra.
 
@@ -80,7 +82,25 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA "curso-musica"
 As **tabelas** (`progress`, `module_result`) não precisam ser criadas: o app cria
 sozinho, de forma idempotente, na primeira conexão (`ProgressDatabase::ensureSchema`).
 
-## 4. Configurar o app (variáveis de ambiente)
+## 4. Configurar o app
+
+### 4.1 Pela janela de Configurações (recomendado no Windows)
+
+A forma normal de ligar o espelhamento é a janela **Configurações → Banco de
+dados…**. Um app iniciado pelo menu Iniciar/Explorer **não herda** `PGHOST` do
+ambiente, então sem esta janela o app nunca conectava: o schema não era criado e
+o progresso nunca saía da máquina.
+
+Na janela o aluno liga o espelhamento e informa **host**, **porta** (padrão
+5432), **usuário**, **banco** e **schema** (padrão `curso-musica`). O botão
+**Testar conexão** abre a conexão e cria o schema na hora. Só os campos **não
+secretos** são guardados no `CursoMusica.settings`; a **senha nunca é gravada**
+(vem de `PGPASSWORD`, `docs/SECURITY.md`).
+
+### 4.2 Por variáveis de ambiente (CI e execução por script)
+
+Quando nada foi configurado na janela, o app cai para o ambiente — útil para CI
+e execuções automatizadas.
 
 | Variável | Papel | Default |
 |---|---|---|
@@ -138,6 +158,7 @@ O `ProgressStore` expõe o estado por `getRemoteStatus()` / `isRemoteConnected()
 - `local-only (...)` — sem libpq no build ou sem ambiente configurado.
 
 > Indicador visual na tela de configuração é um passo seguinte do ux-ui-designer.
+> O status textual já é mostrado na janela **Banco de dados…** ("Testar conexão").
 
 A prova direta de que está gravando é consultar o banco:
 
@@ -156,6 +177,8 @@ exercita o caminho real quando um banco está acessível.
 | Build diz `libpq not found` | libpq fora do caminho padrão | passe `-DPostgreSQL_ROOT="C:/Program Files/PostgreSQL/18"` |
 | App abre mas status fica `local-only (build without libpq)` | compilado sem libpq | reconfigure com `-DCURSOMUSICA_REQUIRE_POSTGRES=ON` |
 | Status `configured, connecting…` | banco fora do ar ou credenciais erradas | confira `PGHOST`/porta/usuário/senha e o serviço |
+| **Schema `curso-musica` não existe / progresso não vai ao banco** | o app nunca conectou: nada configurado na janela **Banco de dados…** e `PGHOST` vazio | abra **Configurações → Banco de dados…**, ligue o espelhamento e use **Testar conexão** (§4.1) |
+| **Progresso some ao fechar o app** | (corrigido) duas instâncias de `PropertiesFile` sobre o mesmo `CursoMusica.settings` — a última a salvar apagava as chaves da outra | atualize o app; a instância passou a ser única (`Data/AppSettings`) |
 | `FATAL: database "..." does not exist` | banco não criado | rode `tools/setup_postgres.sh` (§3) |
 | App não abre / erro de DLL no Windows | `libpq.dll` não encontrada | §5 |
 | `password authentication failed` | senha do papel diferente | `setup_postgres.sh` (re)define a senha |

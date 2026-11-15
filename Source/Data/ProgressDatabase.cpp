@@ -1,5 +1,7 @@
 #include "Data/ProgressDatabase.h"
 
+#include "Data/AppSettings.h"
+
 #ifdef CURSOMUSICA_HAS_POSTGRES
  #include <libpq-fe.h>
 #endif
@@ -37,6 +39,49 @@ PostgresConfig PostgresConfig::fromEnvironment()
     config.student  = envOr ("CURSOMUSICA_PG_STUDENT", "local");
     config.disabled = envFlag ("CURSOMUSICA_PG_DISABLE");
     return config;
+}
+
+namespace
+{
+    constexpr const char* pgEnabledKey = "database/enabled";
+    constexpr const char* pgHostKey    = "database/host";
+    constexpr const char* pgPortKey    = "database/port";
+    constexpr const char* pgUserKey    = "database/user";
+    constexpr const char* pgDatabaseKey = "database/name";
+    constexpr const char* pgSchemaKey  = "database/schema";
+}
+
+PostgresConfig PostgresConfig::fromSettings()
+{
+    auto& settings = AppSettings::get();
+
+    PostgresConfig config;
+    config.host   = settings.getValue (pgHostKey);
+    config.port   = settings.getValue (pgPortKey, "5432");
+    config.user   = settings.getValue (pgUserKey);
+    config.dbname = settings.getValue (pgDatabaseKey);
+    config.schema = settings.getValue (pgSchemaKey, "curso-musica");
+
+    // The password is deliberately not persisted; it is supplied by the
+    // environment at runtime (docs/SECURITY.md).
+    config.password = envOr ("PGPASSWORD", {});
+    config.student  = envOr ("CURSOMUSICA_PG_STUDENT", "local");
+
+    config.disabled = ! settings.getBoolValue (pgEnabledKey, false);
+    return config;
+}
+
+void PostgresConfig::saveToSettings() const
+{
+    auto& settings = AppSettings::get();
+
+    settings.setValue (pgEnabledKey, ! disabled);
+    settings.setValue (pgHostKey, host);
+    settings.setValue (pgPortKey, port);
+    settings.setValue (pgUserKey, user);
+    settings.setValue (pgDatabaseKey, dbname);
+    settings.setValue (pgSchemaKey, schema);
+    settings.saveIfNeeded();
 }
 
 ProgressDatabase::ProgressDatabase() = default;
