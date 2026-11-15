@@ -6,8 +6,8 @@
 # build/runtime (see deploy/windows/installer.nsi and release.yml), so this
 # script copies libpq.dll and the DLLs it transitively imports.
 #
-# Runs in script mode from CMakeLists.txt as a POST_BUILD step:
-#   cmake -DEXE=<exe> -DOUT_DIR=<dir> -DPG_DIRS=<dir|dir> -P this-file
+# Runs in script mode, from the generated build/stage-windows-runtime.cmake
+# (see CMakeLists.txt): it sets EXE, OUT_DIR and PG_DIRS, then includes this file.
 
 if(NOT DEFINED EXE OR NOT EXISTS "${EXE}")
     message(FATAL_ERROR "StageWindowsRuntime: EXE not found: ${EXE}")
@@ -17,10 +17,12 @@ if(NOT DEFINED OUT_DIR OR OUT_DIR STREQUAL "")
 endif()
 
 # Candidate directories, in order: the PostgreSQL install tree, then PATH (a
-# machine-wide install puts libpq.dll in its bin/ and on PATH).
+# machine-wide install puts libpq.dll in its bin/ and on PATH). PG_DIRS is a
+# CMake list (semicolon-separated); a "|" separator is also accepted.
 set(_dirs "")
 if(DEFINED PG_DIRS AND NOT PG_DIRS STREQUAL "")
-    string(REPLACE "|" ";" _dirs "${PG_DIRS}")
+    set(_dirs "${PG_DIRS}")
+    string(REPLACE "|" ";" _dirs "${_dirs}")
 endif()
 if(DEFINED ENV{PATH})
     file(TO_CMAKE_PATH "$ENV{PATH}" _path_dirs)

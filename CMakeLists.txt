@@ -198,14 +198,18 @@ if(PostgreSQL_FOUND)
             list(APPEND _pg_hint_dirs "${PostgreSQL_ROOT}/bin" "${PostgreSQL_ROOT}/lib")
         endif()
         list(REMOVE_DUPLICATES _pg_hint_dirs)
-        string(REPLACE ";" "|" _pg_hint_arg "${_pg_hint_dirs}")
-
+        # Written to a generated script instead of -D arguments: the PostgreSQL
+        # path contains spaces ("Program Files") and Ninja hands the command to
+        # cmd.exe, which splits it ("'C:' is not recognized as an internal or
+        # external command").
+        file(GENERATE OUTPUT "${CMAKE_BINARY_DIR}/stage-windows-runtime.cmake" CONTENT
+"set(EXE \"$<TARGET_FILE:CursoMusica>\")
+set(OUT_DIR \"${CMAKE_BINARY_DIR}/runtime\")
+set(PG_DIRS \"${_pg_hint_dirs}\")
+include(\"${CMAKE_CURRENT_SOURCE_DIR}/cmake/StageWindowsRuntime.cmake\")
+")
         add_custom_command(TARGET CursoMusica POST_BUILD
-            COMMAND ${CMAKE_COMMAND}
-                    -DEXE="$<TARGET_FILE:CursoMusica>"
-                    -DOUT_DIR="${CMAKE_BINARY_DIR}/runtime"
-                    -DPG_DIRS="${_pg_hint_arg}"
-                    -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/StageWindowsRuntime.cmake"
+            COMMAND ${CMAKE_COMMAND} -P "${CMAKE_BINARY_DIR}/stage-windows-runtime.cmake"
             COMMENT "Staging Windows runtime DLLs (libpq) into build/runtime")
     endif()
 elseif(CURSOMUSICA_REQUIRE_POSTGRES)
