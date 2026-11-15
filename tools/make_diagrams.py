@@ -673,6 +673,280 @@ DIAGRAMS = {
 }
 
 
+# --------------------------------------------------------------------------
+# Modulo 2 — teoria dos intervalos e percepcao musical.
+# --------------------------------------------------------------------------
+LETTERS = {"C": 0, "D": 1, "E": 2, "F": 3, "G": 4, "A": 5, "B": 6}
+STAFF_LINE_GAP = 26
+
+
+def diatonic_index(name: str, octave: int) -> int:
+    return octave * 7 + LETTERS[name[0]]
+
+
+def staff(d, x, y, w, notes, clef=True, caption=None):
+    """Pauta simples (clave de sol). `notes` = [(letter, octave, accidental)]."""
+    gap = STAFF_LINE_GAP
+    top = y + gap * 2  # linha de cima (F5)
+    bottom = y + gap * 6  # linha de baixo (E4)
+    d.text((x, y - 34), "Clave de sol", font=font(17, True), fill=TXT2, anchor="la")
+
+    for i in range(5):
+        yy = top + i * gap
+        d.line([x, yy, x + w, yy], fill=(200, 200, 210), width=2)
+
+    if clef:
+        # The DejaVu fonts used here have no treble-clef glyph, so a bold "G"
+        # stands in for the clef and the caption names it.
+        d.text((x + 6, (top + bottom) / 2), "G", font=font(70, True), fill=TXT, anchor="lm")
+
+    ref = diatonic_index("E", 4)
+    step = w / (len(notes) + 1)
+    for i, (letter, octave, accidental) in enumerate(notes):
+        cx = x + step * (i + 1)
+        pos = diatonic_index(letter, octave) - ref
+        cy = bottom - pos * (gap / 2)
+        rw, rh = 13, 9
+        d.ellipse([cx - rw, cy - rh, cx + rw, cy + rh], fill=TXT)
+        d.line([cx + rw - 2, cy, cx + rw - 2, cy - 58], fill=TXT, width=3)
+        if accidental:
+            d.text((cx - rw - 16, cy), accidental, font=font(26, True), fill=GOLD, anchor="mm")
+
+    if caption:
+        d.text((x + w / 2, bottom + 78), caption, font=font(20), fill=TXT2, anchor="mm")
+    return bottom + 110
+
+
+def d_m2_semitons_piano():
+    h = 560
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Semitons: a regua de todo intervalo")
+    y = subtitle(d, "1 semitom = 1 casa no braco = tecla vizinha no teclado. 1 tom = 2 semitons.", y)
+    piano(d, MARGIN, y + 40, W - 2 * MARGIN, 240, octaves=2,
+          black_labels={1: "C#", 3: "D#", 6: "F#", 8: "G#", 10: "A#"})
+    d.text((W / 2, h - 96), "Do ao Do seguinte: 12 semitons (uma oitava).",
+           font=font(22, True), fill=CYAN, anchor="mm")
+    d.text((W / 2, h - 54), "Entre Mi-Fa e Si-Do ha apenas 1 semitom; as outras notas naturais estao a 1 tom.",
+           font=font(19), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m2_quadro_movel():
+    h = 760
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Quadro movel de intervalos (a partir de Do)")
+    y = subtitle(d, "Mesmo desenho em qualquer tonica: muda a nota, o nome do intervalo nao.", y)
+    rows = [(0, "unissono", "Do"), (1, "2a menor", "Do#"), (2, "2a maior", "Re"),
+            (3, "3a menor", "Re#"), (4, "3a maior", "Mi"), (5, "4a justa", "Fa"),
+            (6, "4a aum. (tritono)", "Fa#"), (7, "5a justa", "Sol"),
+            (8, "6a menor", "Sol#"), (9, "6a maior", "La"), (10, "7a menor", "La#"),
+            (11, "7a maior", "Si"), (12, "8a justa", "Do")]
+    col_w = (W - 2 * MARGIN) / 3
+    top = y + 26
+    d.text((MARGIN, top), "Semitons", font=font(19, True), fill=ACCENT, anchor="la")
+    d.text((MARGIN + col_w, top), "Intervalo", font=font(19, True), fill=ACCENT, anchor="la")
+    d.text((MARGIN + 2 * col_w, top), "Nota", font=font(19, True), fill=ACCENT, anchor="la")
+    for i, (semi, name, note) in enumerate(rows):
+        yy = top + 30 + i * 48
+        fill = RAISED if i % 2 == 0 else SURFACE
+        d.rounded_rectangle([MARGIN, yy, W - MARGIN, yy + 42], radius=8, fill=fill)
+        color = GOLD if semi == 6 else TXT
+        d.text((MARGIN + 14, yy + 21), str(semi), font=font(20, True), fill=color, anchor="lm")
+        d.text((MARGIN + col_w + 14, yy + 21), name, font=font(20, True), fill=color, anchor="lm")
+        d.text((MARGIN + 2 * col_w + 14, yy + 21), note, font=font(20, True), fill=CYAN, anchor="lm")
+    return img
+
+
+def d_m2_mapa_intervalos():
+    h = 760
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Intervalos no braco (a partir de Do na 5a corda)")
+    y = subtitle(d, "Cada corda e uma regua de semitons; a forma se repete em qualquer tonica.", y)
+    fretboard(d, MARGIN + 40, y + 40, W - 2 * MARGIN - 80, 300,
+              n_frets=12, start_fret=0, show_notes=True, highlight={0, 4, 7}, root_pc=0)
+    string_labels(d, MARGIN + 10, y + 40, 300)
+    d.text((MARGIN, h - 118), "Destaques: tonica (0, roxo), terca maior (4, ciano) e quinta justa (7, ciano).",
+           font=font(20), fill=TXT2, anchor="la")
+    d.text((MARGIN, h - 76), "Ache a tonica e conte os semitons para localizar qualquer intervalo.",
+           font=font(20, True), fill=GOLD, anchor="la")
+    return img
+
+
+def d_m2_percepcao_referencias():
+    h = 660
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Referencias sonoras por intervalo")
+    y = subtitle(d, "Associe cada intervalo a uma sensacao; o ouvido memoriza pela comparacao.", y)
+    items = [("2a maior", "passo de escala", "movimento"),
+             ("3a maior", "melodia alegre", "aberto"),
+             ("3a menor", "melodia triste", "fechado"),
+             ("4a justa", "toque de chamada", "firme"),
+             ("5a justa", "som vazio/epico", "grandioso"),
+             ("6a maior", "frase doce", "expansivo"),
+             ("7a maior", "brilho suspenso", "tenso"),
+             ("8a justa", "mesma nota mais alta", "identico")]
+    top = y + 40
+    for i, (name, ref, feel) in enumerate(items):
+        yy = top + i * 60
+        d.rounded_rectangle([MARGIN, yy, W - MARGIN, yy + 52], radius=8, fill=RAISED if i % 2 == 0 else SURFACE)
+        d.text((MARGIN + 18, yy + 26), name, font=font(22, True), fill=ACCENT, anchor="lm")
+        d.text((MARGIN + 260, yy + 26), ref, font=font(20), fill=TXT, anchor="lm")
+        d.text((MARGIN + 720, yy + 26), feel, font=font(20, True), fill=CYAN, anchor="lm")
+    return img
+
+
+def d_m2_triades_empilhadas():
+    h = 680
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Tríades e tetrades: intervalos empilhados")
+    y = subtitle(d, "O nome do acorde descreve os intervalos sobre a tonica.", y)
+    groups = [("Maior (0,4,7)", ["Do", "Mi", "Sol"], ACCENT),
+              ("Menor (0,3,7)", ["Do", "Mib", "Sol"], CYAN),
+              ("7a maior (0,4,7,11)", ["Do", "Mi", "Sol", "Si"], SUCCESS),
+              ("7a dominante (0,4,7,10)", ["Do", "Mi", "Sol", "Sib"], GOLD)]
+    top = y + 40
+    for i, (name, notes, color) in enumerate(groups):
+        yy = top + i * 130
+        d.text((MARGIN, yy + 10), name, font=font(24, True), fill=color, anchor="la")
+        for k, note in enumerate(notes):
+            cx = MARGIN + 40 + k * 130
+            cy = yy + 74
+            d.ellipse([cx - 40, cy - 40, cx + 40, cy + 40], fill=RAISED, outline=color, width=3)
+            d.text((cx, cy), note, font=font(24, True), fill=TXT, anchor="mm")
+    d.text((W / 2, h - 46), "Cada bolinha e uma nota a um numero de semitons da tonica.",
+           font=font(20), fill=TXT2, anchor="mm")
+    return img
+
+
+def d_m2_cantar_tocar():
+    h = 520
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "O ciclo do treino de intervalos")
+    y = subtitle(d, "Ouvir, cantar, tocar e conferir: cada passo reforca o anterior.", y)
+    steps = [("1. Ouvir", "o app demonstra o intervalo"),
+             ("2. Cantar", "reproduza a altura com a voz"),
+             ("3. Tocar", "execute no braco, em qualquer posicao"),
+             ("4. Conferir", "o app mede os semitons e valida")]
+    top = y + 50
+    for i, (title_txt, desc) in enumerate(steps):
+        yy = top + i * 90
+        d.rounded_rectangle([MARGIN, yy, W - MARGIN, yy + 74], radius=10, fill=RAISED)
+        d.text((MARGIN + 20, yy + 22), title_txt, font=font(26, True), fill=ACCENT, anchor="la")
+        d.text((MARGIN + 300, yy + 26), desc, font=font(21), fill=TXT, anchor="la")
+        if i < len(steps) - 1:
+            d.text((W / 2, yy + 78), "v", font=font(24, True), fill=TXT_DIS, anchor="mm")
+    return img
+
+
+def _score_image(name, notes, caption):
+    h = 420
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, caption)
+    staff(d, MARGIN + 30, y + 40, W - 2 * MARGIN - 60, notes)
+    return img
+
+
+def d_m2_partitura_terca():
+    return _score_image("terca", [("C", 4, None), ("E", 4, None)],
+                        "Partitura: terca maior (Do-Mi)")
+
+
+def d_m2_partitura_tercas():
+    return _score_image("tercas", [("C", 4, None), ("E", 4, None), ("C", 4, None), ("E", 4, "b")],
+                        "Partitura: terca maior e terca menor (Do-Mi / Do-Mib)")
+
+
+def d_m2_partitura_triade():
+    return _score_image("triade", [("C", 4, None), ("E", 4, None), ("G", 4, None), ("C", 5, None)],
+                        "Partitura: triade de Do maior com a oitava")
+
+
+def d_m2_partitura_intervalos():
+    return _score_image("intervalos", [("C", 4, None), ("D", 4, None), ("E", 4, None), ("F", 4, None),
+                                       ("G", 4, None), ("A", 4, None), ("B", 4, None), ("C", 5, None)],
+                        "Partitura: escala de Do maior (cada passo e um intervalo)")
+
+
+def d_m2_partitura_arpejo():
+    return _score_image("arpejo", [("C", 4, None), ("E", 4, None), ("G", 4, None), ("C", 5, None),
+                                   ("G", 4, None), ("E", 4, None), ("C", 4, None)],
+                        "Partitura: arpejo de Do maior (sobe e desce)")
+
+
+DIAGRAMS.update({
+    "m2_semitons_piano": d_m2_semitons_piano,
+    "m2_quadro_movel": d_m2_quadro_movel,
+    "m2_mapa_intervalos": d_m2_mapa_intervalos,
+    "m2_percepcao_referencias": d_m2_percepcao_referencias,
+    "m2_triades_empilhadas": d_m2_triades_empilhadas,
+    "m2_cantar_tocar": d_m2_cantar_tocar,
+    "m2_partitura_terca": d_m2_partitura_terca,
+    "m2_partitura_tercas": d_m2_partitura_tercas,
+    "m2_partitura_triade": d_m2_partitura_triade,
+    "m2_partitura_intervalos": d_m2_partitura_intervalos,
+    "m2_partitura_arpejo": d_m2_partitura_arpejo,
+})
+
+
+def d_m2_qualidades_grupos():
+    h = 620
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Os tres grupos de qualidade")
+    y = subtitle(d, "Justos; maiores/menores; aumentados/diminutos. O numero diz o grupo.", y)
+    cols = [("Justos", ["1a unissono", "4a", "5a", "8a"], ACCENT),
+            ("Maiores/Menores", ["2a", "3a", "6a", "7a"], CYAN),
+            ("Alterados", ["aumentado", "diminuto"], GOLD)]
+    top = y + 40
+    col_w = (W - 2 * MARGIN) / 3
+    for c, (name, items, color) in enumerate(cols):
+        x = MARGIN + c * col_w
+        d.rounded_rectangle([x + 10, top, x + col_w - 10, top + 300], radius=12, fill=RAISED)
+        d.text((x + col_w / 2, top + 30), name, font=font(24, True), fill=color, anchor="mm")
+        for i, it in enumerate(items):
+            d.text((x + col_w / 2, top + 80 + i * 44), it, font=font(21), fill=TXT, anchor="mm")
+    d.text((W / 2, h - 60), "Justos nao tem versao maior/menor; os demais podem ser alterados.",
+           font=font(20), fill=TXT2, anchor="mm")
+    return img
+
+
+def d_m2_intervalos_papeis():
+    h = 660
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "O papel de cada intervalo")
+    y = subtitle(d, "Cada intervalo tem uma funcao na construcao da musica.", y)
+    items = [("terca maior", "define o acorde maior", "aberto"),
+             ("terca menor", "define o acorde menor", "fechado"),
+             ("quarta justa", "movimento e suspensao", "firme"),
+             ("quinta justa", "estabilidade e power chord", "cheio"),
+             ("sexta maior", "melodia doce", "expansivo"),
+             ("setima maior", "brilho no acorde de setima", "suspenso"),
+             ("setima menor", "dominante e blues", "tenso"),
+             ("nona", "cor sobre o acorde", "rico")]
+    top = y + 34
+    for i, (name, role, feel) in enumerate(items):
+        yy = top + i * 56
+        d.rounded_rectangle([MARGIN, yy, W - MARGIN, yy + 48], radius=8,
+                            fill=RAISED if i % 2 == 0 else SURFACE)
+        d.text((MARGIN + 18, yy + 24), name, font=font(21, True), fill=ACCENT, anchor="lm")
+        d.text((MARGIN + 340, yy + 24), role, font=font(20), fill=TXT, anchor="lm")
+        d.text((MARGIN + 900, yy + 24), feel, font=font(20, True), fill=CYAN, anchor="lm")
+    return img
+
+DIAGRAMS.update({
+    "m2_qualidades_grupos": d_m2_qualidades_grupos,
+    "m2_intervalos_papeis": d_m2_intervalos_papeis,
+})
+
+
 def main() -> None:
     out_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                            "Source", "Course", "Content", "Diagrams")

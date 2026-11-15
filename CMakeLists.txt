@@ -78,8 +78,10 @@ target_sources(CursoMusica PRIVATE
     Source/Audio/PluginSearchPaths.cpp
     Source/Audio/TuningSettings.cpp
     Source/Audio/Metronome.cpp
+    Source/Audio/TonePlayer.cpp
     Source/Audio/AudioPortClassifier.cpp
     Source/Course/NoteMath.cpp
+    Source/Course/Intervals.cpp
     Source/Course/ExerciseEvaluator.cpp
     Source/Course/TempoGrid.cpp
     Source/Course/PracticeSession.cpp
@@ -99,6 +101,14 @@ target_sources(CursoMusica PRIVATE
     Source/Course/Content/TopicG.cpp
     Source/Course/Content/TopicH.cpp
     Source/Course/Content/TopicI.cpp
+    Source/Course/Content/Topic2A.cpp
+    Source/Course/Content/Topic2B.cpp
+    Source/Course/Content/Topic2C.cpp
+    Source/Course/Content/Topic2D.cpp
+    Source/Course/Content/Topic2E.cpp
+    Source/Course/Content/Topic2F.cpp
+    Source/Course/Content/Topic2G.cpp
+    Source/Course/Content/Topic2H.cpp
     Source/UI/Design/LookAndFeel.cpp
     Source/UI/Design/Panel.cpp
     Source/UI/LevelMeter.cpp
@@ -265,6 +275,7 @@ juce_add_console_app(CursoMusicaTests
 target_sources(CursoMusicaTests PRIVATE
     tests/TestMain.cpp
     Source/Course/NoteMath.cpp
+    Source/Course/Intervals.cpp
     Source/Course/ExerciseEvaluator.cpp
     Source/Course/TempoGrid.cpp
     Source/Course/PracticeSession.cpp
@@ -284,6 +295,14 @@ target_sources(CursoMusicaTests PRIVATE
     Source/Course/Content/TopicG.cpp
     Source/Course/Content/TopicH.cpp
     Source/Course/Content/TopicI.cpp
+    Source/Course/Content/Topic2A.cpp
+    Source/Course/Content/Topic2B.cpp
+    Source/Course/Content/Topic2C.cpp
+    Source/Course/Content/Topic2D.cpp
+    Source/Course/Content/Topic2E.cpp
+    Source/Course/Content/Topic2F.cpp
+    Source/Course/Content/Topic2G.cpp
+    Source/Course/Content/Topic2H.cpp
     Source/Audio/AudioPortClassifier.cpp
     Source/Audio/PluginSearchPaths.cpp)
 

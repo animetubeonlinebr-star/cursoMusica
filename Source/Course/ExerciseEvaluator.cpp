@@ -89,4 +89,43 @@ bool gatePassed (double accuracy, double threshold)
     return accuracy >= threshold;
 }
 
+SequenceResult evaluateIntervals (const IntervalSpec& spec,
+                                  const std::vector<NoteEvent>& played,
+                                  float centsTolerance,
+                                  double passThreshold)
+{
+    SequenceResult result;
+    result.total = juce::jmax (1, spec.repeats);
+
+    if (spec.semitones <= 0 || played.size() < 2)
+        return result;
+
+    for (std::size_t i = 1; i < played.size(); ++i)
+    {
+        const auto& previous = played[i - 1];
+        const auto& current = played[i];
+
+        if (std::abs (current.cents) > centsTolerance || std::abs (previous.cents) > centsTolerance)
+            continue;
+
+        const int distance = current.midi - previous.midi;
+
+        const bool directionOk = (distance > 0 && spec.ascending)
+                                   || (distance < 0 && spec.descending);
+
+        if (directionOk && std::abs (distance) == spec.semitones)
+            ++result.matched;
+
+        if (result.matched >= result.total)
+        {
+            result.matched = result.total;
+            break;
+        }
+    }
+
+    result.accuracy = accuracyOf (result.matched, result.total);
+    result.passed = result.accuracy >= passThreshold;
+    return result;
+}
+
 } // namespace cursomusica::course::evaluator

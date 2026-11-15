@@ -161,6 +161,46 @@ build entrega a linha exata de `target_sources` ao dono.
 | Software Engineer in Test (SET) | `.agents/agents/set.md` | harness e jobs de teste em `tests/**` e `.github/workflows/**` | **Automatizar teste em escala** |
 | Security Engineer | `.agents/agents/security-engineer.md` | `docs/SECURITY.md` | **Está seguro? É lícito?** |
 | DevOps | `.agents/agents/devops.md` | `.github/workflows/**`, `deploy/**`, infra | **Entregar automatizado** |
+| Autor de Módulo | `.agents/agents/module-author.md` | `Source/Course/Content/Topic<N>*.cpp` de um módulo (co-own `musician`) | **Transformar uma Etapa em módulo completo** |
+| Painel de Revisão do Módulo | `.agents/agents/module-reviewer.md` | (veredito; sem diretório próprio) | **O módulo passa no painel?** |
+| Revisor de Release | `.agents/agents/release-reviewer.md` | (veredito final; sem diretório próprio) | **O curso integrado pode ir para `main`?** |
+
+## 4.1. Pipeline de módulos (Etapas) — autor → painel → release
+
+Cada Etapa do curso (`docs/MUSIC.md`) vira **um módulo**, seguindo exatamente o
+padrão do **Módulo 2** (Etapa 2 — Teoria dos intervalos e percepção musical):
+teoria com **mínimo de 5 páginas por tópico**, **imagens**, **áudios** e
+**partituras** (toda partitura com seu áudio), **3 a 5 exercícios por tópico**, e
+parte dos exercícios **tocada no instrumento**, com o app reconhecendo as notas
+para verificar se o intervalo/acorde está correto.
+
+O fluxo é:
+
+```
+docs/MUSIC.md (Etapa N)
+   └─> module-author  → branch feat/modulo-<N>-<slug> + PR para `test`
+          └─> module-reviewer (painel):
+                1 Músico · 2 PM · 3 PO · 4 Tech Lead · 5 Arquiteto · 6 Tech Lead
+                · 7 Software Engineers · 8 Tech Lead · 9 QA · 10 Security · 11 SET
+                     ↳ qualquer problema volta ao module-author;
+                       corrigido, o painel REINICIA do começo
+                       até todos passarem na mesma rodada
+          └─> merge do módulo em `test`
+                 └─> (todos os módulos prontos) release-reviewer (revisão final):
+                       1 Arquiteto · 2 Tech Lead · 3 Software Engineers · 4 Tech Lead
+                            ↳ merge de `test` em `main` + instalador de teste
+```
+
+**Regras do pipeline:**
+
+- Um módulo por branch; um PR por módulo.
+- Um problema encontrado **retorna ao autor**; a correção **reinicia o painel
+  inteiro**, não apenas o revisor que falhou.
+- Nenhum módulo é aceito sem o painel completo verde na mesma rodada.
+- A revisão final do release cobre o **conjunto** dos módulos (o que os painéis
+  por módulo não veem): duplicação, padrão inconsistente, quebra de integração.
+- Merge só por PR, **nunca** reescrevendo histórico; backup antes de todo push
+  (§11).
 
 ## 5. Protocolo de handoff (como os agentes conversam)
 
@@ -290,6 +330,8 @@ Uma entrega só é "pronta" quando:
 | 2026-11-14 | developer + qa | **Correção do grid de pastas VST3 (REQ-024): seleção de linha e "Remover"** — as linhas do grid são componentes customizados (rótulo + botão `…`) e interceptavam o clique, então `list.getSelectedRow()` nunca mudava e **"Remover" não fazia nada**; a `Row` agora usa `setInterceptsMouseClicks (false, true)`, deixando o `ListBox` tratar o clique na linha e mantendo o botão `…` clicável. Verificação sob Xvfb por OCR: adicionar pasta grava `vst3SearchPaths`; **remover zera a chave**; o botão `…` por linha abre o seletor; a lista recarrega após reiniciar; e a cadeia de **canal único** de áudio está intacta (`inputChannelData[0]` → `pluginChain.process` → meter/análise, `AudioEngine.cpp`). Suíte em **338 checagens verdes** | Remover pasta passa a funcionar e a seleção de linha responde; sem pasta configurada o scan segue usando só os locais padrão |
 | 2026-11-14 | architect + developer + designer | **Pastas de busca de plugins VST3 configuráveis (REQ-024, ADR 0007, pedido do cliente: "estilo Reaper")**: novo `Source/Audio/PluginSearchPaths.*` (lógica pura: normaliza, recusa vazio/duplicata, cap de 32, serializa, resolve só pastas existentes) e janela `Source/UI/PluginPathsComponent.*` com grid de duas colunas (caminho | botão de seleção), aberta pelo botão "Pastas…" ao lado da tabela de plugins; `PluginHost` soma as pastas do usuário aos locais padrão do VST3 no scan e persiste em `vst3SearchPaths` com flush imediato, podando do cache os plugins fora das pastas (por descendência, `isAChildOf`); corrigida a iteração de `juce::FileSearchPath` (não é iterável — `getNumPaths()`/`getReference(i)`) | Usuário instala VST3 fora do padrão sem mexer no sistema; sem pasta configurada o comportamento é o de antes; suíte em **356 checagens verdes** |
 | 2026-11-16 | architect + developer + data-engineer + designer | **Dois bugs do cliente: progresso perdido ao fechar e tópico de outro módulo sem exercícios.** (1) *Progresso perdido:* `ProgressStore`, `TuningSettings` e `PluginHost` abriam **três `PropertiesFile` sobre o mesmo `CursoMusica.settings`**; cada `save` reescreve o mapa inteiro, então a última instância a gravar (o `PluginHost`, no shutdown) apagava as chaves que não tinha carregado — o progresso entre elas. Reproduzido em teste. Correção: instância única compartilhada `Source/Data/AppSettings.*` (referência, não `unique_ptr`), consumida pelos três. (2) *Tópico sem exercícios:* `ModuleComponent::selectTopic`/`showModule` chamavam `PracticePanel::setTopicFilter` **sem antes apontar o painel para o módulo clicado**, então o filtro corria sobre o módulo anterior (o 2 é *placeholder*, sem exercícios) e a lista saía vazia; novo `PracticePanel::setModuleAndTopic(module, lessonId)` fixa módulo+tópico juntos e a filtragem virou a função pura `Course/ExerciseFilter.h` (testável). Bônus do mesmo pedido: o app **não tinha como configurar o banco** (só `PGHOST` do ambiente, que um app aberto pelo menu Iniciar não herda), então o schema `curso-musica` nunca era criado — nova janela **Configurações → Banco de dados…** (`Source/UI/DatabaseSettingsComponent.*`) grava host/porta/usuário/banco/schema no settings (**senha nunca**, vem de `PGPASSWORD`) e tem **Testar conexão**; `PostgresConfig::fromSettings()` passa a ter precedência sobre o ambiente | Progresso sobrevive ao fechamento, tópico lista os exercícios certos e o aluno liga o espelhamento pela UI; suíte em **377 checagens verdes** (359 offline) |
+| 2026-11-16 | orquestrador + musician + pm + po + tech-lead + architect + developer + qa + security-engineer + set | **Pipeline de módulos (Etapas) e painel de revisão.** Criados três sub-agentes: `module-author` (transforma uma Etapa de `docs/MUSIC.md` em módulo completo, no padrão do Módulo 2 — teoria ≥5 páginas/tópico, imagens, áudios, partituras com áudio, 3–5 exercícios/tópico, exercícios tocados no instrumento reconhecidos pelo app), `module-reviewer` (painel: Músico, PM, PO, Tech Lead, Arquiteto, Tech Lead, Software Engineers, Tech Lead, QA, Security, SET; qualquer problema volta ao autor e o painel **reinicia do começo**) e `release-reviewer` (revisão final cross-módulo: Arquiteto, Tech Lead, Software Engineers, Tech Lead; merge para `main` + instalador de teste). Um módulo por branch/PR; nenhum módulo aceito sem painel verde na mesma rodada; merge só por PR, sem reescrever histórico, backup antes de todo push (§11) | Todo o curso (Etapas 2–10) passa a ser produzido e revisado pelo mesmo pipeline, com qualidade e padrão verificáveis |
+| 2026-11-16 | musician + developer + architect + qa + set | **Módulo 2 (Etapa 2 — Teoria dos intervalos e percepção musical) implementado** como referência do padrão: `Source/Course/Intervals.*` (teoria pura de intervalos), `Source/Audio/TonePlayer.*` (áudio de exemplos, RT-safe, REQ-004), `ContentKind::audio`/`score` no modelo e na UI, `Exercise::interval` + `Exercise::usesGrid` e `evaluateIntervals` (o app reconhece as notas tocadas e confere a distância em semitons, em qualquer posição do braço); 8 tópicos (A–H), cada um com ≥5 páginas, imagens, tabelas, áudios e partitura com áudio; 3–5 exercícios por tópico (EX-2.*), gate `C–F–G–C` a 64 BPM; suíte em **950 checagens verdes** | Módulo 2 jogável e auditável; serve de gabarito para as Etapas seguintes |
 
 ## 8. Convenções de código
 

@@ -9,6 +9,7 @@
 #include "Audio/PitchDetector.h"
 #include "Audio/PluginChain.h"
 #include "Audio/Metronome.h"
+#include "Audio/TonePlayer.h"
 #include "Course/ExerciseEvaluator.h"
 #include "Course/NoteMath.h"
 
@@ -38,6 +39,7 @@ public:
     juce::AudioDeviceManager& getDeviceManager() noexcept { return deviceManager; }
     PluginChain& getPluginChain() noexcept { return pluginChain; }
     Metronome& getMetronome() noexcept { return metronome; }
+    TonePlayer& getTonePlayer() noexcept { return tonePlayer; }
 
     // Drains the detected-note queue into `out` (message thread only). Each
     // event carries the time (seconds since the last reset) it was detected.
@@ -100,6 +102,7 @@ private:
     PitchDetector pitchDetector;
     PluginChain pluginChain;
     Metronome metronome;
+    TonePlayer tonePlayer;
 
     // Detected-note queue. Single-producer (analysis thread) / single-consumer
     // (message thread), so the atomic indices are enough.

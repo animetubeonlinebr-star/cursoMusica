@@ -1,6 +1,7 @@
 #include "Course/ModuleCatalog.h"
 
 #include "Course/Content/Topics.h"
+#include "Course/Intervals.h"
 #include "Course/NoteMath.h"
 
 namespace cursomusica
@@ -55,6 +56,26 @@ namespace
             out.push_back ({ music::noteNameToMidi (text), text });
         }
         return out;
+    }
+
+    // An interval-recognition exercise (module 2): the app listens to the root
+    // and the second note and checks the distance the instrument produced, so
+    // any position on the neck is accepted (client: "o sistema precisa
+    // reconhecer as notas tocadas"). Not graded against the grid.
+    Exercise intervalExercise (const char* id, const char* title, const char* goal,
+                               int semitones, int repeats)
+    {
+        auto e = exercise (id, juce::String::fromUTF8 (title), juce::String::fromUTF8 (goal),
+                           juce::String::fromUTF8 ("O app reconhece as notas tocadas e confere a distância de ")
+                               + juce::String (semitones) + juce::String::fromUTF8 (" semitons (")
+                               + course::intervalName (semitones)
+                               + juce::String::fromUTF8 ("), em qualquer posição do braço."));
+        e.interval.semitones = semitones;
+        e.interval.repeats = repeats;
+        e.interval.ascending = true;
+        e.interval.descending = false;
+        e.usesGrid = false;
+        return e;
     }
 
     CourseModule makeModule1()
@@ -637,7 +658,463 @@ namespace
         return m;
     }
 
-    // Modules 2..20 exist as placeholders so the list is honest about what is
+    // Module 2 — Etapa 2: teoria dos intervalos e percepção musical. The client
+    // asked the student to start identifying what is played: part of the
+    // exercises is played on the instrument and the app recognises the notes to
+    // check the interval (Exercise::interval). The explanation carries images,
+    // audio examples (ContentKind::audio) and scores with their audio
+    // (ContentKind::score), and every topic has >=5 pages (content::minTopicChars).
+    CourseModule makeModule2()
+    {
+        CourseModule m;
+        m.number = 2;
+        m.title = juce::String::fromUTF8 ("Teoria dos intervalos e percepção musical");
+        m.objective = juce::String::fromUTF8 (
+            "Compreender a distância entre as notas e desenvolver a capacidade de "
+            "identificar sonoridades — pelo instrumento e de ouvido.");
+        m.level = 1;          // MUSIC.md: módulos 1–2 = nível 1
+        m.targetBpm = 64;     // MUSIC.md, módulo 2
+        m.onGridTarget = 0.76f;
+        m.implemented = true;
+
+        m.lessons = {
+            detail (block ("A", juce::String::fromUTF8 ("Intervalos musicais"), {
+                "Intervalo é a distância entre duas notas, medida em semitons.",
+                "Melódico (notas em sequência) e harmônico (notas juntas).",
+                "O número vem da contagem das letras; a qualidade, dos semitons."
+            }), content::topic2A()),
+            detail (block ("B", juce::String::fromUTF8 ("Quadro móvel de intervalos"), {
+                "Tabela dos doze semitons com o nome de cada intervalo.",
+                "É móvel: vale a partir de qualquer nota de partida.",
+                "No braço, cada corda é uma linha do quadro."
+            }), content::topic2B()),
+            detail (block ("C", juce::String::fromUTF8 ("Maiores, menores, justos, aumentados e diminutos"), {
+                "Justos: uníssono, quarta, quinta e oitava.",
+                "Maiores e menores: segunda, terça, sexta e sétima.",
+                "Aumentado alarga o padrão; diminuto estreita."
+            }), content::topic2C()),
+            detail (block ("D", juce::String::fromUTF8 ("Percepção de intervalos"), {
+                "Reconhecer a distância pelo ouvido, sem olhar o braço.",
+                "Consonantes soam estáveis; dissonantes soam tensos.",
+                "Reconheça em três passos: direção, tamanho, qualidade."
+            }), content::topic2D()),
+            detail (block ("E", juce::String::fromUTF8 ("Terças, quartas, quintas, sextas, sétimas e nonas"), {
+                "A terça define maior ou menor; é o coração do acorde.",
+                "Quarta e quinta dão movimento e estabilidade.",
+                "Sexta, sétima e nona dão cor, tensão e identidade."
+            }), content::topic2E()),
+            detail (block ("F", juce::String::fromUTF8 ("Relação entre intervalos e construção de acordes"), {
+                "Um acorde é um conjunto de intervalos empilhados sobre a tônica.",
+                "Tríade = tônica, terça e quinta; tétrade acrescenta a sétima.",
+                "Inversões mudam o baixo, não o acorde."
+            }), content::topic2F()),
+            detail (block ("G", juce::String::fromUTF8 ("Cantar e tocar os intervalos"), {
+                "Cantar desenvolve a memória auditiva e liga ouvido e mão.",
+                "Cante a partir de uma nota de referência, subindo aos poucos.",
+                "Cante antes de tocar; depois toque e deixe o app conferir."
+            }), content::topic2G()),
+            detail (block ("H", juce::String::fromUTF8 ("Identificar intervalos no instrumento e de ouvido"), {
+                "Identificar é dizer número, qualidade e sensação.",
+                "Pelo instrumento, o app mede os semitons e valida.",
+                "De ouvido, reconheça direção, tamanho e qualidade."
+            }), content::topic2H()),
+        };
+
+        // Exercises: at least three per topic, mixing verifiable quizzes (ear
+        // training) and playable interval exercises (the app recognises the
+        // notes). Ids follow EX-2.<topico>.<n>, numbered per topic, as module 1.
+        auto add = [&m] (Exercise e, const char* topic)
+        {
+            e.lessonId = topic;
+            m.exercises.push_back (std::move (e));
+            return (int) m.exercises.size() - 1;
+        };
+
+        // --- Topic A — intervalos musicais -----------------------------------
+        add (exercise ("EX-2.A.1", juce::String::fromUTF8 ("Questionário: o que é intervalo"),
+                       juce::String::fromUTF8 ("Responder ao questionário de introdução aos intervalos."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões de intervalo.")), "A");
+        m.exercises.back().quiz = {
+            question ("O que é um intervalo musical?",
+                      { "A distância entre duas notas",
+                        "O volume de uma nota",
+                        "A duração de um acorde",
+                        "O número de cordas" }, 0),
+            question ("Quantos semitons há em um tom?",
+                      { "1", "2", "3", "12" }, 1),
+            question ("Na guitarra, um semitom corresponde a quantas casas?",
+                      { "Uma casa", "Duas casas", "Cinco casas", "Doze casas" }, 0),
+            question ("Quando as duas notas soam juntas, o intervalo é:",
+                      { "melódico", "harmônico", "enarmônico", "cromático" }, 1),
+            question ("Quantos semitons tem uma oitava?",
+                      { "7", "10", "12", "14" }, 2),
+        };
+        add (intervalExercise ("EX-2.A.2", "Tocar uma terça maior",
+                               "Tocar uma terça maior (4 semitons) a partir de qualquer nota, três vezes.",
+                               4, 3), "A");
+        add (intervalExercise ("EX-2.A.3", "Tocar uma segunda maior",
+                               "Tocar uma segunda maior (2 semitons), duas vezes.",
+                               2, 2), "A");
+        add (exercise ("EX-2.A.4", juce::String::fromUTF8 ("Nomear intervalos do quadro"),
+                       juce::String::fromUTF8 ("Dizer o número e a qualidade de intervalos básicos."),
+                       juce::String::fromUTF8 ("Acerto ≥90% no questionário de nomes.")), "A");
+        m.exercises.back().quiz = {
+            question ("Qual intervalo tem 4 semitons?",
+                      { "terça menor", "terça maior", "quarta justa", "segunda maior" }, 1),
+            question ("Qual intervalo tem 7 semitons?",
+                      { "quarta justa", "quinta justa", "sexta maior", "sétima menor" }, 1),
+            question ("Qual intervalo tem 5 semitons?",
+                      { "quarta justa", "quarta aumentada", "terça maior", "quinta justa" }, 0),
+            question ("Qual intervalo é o trítono?",
+                      { "4 semitons", "5 semitons", "6 semitons", "7 semitons" }, 2),
+        };
+
+        // --- Topic B — quadro móvel ------------------------------------------
+        add (exercise ("EX-2.B.1", juce::String::fromUTF8 ("Questionário: quadro móvel"),
+                       juce::String::fromUTF8 ("Responder ao questionário do quadro móvel."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões do quadro móvel.")), "B");
+        m.exercises.back().quiz = {
+            question ("O que significa dizer que o quadro de intervalos é móvel?",
+                      { "Que ele vale a partir de qualquer nota de partida",
+                        "Que ele muda de nome a cada compasso",
+                        "Que ele só serve para Dó",
+                        "Que ele só existe no papel" }, 0),
+            question ("No quadro, qual intervalo está a 4 semitons da tônica?",
+                      { "terça menor", "terça maior", "quarta justa", "quinta justa" }, 1),
+            question ("Qual intervalo fica no centro do quadro (6 semitons)?",
+                      { "quinta justa", "trítono", "sexta maior", "oitava" }, 1),
+            question ("A 9 semitons da tônica está qual intervalo?",
+                      { "sexta menor", "sexta maior", "sétima menor", "sétima maior" }, 1),
+        };
+        add (intervalExercise ("EX-2.B.2", "Quarta justa no quadro",
+                               "Tocar uma quarta justa (5 semitons), três vezes.", 5, 3), "B");
+        add (intervalExercise ("EX-2.B.3", "Quinta justa no quadro",
+                               "Tocar uma quinta justa (7 semitons), três vezes.", 7, 3), "B");
+        add (exercise ("EX-2.B.4", juce::String::fromUTF8 ("Ler o quadro em outras tônicas"),
+                       juce::String::fromUTF8 ("Aplicar o quadro a partir de Sol e de Lá."),
+                       juce::String::fromUTF8 ("Acerto ≥90% no questionário de transposição.")), "B");
+        m.exercises.back().quiz = {
+            question ("4 semitons acima de Sol caem em qual nota?",
+                      { "Lá", "Si", "Dó", "Ré" }, 1),
+            question ("7 semitons acima de Lá caem em qual nota?",
+                      { "Mi", "Ré", "Dó", "Fá" }, 0),
+            question ("O nome do intervalo depende de quê?",
+                      { "Da nota de partida",
+                        "Da distância em semitons",
+                        "Do volume",
+                        "Da corda usada" }, 1),
+            question ("A 12 semitons de qualquer nota, qual intervalo ocorre?",
+                      { "quinta justa", "sétima maior", "oitava justa", "sexta maior" }, 2),
+        };
+
+        // --- Topic C — qualidades --------------------------------------------
+        add (exercise ("EX-2.C.1", juce::String::fromUTF8 ("Questionário: qualidades dos intervalos"),
+                       juce::String::fromUTF8 ("Responder ao questionário de qualidades."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões de qualidade.")), "C");
+        m.exercises.back().quiz = {
+            question ("Quais intervalos são justos?",
+                      { "1ª, 4ª, 5ª e 8ª", "2ª, 3ª, 6ª e 7ª", "só a 5ª", "todos os intervalos" }, 0),
+            question ("A diferença entre terça maior e terça menor é de:",
+                      { "um tom", "um semitom", "meio semitom", "uma oitava" }, 1),
+            question ("Um intervalo aumentado é:",
+                      { "o padrão alargado em um semitom",
+                        "o padrão estreitado em um semitom",
+                        "o dobro da oitava",
+                        "sempre o trítono" }, 0),
+            question ("Quarta aumentada e quinta diminuta têm quantos semitons cada?",
+                      { "5", "6", "7", "8" }, 1),
+            question ("Qual qualidade a terça maior tem?",
+                      { "justa", "maior", "menor", "diminuta" }, 1),
+        };
+        add (intervalExercise ("EX-2.C.2", "Terça maior",
+                               "Tocar uma terça maior (4 semitons), três vezes.", 4, 3), "C");
+        add (intervalExercise ("EX-2.C.3", "Terça menor",
+                               "Tocar uma terça menor (3 semitons), três vezes.", 3, 3), "C");
+        add (intervalExercise ("EX-2.C.4", "Trítono",
+                               "Tocar um trítono (6 semitons), duas vezes.", 6, 2), "C");
+        add (exercise ("EX-2.C.5", juce::String::fromUTF8 ("Enarmonia de intervalos"),
+                       juce::String::fromUTF8 ("Reconhecer intervalos enarmônicos."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões de enarmonia.")), "C");
+        m.exercises.back().quiz = {
+            question ("Dois intervalos enarmônicos:",
+                      { "têm o mesmo som e nomes diferentes",
+                        "têm nomes iguais e sons diferentes",
+                        "são sempre iguais",
+                        "nunca ocorrem" }, 0),
+            question ("Dó–Fá# e Dó–Solb são, respectivamente:",
+                      { "quarta aumentada e quinta diminuta",
+                        "quarta justa e quinta justa",
+                        "terça maior e terça menor",
+                        "quinta e sexta" }, 0),
+            question ("Estreitar um intervalo justo em um semitom o torna:",
+                      { "maior", "aumentado", "diminuto", "enarmônico" }, 2),
+        };
+
+        // --- Topic D — percepção ---------------------------------------------
+        add (exercise ("EX-2.D.1", juce::String::fromUTF8 ("Questionário: percepção"),
+                       juce::String::fromUTF8 ("Responder ao questionário de percepção de intervalos."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões de percepção.")), "D");
+        m.exercises.back().quiz = {
+            question ("Quais intervalos soam consonantes (estáveis)?",
+                      { "segundas e sétimas",
+                        "oitava, quinta, quarta, terças e sextas",
+                        "só o trítono",
+                        "nenhum" }, 1),
+            question ("O trítono costuma soar:",
+                      { "estável e repousado", "tenso e instável",
+                        "igual à oitava", "idêntico à quinta" }, 1),
+            question ("Ao reconhecer um intervalo de ouvido, o primeiro passo é:",
+                      { "decidir a direção (sobe ou desce)",
+                        "olhar o braço",
+                        "contar as cordas",
+                        "ver o volume" }, 0),
+            question ("Uma referência para a quinta justa é:",
+                      { "som vazio e grandioso", "som tenso", "melodia triste", "mesma nota" }, 0),
+        };
+        add (exercise ("EX-2.D.2", juce::String::fromUTF8 ("Classificar consonância"),
+                       juce::String::fromUTF8 ("Dizer se o intervalo é consonante ou dissonante."),
+                       juce::String::fromUTF8 ("Acerto ≥90% na classificação.")), "D");
+        m.exercises.back().quiz = {
+            question ("A terça maior é consonante ou dissonante?",
+                      { "consonante", "dissonante", "nem um nem outro", "depende do volume" }, 0),
+            question ("A segunda maior é:",
+                      { "consonante", "dissonante", "justa", "aumentada" }, 1),
+            question ("A quinta justa é:",
+                      { "consonante", "dissonante", "diminuta", "aumentada" }, 0),
+            question ("A sétima maior é:",
+                      { "consonante", "dissonante", "justa", "igual à oitava" }, 1),
+        };
+        add (intervalExercise ("EX-2.D.3", "Sexta maior",
+                               "Tocar uma sexta maior (9 semitons), duas vezes.", 9, 2), "D");
+        add (exercise ("EX-2.D.4", juce::String::fromUTF8 ("Identificar de ouvido"),
+                       juce::String::fromUTF8 ("Ouvir os exemplos e nomear os intervalos."),
+                       juce::String::fromUTF8 ("Acerto ≥90% na identificação.")), "D");
+        m.exercises.back().quiz = {
+            question ("Um som que parece a mesma nota, mais aguda, é:",
+                      { "a oitava", "a quinta", "a terça", "o trítono" }, 0),
+            question ("Um som firme, de chamada, lembra:",
+                      { "a quarta justa", "a sétima maior", "a segunda menor", "a oitava" }, 0),
+            question ("Um som alegre e aberto sugere:",
+                      { "terça maior", "terça menor", "trítono", "sétima menor" }, 0),
+        };
+
+        // --- Topic E — terças a nonas ----------------------------------------
+        add (exercise ("EX-2.E.1", juce::String::fromUTF8 ("Questionário: intervalos práticos"),
+                       juce::String::fromUTF8 ("Responder ao questionário dos intervalos práticos."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "E");
+        m.exercises.back().quiz = {
+            question ("Qual intervalo define se um acorde é maior ou menor?",
+                      { "a quinta", "a terça", "a sétima", "a nona" }, 1),
+            question ("O power chord usa quais intervalos?",
+                      { "tônica e terça", "tônica e quinta", "tônica e sétima", "tônica e nona" }, 1),
+            question ("A nona é o mesmo intervalo que:",
+                      { "a segunda, uma oitava acima", "a terça", "a quarta", "a sétima" }, 0),
+            question ("Qual intervalo dá o som do blues e do dominante?",
+                      { "sétima maior", "sétima menor", "sexta maior", "quarta justa" }, 1),
+            question ("A sexta maior tem quantos semitons?",
+                      { "8", "9", "10", "11" }, 1),
+        };
+        add (intervalExercise ("EX-2.E.2", "Terça (coração do acorde)",
+                               "Tocar uma terça maior (4 semitons), três vezes.", 4, 3), "E");
+        add (intervalExercise ("EX-2.E.3", "Quinta (estabilidade)",
+                               "Tocar uma quinta justa (7 semitons), três vezes.", 7, 3), "E");
+        add (intervalExercise ("EX-2.E.4", "Sétima maior",
+                               "Tocar uma sétima maior (11 semitons), duas vezes.", 11, 2), "E");
+        add (exercise ("EX-2.E.5", juce::String::fromUTF8 ("Papel de cada intervalo"),
+                       juce::String::fromUTF8 ("Relacionar cada intervalo ao seu papel musical."),
+                       juce::String::fromUTF8 ("Acerto ≥90% no questionário de papéis.")), "E");
+        m.exercises.back().quiz = {
+            question ("Qual intervalo dá movimento e suspensão?",
+                      { "quarta justa", "quinta justa", "oitava", "terça maior" }, 0),
+            question ("A sétima maior produz um som:",
+                      { "brilhante e suspenso", "tenso e de blues",
+                        "igual à oitava", "fechado e triste" }, 0),
+            question ("Acordes com nona têm:",
+                      { "som mais rico, sem perder a identidade",
+                        "som sempre menor",
+                        "apenas duas notas",
+                        "nenhuma terça" }, 0),
+        };
+
+        // --- Topic F — acordes -----------------------------------------------
+        add (exercise ("EX-2.F.1", juce::String::fromUTF8 ("Questionário: intervalos e acordes"),
+                       juce::String::fromUTF8 ("Responder ao questionário de construção de acordes."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões de acordes.")), "F");
+        m.exercises.back().quiz = {
+            question ("Uma tríade maior é formada por quais intervalos (em semitons)?",
+                      { "0, 4, 7", "0, 3, 7", "0, 3, 6", "0, 4, 8" }, 0),
+            question ("Uma tríade menor usa quais intervalos?",
+                      { "0, 4, 7", "0, 3, 7", "0, 3, 6", "0, 4, 8" }, 1),
+            question ("Acrescentar a sétima menor (10 semitons) a uma tríade maior forma:",
+                      { "acorde de sétima maior", "acorde de sétima dominante",
+                        "acorde diminuto", "acorde suspenso" }, 1),
+            question ("Uma inversão de acorde muda:",
+                      { "a nota do baixo", "as notas do acorde",
+                        "a tonalidade", "o número de notas" }, 0),
+            question ("As tensões 9, 11 e 13 são:",
+                      { "intervalos uma oitava acima dos graus 2, 4 e 6",
+                        "notas fora da escala",
+                        "acordes inteiros",
+                        "sinônimos de 1, 3 e 5" }, 0),
+        };
+        add (exercise ("EX-2.F.2", juce::String::fromUTF8 ("Montar a tríade maior"),
+                       juce::String::fromUTF8 ("Tocar uma tríade maior (tônica, terça maior e quinta justa)."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere os intervalos da tríade maior.")), "F");
+        m.exercises.back().chordPitchClasses = { 0, 4, 7 };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-2.F.3", juce::String::fromUTF8 ("Montar a tríade menor"),
+                       juce::String::fromUTF8 ("Tocar uma tríade menor (tônica, terça menor e quinta justa)."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere os intervalos da tríade menor.")), "F");
+        m.exercises.back().chordPitchClasses = { 0, 3, 7 };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-2.F.4", juce::String::fromUTF8 ("Da tríade à tétrade"),
+                       juce::String::fromUTF8 ("Dizer qual sétima transforma a tríade em cada tétrade."),
+                       juce::String::fromUTF8 ("Acerto ≥90% no questionário de tétrades.")), "F");
+        m.exercises.back().quiz = {
+            question ("C7M (sétima maior) usa qual sétima?",
+                      { "11 semitons (sétima maior)", "10 semitons (sétima menor)",
+                        "9 semitons", "12 semitons" }, 0),
+            question ("Cm7 usa qual sétima?",
+                      { "11 semitons", "10 semitons", "6 semitons", "7 semitons" }, 1),
+            question ("A diferença entre C7M e C7 está:",
+                      { "na terça", "na quinta", "na sétima", "na tônica" }, 2),
+            question ("Um acorde meio-diminuto tem os intervalos:",
+                      { "0, 3, 6, 10", "0, 4, 7, 11", "0, 3, 7, 10", "0, 4, 8, 11" }, 0),
+        };
+
+        // --- Topic G — cantar e tocar ----------------------------------------
+        add (exercise ("EX-2.G.1", juce::String::fromUTF8 ("Questionário: cantar e tocar"),
+                       juce::String::fromUTF8 ("Responder ao questionário do treino de canto."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "G");
+        m.exercises.back().quiz = {
+            question ("Por que cantar ajuda a tocar de ouvido?",
+                      { "Porque desenvolve a memória auditiva e liga ouvido e mão",
+                        "Porque aumenta a força dos dedos",
+                        "Porque afina o instrumento",
+                        "Porque substitui a prática" }, 0),
+            question ("O melhor momento para cantar o intervalo é:",
+                      { "antes de tocar", "depois de errar", "só no fim", "nunca" }, 0),
+            question ("Cantar a partir de uma nota de referência serve para:",
+                      { "comparar alturas com uma base fixa",
+                        "mudar a tonalidade da música",
+                        "aumentar o volume",
+                        "afinar as cordas" }, 0),
+            question ("Cantar um intervalo harmônico é mais difícil porque:",
+                      { "as duas notas soam ao mesmo tempo",
+                        "é sempre mais grave",
+                        "não tem som",
+                        "é sempre menor" }, 0),
+        };
+        add (intervalExercise ("EX-2.G.2", "Cantar e tocar a terça",
+                               "Cantar e tocar uma terça maior (4 semitons), três vezes.", 4, 3), "G");
+        add (intervalExercise ("EX-2.G.3", "Cantar e tocar a quinta",
+                               "Cantar e tocar uma quinta justa (7 semitons), três vezes.", 7, 3), "G");
+        add (exercise ("EX-2.G.4", juce::String::fromUTF8 ("Do exercício para a música"),
+                       juce::String::fromUTF8 ("Identificar intervalos de uma melodia simples."),
+                       juce::String::fromUTF8 ("Acerto ≥90% na identificação.")), "G");
+        m.exercises.back().quiz = {
+            question ("Identificar intervalos de ouvido permite:",
+                      { "tirar melodias de ouvido e tocar de memória",
+                        "afinar sem afinador",
+                        "aumentar o volume",
+                        "mudar a afinação das cordas" }, 0),
+            question ("O ciclo do treino de intervalos é:",
+                      { "ouvir, cantar, tocar e conferir",
+                        "tocar, errar, parar",
+                        "ler, escrever, apagar",
+                        "afinar, tocar, guardar" }, 0),
+            question ("Cantar a nota antes de tocar ajuda porque:",
+                      { "o dedo executa uma ideia clara em vez de procurar às cegas",
+                        "o som fica mais alto",
+                        "a corda vibra mais",
+                        "o metrônomo acelera" }, 0),
+        };
+
+        // --- Topic H — identificar -------------------------------------------
+        add (exercise ("EX-2.H.1", juce::String::fromUTF8 ("Questionário: identificar intervalos"),
+                       juce::String::fromUTF8 ("Responder ao questionário de identificação."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "H");
+        m.exercises.back().quiz = {
+            question ("Identificar um intervalo é dizer:",
+                      { "número, qualidade e sensação",
+                        "apenas o número",
+                        "apenas a nota de partida",
+                        "o volume" }, 0),
+            question ("No instrumento, o app identifica o intervalo medindo:",
+                      { "a distância em semitons entre as notas tocadas",
+                        "o volume das notas",
+                        "a duração das notas",
+                        "a corda usada" }, 0),
+            question ("Ao confundir terça maior e quarta justa, conte:",
+                      { "4 contra 5 semitons", "2 contra 3 semitons",
+                        "7 contra 8 semitons", "11 contra 12 semitons" }, 0),
+            question ("Sétima maior e oitava têm, respectivamente:",
+                      { "11 e 12 semitons", "10 e 11 semitons",
+                        "9 e 10 semitons", "12 e 13 semitons" }, 0),
+            question ("Uma boa dica antes de responder é:",
+                      { "cantar a nota de referência",
+                        "olhar o braço",
+                        "aumentar o volume",
+                        "tocar mais rápido" }, 0),
+        };
+        add (intervalExercise ("EX-2.H.2", "Identificar a terça maior",
+                               "Tocar uma terça maior (4 semitons) em qualquer posição, três vezes.", 4, 3), "H");
+        add (intervalExercise ("EX-2.H.3", "Identificar a quinta justa",
+                               "Tocar uma quinta justa (7 semitons) em qualquer posição, três vezes.", 7, 3), "H");
+        add (exercise ("EX-2.H.4", juce::String::fromUTF8 ("Identificar de ouvido"),
+                       juce::String::fromUTF8 ("Ouvir os exemplos e nomear os intervalos."),
+                       juce::String::fromUTF8 ("Acerto ≥90% na identificação de ouvido.")), "H");
+        m.exercises.back().quiz = {
+            question ("Um som tenso, quase desafinado, sugere:",
+                      { "o trítono", "a oitava", "a quinta justa", "a terça maior" }, 0),
+            question ("Um som que pede resolução, de blues, sugere:",
+                      { "sétima menor", "sétima maior", "quarta justa", "oitava" }, 0),
+            question ("A terça maior tem quantos semitons?",
+                      { "3", "4", "5", "7" }, 1),
+            question ("A quinta justa tem quantos semitons?",
+                      { "5", "6", "7", "8" }, 2),
+        };
+
+        // The gate closes the module: play a I–IV–V–I vamp on the grid, built
+        // from the intervals of the tonic (REQ-009, REQ-015).
+        auto& gate = m.exercises.emplace_back (exercise (
+            "GATE-2", juce::String::fromUTF8 ("Desafio de gate — vamp C–F–G–C"),
+            juce::String::fromUTF8 ("Tocar C – F – G – C a 64 BPM, na grade do metrônomo."),
+            juce::String::fromUTF8 ("Acordes reconhecidos e alinhados à grade (≥ 0,76).")));
+        gate.isGate = true;
+        gate.lessonId = "H";
+        gate.chordProgression = {
+            { 0, 4, 7 },    // C
+            { 5, 9, 0 },    // F
+            { 7, 11, 2 },   // G
+            { 0, 4, 7 },    // C
+        };
+
+        m.gateChallenge = juce::String::fromUTF8 (
+            "Tocar C – F – G – C (vamp de 1 acorde, nível 1) a 64 BPM com ≥90% de "
+            "acerto de acordes e on_grid_ratio ≥ 0,76. Os acordes são construídos "
+            "pelos intervalos estudados no módulo.");
+
+        // Pattern and link the module must cite (REQ-007, REQ-010).
+        m.practice.patternId = "PTN-M-3rds";
+        m.practice.patternUse = juce::String::fromUTF8 (
+            "Terças: o padrão 1-3, 2-4, 3-5… percorre a escala saltando um grau, o "
+            "que faz o aluno ouvir o intervalo de terça em movimento. Complemento: "
+            "PTN-M-4ths (quartas) para contrastar com as terças.");
+        m.practice.guitarists = { "John Petrucci", "Guthrie Govan", "Steve Vai" };
+
+        // Curated apostilas (REQ-006, CM-012); see docs/MUSIC.md §2.1.
+        m.sources = {
+            "pdf-teoria-elementar-da-musica-ricordi-osvaldo-lacerda",
+            "pdf-p-classtruncatedtext-module-lineclamped-85ulhh-style-max-lines5bohumil-med-teoria-da-musica-5-edicao-p",
+            "pdf-mozart-mello-livroestudosdeguitarra4em1",
+            "pdf-caged-e-derivaoes-de-acordes-marcelo-mello-apostila-de-violao-e-guitarra-vol1",
+        };
+
+        return m;
+    }
+
+    // Modules 3..20 exist as placeholders so the list is honest about what is
     // coming (ADR 0005): level, target BPM and alignment come from MUSIC.md.
     CourseModule makePlaceholder (int number, const char* title, int level,
                                   int targetBpm, float onGridTarget)
@@ -660,7 +1137,7 @@ const std::vector<CourseModule>& ModuleCatalog::getModules()
 {
     static const std::vector<CourseModule> modules {
         makeModule1(),
-        makePlaceholder (2,  "Vamps de 1 acorde (continuação)",     1,  64,  0.76f),
+        makeModule2(),
         makePlaceholder (3,  "Vamps de 2 acordes",                  2,  68,  0.77f),
         makePlaceholder (4,  "Vamps de 2 acordes (aplicação)",      2,  72,  0.78f),
         makePlaceholder (5,  "II–V–I",                              3,  76,  0.79f),
