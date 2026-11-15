@@ -1114,6 +1114,424 @@ namespace
         return m;
     }
 
+    // Module 9 — Etapa 9: harmonia avançada e estruturas especiais. Same shape
+    // as module 2: nine topics (A..I), each with >=5 pages of explanation,
+    // images and tables; the module demonstrates the structures with audio and
+    // scores (every score carries its audio); 3..5 exercises per topic mixing
+    // quizzes and playable exercises (the app recognises the notes). Level, BPM
+    // and alignment come from MUSIC.md (the placeholder values are reused).
+    CourseModule makeModule9()
+    {
+        CourseModule m;
+        m.number = 9;
+        m.title = juce::String::fromUTF8 ("Harmonia avançada e estruturas especiais");
+        m.objective = juce::String::fromUTF8 (
+            "Explorar possibilidades harmônicas mais elaboradas — acordes diminutos, "
+            "dominantes diminutos, campos e estruturas simétricas — e desenvolver uma "
+            "visão ampla das relações entre acordes.");
+        m.level = 4;          // MUSIC.md: módulo 9 = nível 4
+        m.targetBpm = 92;     // MUSIC.md, módulo 9
+        m.onGridTarget = 0.81f;
+        m.implemented = true;
+
+        m.lessons = {
+            detail (block ("A", juce::String::fromUTF8 ("Acordes diminutos e suas funções"), {
+                "O diminuto é um empilhamento de terças menores (0-3-6; dim7 = 0-3-6-9).",
+                "É simétrico: só existem três dim7 diferentes.",
+                "Funções: sensível, ii grau menor, passagem e substituto de dominante."
+            }), content::topic9A()),
+            detail (block ("B", juce::String::fromUTF8 ("Dominantes diminutos (DomDim)"), {
+                "O DomDim é o dominante com nona bemol (e outras tensões).",
+                "Nasce da escala diminuta meio-tom / tom.",
+                "Sem a fundamental, o dominante com nona bemol vira um dim7."
+            }), content::topic9B()),
+            detail (block ("C", juce::String::fromUTF8 ("Ciclos diminutos"), {
+                "O ciclo das terças menores percorre quatro notas e volta ao início.",
+                "Existem apenas três dim7 diferentes no total.",
+                "O ciclo é um mapa de modulação e um recurso de improvisação."
+            }), content::topic9C()),
+            detail (block ("D", juce::String::fromUTF8 ("Campos harmônicos diminutos"), {
+                "As escalas diminutas geram dois campos: tom-meio-tom e meio-tom-tom.",
+                "O campo do DomDim é o da escala meio-tom / tom.",
+                "O campo diminuto se cruza com o campo maior pelo vii grau."
+            }), content::topic9D()),
+            detail (block ("E", juce::String::fromUTF8 ("Acorde m7(#5)"), {
+                "m7(#5) = tônica, terça menor, quinta aumentada e sétima menor.",
+                "Difere do m7 apenas na quinta, mas a cor muda por completo.",
+                "Tem leitura enarmônica: é uma inversão de acorde maior com nona."
+            }), content::topic9E()),
+            detail (block ("F", juce::String::fromUTF8 ("Policordes"), {
+                "Policorde = dois acordes empilhados; o baixo define a harmonia.",
+                "Diferente do slash chord, o baixo é um acorde completo.",
+                "Na guitarra, as camadas se separam por registro."
+            }), content::topic9F()),
+            detail (block ("G", juce::String::fromUTF8 ("Simetria e escalas simétricas"), {
+                "Escala simétrica divide a oitava em partes iguais.",
+                "Tons inteiros: seis notas, duas formas; diminuta: oito notas, três formas.",
+                "Na guitarra, a mesma digitação se desloca pelo braço."
+            }), content::topic9G()),
+            detail (block ("H", juce::String::fromUTF8 ("Relações entre campos harmônicos"), {
+                "Campos vizinhos compartilham seis das sete notas.",
+                "O acorde pivô pertence aos dois campos e prepara a passagem.",
+                "O dominante secundário e o diminuto ligam campos distantes."
+            }), content::topic9H()),
+            detail (block ("I", juce::String::fromUTF8 ("Sonoridades especiais"), {
+                "Quartal, cluster, add9/6-9, inversões e estruturas superiores.",
+                "Cada sonoridade tem um uso: cor, tensão, movimento ou repouso.",
+                "Todas funcionam melhor em contraste com momentos simples."
+            }), content::topic9I()),
+        };
+
+        auto add = [&m] (Exercise e, const char* topic)
+        {
+            e.lessonId = topic;
+            m.exercises.push_back (std::move (e));
+            return (int) m.exercises.size() - 1;
+        };
+
+        // --- Topic A — acordes diminutos e suas funções -----------------------
+        add (exercise ("EX-9.A.1", juce::String::fromUTF8 ("Questionário: acordes diminutos"),
+                       juce::String::fromUTF8 ("Responder ao questionário sobre o acorde diminuto."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões do diminuto.")), "A");
+        m.exercises.back().quiz = {
+            question ("O acorde diminuto é formado por:",
+                      { "terças menores empilhadas", "terças maiores empilhadas",
+                        "quartas empilhadas", "quintas empilhadas" }, 0),
+            question ("Quais intervalos formam o dim7 sobre a tônica?",
+                      { "0-3-6-9", "0-4-7-11", "0-3-7-10", "0-4-7-10" }, 0),
+            question ("Quantos acordes dim7 diferentes existem na música ocidental?",
+                      { "Três", "Quatro", "Seis", "Doze" }, 0),
+            question ("No campo harmônico maior, o acorde diminuto aparece no:",
+                      { "sétimo grau (sensível)", "primeiro grau",
+                        "quarto grau", "quinto grau" }, 0),
+            question ("O acorde meio-diminuto se distingue do dim7 pela:",
+                      { "sétima menor (10 semitons) em vez da diminuta (9)",
+                        "terça maior", "quinta justa", "nona" }, 0),
+        };
+        add (exercise ("EX-9.A.2", juce::String::fromUTF8 ("Tocar a tríade diminuta"),
+                       juce::String::fromUTF8 ("Tocar uma tríade diminuta (0-3-6) em qualquer posição."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere as classes de altura da tríade diminuta.")), "A");
+        m.exercises.back().chordPitchClasses = { 0, 3, 6 };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-9.A.3", juce::String::fromUTF8 ("Tocar o diminuto de sétima"),
+                       juce::String::fromUTF8 ("Tocar um dim7 (0-3-6-9) em qualquer posição do braço."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere as classes de altura do dim7.")), "A");
+        m.exercises.back().chordPitchClasses = { 0, 3, 6, 9 };
+        m.exercises.back().usesGrid = false;
+        add (intervalExercise ("EX-9.A.4", "Identificar o trítono",
+                               "Tocar um trítono (6 semitons), que é a quinta diminuta do acorde, duas vezes.",
+                               6, 2), "A");
+
+        // --- Topic B — dominantes diminutos -----------------------------------
+        add (exercise ("EX-9.B.1", juce::String::fromUTF8 ("Questionário: dominantes diminutos"),
+                       juce::String::fromUTF8 ("Responder ao questionário do DomDim."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões do DomDim.")), "B");
+        m.exercises.back().quiz = {
+            question ("O acorde dominante diminuto (DomDim) é:",
+                      { "o dominante com nona bemol", "o dominante com quarta justa",
+                        "um acorde menor com sétima", "uma tríade aumentada" }, 0),
+            question ("O DomDim nasce de qual escala?",
+                      { "diminuta meio-tom / tom", "maior natural",
+                        "menor natural", "pentatônica" }, 0),
+            question ("Sem a fundamental, o dominante com nona bemol vira:",
+                      { "um acorde diminuto de sétima", "uma tríade maior",
+                        "um acorde menor com sétima", "uma quinta aumentada" }, 0),
+            question ("O dim7 substituto fica, em relação à resolução, a:",
+                      { "um semitom acima", "uma quarta acima",
+                        "uma quinta abaixo", "uma oitava abaixo" }, 0),
+            question ("Quantos dominantes usam a mesma escala diminuta?",
+                      { "Quatro, a uma terça menor de distância", "Dois",
+                        "Três", "Doze" }, 0),
+        };
+        add (exercise ("EX-9.B.2", juce::String::fromUTF8 ("Tocar o dominante com nona bemol"),
+                       juce::String::fromUTF8 ("Tocar C7(b9) (0-4-7-10-1) em qualquer posição."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere as classes de altura do dominante com nona bemol.")), "B");
+        m.exercises.back().chordPitchClasses = { 0, 4, 7, 10, 1 };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-9.B.3", juce::String::fromUTF8 ("Tocar o diminuto substituto"),
+                       juce::String::fromUTF8 ("Tocar o dim7 substituto um semitom acima da resolução."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere as classes de altura do dim7 substituto.")), "B");
+        m.exercises.back().chordPitchClasses = { 1, 4, 7, 10 };
+        m.exercises.back().usesGrid = false;
+        add (intervalExercise ("EX-9.B.4", "A terça menor do substituto",
+                               "Tocar uma terça menor (3 semitons), o passo que separa o dominante do substituto, duas vezes.",
+                               3, 2), "B");
+
+        // --- Topic C — ciclos diminutos ---------------------------------------
+        add (exercise ("EX-9.C.1", juce::String::fromUTF8 ("Questionário: ciclos diminutos"),
+                       juce::String::fromUTF8 ("Responder ao questionário do ciclo diminuto."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões do ciclo.")), "C");
+        m.exercises.back().quiz = {
+            question ("O ciclo diminuto percorre a oitava de quantos em quantos semitons?",
+                      { "de 3 em 3 (terças menores)", "de 2 em 2 (tons)",
+                        "de 4 em 4 (terças maiores)", "de 7 em 7 (quintas)" }, 0),
+            question ("Quantas notas o ciclo das terças menores percorre?",
+                      { "Quatro", "Três", "Seis", "Doze" }, 0),
+            question ("Cdim7, Ebdim7, Gbdim7 e Adim7 são:",
+                      { "o mesmo som, com nomes diferentes", "quatro acordes distintos",
+                        "tríades maiores", "dominantes" }, 0),
+            question ("O ciclo diminuto serve, na prática, para:",
+                      { "modular e deslocar frases pelo braço", "afinar o instrumento",
+                        "medir o tempo", "aumentar o volume" }, 0),
+        };
+        add (exercise ("EX-9.C.2", juce::String::fromUTF8 ("O mesmo dim7 em quatro posições"),
+                       juce::String::fromUTF8 ("Tocar um dim7 (0-3-6-9) e deslocá-lo de terça menor em terça menor."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere que as classes de altura continuam as do dim7.")), "C");
+        m.exercises.back().chordPitchClasses = { 0, 3, 6, 9 };
+        m.exercises.back().usesGrid = false;
+        add (intervalExercise ("EX-9.C.3", "O passo do ciclo",
+                               "Tocar uma terça menor (3 semitons), o passo do ciclo diminuto, duas vezes.",
+                               3, 2), "C");
+
+        // --- Topic D — campos harmônicos diminutos ----------------------------
+        add (exercise ("EX-9.D.1", juce::String::fromUTF8 ("Questionário: campos diminutos"),
+                       juce::String::fromUTF8 ("Responder ao questionário dos campos diminutos."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões do campo diminuto.")), "D");
+        m.exercises.back().quiz = {
+            question ("As escalas diminutas geram quantos campos?",
+                      { "Dois: tom-meio-tom e meio-tom-tom", "Um só",
+                        "Três", "Doze" }, 0),
+            question ("O campo do DomDim é o da escala:",
+                      { "meio-tom / tom", "maior natural", "menor harmônica", "pentatônica" }, 0),
+            question ("O vii grau do campo maior pertence também ao:",
+                      { "campo diminuto", "campo de blues", "campo pentatônico", "campo de tons inteiros" }, 0),
+            question ("O campo diminuto organiza a harmonia sobretudo por:",
+                      { "cor e tensão", "função de tônica e dominante",
+                        "compasso", "andamento" }, 0),
+        };
+        add (exercise ("EX-9.D.2", juce::String::fromUTF8 ("Tocar o meio-diminuto"),
+                       juce::String::fromUTF8 ("Tocar um m7(b5) (0-3-6-10), o ii grau do campo menor."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere as classes de altura do meio-diminuto.")), "D");
+        m.exercises.back().chordPitchClasses = { 0, 3, 6, 10 };
+        m.exercises.back().usesGrid = false;
+        add (intervalExercise ("EX-9.D.3", "O passo de tom do campo",
+                               "Tocar um tom (2 semitons), o passo da escala tom-meio-tom, duas vezes.",
+                               2, 2), "D");
+
+        // --- Topic E — acorde m7(#5) ------------------------------------------
+        add (exercise ("EX-9.E.1", juce::String::fromUTF8 ("Questionário: o acorde m7(#5)"),
+                       juce::String::fromUTF8 ("Responder ao questionário do m7(#5)."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões do m7(#5).")), "E");
+        m.exercises.back().quiz = {
+            question ("O m7(#5) tem os intervalos:",
+                      { "0-3-8-10", "0-3-7-10", "0-4-7-10", "0-3-6-10" }, 0),
+            question ("Em relação ao m7, o m7(#5) muda:",
+                      { "a quinta (de justa para aumentada)", "a terça", "a sétima", "a fundamental" }, 0),
+            question ("O m7(#5) tem uma leitura enarmônica como:",
+                      { "uma inversão de acorde maior com nona", "um dominante",
+                        "uma tríade aumentada", "um acorde meio-diminuto" }, 0),
+            question ("O som do m7(#5) é:",
+                      { "suspenso, sem repouso claro", "estável e cantável",
+                        "igual ao m7", "igual a uma tríade maior" }, 0),
+        };
+        add (exercise ("EX-9.E.2", juce::String::fromUTF8 ("Tocar o m7(#5)"),
+                       juce::String::fromUTF8 ("Tocar um m7(#5) (0-3-8-10) em qualquer posição."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere as classes de altura do m7(#5).")), "E");
+        m.exercises.back().chordPitchClasses = { 0, 3, 8, 10 };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-9.E.3", juce::String::fromUTF8 ("Comparar m7 e m7(#5)"),
+                       juce::String::fromUTF8 ("Tocar um m7 (0-3-7-10) para comparar com o m7(#5)."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere as classes de altura do m7.")), "E");
+        m.exercises.back().chordPitchClasses = { 0, 3, 7, 10 };
+        m.exercises.back().usesGrid = false;
+        add (intervalExercise ("EX-9.E.4", "Identificar a quinta aumentada",
+                               "Tocar uma quinta aumentada (8 semitons), a marca do m7(#5), duas vezes.",
+                               8, 2), "E");
+
+        // --- Topic F — policordes ---------------------------------------------
+        add (exercise ("EX-9.F.1", juce::String::fromUTF8 ("Questionário: policordes"),
+                       juce::String::fromUTF8 ("Responder ao questionário dos policordes."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões dos policordes.")), "F");
+        m.exercises.back().quiz = {
+            question ("Um policorde é:",
+                      { "dois acordes empilhados", "um acorde com uma nota repetida",
+                        "uma escala", "um intervalo" }, 0),
+            question ("Diferente do slash chord, no policorde o baixo é:",
+                      { "um acorde completo", "uma nota do acorde de cima",
+                        "sempre a tônica", "uma nota estranha" }, 0),
+            question ("A camada inferior de um policorde:",
+                      { "define a harmonia de base", "só acrescenta tensão",
+                        "é sempre maior", "não importa" }, 0),
+            question ("Na guitarra, as camadas do policorde se separam por:",
+                      { "registro (graves e agudos)", "andamento", "volume", "afinação" }, 0),
+        };
+        add (exercise ("EX-9.F.2", juce::String::fromUTF8 ("Tocar o policorde D/C"),
+                       juce::String::fromUTF8 ("Tocar as notas de D/C (tríade de Ré sobre a de Dó)."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere as classes de altura das duas camadas.")), "F");
+        m.exercises.back().chordPitchClasses = { 0, 2, 4, 6, 7, 9 };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-9.F.3", juce::String::fromUTF8 ("Tocar a camada inferior"),
+                       juce::String::fromUTF8 ("Tocar a tríade de Dó (0-4-7), o baixo do policorde."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere a tríade de baixo.")), "F");
+        m.exercises.back().chordPitchClasses = { 0, 4, 7 };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-9.F.4", juce::String::fromUTF8 ("Notação do policorde"),
+                       juce::String::fromUTF8 ("Interpretar a cifra de um policorde."),
+                       juce::String::fromUTF8 ("Acerto ≥90% no questionário de notação.")), "F");
+        m.exercises.back().quiz = {
+            question ("Na cifra D/C, o que significa a barra?",
+                      { "que o acorde de Ré soa sobre o baixo de Dó",
+                        "que o acorde é menor", "que o acorde é dominante",
+                        "que o baixo é a nota Ré" }, 0),
+            question ("F/G, na prática, é:",
+                      { "a tríade de Fá sobre a de Sol", "um acorde menor",
+                        "um dim7", "uma escala" }, 0),
+            question ("Um policorde bem construído soa:",
+                      { "rico e coerente", "confuso", "igual a um acorde simples", "desafinado" }, 0),
+        };
+
+        // --- Topic G — simetria e escalas simétricas --------------------------
+        add (exercise ("EX-9.G.1", juce::String::fromUTF8 ("Questionário: escalas simétricas"),
+                       juce::String::fromUTF8 ("Responder ao questionário das escalas simétricas."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões da simetria.")), "G");
+        m.exercises.back().quiz = {
+            question ("Uma escala é simétrica quando:",
+                      { "divide a oitava em partes iguais", "tem sete notas",
+                        "é sempre maior", "não tem tônica" }, 0),
+            question ("Quantas escalas de tons inteiros existem?",
+                      { "Duas", "Três", "Quatro", "Doze" }, 0),
+            question ("Quantas escalas diminutas existem?",
+                      { "Três", "Duas", "Quatro", "Doze" }, 0),
+            question ("Na guitarra, a simetria permite:",
+                      { "deslocar a mesma digitação pelo braço", "afinar mais rápido",
+                        "tocar mais alto", "mudar o timbre" }, 0),
+        };
+        add (intervalExercise ("EX-9.G.2", "O passo da escala de tons inteiros",
+                               "Tocar um tom (2 semitons), o passo da escala de tons inteiros, duas vezes.",
+                               2, 2), "G");
+        add (intervalExercise ("EX-9.G.3", "O passo da escala diminuta",
+                               "Tocar uma terça menor (3 semitons), o passo do ciclo diminuto, duas vezes.",
+                               3, 2), "G");
+        add (intervalExercise ("EX-9.G.4", "O passo da escala aumentada",
+                               "Tocar uma terça maior (4 semitons), o passo da escala aumentada, duas vezes.",
+                               4, 2), "G");
+
+        // --- Topic H — relações entre campos harmônicos -----------------------
+        add (exercise ("EX-9.H.1", juce::String::fromUTF8 ("Questionário: relações entre campos"),
+                       juce::String::fromUTF8 ("Responder ao questionário das relações entre campos."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões das relações.")), "H");
+        m.exercises.back().quiz = {
+            question ("Duas tonalidades vizinhas no círculo das quintas compartilham:",
+                      { "seis das sete notas", "apenas a tônica",
+                        "todas as notas", "nenhuma nota" }, 0),
+            question ("Um acorde pivô é um acorde que:",
+                      { "pertence aos dois campos", "só existe no campo maior",
+                        "é sempre diminuto", "não tem função" }, 0),
+            question ("O dominante secundário é:",
+                      { "o V7 da nova tônica", "o I grau do campo",
+                        "um acorde diminuto", "o IV grau" }, 0),
+            question ("Campos relativos (Do maior e Lá menor) compartilham:",
+                      { "as mesmas notas", "apenas a tônica", "nenhuma nota", "só o dominante" }, 0),
+        };
+        add (exercise ("EX-9.H.2", juce::String::fromUTF8 ("Modular por acorde pivô"),
+                       juce::String::fromUTF8 ("Tocar uma progressão que passa por um pivô até a nova tônica."),
+                       juce::String::fromUTF8 ("O app reconhece a progressão de acordes e confere as classes de altura.")), "H");
+        m.exercises.back().chordProgression = {
+            { 0, 4, 7 },    // C  (campo de origem)
+            { 7, 11, 2 },   // G  (pivô)
+            { 2, 6, 9 },    // D7 (dominante secundário)
+            { 7, 11, 2 },   // G  (nova tônica)
+        };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-9.H.3", juce::String::fromUTF8 ("Tocar o dominante secundário"),
+                       juce::String::fromUTF8 ("Tocar D7 (2-6-9), o V7 da nova tonalidade."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere as classes de altura do dominante secundário.")), "H");
+        m.exercises.back().chordPitchClasses = { 2, 6, 9 };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-9.H.4", juce::String::fromUTF8 ("Homônimos e relativos"),
+                       juce::String::fromUTF8 ("Distinguir campos relativos de homônimos."),
+                       juce::String::fromUTF8 ("Acerto ≥90% no questionário de campos.")), "H");
+        m.exercises.back().quiz = {
+            question ("Do maior e Lá menor são campos:",
+                      { "relativos", "homônimos", "distantes", "idênticos" }, 0),
+            question ("Do maior e Do menor são campos:",
+                      { "homônimos", "relativos", "distantes", "iguais" }, 0),
+            question ("Quanto mais notas dois campos compartilham, a passagem entre eles é:",
+                      { "mais suave", "mais abrupta", "impossível", "sempre igual" }, 0),
+        };
+
+        // --- Topic I — sonoridades especiais ----------------------------------
+        add (exercise ("EX-9.I.1", juce::String::fromUTF8 ("Questionário: sonoridades especiais"),
+                       juce::String::fromUTF8 ("Responder ao questionário das sonoridades especiais."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões das sonoridades.")), "I");
+        m.exercises.back().quiz = {
+            question ("O acorde quartal é construído empilhando:",
+                      { "quartas", "terças", "quintas", "sextas" }, 0),
+            question ("O cluster é:",
+                      { "um conjunto de notas vizinhas", "uma tríade maior",
+                        "um acorde diminuto", "uma escala" }, 0),
+            question ("Uma estrutura superior é:",
+                      { "uma tríade tocada sobre um dominante", "um acorde menor",
+                        "um cluster", "um baixo invertido" }, 0),
+            question ("O acorde add9 acrescenta à tríade:",
+                      { "a nona", "a sétima", "a quarta", "a sexta" }, 0),
+            question ("As sonoridades especiais funcionam melhor:",
+                      { "em contraste com momentos simples", "em excesso",
+                        "isoladas da música", "sem função" }, 0),
+        };
+        add (exercise ("EX-9.I.2", juce::String::fromUTF8 ("Tocar o acorde quartal"),
+                       juce::String::fromUTF8 ("Tocar um acorde quartal sobre Dó (quartas empilhadas)."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere as classes de altura do acorde quartal.")), "I");
+        m.exercises.back().chordPitchClasses = { 0, 5, 10 };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-9.I.3", juce::String::fromUTF8 ("Tocar o acorde 6/9"),
+                       juce::String::fromUTF8 ("Tocar um C6/9 (tônica, terça, quinta, sexta e nona)."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere as classes de altura do 6/9.")), "I");
+        m.exercises.back().chordPitchClasses = { 0, 2, 4, 7, 9 };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-9.I.4", juce::String::fromUTF8 ("Da sonoridade à música"),
+                       juce::String::fromUTF8 ("Escolher a sonoridade certa para cada momento."),
+                       juce::String::fromUTF8 ("Acerto ≥90% no questionário de aplicação.")), "I");
+        m.exercises.back().quiz = {
+            question ("Para um clímax de máxima tensão, a sonoridade indicada é:",
+                      { "o cluster", "o add9", "a tríade maior", "a oitava" }, 0),
+            question ("Para abrir uma introdução com som moderno e sem direção, use:",
+                      { "o acorde quartal", "uma tríade maior", "um dominante", "uma escala maior" }, 0),
+            question ("A sonoridade doce típica da bossa nova vem do:",
+                      { "6/9", "cluster", "quartal", "dim7" }, 0),
+        };
+
+        // The gate closes the module on the grid: a I–#Idim7–ii–V turnaround
+        // that returns to the tonic, built from the material of the module
+        // (REQ-009, REQ-015). The student plays the chords in time.
+        auto& gate = m.exercises.emplace_back (exercise (
+            "GATE-9", juce::String::fromUTF8 ("Desafio de gate — turnaround C–C#dim7–Dm7–G7"),
+            juce::String::fromUTF8 ("Tocar C – C#dim7 – Dm7 – G7 a 92 BPM, na grade do metrônomo."),
+            juce::String::fromUTF8 ("Acordes reconhecidos e alinhados à grade (≥ 0,81).")));
+        gate.isGate = true;
+        gate.lessonId = "A";
+        gate.chordProgression = {
+            { 0, 4, 7 },      // C
+            { 1, 4, 7, 10 },  // C#dim7 (diminuto de passagem)
+            { 2, 5, 9, 0 },   // Dm7
+            { 7, 11, 2, 5 },  // G7
+        };
+
+        m.gateChallenge = juce::String::fromUTF8 (
+            "Tocar C – C#dim7 – Dm7 – G7 (turnaround com diminuto de passagem) a 92 BPM "
+            "com ≥90% de acerto de acordes e on_grid_ratio ≥ 0,81. O diminuto de "
+            "passagem conduz ao ii–V e prepara o retorno à tônica.");
+
+        // Pattern and links the module must cite (REQ-007, REQ-010).
+        m.practice.patternId = "PTN-A-DROP2";
+        m.practice.patternUse = juce::String::fromUTF8 (
+            "Arpejos de sétima em Drop 2: a digitação 1-3-5-7 cobre as tétrades "
+            "estudadas (dim7, m7(b5), m7(#5), dominante com nona bemol) e permite "
+            "tocar as sonoridades do módulo em qualquer posição. Complemento: "
+            "PTN-M-4ths (quartas) para os acordes quartais.");
+        m.practice.guitarists = { "Wes Montgomery", "Pat Metheny", "Joe Pass" };
+
+        // Curated apostilas (REQ-006, CM-012); see docs/MUSIC.md.
+        m.sources = {
+            "pdf-teoria-elementar-da-musica-ricordi-osvaldo-lacerda",
+            "pdf-p-classtruncatedtext-module-lineclamped-85ulhh-style-max-lines5bohumil-med-teoria-da-musica-5-edicao-p",
+            "pdf-mozart-mello-livroestudosdeguitarra4em1",
+            "pdf-desvendando-os-segredos-da-guitarra-fusion",
+        };
+
+        return m;
+    }
+
     // Modules 3..20 exist as placeholders so the list is honest about what is
     // coming (ADR 0005): level, target BPM and alignment come from MUSIC.md.
     CourseModule makePlaceholder (int number, const char* title, int level,
@@ -1144,7 +1562,7 @@ const std::vector<CourseModule>& ModuleCatalog::getModules()
         makePlaceholder (6,  "II–V–I (menor)",                      3,  80,  0.80f),
         makePlaceholder (7,  "II–V–I (aplicação)",                  3,  84,  0.80f),
         makePlaceholder (8,  "Turnarounds",                         4,  88,  0.81f),
-        makePlaceholder (9,  "Turnarounds (variações)",             4,  92,  0.81f),
+        makeModule9(),
         makePlaceholder (10, "Turnarounds (aplicação)",             4,  96,  0.82f),
         makePlaceholder (11, "Blues de 12 compassos",               5, 100,  0.82f),
         makePlaceholder (12, "Blues menor",                         5, 104,  0.82f),

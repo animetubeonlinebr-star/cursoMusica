@@ -70,4 +70,15 @@ std::vector<ContentItem> topic2F();  // Relação entre intervalos e construçã
 std::vector<ContentItem> topic2G();  // Cantar e tocar os intervalos
 std::vector<ContentItem> topic2H();  // Identificar intervalos no instrumento e de ouvido
 
+// Module 9 (Etapa 9 — harmonia avançada e estruturas especiais).
+std::vector<ContentItem> topic9A();  // Acordes diminutos e suas funções
+std::vector<ContentItem> topic9B();  // Dominantes diminutos (DomDim)
+std::vector<ContentItem> topic9C();  // Ciclos diminutos
+std::vector<ContentItem> topic9D();  // Campos harmônicos diminutos
+std::vector<ContentItem> topic9E();  // Acorde m7(#5)
+std::vector<ContentItem> topic9F();  // Policordes
+std::vector<ContentItem> topic9G();  // Simetria e escalas simétricas
+std::vector<ContentItem> topic9H();  // Relações entre campos harmônicos
+std::vector<ContentItem> topic9I();  // Sonoridades especiais
+
 } // namespace cursomusica::content

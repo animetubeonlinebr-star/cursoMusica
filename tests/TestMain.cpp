@@ -1,5 +1,6 @@
 #include <juce_core/juce_core.h>
 
+#include <algorithm>
 #include <cmath>
 #include <iostream>
 #include <vector>
@@ -295,6 +296,63 @@ void testAudioPortClassifier()
            "ordinary hardware is not a virtual mixer port");
 }
 
+// The catalogue grows one Etapa at a time, and the Etapa branches are built in
+// parallel: a single branch implements one module on top of the base (e.g. only
+// module 9 on top of 1 and 2), so the old rule "modules 3..20 are placeholders"
+// no longer holds and a strict "contiguous from 1" rule would fail on every
+// in-progress branch. The invariants that must always hold, whatever set of
+// Etapas is merged, are: every module number is unique (no leftover placeholder
+// duplicating an implemented number), module 1 and module 2 are implemented, an
+// implemented module is a real module (it has topics), and findModule returns
+// the module that owns each number.
+void checkModuleRegistryShape (const std::vector<cursomusica::CourseModule>& modules)
+{
+    using namespace cursomusica;
+
+    std::vector<int> numbers;
+    std::vector<int> implemented;
+    for (const auto& m : modules)
+    {
+        numbers.push_back (m.number);
+        if (m.implemented)
+            implemented.push_back (m.number);
+    }
+
+    // Unique numbers, so a module is never listed twice (no leftover placeholder
+    // beside the implemented module of the same number).
+    auto sorted = numbers;
+    std::sort (sorted.begin(), sorted.end());
+    check (std::adjacent_find (sorted.begin(), sorted.end()) == sorted.end(),
+           "every module number is unique in getModules()");
+
+    // The base is always implemented (the course starts at module 1).
+    check (std::find (implemented.begin(), implemented.end(), 1) != implemented.end(),
+           "module 1 is implemented");
+    check (std::find (implemented.begin(), implemented.end(), 2) != implemented.end(),
+           "module 2 is implemented");
+
+    // An implemented module is a real module: it has topics, an objective and a
+    // positive level. This catches a module left half-wired.
+    for (const auto& m : modules)
+        if (m.implemented)
+        {
+            check (! m.lessons.empty(),
+                   juce::String ("implemented module ") + juce::String (m.number) + " has topics");
+            check (m.objective.isNotEmpty(),
+                   juce::String ("implemented module ") + juce::String (m.number) + " has an objective");
+            check (m.level > 0,
+                   juce::String ("implemented module ") + juce::String (m.number) + " has a level");
+        }
+
+    // findModule returns the module that owns each number, with the matching flag.
+    for (const auto& m : modules)
+    {
+        const auto* found = ModuleCatalog::findModule (m.number);
+        check (found != nullptr && found->number == m.number && found->implemented == m.implemented,
+               juce::String ("findModule(") + juce::String (m.number) + ") returns its module");
+    }
+}
+
 void testModuleCatalog()
 {
     using namespace cursomusica;
@@ -439,9 +497,10 @@ void testModuleCatalog()
         if (m.number > 1)
             check (m.usesTempo, "modules 2..20 still use a BPM target");
 
-    for (const auto& m : modules)
-        if (m.number > 2)
-            check (! m.implemented, "modules 3..20 are still placeholders");
+    // The registry shape must hold as modules are implemented one by one (the
+    // old "3..20 are placeholders" rule no longer applies once any of them
+    // exists). See checkModuleRegistryShape.
+    checkModuleRegistryShape (modules);
 
     // The client asked the graphical material (fretboard, CAGED shapes, rhythm
     // figures) to be shown as images instead of text art. Every diagram named by
@@ -1045,11 +1104,173 @@ void testModule2()
         }
     check (hasGate, "module 2 has a gate exercise");
 
-    // Modules 3..20 are still placeholders.
-    const auto& modules = ModuleCatalog::getModules();
-    for (const auto& m : modules)
-        if (m.number > 2)
-            check (! m.implemented, "modules 3..20 are still placeholders");
+    // The registry keeps growing one Etapa at a time (in parallel branches), so
+    // the old "3..20 are placeholders" rule is replaced by the registry shape.
+    checkModuleRegistryShape (ModuleCatalog::getModules());
+}
+
+// Module 9 — Etapa 9: harmonia avançada e estruturas especiais. Mirrors
+// testModule2: topics, 3..5 exercises per topic, id shape, >=5 pages, media
+// (images, tables, audio and scores with audio), playable exercises the app
+// verifies by recognising notes, and the gate on the grid.
+void testModule9()
+{
+    std::cout << "Module9\n";
+    using namespace cursomusica;
+
+    const auto* m9 = ModuleCatalog::findModule (9);
+    check (m9 != nullptr, "module 9 exists");
+    if (m9 == nullptr)
+        return;
+
+    check (m9->implemented, "module 9 is implemented");
+    check (m9->number == 9, "module 9 has number 9");
+    check (m9->usesTempo, "module 9 uses a BPM target");
+    check (m9->targetBpm == 92, "module 9 target BPM is 92 (MUSIC.md)");
+    check (m9->level == 4, "module 9 is level 4 (MUSIC.md)");
+    check (m9->lessons.size() == 9, "module 9 has nine topics (A..I)");
+    check (m9->lessons.front().id == "A" && m9->lessons.back().id == "I",
+           "module 9 topics run A..I in order");
+    check (m9->exercises.size() >= 27, "module 9 lists a full exercise set");
+
+    // Every topic A..I has 3..5 exercises (client: "de 3 a 5 exercícios por tópico").
+    for (const auto& topic : m9->lessons)
+    {
+        int count = 0;
+        for (const auto& e : m9->exercises)
+            if (e.lessonId == topic.id)
+                ++count;
+        check (count >= 3, juce::String ("topic ") + topic.id + " has at least three exercises");
+        check (count <= 5, juce::String ("topic ") + topic.id + " has at most five exercises");
+    }
+
+    // Every exercise is tied to a topic and its id follows EX-9.<topico>.<n>.
+    for (const auto& e : m9->exercises)
+    {
+        check (e.lessonId.isNotEmpty(), "exercise " + e.id + " is tied to a topic");
+        if (! e.isGate)
+            check (e.id.startsWith ("EX-9."), "exercise " + e.id + " follows EX-9.<topico>.<n>");
+    }
+
+    // Part of the exercises is played on the instrument and verified by the
+    // detector: every topic owns at least one playable exercise (quiz, chord,
+    // progression or interval the evaluator understands).
+    juce::StringArray playableTopics;
+    for (const auto& e : m9->exercises)
+    {
+        const bool playable = e.isQuiz() || ! e.targets.empty() || ! e.chordPitchClasses.empty()
+                                || ! e.chordProgression.empty() || e.interval.semitones > 0;
+        if (playable && e.lessonId.isNotEmpty())
+            playableTopics.addIfNotAlreadyThere (e.lessonId);
+    }
+    for (const auto& topic : { "A", "B", "C", "D", "E", "F", "G", "H", "I" })
+        check (playableTopics.contains (topic),
+               juce::String ("topic ") + topic + " has a verifiable exercise");
+
+    // An interval exercise must not gate on the grid, and its distance is valid.
+    for (const auto& e : m9->exercises)
+        if (e.interval.semitones > 0)
+        {
+            check (! e.usesGrid, "interval exercise " + e.id + " is not grid-gated");
+            check (e.interval.repeats >= 1, "interval exercise " + e.id + " asks for at least one repeat");
+            check (e.interval.semitones >= 1 && e.interval.semitones <= 12,
+                   "interval exercise " + e.id + " has a valid semitone distance");
+        }
+
+    // Chord / progression exercises must not gate on the grid either (they are
+    // recognition exercises), and they carry a spec the evaluator understands.
+    for (const auto& e : m9->exercises)
+        if (! e.isGate && (! e.chordPitchClasses.empty() || ! e.chordProgression.empty()))
+        {
+            check (! e.usesGrid, "recognition exercise " + e.id + " is not grid-gated");
+            for (const int pc : e.chordPitchClasses)
+                check (pc >= 0 && pc < 12, "chord exercise " + e.id + " uses a valid pitch class");
+            for (const auto& chord : e.chordProgression)
+                for (const int pc : chord)
+                    check (pc >= 0 && pc < 12, "progression " + e.id + " uses a valid pitch class");
+        }
+
+    // Explanation: >=5 pages per topic, at least one table and one image, and
+    // the media the client asked for (images, audio, scores with audio).
+    auto detailChars = [] (const LessonBlock& topic)
+    {
+        int total = 0;
+        for (const auto& item : topic.detail)
+        {
+            total += item.text.length();
+            for (const auto& cell : item.columns)
+                total += cell.length();
+            for (const auto& row : item.rows)
+                for (const auto& cell : row)
+                    total += cell.length();
+        }
+        return total;
+    };
+
+    bool anyAudio = false;
+    bool anyScore = false;
+    for (const auto& topic : m9->lessons)
+    {
+        const int chars = detailChars (topic);
+        check (chars >= content::minTopicChars,
+               juce::String ("topic ") + topic.id + " has at least "
+                   + juce::String (content::minPages) + " pages (" + juce::String (chars) + " chars)");
+
+        int images = 0, tables = 0, audios = 0, scores = 0;
+        for (const auto& item : topic.detail)
+        {
+            if (item.kind == ContentKind::image) ++images;
+            else if (item.kind == ContentKind::table) ++tables;
+            else if (item.kind == ContentKind::audio) ++audios;
+            else if (item.kind == ContentKind::score) ++scores;
+        }
+        check (images >= 1, juce::String ("topic ") + topic.id + " has at least one image");
+        check (tables >= 1, juce::String ("topic ") + topic.id + " has at least one table");
+        anyAudio = anyAudio || audios > 0;
+        anyScore = anyScore || scores > 0;
+    }
+    check (anyAudio, "module 9 demonstrates the structures with audio (REQ-004)");
+    check (anyScore, "module 9 has scores with their audio (REQ-004)");
+
+    // Every diagram and score named by the content is embedded in the binary,
+    // and every audio/score item actually carries notes to play.
+    for (const auto& topic : m9->lessons)
+        for (const auto& item : topic.detail)
+        {
+            if (item.kind == ContentKind::image || item.kind == ContentKind::score)
+                check (content::diagramExists (item.imageName),
+                       juce::String ("topic ") + topic.id + " references the image '"
+                           + item.imageName + "'");
+            if (item.kind == ContentKind::audio || item.kind == ContentKind::score)
+            {
+                check (! item.notes.empty(),
+                       juce::String ("topic ") + topic.id + " has a playable example");
+                for (const int midi : item.notes)
+                    check (midi >= 0 && midi <= 127,
+                           juce::String ("topic ") + topic.id + " example uses a valid MIDI note");
+            }
+        }
+
+    // The module cites >=1 pattern and >=1 guitarist (REQ-007, REQ-010).
+    check (m9->practice.patternId.isNotEmpty(), "module 9 cites a pattern");
+    check (! m9->practice.guitarists.isEmpty(), "module 9 cites at least one guitarist");
+    check (m9->sources.size() >= 1, "module 9 cites its curated apostilas");
+
+    // The gate closes the module on the grid: a turnaround built from the
+    // material of the module (REQ-009).
+    bool hasGate = false;
+    for (const auto& e : m9->exercises)
+        if (e.isGate)
+        {
+            hasGate = true;
+            check (e.chordProgression.size() == 4, "module 9 gate has four chords");
+            check (e.chordProgression.front() == std::vector<int> ({ 0, 4, 7 }),
+                   "module 9 gate opens on C major");
+        }
+    check (hasGate, "module 9 has a gate exercise");
+
+    // The registry shape holds with module 9 implemented.
+    checkModuleRegistryShape (ModuleCatalog::getModules());
 }
 
 int main()
@@ -1066,6 +1287,7 @@ int main()
     testIntervalEvaluation();
     testModuleCatalog();
     testModule2();
+    testModule9();
     testProgressDatabase();
     testProgressStore();
     testSharedSettings();

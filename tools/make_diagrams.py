@@ -947,6 +947,293 @@ DIAGRAMS.update({
 })
 
 
+# --------------------------------------------------------------------------
+# Modulo 9 — harmonia avancada e estruturas especiais.
+# --------------------------------------------------------------------------
+def _rows_panel(d, y, items, row_h=56, label_w=360, font_size=21):
+    top = y + 34
+    for i, (name, desc, feel) in enumerate(items):
+        yy = top + i * row_h
+        d.rounded_rectangle([MARGIN, yy, W - MARGIN, yy + row_h - 8], radius=8,
+                            fill=RAISED if i % 2 == 0 else SURFACE)
+        d.text((MARGIN + 18, yy + (row_h - 8) / 2), name, font=font(font_size, True),
+               fill=ACCENT, anchor="lm")
+        d.text((MARGIN + label_w, yy + (row_h - 8) / 2), desc, font=font(font_size - 1),
+               fill=TXT, anchor="lm")
+        if feel:
+            d.text((W - MARGIN - 18, yy + (row_h - 8) / 2), feel,
+                   font=font(font_size - 1, True), fill=CYAN, anchor="rm")
+
+
+def _cycle_ring(d, cx, cy, r_out, r_in, cells, inner, note_font=26):
+    n = len(cells)
+    for i, cell in enumerate(cells):
+        step = 360 / n
+        d.pieslice([cx - r_out, cy - r_out, cx + r_out, cy + r_out],
+                   start=-90 + i * step - step / 2, end=-90 + i * step + step / 2,
+                   fill=RAISED if i % 2 == 0 else SURFACE, outline=BORDER)
+        am = math.radians(-90 + i * step)
+        d.text((cx + (r_out - 58) * math.cos(am), cy + (r_out - 58) * math.sin(am)),
+               cell, font=font(note_font, True), fill=TXT, anchor="mm")
+    if inner:
+        d.ellipse([cx - r_in, cy - r_in, cx + r_in, cy + r_in],
+                  fill=ACCENT_MUTED, outline=BORDER, width=2)
+        for k, line in enumerate(inner):
+            d.text((cx, cy - 14 + k * 30), line, font=font(22, True), fill=TXT, anchor="mm")
+
+
+def d_m9_diminuto_formacao():
+    h = 700
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Formacao do acorde diminuto")
+    y = subtitle(d, "Terca menor + terca menor: 0-3-6 na triade; 0-3-6-9 no dim7.", y)
+    groups = [("Triade diminuta", ["Do", "Mib", "Solb"], "0 - 3 - 6"),
+              ("Diminuto de setima (dim7)", ["Do", "Mib", "Solb", "Labb"], "0 - 3 - 6 - 9")]
+    top = y + 50
+    for g, (name, notes, formula) in enumerate(groups):
+        yy = top + g * 220
+        d.text((MARGIN, yy), name, font=font(24, True), fill=ACCENT, anchor="la")
+        d.text((W - MARGIN, yy), formula, font=font(22, True), fill=GOLD, anchor="ra")
+        for k, note in enumerate(notes):
+            cx = MARGIN + 90 + k * 200
+            cy = yy + 100
+            d.ellipse([cx - 46, cy - 46, cx + 46, cy + 46], fill=RAISED,
+                      outline=CYAN, width=3)
+            d.text((cx, cy), note, font=font(24, True), fill=TXT, anchor="mm")
+            if k < len(notes) - 1:
+                d.text((cx + 100, cy - 30), "+ 3m", font=font(17, True), fill=TXT2, anchor="mm")
+    d.text((W / 2, h - 60), "Cada terca menor sobrepoe uma casa a menos: o acorde se repete a cada 3 semitons.",
+           font=font(20), fill=TXT2, anchor="mm")
+    return img
+
+
+def d_m9_diminuto_funcoes():
+    h = 640
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Funcoes do acorde diminuto")
+    y = subtitle(d, "O diminuto aparece como sensivel, como substituto de dominante e como passagem.", y)
+    items = [("vii dim (sensivel)", "Conduz a tonica; nasce do 7o grau da escala maior", "dominante"),
+             ("ii dim (menor)", "2o grau do campo menor; prepara o V7", "subdominante"),
+             ("dim de passagem", "Liga dois acordes por graus conjuntos", "cromatismo"),
+             ("dim substituto", "Dim7 sobre a 3a traz 3a, 5a, 7a e 9a do dominante", "dominante"),
+             ("dim sobre pedal", "Cor e tensao sobre uma tonica sustentada", "cor")]
+    _rows_panel(d, y, items)
+    d.text((W / 2, h - 46), "Um dim7 tem quatro grafias enarmonicas: qualquer nota pode ser a fundamental.",
+           font=font(19), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m9_domdim_escala():
+    h = 720
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Dominante diminuto (DomDim): escala meio-tom / tom")
+    y = subtitle(d, "C7b9 = C Db Eb E F# G A Bb. As quatro dominantes 7b9 usam a mesma dim7.", y)
+    scale = ["C", "Db", "Eb", "E", "F#", "G", "A", "Bb"]
+    bw = (W - 2 * MARGIN) / len(scale)
+    for i, note in enumerate(scale):
+        cx = MARGIN + bw * (i + 0.5)
+        d.rounded_rectangle([cx - 44, y + 50, cx + 44, y + 146], radius=10,
+                            fill=RAISED, outline=CYAN if i % 2 == 0 else ACCENT, width=3)
+        d.text((cx, y + 98), note, font=font(26, True), fill=TXT, anchor="mm")
+        d.text((cx, y + 180), "m" if i % 2 == 0 else "T", font=font(18, True),
+               fill=TXT2, anchor="mm")
+    d.text((MARGIN, y + 230), "Os quatro dominantes a uma terca menor usam a mesma escala diminuta:",
+           font=font(21, True), fill=TXT2, anchor="la")
+    doms = ["C7b9", "Eb7b9", "Gb7b9", "A7b9"]
+    for i, name in enumerate(doms):
+        cx = MARGIN + 180 + i * 260
+        d.rounded_rectangle([cx - 110, y + 270, cx + 110, y + 350], radius=10,
+                            fill=ACCENT_MUTED, outline=ACCENT, width=2)
+        d.text((cx, y + 310), name, font=font(26, True), fill=TXT, anchor="mm")
+    d.text((W / 2, h - 60), "Trocar a fundamental entre essas quatro e uma rearmonizacao classica.",
+           font=font(20), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m9_ciclos_diminutos():
+    h = 820
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Ciclos diminutos: o circulo das tercas menores")
+    y = subtitle(d, "De 3 em 3 semitons a nota volta ao inicio; so existem tres dim7 diferentes.", y)
+    cx, cy = W / 2, y + 360
+    _cycle_ring(d, cx, cy, 300, 210, ["C", "Eb", "Gb", "A"], ["Dim7 de", "Do / Mib /", "Solb / La"])
+    d.text((MARGIN, h - 130), "Cdim7 = Ebdim7 = Gbdim7 = Adim7 (mesmas notas, outra grafia).",
+           font=font(21), fill=TXT2, anchor="la")
+    d.text((MARGIN, h - 92), "Os outros dois grupos comecam em C# e em D: no total, tres dim7.",
+           font=font(21), fill=TXT2, anchor="la")
+    d.text((MARGIN, h - 54), "O ciclo tambem vale para a escala diminuta e para o DomDim.",
+           font=font(21, True), fill=GOLD, anchor="la")
+    return img
+
+
+def d_m9_campo_diminuto():
+    h = 700
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Campos harmonicos das escalas diminutas")
+    y = subtitle(d, "As duas escalas de 8 notas geram campos diferentes ao empilhar tercas.", y)
+    cols = [("Tom - meio - tom (0,2,3,5,6,8,9,11)",
+             ["dois dim7 a um tom", "Cdim7 e Ddim7", "0-3-6-9 / 0-3-6-9"], CYAN),
+            ("Meio - tom - meio (0,1,3,4,6,7,9,10)",
+             ["quatro dominantes", "C7  Eb7  Gb7  A7", "cada um com 7(b9)"], ACCENT)]
+    col_w = (W - 2 * MARGIN) / 2
+    for c, (name, lines, color) in enumerate(cols):
+        x = MARGIN + c * col_w
+        d.rounded_rectangle([x + 10, y + 40, x + col_w - 10, y + 400], radius=12, fill=RAISED)
+        d.text((x + col_w / 2, y + 80), name, font=font(20, True), fill=color, anchor="mm")
+        for i, line in enumerate(lines):
+            d.text((x + col_w / 2, y + 160 + i * 54), line, font=font(23), fill=TXT, anchor="mm")
+    d.text((W / 2, h - 60), "A escala diminuta tem 8 notas e apenas 3 transposicoes distintas.",
+           font=font(20), fill=TXT2, anchor="mm")
+    return img
+
+
+def d_m9_m7s5():
+    h = 700
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Acorde m7(#5): a quinta aumentada")
+    y = subtitle(d, "0-3-8-10 (tonica, 3a menor, 5a aumentada, 7a menor).", y)
+    chord_box(d, MARGIN + 200, y + 90, 200, 210, [-1, 3, 6, 3, 4, -1], "Cm7(#5)",
+              start_fret=1, caption="Do - Mib - Lab - Sib")
+    items = [("Cm7(#5)", "0-3-8-10", "cor e suspensao"),
+             ("= Ab(add9)/C", "mesmas notas, outro nome", "enarmonia"),
+             ("m7 com 5a justa", "0-3-7-10", "compare e ouça")]
+    top = y + 90
+    for i, (name, desc, feel) in enumerate(items):
+        yy = top + i * 96
+        d.rounded_rectangle([MARGIN + 480, yy, W - MARGIN, yy + 80], radius=10,
+                            fill=RAISED if i % 2 == 0 else SURFACE)
+        d.text((MARGIN + 500, yy + 20), name, font=font(22, True), fill=ACCENT, anchor="la")
+        d.text((MARGIN + 500, yy + 52), desc, font=font(19), fill=TXT, anchor="la")
+        d.text((W - MARGIN - 16, yy + 40), feel, font=font(19, True), fill=CYAN, anchor="rm")
+    d.text((W / 2, h - 54), "A quinta aumentada deixa o acorde suspenso: nem maior, nem menor, nem dominante.",
+           font=font(20), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m9_policordes():
+    h = 700
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Policordes: dois acordes empilhados")
+    y = subtitle(d, "Escreve-se o acorde de cima sobre o de baixo; cada camada e uma triade.", y)
+    upper = ["Re", "Fa#", "La"]
+    lower = ["Do", "Mi", "Sol"]
+    for row, (name, notes, color) in enumerate([("Triade superior", upper, CYAN),
+                                                ("Triade inferior", lower, ACCENT)]):
+        yy = y + 60 + row * 190
+        d.text((MARGIN, yy), name, font=font(22, True), fill=color, anchor="la")
+        for k, note in enumerate(notes):
+            cx = MARGIN + 380 + k * 150
+            cy = yy + 50
+            d.ellipse([cx - 44, cy - 44, cx + 44, cy + 44], fill=RAISED, outline=color, width=3)
+            d.text((cx, cy), note, font=font(24, True), fill=TXT, anchor="mm")
+    d.text((W / 2, y + 330), "D sobre C  =  D/C", font=font(30, True), fill=GOLD, anchor="mm")
+    d.text((MARGIN, h - 110), "O baixo (inferior) fixa a harmonia; o superior acrescenta tensao.",
+           font=font(20), fill=TXT2, anchor="la")
+    d.text((MARGIN, h - 70), "Policorde = duas triades; slash chord = um acorde com nota estranha no baixo.",
+           font=font(20), fill=TXT2, anchor="la")
+    return img
+
+
+def d_m9_simetria():
+    h = 700
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Simetria: escalas que dividem a oitava")
+    y = subtitle(d, "Quando a oitava se divide em partes iguais, a escala se repete no braco.", y)
+    items = [("Diminuta (8 notas)", "0-1-3-4-6-7-9-10: divide em 4 tercas menores", "3 escalas"),
+             ("Tom inteiro (6 notas)", "0-2-4-6-8-10: divide em 6 tons", "2 escalas"),
+             ("Aumentada (6 notas)", "0-3-4-7-8-11: tercas maiores + semitons", "4 escalas"),
+             ("Pentatonica", "nao e simetrica: e uma selecao da escala", "12 escalas")]
+    _rows_panel(d, y, items, row_h=62, label_w=380)
+    d.text((W / 2, h - 54), "A simetria permite deslocar a digitacao sem mudar o desenho do braco.",
+           font=font(20), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m9_relacoes_campos():
+    h = 760
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Relacoes entre campos harmonicos")
+    y = subtitle(d, "Campos vizinhos no circulo das quintas compartilham seis das sete notas.", y)
+    cx, cy = W / 2, y + 330
+    _cycle_ring(d, cx, cy, 260, 150,
+                ["C", "G", "D", "A", "E", "B", "F#", "Db", "Ab", "Eb", "Bb", "F"], [])
+    d.text((MARGIN, h - 150), "Um acorde comum aos dois campos e o pivo da modulacao.",
+           font=font(21), fill=TXT2, anchor="la")
+    d.text((MARGIN, h - 112), "Dominantes secundarios e diminutos ligam campos distantes.",
+           font=font(21), fill=TXT2, anchor="la")
+    d.text((MARGIN, h - 74), "O dim7 e o mesmo em quatro campos: e uma ponte entre eles.",
+           font=font(21, True), fill=GOLD, anchor="la")
+    return img
+
+
+def d_m9_sonoridades():
+    h = 680
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Sonoridades especiais")
+    y = subtitle(d, "Estruturas que fogem do acorde terca-sobre-terca e criam cores novas.", y)
+    items = [("Quartal (So What)", "empilha quartas em vez de tercas", "aberto"),
+             ("Cluster", "notas vizinhas soando juntas", "denso"),
+             ("Add9 / 6-9", "triade com a nona ou a sexta e a nona", "luminoso"),
+             ("Slash / inversao", "acorde com nota estranha no baixo", "movel"),
+             ("Upper structure", "triade sobre um dominante", "tenso")]
+    _rows_panel(d, y, items, row_h=56, label_w=380)
+    d.text((W / 2, h - 46), "Cada sonoridade tem um uso: cor, tensao, movimento ou repouso.",
+           font=font(20), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m9_partitura_dim7():
+    return _score_image("dim7", [("C", 4, None), ("E", 4, "b"), ("G", 4, "b"),
+                                 ("A", 4, None), ("C", 5, None)],
+                        "Partitura: arpejo de Cdim7 (Do-Mib-Solb-La-Do)")
+
+
+def d_m9_partitura_domdim():
+    return _score_image("domdim", [("C", 4, None), ("E", 4, None), ("G", 4, None),
+                                   ("B", 4, "b"), ("D", 5, "b")],
+                        "Partitura: C7(b9) - Do-Mi-Sol-Sib-Reb")
+
+
+def d_m9_partitura_m7s5():
+    return _score_image("m7s5", [("C", 4, None), ("E", 4, "b"), ("G", 4, "#"),
+                                 ("B", 4, "b"), ("C", 5, None)],
+                        "Partitura: arpejo de Cm7(#5) - Do-Mib-Sol#-Sib")
+
+
+def d_m9_partitura_policorde():
+    return _score_image("policorde", [("D", 4, None), ("F", 4, "#"), ("A", 4, None),
+                                      ("C", 5, None), ("E", 5, None), ("G", 5, None)],
+                        "Partitura: policorde D/C - triade de Re sobre triade de Do")
+
+
+DIAGRAMS.update({
+    "m9_diminuto_formacao": d_m9_diminuto_formacao,
+    "m9_diminuto_funcoes": d_m9_diminuto_funcoes,
+    "m9_domdim_escala": d_m9_domdim_escala,
+    "m9_ciclos_diminutos": d_m9_ciclos_diminutos,
+    "m9_campo_diminuto": d_m9_campo_diminuto,
+    "m9_m7s5": d_m9_m7s5,
+    "m9_policordes": d_m9_policordes,
+    "m9_simetria": d_m9_simetria,
+    "m9_relacoes_campos": d_m9_relacoes_campos,
+    "m9_sonoridades": d_m9_sonoridades,
+    "m9_partitura_dim7": d_m9_partitura_dim7,
+    "m9_partitura_domdim": d_m9_partitura_domdim,
+    "m9_partitura_m7s5": d_m9_partitura_m7s5,
+    "m9_partitura_policorde": d_m9_partitura_policorde,
+})
+
+
 def main() -> None:
     out_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                            "Source", "Course", "Content", "Diagrams")
