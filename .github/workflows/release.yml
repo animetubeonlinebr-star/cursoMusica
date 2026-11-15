@@ -75,6 +75,15 @@ jobs:
             exit 1
           }
           New-Item -ItemType Directory -Force -Path (Split-Path $out) | Out-Null
+          # The app links libpq through its import library, so shipping without
+          # libpq.dll makes it fail to start with "LIBPQ.dll was not found"
+          # (REQ-014: ready to use after install). Fail the build instead of
+          # publishing an installer that cannot run.
+          if (-not (Test-Path "build/runtime/libpq.dll")) {
+            Write-Error "build/runtime/libpq.dll is missing; the installer would ship an app that cannot start."
+            Get-ChildItem -Recurse -Filter *.dll build | Select-Object FullName
+            exit 1
+          }
           $defines = @("-DAPPEXE=$app", "-DOUTFILE=$out", "-DAPPICON=$icon")
           if (Test-Path "build/runtime") {
             $defines += "-DRUNTIME"

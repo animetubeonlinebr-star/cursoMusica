@@ -181,7 +181,7 @@ conteúdo (REQ-006), não só de código.
 | REQ-011 | musician + developer | `docs/MUSIC.md` | pendente |
 | REQ-012 | musician + developer | `docs/MUSIC.md` | pendente |
 | REQ-013 | devops | `.github/workflows/` | pendente |
-| REQ-014 | devops | instalador Windows | pendente |
+| REQ-014 | devops | instalador Windows | **implementado** (empacota a `libpq.dll`, ADR 0008) |
 | REQ-015 | musician + developer + data-engineer | ADR 0004 | pendente |
 | REQ-016 | musician | `docs/MUSIC.md` | catalogado (IDs PTN-*) |
 | REQ-017 | developer + designer | `Source/UI/TunerComponent.*`, `Source/Audio/TuningSettings.*` | **implementado** |
