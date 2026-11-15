@@ -60,3 +60,22 @@ Restrições:
   log do CMake lista as DLLs estagiadas.
 - O `docs/POSTGRESQL.md` §5 deixa de descrever a pendência e passa a descrever o
   comportamento real.
+
+## Notas de implementação
+
+Três armadilhas apareceram só no runner Windows (o `makensis`/CMake no Linux
+escondia as duas) e valem como aviso para futuros passos de empacotamento:
+
+1. **Caminhos com espaço não podem ir pela linha de comando.** O Ninja entrega
+   o comando ao `cmd.exe`, que partia `-DPG_DIRS="C:/Program Files/..."` e
+   abortava com `'C:' is not recognized as an internal or external command`. O
+   passo `POST_BUILD` agora **gera** um script (`file(GENERATE)`) com os valores
+   dentro do arquivo, em vez de passá-los como `-D`.
+2. **O NSIS no Windows exige separador nativo no curinga.** `File` casa o padrão
+   com `FindFirstFile`, que **rejeita `/`**: `File /r "${RUNTIMEDIR}/*.*"`
+   abortava com `no files found` mesmo com o diretório correto. O `.nsi` usa
+   `\*.*` e o `RUNTIMEDIR` vai absoluto e com barra invertida (via `Join-Path`).
+   O `makensis` do Linux usa POSIX e aceitava a barra normal, o que mascarava o
+   defeito.
+3. **`File` resolve relativo ao diretório do script**, não à raiz do repositório:
+   por isso `APPEXE`, `APPICON` e `RUNTIMEDIR` são todos absolutos.
