@@ -70,4 +70,15 @@ std::vector<ContentItem> topic2F();  // Relação entre intervalos e construçã
 std::vector<ContentItem> topic2G();  // Cantar e tocar os intervalos
 std::vector<ContentItem> topic2H();  // Identificar intervalos no instrumento e de ouvido
 
+// Module 4 (Etapa 4 — construção de acordes: tríades e tétrades).
+std::vector<ContentItem> topic4A();  // Tríades maiores e menores
+std::vector<ContentItem> topic4B();  // Tríades aumentadas e diminutas
+std::vector<ContentItem> topic4C();  // Tríades abertas e fechadas
+std::vector<ContentItem> topic4D();  // Inversões
+std::vector<ContentItem> topic4E();  // Tétrades
+std::vector<ContentItem> topic4F();  // Formação de acordes
+std::vector<ContentItem> topic4G();  // Sistema 5 (CAGED) e famílias de acordes
+std::vector<ContentItem> topic4H();  // As cinco fases das famílias
+std::vector<ContentItem> topic4I();  // Acordes clean e distribuição pelo braço
+
 } // namespace cursomusica::content
