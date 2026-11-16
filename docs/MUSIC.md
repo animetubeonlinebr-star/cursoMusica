@@ -819,3 +819,236 @@ iniciante que nunca tocou guitarra e conferido contra as fontes curadas de §1.1
 **Verificação de uso (REQ-010):** o módulo registra o pattern (`PTN-R-PALM`) e o
 link; a avaliação confere a assinatura do pattern no trecho tocado (ver
 §"Detecção do uso de pattern"). Sem assinatura detectada, o exercício não conta.
+
+# Módulo 6 — Escalas menores e campos harmônicos
+
+> **Etapa 6.** Nível 3, BPM meta **80**, alvo de `on_grid_ratio` **0,80**
+> (faixa de estudo 75–82 %). Branch
+> `feat/modulo-6-escalas-menores-e-campos-harmonicos`. Fonte de verdade do
+> texto: as seções abaixo; o espelho executável vive em
+> `Source/Course/Content/Topic6A.cpp` … `Topic6I.cpp` (≥5 páginas por tópico,
+> medidas por `content::minTopicChars`).
+
+## 6.1 Conteúdo (curadoria — REQ-006)
+
+As apostilas curadas do módulo (ver §1.1) cobrem as escalas menores e a
+formação dos acordes. O texto de cada tópico foi conferido contra elas:
+
+| Apostila | Blocos que sustenta |
+|---|---|
+| Teoria Elementar da Música (Lacerda) | A, B, D, F, H (escalas, graus, tonalidades) |
+| Teoria da Música (Bohumil Med, 5ª ed.) | B, C, D, E, F, I (escalas menores, modos) |
+| CAGED e derivações de acordes (Marcelo Mello) | F, G (tríades, acordes do campo) |
+| Livro de estudos de guitarra 4 em 1 (Mozart Mello) | F, G (digitações e levadas) |
+| Desvendando os segredos da guitarra fusion | E, I (modos e sonoridades modernas) |
+
+## 6.2 Teoria apresentada no módulo
+
+> **Explicação completa por tópico.** Os resumos abaixo são a versão curta. A
+> explicação completa (≥5 páginas por tópico, escrita para iniciante) de cada
+> bloco A–I vive em `Source/Course/Content/Topic6A.cpp` … `Topic6I.cpp`. Este
+> documento permanece a fonte de verdade do conteúdo.
+
+### Bloco A — Escala menor natural
+
+Escala menor natural (ou **eólio**): graus **1 2 b3 4 5 b6 b7**. Em Lá menor:
+`A B C D E F G`. É a **relativa menor** de uma escala maior — mesmas notas, outro
+repouso (Lá menor = Dó maior). A **terça menor** (b3) define o caráter
+melancólico; o b6 e o b7 completam o som escuro. Padrão de tons e semitons:
+`T S T T S T T`.
+
+### Bloco B — Escala menor harmônica
+
+Escala menor harmônica: **1 2 b3 4 5 b6 7** — a menor natural com o **7º grau
+elevado**. Em Lá menor harmônica: `A B C D E F G#`. O G# é a **sensível** de Lá,
+que cria a cadência `V7 → i` (E7 → Am). O salto entre o b6 (Fá) e o 7 (Sol#) é
+uma **segunda aumentada**, que dá o caráter exótico ao modo.
+
+### Bloco C — Modos da menor harmônica
+
+A menor harmônica gera **sete modos**, um por grau: (1) menor harmônica, (2)
+lócrio 6 natural, (3) jônio #5, (4) dórico #4, (5) **frígio dominante**, (6)
+lídio #2, (7) superlócrio bb7. O **5º modo** (frígio dominante, som do flamenco
+e do `V7(b9)`) é o mais usado; o 1º e o 4º vêm em seguida. Cada modo combina com
+um tipo de acorde do campo menor harmônico.
+
+### Bloco D — Escala menor melódica
+
+Escala menor melódica: **1 2 b3 4 5 6 7** — o **6º e o 7º graus elevados**. Em Lá
+menor melódica: `A B C D E F# G#`. Ela sobe suave a partir do 5º grau (sem o
+salto da harmônica) e é a base das sonoridades modernas do jazz e da bossa
+(acordes `m7M`).
+
+### Bloco E — Modos da menor melódica
+
+A menor melódica também gera **sete modos**: (1) menor melódica, (2) dórico b2,
+(3) **lídio aumentado** (`1 2 3 #4 #5 6 7`), (4) **lídio dominante** (`1 2 3 #4 5
+6 b7`), (5) mixolídio b6, (6) lócrio 2 natural, (7) **escala alterada**. O 4º
+(lídio dominante) e o 7º (alterada) são os mais usados sobre acordes dominantes.
+
+### Bloco F — Campos harmônicos menores e funções dos acordes
+
+**Campo harmônico** é o conjunto de acordes que nasce da escala. O campo **menor
+natural** em Lá: `Am  Bm7(b5)  C7M  Dm7  Em7  F7M  G7` (i, ii, III, iv, v, VI,
+VII). O campo **menor harmônico** troca o `v` pelo **V7** (E7), criando a
+cadência forte. Funções: **tônica** (i, III), **subdominante** (ii, iv, VI),
+**dominante** (v/V, VII).
+
+### Bloco G — Subdominantes menores
+
+**Subdominante menor** é um acorde do campo menor paralelo usado dentro do campo
+maior. O mais comum é o **iv** menor: `I → IV → iv → I`. Em Dó maior: `C7M –
+Fm7` (com `Ab` e `Eb` emprestados). Outros empréstimos: `ii(b5)` (Dm7(b5)),
+`bVI` (Abmaj7), `bVII` (Bb7), `bIII` (Ebmaj7) e `bII` (Db, napolitano). São a
+cor da MPB, da bossa e do rock.
+
+### Bloco H — Relações entre os campos maior e menor
+
+**Relativa**: mesma armadura, outra tônica (Dó maior ↔ Lá menor). **Paralela**:
+mesma tônica, outra armadura (Dó maior ↔ Dó menor). Tonalidades **próximas**
+(vizinhas no ciclo das quintas) facilitam a modulação; as **distantes** exigem
+acordes-pivô. A mistura dos dois campos é a base da harmonia funcional ampliada.
+
+### Bloco I — Modos dórico, frígio, lídio, mixolídio e lócrio
+
+Os **sete modos gregos** são a escala maior vista de sete pontos de partida:
+jônio (maior), dórico (`1 2 b3 4 5 6 b7`), frígio (`1 b2 b3 4 5 b6 b7`), lídio
+(`1 2 3 #4 5 6 7`), mixolídio (`1 2 3 4 5 6 b7`), eólio (menor natural) e lócrio
+(`1 b2 b3 4 b5 b6 b7`). Cada acorde do campo tem um modo que combina com ele.
+
+## 6.3 Prática (exercícios e desafios — REQ-008)
+
+Cada exercício tem **explicação antes da execução** (REQ-003) e é **medido**
+(REQ-009). BPM meta 80 (REQ-015). Cada tópico A–I tem de **3 a 5 exercícios**,
+entre questionários (verificáveis por pergunta) e exercícios tocados no
+instrumento (verificáveis pelo detector de altura/acorde); o catálogo registra o
+tópico em `Exercise::lessonId`.
+
+| ID | Tópico | Exercício | Verificação automática |
+|---|---|---|---|
+| EX-6.A.1 | A | Questionário: escala menor natural | questionário ≥90% |
+| EX-6.A.2 | A | Tocar a terça menor | detector: intervalo de 3 semitons |
+| EX-6.A.3 | A | Tocar a sétima menor | detector: intervalo de 10 semitons |
+| EX-6.A.4 | A | Graus da menor natural | questionário ≥90% |
+| EX-6.B.1 | B | Questionário: escala menor harmônica | questionário ≥90% |
+| EX-6.B.2 | B | Tocar a sétima maior (sensível) | detector: intervalo de 11 semitons |
+| EX-6.B.3 | B | Tocar a sexta menor | detector: intervalo de 8 semitons |
+| EX-6.B.4 | B | Menor natural x harmônica | questionário ≥90% |
+| EX-6.C.1 | C | Questionário: modos da menor harmônica | questionário ≥90% |
+| EX-6.C.2 | C | Tocar a segunda menor (frígio dominante) | detector: intervalo de 1 semitom |
+| EX-6.C.3 | C | Aplicar os modos | questionário ≥90% |
+| EX-6.D.1 | D | Questionário: escala menor melódica | questionário ≥90% |
+| EX-6.D.2 | D | Tocar a sétima maior | detector: intervalo de 11 semitons |
+| EX-6.D.3 | D | Tocar a sexta maior | detector: intervalo de 9 semitons |
+| EX-6.D.4 | D | As três menores | questionário ≥90% |
+| EX-6.E.1 | E | Questionário: modos da menor melódica | questionário ≥90% |
+| EX-6.E.2 | E | Tocar o trítono (lídio dominante) | detector: intervalo de 6 semitons |
+| EX-6.E.3 | E | Tocar a segunda menor (alterada) | detector: intervalo de 1 semitom |
+| EX-6.E.4 | E | Modos e acordes da melódica | questionário ≥90% |
+| EX-6.F.1 | F | Questionário: campos harmônicos menores | questionário ≥90% |
+| EX-6.F.2 | F | Montar a tríade menor | detector: acorde menor |
+| EX-6.F.3 | F | Montar a tríade diminuta | detector: acorde diminuto |
+| EX-6.F.4 | F | Funções no campo menor | questionário ≥90% |
+| EX-6.G.1 | G | Questionário: subdominantes menores | questionário ≥90% |
+| EX-6.G.2 | G | Montar o iv menor | detector: acorde menor |
+| EX-6.G.3 | G | Tocar a progressão I–iv–I | detector: C7M – Fm7 – C7M |
+| EX-6.G.4 | G | Empréstimos do campo menor | questionário ≥90% |
+| EX-6.H.1 | H | Questionário: relações entre os campos | questionário ≥90% |
+| EX-6.H.2 | H | Tocar a sexta maior (relativa) | detector: intervalo de 9 semitons |
+| EX-6.H.3 | H | Maior, relativa e paralela | questionário ≥90% |
+| EX-6.I.1 | I | Questionário: modos gregos | questionário ≥90% |
+| EX-6.I.2 | I | Tocar a quarta aumentada (lídio) | detector: intervalo de 6 semitons |
+| EX-6.I.3 | I | Tocar a sétima menor (mixolídio) | detector: intervalo de 10 semitons |
+| EX-6.I.4 | I | Modos e acordes | questionário ≥90% |
+
+**Desafio de gate:** tocar a cadência menor **ii–V–i** `Bm7(b5) – E7 – Am7 –
+Am7` a **80 BPM** com **≥90 % de acerto** de acordes e `on_grid_ratio ≥ 0,80`.
+Os acordes vêm do campo harmônico menor estudado no módulo (REQ-009, REQ-015).
+
+## 6.4 Patterns e links do módulo (REQ-007, REQ-010)
+
+- **Pattern obrigatório:** `PTN-M-3rds` (terças: 1-3, 2-4, 3-5…) sobre a escala
+  menor, para ouvir a terça — que define o caráter menor — em movimento.
+- **Complemento:** `PTN-A-TRIAD` (arpejos de tríade) para tocar os acordes do
+  campo menor.
+- **Links (guitarristas de referência — REQ-007):** um vídeo-aula por referência,
+  curado com **citação da fonte** (sem copiar material protegido):
+  - **Wes Montgomery** — acordes e terças no jazz.
+  - **Pat Metheny** — sonoridades modais e campos harmônicos.
+  - **Santana** — o modo dórico e o som modal latino.
+
+**Verificação de uso (REQ-010):** o módulo registra o pattern (`PTN-M-3rds`) e os
+links; a avaliação confere a assinatura do pattern no trecho tocado (ver
+§"Detecção do uso de pattern"). Sem assinatura detectada, o exercício não conta.
+
+# Módulo 7 — Empilhamentos, estruturas modais e sonoridades
+
+**Nível:** 3 (II–V–I) · **BPM meta:** 84 (REQ-015) · **Gate:** 90% (REQ-009) ·
+**`on_grid_ratio`:** 0,80 (faixa de estudo 75–82%)
+**Objetivo:** conhecer estruturas harmônicas além das tríades e tétrades
+convencionais — empilhamentos, estruturas modais, tríades do meio e as
+sonoridades modais do dórico ao alterado.
+
+> **Regra de ouro (REQ-003):** a explicação vem **antes** de qualquer desafio.
+> Nenhum desafio abre sem que o conteúdo abaixo tenha sido apresentado.
+
+## 7.1 Conteúdo (curadoria — REQ-006)
+
+| Tópico | Tema | Apostila de referência |
+|---|---|---|
+| A | Empilhamentos de terças | `pdf-caged-e-derivaoes-de-acordes-marcelo-mello-…-vol1` |
+| B | Empilhamentos quartais | `pdf-caged-e-derivaoes-de-acordes-marcelo-mello-…-vol1` |
+| C | Outros empilhamentos | `pdf-caged-e-derivaoes-de-acordes-marcelo-mello-…-vol1` |
+| D | Estruturas modais e tríades do meio | `pdf-caged-e-derivaoes-de-acordes-marcelo-mello-…-vol1` |
+| E | Acordes e famílias modais | `pdf-teoria-elementar-…-lacerda`, `pdf-p-…-bohumil-med-…` |
+| F | Modos estruturais pelo CAGED | `pdf-caged-e-derivaoes-de-acordes-marcelo-mello-…-vol1` |
+| G | Dórico, Lídio e Mixolídio | `pdf-desvendando-os-segredos-da-guitarra-fusion` |
+| H | Mixolídio sus e Mixolídio #4 | `pdf-desvendando-os-segredos-da-guitarra-fusion` |
+| I | Lócrio 9 e Alterado (Alt.7) | `pdf-desvendando-os-segredos-da-guitarra-fusion` |
+| J | Aplicações modais no rock e pop-rock | `pdf-mozart-mello-livroestudosdeguitarra4em1` |
+
+## 7.2 Teoria apresentada no módulo
+
+- **A — Empilhamentos de terças.** Somar terças sobrepostas; a mistura de
+  terças maiores e menores define a qualidade; as tensões 9, 11 e 13 são os
+  graus 2, 4 e 6 uma oitava acima.
+- **B — Empilhamentos quartais.** Quartas justas (5 semitons) produzem um som
+  suspenso e modal (o acorde de *So What* empilha quartas com uma terça no topo);
+  sem a terça, o acorde não é maior nem menor.
+- **C — Outros empilhamentos.** Quintas dão força (power chords); segundas dão
+  tensão (clusters); mistos dão cor sob medida.
+- **D — Estruturas modais e tríades do meio.** Estruturas que reforçam um modo
+  sem criar resolução; tríades construídas sobre graus internos da escala.
+- **E — Acordes e famílias modais.** Cada acorde carrega uma família de modos:
+  maiores (jônio, lídio), menores (dórico, eólio, frígio), dominantes
+  (mixolídio, lídio dominante, alterado, sus), meio-diminuto (lócrio).
+- **F — Modos estruturais pelo CAGED.** O CAGED como mapa do braço: cada forma
+  contém a escala do tom; os modos são a mesma escala vista de graus diferentes.
+- **G — Dórico, Lídio e Mixolídio.** Fórmulas 1 2 b3 4 5 6 b7 (dórico),
+  1 2 3 #4 5 6 7 (lídio) e 1 2 3 4 5 6 b7 (mixolídio); notas características e
+  de repouso.
+- **H — Mixolídio sus e Mixolídio #4.** 1 2 4 5 6 b7 (sus, combina com X7sus4) e
+  1 2 3 #4 5 6 b7 (#4, combina com X7#11).
+- **I — Lócrio 9 e Alterado (Alt.7).** 1 2 b3 4 b5 b6 b7 (lócrio 9, II grau do
+  II–V–I menor) e 1 b9 #9 3 b5 #5 b7 (alterado, V grau; resolve meio-tom abaixo).
+- **J — Aplicações modais no rock e pop-rock.** Vamps de um ou dois acordes; cada
+  modo tem um tipo de vamp e uma cor; do modal se chega à harmonia funcional.
+
+## 7.3 Prática (exercícios e desafios — REQ-008)
+
+Cada tópico A–J tem **de 3 a 5 exercícios** (ids `EX-7.<tópico>.<n>`), misturando
+questionários verificáveis e exercícios **tocados no instrumento** que o app
+reconhece (por classes de altura ou por sequência de notas). Os exercícios de
+identificação **não** são presos à grade (`usesGrid = false`).
+
+**Desafio de gate (REQ-009/REQ-015):** tocar `Dm7 – G7 – C7M – C7M` (II–V–I,
+nível 3) a **84 BPM** com **≥90% de acerto** de acordes e `on_grid_ratio ≥ 0,80`.
+
+## 7.4 Patterns e links do módulo (REQ-007, REQ-010)
+
+- **Pattern de acordes:** `PTN-A-DROP2` (tétrades em drop 2 nas quatro cordas),
+  que mostra na prática os empilhamentos de terça e as tríades do meio.
+- **Complemento:** `PTN-M-4ths` (empilhamento de quartas) para as estruturas
+  modais.
+- **Links (guitarristas de referência — REQ-007):** Joe Satriani, Steve Vai e
+  Guthrie Govan (uso de estruturas modais e empilhamentos).

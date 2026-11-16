@@ -70,4 +70,88 @@ std::vector<ContentItem> topic2F();  // Relação entre intervalos e construçã
 std::vector<ContentItem> topic2G();  // Cantar e tocar os intervalos
 std::vector<ContentItem> topic2H();  // Identificar intervalos no instrumento e de ouvido
 
+// Module 3 (Etapa 3 — ritmo, leitura e levadas).
+std::vector<ContentItem> topic3A();  // Leitura rítmica e convenções de escrita
+std::vector<ContentItem> topic3B();  // Pulsação e subdivisão
+std::vector<ContentItem> topic3C();  // Cifrado com divisão
+std::vector<ContentItem> topic3D();  // Células rítmicas e acentuações
+std::vector<ContentItem> topic3E();  // Levadas com palheta
+std::vector<ContentItem> topic3F();  // Levadas com os dedos e mapa da mão direita
+std::vector<ContentItem> topic3G();  // Compassos simples, compostos e fórmulas incomuns
+std::vector<ContentItem> topic3H();  // Sílabas rítmicas (Konokol), percussões e efeito sanfona
+// Module 4 (Etapa 4 — construção de acordes: tríades e tétrades).
+std::vector<ContentItem> topic4A();  // Tríades maiores e menores
+std::vector<ContentItem> topic4B();  // Tríades aumentadas e diminutas
+std::vector<ContentItem> topic4C();  // Tríades abertas e fechadas
+std::vector<ContentItem> topic4D();  // Inversões
+std::vector<ContentItem> topic4E();  // Tétrades
+std::vector<ContentItem> topic4F();  // Formação de acordes
+std::vector<ContentItem> topic4G();  // Sistema 5 (CAGED) e famílias de acordes
+std::vector<ContentItem> topic4H();  // As cinco fases das famílias
+std::vector<ContentItem> topic4I();  // Acordes clean e distribuição pelo braço
+// Module 5 (Etapa 5 — campo harmônico maior e funções harmônicas).
+std::vector<ContentItem> topic5A();  // Escala maior
+std::vector<ContentItem> topic5B();  // Campo harmônico maior e graus da escala
+std::vector<ContentItem> topic5C();  // Função tônica
+std::vector<ContentItem> topic5D();  // Função subdominante
+std::vector<ContentItem> topic5E();  // Função dominante
+std::vector<ContentItem> topic5F();  // Acordes relativos
+std::vector<ContentItem> topic5G();  // Armaduras de clave e tonalidades
+std::vector<ContentItem> topic5H();  // Cadências e progressões harmônicas
+std::vector<ContentItem> topic5I();  // Modos gerados pela escala maior
+std::vector<ContentItem> topic5J();  // Harmonização da escala maior
+// Module 6 (Etapa 6 — escalas menores e campos harmônicos).
+std::vector<ContentItem> topic6A();  // Escala menor natural
+std::vector<ContentItem> topic6B();  // Escala menor harmônica
+std::vector<ContentItem> topic6C();  // Modos da menor harmônica
+std::vector<ContentItem> topic6D();  // Escala menor melódica
+std::vector<ContentItem> topic6E();  // Modos da menor melódica
+std::vector<ContentItem> topic6F();  // Campos harmônicos menores e funções
+std::vector<ContentItem> topic6G();  // Subdominantes menores
+std::vector<ContentItem> topic6H();  // Relações entre os campos maior e menor
+std::vector<ContentItem> topic6I();  // Modos dórico, frígio, lídio, mixolídio e lócrio
+// Module 7 (Etapa 7 — empilhamentos, estruturas modais e sonoridades).
+std::vector<ContentItem> topic7A();  // Empilhamentos de terças
+std::vector<ContentItem> topic7B();  // Empilhamentos quartais
+std::vector<ContentItem> topic7C();  // Outros empilhamentos
+std::vector<ContentItem> topic7D();  // Estruturas modais e tríades do meio
+std::vector<ContentItem> topic7E();  // Acordes e famílias modais
+std::vector<ContentItem> topic7F();  // Modos estruturais pelo CAGED
+std::vector<ContentItem> topic7G();  // Dórico, Lídio e Mixolídio
+std::vector<ContentItem> topic7H();  // Mixolídio sus e Mixolídio #4
+std::vector<ContentItem> topic7I();  // Lócrio 9 e Alterado (Alt.7)
+std::vector<ContentItem> topic7J();  // Aplicações modais no rock e pop-rock
+// Module 8 (Etapa 8 — dominantes, cadências e substituições harmônicas).
+std::vector<ContentItem> topic8A();  // Dominante V7
+std::vector<ContentItem> topic8B();  // Dominantes secundários
+std::vector<ContentItem> topic8C();  // Dominantes alterados e resoluções
+std::vector<ContentItem> topic8D();  // SubV7
+std::vector<ContentItem> topic8E();  // SubIIm
+std::vector<ContentItem> topic8F();  // Empréstimos modais
+std::vector<ContentItem> topic8G();  // Dilatação do campo harmônico maior
+std::vector<ContentItem> topic8H();  // Dilatação do campo harmônico menor
+std::vector<ContentItem> topic8I();  // Progressão II-V-I maior e menor
+std::vector<ContentItem> topic8J();  // Identificação de situações que não são II-V-I
+// Module 9 (Etapa 9 — harmonia avançada e estruturas especiais).
+std::vector<ContentItem> topic9A();  // Acordes diminutos e suas funções
+std::vector<ContentItem> topic9B();  // Dominantes diminutos (DomDim)
+std::vector<ContentItem> topic9C();  // Ciclos diminutos
+std::vector<ContentItem> topic9D();  // Campos harmônicos diminutos
+std::vector<ContentItem> topic9E();  // Acorde m7(#5)
+std::vector<ContentItem> topic9F();  // Policordes
+std::vector<ContentItem> topic9G();  // Simetria e escalas simétricas
+std::vector<ContentItem> topic9H();  // Relações entre campos harmônicos
+std::vector<ContentItem> topic9I();  // Sonoridades especiais
+// Module 10 (Etapa 10 — análise harmônica, verticalização e reharmonização).
+std::vector<ContentItem> topic10A();  // Análise harmônica
+std::vector<ContentItem> topic10B();  // Análise melódica
+std::vector<ContentItem> topic10C();  // Escolha modal
+std::vector<ContentItem> topic10D();  // Verticalização
+std::vector<ContentItem> topic10E();  // Conexão entre campos harmônicos
+std::vector<ContentItem> topic10F();  // Estudo das vozes internas
+std::vector<ContentItem> topic10G();  // Reharmonização
+std::vector<ContentItem> topic10H();  // Harmonia-alvo
+std::vector<ContentItem> topic10I();  // Ferramentas de reharmonização
+std::vector<ContentItem> topic10J();  // Relação entre estilos e sonoridades
+
 } // namespace cursomusica::content
