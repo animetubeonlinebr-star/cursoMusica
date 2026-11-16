@@ -142,5 +142,16 @@ std::vector<ContentItem> topic9F();  // Policordes
 std::vector<ContentItem> topic9G();  // Simetria e escalas simétricas
 std::vector<ContentItem> topic9H();  // Relações entre campos harmônicos
 std::vector<ContentItem> topic9I();  // Sonoridades especiais
+// Module 10 (Etapa 10 — análise harmônica, verticalização e reharmonização).
+std::vector<ContentItem> topic10A();  // Análise harmônica
+std::vector<ContentItem> topic10B();  // Análise melódica
+std::vector<ContentItem> topic10C();  // Escolha modal
+std::vector<ContentItem> topic10D();  // Verticalização
+std::vector<ContentItem> topic10E();  // Conexão entre campos harmônicos
+std::vector<ContentItem> topic10F();  // Estudo das vozes internas
+std::vector<ContentItem> topic10G();  // Reharmonização
+std::vector<ContentItem> topic10H();  // Harmonia-alvo
+std::vector<ContentItem> topic10I();  // Ferramentas de reharmonização
+std::vector<ContentItem> topic10J();  // Relação entre estilos e sonoridades
 
 } // namespace cursomusica::content

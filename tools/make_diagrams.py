@@ -718,6 +718,12 @@ def staff(d, x, y, w, notes, clef=True, caption=None):
     ref = diatonic_index("E", 4)
     step = w / (len(notes) + 1)
     for i, (letter, octave, accidental) in enumerate(notes):
+        # The renderer reads only letter[0] and draws the accidental only when
+        # the third field is set, so a note must be spelled ("C", 4, "#") — not
+        # ("C#", 4, None), which silently drops the sharp.
+        if len(letter) != 1 or accidental not in (None, "#", "b"):
+            raise ValueError(f"malformed note { (letter, octave, accidental) }: "
+                             "use (letter, octave, '#'|'b'|None)")
         cx = x + step * (i + 1)
         pos = diatonic_index(letter, octave) - ref
         cy = bottom - pos * (gap / 2)
@@ -1589,6 +1595,106 @@ def d_m8_subiim():
             ("Efeito", "G7 ganha b9 (Ab)", "tensao extra")]
     rows_box(d, y + 50, rows, height=58)
     d.text((W / 2, h - 44), "SubIIm = o ii do campo menor, usado dentro do maior.",
+# Modulo 10 — analise harmonica, verticalizacao e reharmonizacao.
+# --------------------------------------------------------------------------
+def _m10_table(d, y, headers, rows, col_x, row_h=52, title_color=ACCENT):
+    d.text((col_x[0], y), headers[0], font=font(19, True), fill=title_color, anchor="la")
+    for i, head in enumerate(headers[1:], start=1):
+        d.text((col_x[i], y), head, font=font(19, True), fill=title_color, anchor="la")
+    for r, row in enumerate(rows):
+        yy = y + 30 + r * row_h
+        d.rounded_rectangle([MARGIN, yy, W - MARGIN, yy + row_h - 8], radius=8,
+                            fill=RAISED if r % 2 == 0 else SURFACE)
+        for c, cell in enumerate(row):
+            color = CYAN if c == 0 else TXT
+            d.text((col_x[c], yy + (row_h - 8) / 2), cell, font=font(20, True if c == 0 else False),
+                   fill=color, anchor="lm")
+    return y + 30 + len(rows) * row_h
+
+
+def d_m10_analise_harmonica():
+    h = 720
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Analise harmonica: grau, funcao e escala de cada acorde")
+    y = subtitle(d, "Primeiro nomeie o grau (I, vi, ii, V); depois a funcao; depois a escala do improviso.", y)
+    _m10_table(
+        d, y + 30,
+        ["Acorde", "Grau", "Funcao", "Escala / cor"],
+        [["C7M", "I", "tonica", "jonio (modo I)"],
+         ["A7", "VI7", "dominante secundario", "mixolidio alterado"],
+         ["Dm7", "ii", "subdominante", "dorico"],
+         ["G7", "V", "dominante", "mixolidio"]],
+        col_x=[MARGIN + 18, MARGIN + 260, MARGIN + 420, MARGIN + 760])
+    d.text((MARGIN, h - 92), "Todo acorde diz tres coisas: de onde vem (grau), o que faz (funcao) e como soa (escala).",
+           font=font(20), fill=TXT2, anchor="la")
+    d.text((MARGIN, h - 54), "O ciclo ii-V-I em Do: Dm7 -> G7 -> C7M. A analise revela o caminho antes de tocar.",
+           font=font(20, True), fill=GOLD, anchor="la")
+    return img
+
+
+def d_m10_analise_melodica():
+    h = 700
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Analise melodica: notas do acorde x notas de tensao")
+    y = subtitle(d, "Sobre Dm7, cada nota da melodia tem um papel: repouso (acorde) ou tensao (passagem).", y)
+    notes = [("D", "fundamental", "repouso", SUCCESS), ("F", "3a menor", "repouso", SUCCESS),
+             ("A", "5a justa", "repouso", SUCCESS), ("C", "7a menor", "repouso", SUCCESS),
+             ("E", "9a", "tensao", GOLD), ("B", "13a", "tensao", GOLD),
+             ("G", "11a", "tensao (evitar)", DANGER)]
+    top = y + 40
+    for i, (note, role, feel, color) in enumerate(notes):
+        yy = top + i * 62
+        d.rounded_rectangle([MARGIN, yy, W - MARGIN, yy + 52], radius=8, fill=RAISED)
+        d.ellipse([MARGIN + 30, yy + 10, MARGIN + 72, yy + 42], fill=color)
+        d.text((MARGIN + 51, yy + 26), note, font=font(22, True), fill=BG, anchor="mm")
+        d.text((MARGIN + 110, yy + 26), role, font=font(21, True), fill=TXT, anchor="lm")
+        d.text((MARGIN + 620, yy + 26), feel, font=font(20), fill=color, anchor="lm")
+    d.text((W / 2, h - 50), "Repouso cai no tempo forte; tensao pede resolucao no proximo acorde.",
+           font=font(20, True), fill=CYAN, anchor="mm")
+    return img
+
+
+def d_m10_escolha_modal():
+    h = 780
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Escolha modal: qual modo sobre cada acorde")
+    y = subtitle(d, "O modo nao vem da escala da musica: vem do acorde que esta soando naquele compasso.", y)
+    rows = [["Cm7 (dorico)", "menor, 6a maior", "jazz modal, funk"],
+            ["Cm7 (eolio)", "menor, 6a menor", "menor natural"],
+            ["Cmaj7 (jonio)", "maior, 7a maior", "tonica classica"],
+            ["Cmaj7 (lidio)", "maior, 4a aumentada", "brilho flutuante"],
+            ["C7 (mixolidio)", "maior, 7a menor", "dominante, blues"],
+            ["C7 (lidio b7)", "maior, #11", "dominante flutuante"],
+            ["Cm7b5 (locrio)", "menor, 5a dim.", "II do menor"]]
+    _m10_table(d, y + 30, ["Acorde / modo", "Cor caracteristica", "Uso tipico"], rows,
+               col_x=[MARGIN + 18, MARGIN + 480, MARGIN + 880], row_h=58)
+    return img
+
+
+def d_m10_verticalizacao():
+    h = 660
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Verticalizacao: transformar melodia em harmonia")
+    y = subtitle(d, "Pegue cada nota da melodia e empilhe intervalos a partir dela para criar o acorde.", y)
+    melody = ["A", "G", "F", "E"]
+    top = y + 60
+    d.text((MARGIN, top - 10), "Melodia:", font=font(22, True), fill=ACCENT, anchor="la")
+    for i, note in enumerate(melody):
+        cx = MARGIN + 200 + i * 150
+        d.ellipse([cx - 34, top - 44, cx + 34, top + 24], fill=ACCENT)
+        d.text((cx, top - 10), note, font=font(26, True), fill=TXT, anchor="mm")
+    stacks = [("Am7", ["A", "C", "E", "G"]), ("G7", ["G", "B", "D", "F"]),
+              ("F7M", ["F", "A", "C", "E"]), ("Em7", ["E", "G", "B", "D"])]
+    for i, (chord, notes) in enumerate(stacks):
+        cx = MARGIN + 200 + i * 150
+        d.text((cx, top + 70), chord, font=font(22, True), fill=CYAN, anchor="mm")
+        for k, n in enumerate(notes):
+            d.text((cx, top + 110 + k * 34), n, font=font(20), fill=TXT2, anchor="mm")
+    d.text((W / 2, h - 56), "A melodia A-G-F-E vira Am7 - G7 - F7M - Em7: a harmonia nasce das proprias notas.",
            font=font(20, True), fill=GOLD, anchor="mm")
     return img
 
@@ -1870,6 +1976,31 @@ def d_m8_emprestimos_modais():
             ("Eb7M", "bIII", "brilho modal")]
     rows_box(d, y + 40, rows, height=56)
     d.text((W / 2, h - 44), "Emprestimo modal = pegar acorde do campo paralelo emprestado.",
+def d_m10_conexao_campos():
+    h = 700
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Conexao entre campos harmonicos (acordes-pivo)")
+    y = subtitle(d, "Dois centros se ligam por acordes que existem nos dois campos: os acordes-pivo.", y)
+    left = [("C7M", "I"), ("Am7", "vi"), ("Dm7", "ii"), ("G7", "V")]
+    right = [("F7M", "I"), ("Dm7", "vi"), ("Gm7", "ii"), ("C7", "V")]
+    cx = W / 2
+    d.text((MARGIN + 120, y + 30), "Campo de Do", font=font(24, True), fill=ACCENT, anchor="mm")
+    d.text((W - MARGIN - 120, y + 30), "Campo de Fa", font=font(24, True), fill=CYAN, anchor="mm")
+    for i in range(4):
+        yy = y + 90 + i * 100
+        d.rounded_rectangle([MARGIN + 30, yy, MARGIN + 250, yy + 66], radius=10, fill=RAISED)
+        d.text((MARGIN + 140, yy + 33), left[i][0] + " (" + left[i][1] + ")",
+               font=font(22, True), fill=TXT, anchor="mm")
+        d.rounded_rectangle([W - MARGIN - 250, yy, W - MARGIN - 30, yy + 66], radius=10, fill=RAISED)
+        d.text((W - MARGIN - 140, yy + 33), right[i][0] + " (" + right[i][1] + ")",
+               font=font(22, True), fill=TXT, anchor="mm")
+    for i, j, label in [(2, 0, "Dm7 = vi de Fa"), (3, 3, "G7 -> C7 (V-V)")]:
+        yy = y + 90 + i * 100 + 33
+        y2 = y + 90 + j * 100 + 33
+        d.line([MARGIN + 260, yy, W - MARGIN - 260, y2], fill=GOLD, width=3)
+        d.text((cx, (yy + y2) / 2 - 14), label, font=font(19, True), fill=GOLD, anchor="mm")
+    d.text((W / 2, h - 52), "Dm7 e o pivo: ii de Do, vi de Fa. Ele muda de funcao sem mudar de acorde.",
            font=font(20, True), fill=GOLD, anchor="mm")
     return img
 
@@ -1933,6 +2064,26 @@ def d_m3_percussao_sanfona():
              ("Harmonico percussivo", "toque leve sobre o traste", "cor ritmica")]
     _bullets(d, y + 40, items)
     d.text((W / 2, h - 50), "O efeito sanfona alterna o acorde aberto e abafado, criando pulsacao.",
+def d_m10_vozes_internas():
+    h = 640
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Vozes internas: conduzir cada linha com o menor movimento")
+    y = subtitle(d, "Quatro vozes (soprano, contralto, tenor, baixo) andando por graus proximos.", y)
+    chords = [("C7M", ["E", "G", "B", "C"]), ("Am7", ["E", "A", "C", "A"]),
+              ("Dm7", ["F", "A", "C", "D"]), ("G7", ["F", "G", "B", "D"])]
+    top = y + 70
+    labels = ["Soprano", "Contralto", "Tenor", "Baixo"]
+    for v in range(4):
+        d.text((MARGIN, top + v * 60), labels[v], font=font(19, True), fill=ACCENT, anchor="la")
+    for i, (chord, voices) in enumerate(chords):
+        cx = MARGIN + 340 + i * 210
+        d.text((cx, top - 34), chord, font=font(23, True), fill=CYAN, anchor="mm")
+        for v, note in enumerate(voices):
+            d.rounded_rectangle([cx - 40, top + v * 60 - 22, cx + 40, top + v * 60 + 22],
+                                radius=8, fill=RAISED, outline=BORDER)
+            d.text((cx, top + v * 60), note, font=font(22, True), fill=TXT, anchor="mm")
+    d.text((W / 2, h - 56), "O F comum a Dm7 e G7 fica parado: e a nota que amarra os dois acordes.",
            font=font(20, True), fill=GOLD, anchor="mm")
     return img
 
@@ -2314,6 +2465,76 @@ def d_m9_relacoes_campos():
 
 
 def _score_image_m5(caption, notes):
+def d_m10_reharmonizacao():
+    h = 720
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Reharmonizar: trocar o acorde sem trocar a melodia")
+    y = subtitle(d, "Para cada acorde original existem caminhos: substituto, emprestimo modal, dominante extra.", y)
+    rows = [["G7", "Db7 (SubV)", "troca o baixo, mesma resolucao"],
+            ["G7", "Bm7b5 - E7 (ii-V do ii)", "adiciona movimento antes de C"],
+            ["C7M", "Cm6 / Cm7 (emprestimo)", "escurece a tonica"],
+            ["C7M", "E7 - Am7 (relativa)", "desvia para o menor"],
+            ["Dm7", "F7M (relativo maior)", "troca a cor, mantem o F"]]
+    _m10_table(d, y + 30, ["Original", "Alternativa", "Efeito"], rows,
+               col_x=[MARGIN + 18, MARGIN + 300, MARGIN + 700], row_h=58)
+    return img
+
+
+def d_m10_harmonia_alvo():
+    h = 640
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Harmonia-alvo: a chegada que a melodia pede")
+    y = subtitle(d, "Antes de escolher os acordes, defina onde a frase quer chegar (o alvo) e trabalhe de tras para frente.", y)
+    steps = [("1. Melodia", "toque e cante a frase, sem harmonia"),
+             ("2. Alvo", "defina o acorde da chegada (o repouso)"),
+             ("3. Aproximacao", "escolha como chegar: ii-V, SubV, dominante"),
+             ("4. Confirma", "toque a melodia sobre a nova harmonia e escute")]
+    top = y + 50
+    for i, (t, desc) in enumerate(steps):
+        yy = top + i * 92
+        d.rounded_rectangle([MARGIN, yy, W - MARGIN, yy + 76], radius=10, fill=RAISED)
+        d.text((MARGIN + 24, yy + 22), t, font=font(26, True), fill=ACCENT, anchor="la")
+        d.text((MARGIN + 340, yy + 26), desc, font=font(21), fill=TXT, anchor="la")
+        if i < len(steps) - 1:
+            d.text((W / 2, yy + 80), "v", font=font(24, True), fill=TXT_DIS, anchor="mm")
+    return img
+
+
+def d_m10_ferramentas():
+    h = 760
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Ferramentas de reharmonizacao")
+    y = subtitle(d, "Um conjunto pequeno de recursos cobre quase toda reharmonizacao.", y)
+    rows = [["Substituicao de tritono", "Db7 por G7", "cromatismo no baixo"],
+            ["Dominante secundario", "A7 antes de Dm7", "cria V do ii"],
+            ["Emprestimo modal", "Cm7 no campo de Do", "cor do modo menor"],
+            ["Relativo / paralelo", "Am7 por C7M", "mesma familia de notas"],
+            ["Acorde de passagem", "Bm7b5 entre C e Dm", "movimento por graus"],
+            ["Reharmonizacao melodica", "acorde a partir da nota", "verticalizacao"]]
+    _m10_table(d, y + 30, ["Ferramenta", "Exemplo", "Efeito"], rows,
+               col_x=[MARGIN + 18, MARGIN + 520, MARGIN + 860], row_h=58)
+    return img
+
+
+def d_m10_estilos():
+    h = 720
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Estilos e sonoridades: a mesma progressao, quatro roupas")
+    y = subtitle(d, "Mudam o ritmo, a densidade e as tensoes; a analise harmonica continua a mesma.", y)
+    rows = [["Bossa nova", "7M e 9, baixo em sincope", "suave, conversado"],
+            ["Jazz", "ii-V-I, SubV, alterados", "denso, resolvido"],
+            ["Blues", "dominantes, 7a menor, blue note", "cru, tenso"],
+            ["Rock / pop", "triades, power chords, IV e V", "direto, aberto"]]
+    _m10_table(d, y + 30, ["Estilo", "Harmonia tipica", "Sensacao"], rows,
+               col_x=[MARGIN + 18, MARGIN + 400, MARGIN + 860], row_h=66)
+    return img
+
+
+def _m10_score(notes, caption):
     h = 420
     img, d = canvas(h, BG)
     frame(d, h)
@@ -3125,6 +3346,54 @@ def _write_score_notes_header(path: str) -> None:
     ]
     with open(path, "w", encoding="utf-8") as f:
         f.write("\n".join(lines))
+def d_m10_partitura_turnaround():
+    return _m10_score([("C", 4, None), ("E", 4, None), ("G", 4, None), ("B", 4, None),
+                       ("C", 4, "#"), ("E", 4, None), ("G", 4, None), ("A", 4, None),
+                       ("D", 4, None), ("F", 4, None), ("A", 4, None), ("C", 5, None),
+                       ("G", 3, None), ("B", 3, None), ("D", 4, None), ("F", 4, None)],
+                      "Partitura: turnaround C7M - A7 - Dm7 - G7 (arpejos)")
+
+
+def d_m10_partitura_reharmonizado():
+    return _m10_score([("C", 4, None), ("E", 4, None), ("G", 4, None), ("A", 4, None),
+                       ("D", 5, None), ("F", 5, None), ("G", 5, None), ("C", 5, None)],
+                      "Partitura: a mesma melodia reharmonizada (chega em C)")
+
+
+def d_m10_partitura_vozes():
+    return _m10_score([("E", 4, None), ("E", 4, None), ("F", 4, None), ("F", 4, None),
+                       ("G", 4, None), ("A", 4, None), ("B", 4, None), ("D", 5, None)],
+                      "Partitura: vozes internas conduzindo por graus proximos")
+
+
+def d_m10_partitura_verticalizacao():
+    return _m10_score([("A", 4, None), ("G", 4, None), ("F", 4, None), ("E", 4, None)],
+                      "Partitura: melodia A-G-F-E verticalizada (Am7-G7-F7M-Em7)")
+
+
+def d_m10_partitura_modal():
+    return _m10_score([("D", 4, None), ("F", 4, None), ("A", 4, None), ("B", 4, None),
+                       ("C", 5, None), ("A", 4, None), ("F", 4, None), ("D", 4, None)],
+                      "Partitura: frase dorica sobre Dm7 (destaca a sexta maior, B)")
+
+
+DIAGRAMS.update({
+    "m10_analise_harmonica": d_m10_analise_harmonica,
+    "m10_analise_melodica": d_m10_analise_melodica,
+    "m10_escolha_modal": d_m10_escolha_modal,
+    "m10_verticalizacao": d_m10_verticalizacao,
+    "m10_conexao_campos": d_m10_conexao_campos,
+    "m10_vozes_internas": d_m10_vozes_internas,
+    "m10_reharmonizacao": d_m10_reharmonizacao,
+    "m10_harmonia_alvo": d_m10_harmonia_alvo,
+    "m10_ferramentas": d_m10_ferramentas,
+    "m10_estilos": d_m10_estilos,
+    "m10_partitura_turnaround": d_m10_partitura_turnaround,
+    "m10_partitura_reharmonizado": d_m10_partitura_reharmonizado,
+    "m10_partitura_vozes": d_m10_partitura_vozes,
+    "m10_partitura_verticalizacao": d_m10_partitura_verticalizacao,
+    "m10_partitura_modal": d_m10_partitura_modal,
+})
 
 
 def main() -> None:
