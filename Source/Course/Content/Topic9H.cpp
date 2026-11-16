@@ -26,10 +26,10 @@ std::vector<ContentItem> topic9H()
 
         h ("O acorde pivô"),
         p (
-            "Um acorde pivô é um acorde que pertence aos dois campos ao mesmo tempo. Ele serve de ponte: tocar um acorde pivô prepara o ouvido para a nova tonalidade antes que ela chegue. Em Do maior e Sol maior, os acordes pivô são C, Em, G, Am e Bm. Eles existem nos dois campos e por isso podem ser usados para transitar entre eles."),
+            "Um acorde pivô é um acorde que pertence aos dois campos ao mesmo tempo. Ele serve de ponte: tocar um acorde pivô prepara o ouvido para a nova tonalidade antes que ela chegue. Em Do maior e Sol maior, os acordes pivô são C, Em, G e Am. Eles existem nos dois campos e por isso podem ser usados para transitar entre eles."),
         tbl ({ "Campo", "Acordes", "Pivôs com Do maior" }, {
             { "Do maior", "C Dm Em F G Am Bdim", "-" },
-            { "Sol maior", "G Am Bm C D Em F#dim", "G Am Bm C Em" },
+            { "Sol maior", "G Am Bm C D Em F#dim", "G Am C Em" },
             { "Fa maior", "F Gm Am Bb C Dm Edim", "F Am C Dm" },
         }),
         c (

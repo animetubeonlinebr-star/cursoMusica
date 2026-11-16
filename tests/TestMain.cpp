@@ -8,6 +8,7 @@
 #include "Audio/AudioPortClassifier.h"
 #include "Audio/PluginSearchPaths.h"
 #include "Course/Content/Diagrams.h"
+#include "Course/Content/ScoreNotes.h"
 #include "Course/Content/Topics.h"
 #include "Course/ExerciseEvaluator.h"
 #include "Course/Intervals.h"
@@ -1249,6 +1250,44 @@ void testModule9()
                     check (midi >= 0 && midi <= 127,
                            juce::String ("topic ") + topic.id + " example uses a valid MIDI note");
             }
+
+            // A score must play exactly what its image draws (REQ-004): the notes
+            // of the score item are compared with the notes the diagram tool
+            // recorded for that image (Source/Course/Content/ScoreNotes.h).
+            if (item.kind == ContentKind::score)
+            {
+                const content::scoreNotes::Entry* drawn = nullptr;
+                for (const auto& e : content::scoreNotes::all())
+                    if (item.imageName == e.stem)
+                        drawn = &e;
+                check (drawn != nullptr,
+                       juce::String ("score '") + item.imageName + "' has a recorded score image");
+                if (drawn != nullptr)
+                    check (drawn->notes == item.notes,
+                           juce::String ("score '") + item.imageName
+                               + "' plays exactly the notes its image draws");
+            }
+        }
+
+    // A dominant chord the content calls "7" must carry its minor seventh. D7 is
+    // D-F#-A-C (2-6-9-0), never the bare triad D-F#-A (2-6-9). This is the bug
+    // the panel caught: the test now pins the seventh.
+    for (const auto& e : m9->exercises)
+        if (e.id == "EX-9.H.3")
+        {
+            check (std::find (e.chordPitchClasses.begin(), e.chordPitchClasses.end(), 0)
+                       != e.chordPitchClasses.end(),
+                   "EX-9.H.3 (D7) includes the minor seventh (C = 0)");
+            check (e.chordPitchClasses.size() == 4,
+                   "EX-9.H.3 (D7) is a four-note dominant chord");
+        }
+    for (const auto& e : m9->exercises)
+        if (e.id == "EX-9.H.2")
+        {
+            const auto& prog = e.chordProgression;
+            check (prog.size() == 4, "EX-9.H.2 is a four-chord progression");
+            check (std::find (prog[2].begin(), prog[2].end(), 0) != prog[2].end(),
+                   "EX-9.H.2 secondary dominant D7 includes the minor seventh (C = 0)");
         }
 
     // The module cites >=1 pattern and >=1 guitarist (REQ-007, REQ-010).

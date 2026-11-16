@@ -677,7 +677,22 @@ DIAGRAMS = {
 # Modulo 2 — teoria dos intervalos e percepcao musical.
 # --------------------------------------------------------------------------
 LETTERS = {"C": 0, "D": 1, "E": 2, "F": 3, "G": 4, "A": 5, "B": 6}
+SEMITONES = {"C": 0, "D": 2, "E": 4, "F": 5, "G": 7, "A": 9, "B": 11}
 STAFF_LINE_GAP = 26
+
+# Notes actually drawn on each score image, keyed by the image stem. main()
+# writes them to Source/Course/Content/ScoreNotes.h so the tests can prove that
+# a score image and the audio played beside it carry the same notes.
+SCORE_NOTES: dict[str, list[int]] = {}
+
+
+def _midi(letter: str, octave: int, accidental: str | None) -> int:
+    pc = SEMITONES[letter]
+    if accidental == "#":
+        pc += 1
+    elif accidental == "b":
+        pc -= 1
+    return (octave + 1) * 12 + pc
 
 
 def diatonic_index(name: str, octave: int) -> int:
@@ -845,6 +860,11 @@ def d_m2_cantar_tocar():
 
 
 def _score_image(name, notes, caption):
+    # `name` is the score's image stem; the notes actually drawn are recorded so
+    # main() can emit a manifest (Source/Course/Content/ScoreNotes.h) that the
+    # tests use to prove each score image matches the audio carried beside it.
+    SCORE_NOTES[name] = [_midi(letter, octave, accidental)
+                         for (letter, octave, accidental) in notes]
     h = 420
     img, d = canvas(h, BG)
     frame(d, h)
@@ -854,28 +874,28 @@ def _score_image(name, notes, caption):
 
 
 def d_m2_partitura_terca():
-    return _score_image("terca", [("C", 4, None), ("E", 4, None)],
+    return _score_image("m2_partitura_terca", [("C", 4, None), ("E", 4, None)],
                         "Partitura: terca maior (Do-Mi)")
 
 
 def d_m2_partitura_tercas():
-    return _score_image("tercas", [("C", 4, None), ("E", 4, None), ("C", 4, None), ("E", 4, "b")],
+    return _score_image("m2_partitura_tercas", [("C", 4, None), ("E", 4, None), ("C", 4, None), ("E", 4, "b")],
                         "Partitura: terca maior e terca menor (Do-Mi / Do-Mib)")
 
 
 def d_m2_partitura_triade():
-    return _score_image("triade", [("C", 4, None), ("E", 4, None), ("G", 4, None), ("C", 5, None)],
+    return _score_image("m2_partitura_triade", [("C", 4, None), ("E", 4, None), ("G", 4, None), ("C", 5, None)],
                         "Partitura: triade de Do maior com a oitava")
 
 
 def d_m2_partitura_intervalos():
-    return _score_image("intervalos", [("C", 4, None), ("D", 4, None), ("E", 4, None), ("F", 4, None),
-                                       ("G", 4, None), ("A", 4, None), ("B", 4, None), ("C", 5, None)],
+    return _score_image("m2_partitura_intervalos", [("C", 4, None), ("D", 4, None), ("E", 4, None), ("F", 4, None),
+                                                    ("G", 4, None), ("A", 4, None), ("B", 4, None), ("C", 5, None)],
                         "Partitura: escala de Do maior (cada passo e um intervalo)")
 
 
 def d_m2_partitura_arpejo():
-    return _score_image("arpejo", [("C", 4, None), ("E", 4, None), ("G", 4, None), ("C", 5, None),
+    return _score_image("m2_partitura_arpejo", [("C", 4, None), ("E", 4, None), ("G", 4, None), ("C", 5, None),
                                    ("G", 4, None), ("E", 4, None), ("C", 4, None)],
                         "Partitura: arpejo de Do maior (sobe e desce)")
 
@@ -989,7 +1009,7 @@ def d_m9_diminuto_formacao():
     y = title(d, "Formacao do acorde diminuto")
     y = subtitle(d, "Terca menor + terca menor: 0-3-6 na triade; 0-3-6-9 no dim7.", y)
     groups = [("Triade diminuta", ["Do", "Mib", "Solb"], "0 - 3 - 6"),
-              ("Diminuto de setima (dim7)", ["Do", "Mib", "Solb", "Labb"], "0 - 3 - 6 - 9")]
+              ("Diminuto de setima (dim7)", ["Do", "Mib", "Solb", "Sibb"], "0 - 3 - 6 - 9")]
     top = y + 50
     for g, (name, notes, formula) in enumerate(groups):
         yy = top + g * 220
@@ -1193,27 +1213,27 @@ def d_m9_sonoridades():
 
 
 def d_m9_partitura_dim7():
-    return _score_image("dim7", [("C", 4, None), ("E", 4, "b"), ("G", 4, "b"),
-                                 ("A", 4, None), ("C", 5, None)],
+    return _score_image("m9_partitura_dim7", [("C", 4, None), ("E", 4, "b"), ("G", 4, "b"),
+                                              ("A", 4, None), ("C", 5, None)],
                         "Partitura: arpejo de Cdim7 (Do-Mib-Solb-La-Do)")
 
 
 def d_m9_partitura_domdim():
-    return _score_image("domdim", [("C", 4, None), ("E", 4, None), ("G", 4, None),
-                                   ("B", 4, "b"), ("D", 5, "b")],
+    return _score_image("m9_partitura_domdim", [("C", 4, None), ("E", 4, None), ("G", 4, None),
+                                                ("B", 4, "b"), ("D", 5, "b")],
                         "Partitura: C7(b9) - Do-Mi-Sol-Sib-Reb")
 
 
 def d_m9_partitura_m7s5():
-    return _score_image("m7s5", [("C", 4, None), ("E", 4, "b"), ("G", 4, "#"),
-                                 ("B", 4, "b"), ("C", 5, None)],
+    return _score_image("m9_partitura_m7s5", [("C", 4, None), ("E", 4, "b"), ("G", 4, "#"),
+                                              ("B", 4, "b"), ("C", 5, None)],
                         "Partitura: arpejo de Cm7(#5) - Do-Mib-Sol#-Sib")
 
 
 def d_m9_partitura_policorde():
-    return _score_image("policorde", [("D", 4, None), ("F", 4, "#"), ("A", 4, None),
-                                      ("C", 5, None), ("E", 5, None), ("G", 5, None)],
-                        "Partitura: policorde D/C - triade de Re sobre triade de Do")
+    return _score_image("m9_partitura_policorde", [("C", 4, None), ("E", 4, None), ("G", 4, None),
+                                                   ("D", 5, None), ("F", 5, "#"), ("A", 5, None)],
+                        "Partitura: policorde D/C - triade de Do (baixo) e de Re (agudo)")
 
 
 DIAGRAMS.update({
@@ -1234,6 +1254,47 @@ DIAGRAMS.update({
 })
 
 
+def _write_score_notes_header(path: str) -> None:
+    """Emit the notes drawn on each score image as a C++ header the tests read.
+
+    Keeps the score image and the audio beside it in sync: the test compares the
+    notes of a ContentItem of kind score with the ones recorded here (the same
+    notes the image draws)."""
+    lines = [
+        "#pragma once",
+        "",
+        "// GENERATED by tools/make_diagrams.py - do not edit by hand.",
+        "// Notes drawn on each score image, so the tests can prove a score image",
+        "// and the audio played beside it carry the same notes.",
+        "",
+        "#include <juce_core/juce_core.h>",
+        "",
+        "#include <vector>",
+        "",
+        "namespace cursomusica::content::scoreNotes",
+        "{",
+        "",
+        "struct Entry { const char* stem; std::vector<int> notes; };",
+        "",
+        "inline const std::vector<Entry>& all()",
+        "{",
+        "    static const std::vector<Entry> entries = {",
+    ]
+    for stem in sorted(SCORE_NOTES):
+        notes = ", ".join(str(n) for n in SCORE_NOTES[stem])
+        lines.append(f'        {{ "{stem}", {{ {notes} }} }},')
+    lines += [
+        "    };",
+        "    return entries;",
+        "}",
+        "",
+        "} // namespace cursomusica::content::scoreNotes",
+        "",
+    ]
+    with open(path, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines))
+
+
 def main() -> None:
     out_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                            "Source", "Course", "Content", "Diagrams")
@@ -1246,6 +1307,9 @@ def main() -> None:
         size = os.path.getsize(path)
         total += size
         print(f"{name}.jpg  {img.width}x{img.height}  {size // 1024} KB")
+    header = os.path.join(os.path.dirname(out_dir), "ScoreNotes.h")
+    _write_score_notes_header(header)
+    print(f"{len(SCORE_NOTES)} partituras -> {header}")
     print(f"{len(DIAGRAMS)} diagramas, {total // 1024} KB no total -> {out_dir}")
 
 

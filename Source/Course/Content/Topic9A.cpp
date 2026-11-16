@@ -20,10 +20,10 @@ std::vector<ContentItem> topic9A()
         p (
             "A tríade diminuta nasce de duas terças menores empilhadas sobre a tônica. Tomando Do como tônica: Do, Mib (terça menor) e Solb (outra terça menor sobre Mib). Os intervalos em semitons são 0, 3 e 6. Repare que a quinta do acorde — a distância de Do a Solb — é de 6 semitons, ou seja, uma quinta diminuta. É daí vem o nome."),
         p (
-            "Quando acrescentamos mais uma terça menor sobre a quinta diminuta, chegamos ao acorde de sétima diminuta, o dim7. Sobre Do: Do, Mib, Solb e Lab. Em semitons: 0, 3, 6 e 9. Esse acorde de quatro notas é o que você mais vai encontrar na prática, porque ele é o motor de quase todas as resoluções com diminutos."),
+            "Quando acrescentamos mais uma terça menor sobre a quinta diminuta, chegamos ao acorde de sétima diminuta, o dim7. Sobre Do: Do, Mib, Solb e Sibb (a sétima diminuta, enarmônica de Lá). Em semitons: 0, 3, 6 e 9. Esse acorde de quatro notas é o que você mais vai encontrar na prática, porque ele é o motor de quase todas as resoluções com diminutos."),
         tbl ({ "Acorde", "Notas sobre Do", "Intervalos (semitons)", "Cifra" }, {
             { "Tríade diminuta", "Do - Mib - Solb", "0 - 3 - 6", "Cdim (ou Co)" },
-            { "Sétima diminuta", "Do - Mib - Solb - Lab", "0 - 3 - 6 - 9", "Cdim7 (ou Co7)" },
+            { "Sétima diminuta", "Do - Mib - Solb - Sibb (Lá)", "0 - 3 - 6 - 9", "Cdim7 (ou Co7)" },
             { "Meio-diminuto", "Do - Mib - Solb - Sib", "0 - 3 - 6 - 10", "Cm7(b5)" },
         }),
         c (
@@ -113,7 +113,7 @@ std::vector<ContentItem> topic9A()
 
         h ("O diminuto na escrita musical"),
         p (
-            "Na partitura, o diminuto aparece com a quinta e a sétima abaixadas em relação ao acorde maior. A cifra usa o símbolo de grau (o) ou a abreviação dim. Quando você lê uma cifra como Cdim7, já sabe que as notas são Do, Mib, Solb e Lab — quatro notas, todas a uma terça menor de distância. Reconhecer isso pela cifra acelera muito a leitura."),
+            "Na partitura, o diminuto aparece com a quinta e a sétima abaixadas em relação ao acorde maior. A cifra usa o símbolo de grau (o) ou a abreviação dim. Quando você lê uma cifra como Cdim7, já sabe que as notas são Do, Mib, Solb e Sibb — a sétima diminuta, enarmônica de Lá. São quatro notas, todas a uma terça menor de distância. Reconhecer isso pela cifra acelera muito a leitura."),
         b ("Cdim ou Co: tríade diminuta."),
         b ("Cdim7 ou Co7: sétima diminuta (quatro notas)."),
         b ("Cm7(b5): meio-diminuto (sétima menor)."),

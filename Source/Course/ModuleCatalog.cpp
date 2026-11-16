@@ -1427,16 +1427,16 @@ namespace
                        juce::String::fromUTF8 ("Tocar uma progressão que passa por um pivô até a nova tônica."),
                        juce::String::fromUTF8 ("O app reconhece a progressão de acordes e confere as classes de altura.")), "H");
         m.exercises.back().chordProgression = {
-            { 0, 4, 7 },    // C  (campo de origem)
-            { 7, 11, 2 },   // G  (pivô)
-            { 2, 6, 9 },    // D7 (dominante secundário)
-            { 7, 11, 2 },   // G  (nova tônica)
+            { 0, 4, 7 },      // C  (campo de origem)
+            { 7, 11, 2 },     // G  (pivô)
+            { 2, 6, 9, 0 },   // D7 (dominante secundário, com a sétima menor)
+            { 7, 11, 2 },     // G  (nova tônica)
         };
         m.exercises.back().usesGrid = false;
         add (exercise ("EX-9.H.3", juce::String::fromUTF8 ("Tocar o dominante secundário"),
-                       juce::String::fromUTF8 ("Tocar D7 (2-6-9), o V7 da nova tonalidade."),
+                       juce::String::fromUTF8 ("Tocar D7 (2-6-9-0), o V7 da nova tonalidade."),
                        juce::String::fromUTF8 ("O app reconhece as notas e confere as classes de altura do dominante secundário.")), "H");
-        m.exercises.back().chordPitchClasses = { 2, 6, 9 };
+        m.exercises.back().chordPitchClasses = { 2, 6, 9, 0 };
         m.exercises.back().usesGrid = false;
         add (exercise ("EX-9.H.4", juce::String::fromUTF8 ("Homônimos e relativos"),
                        juce::String::fromUTF8 ("Distinguir campos relativos de homônimos."),
@@ -1519,7 +1519,7 @@ namespace
             "estudadas (dim7, m7(b5), m7(#5), dominante com nona bemol) e permite "
             "tocar as sonoridades do módulo em qualquer posição. Complemento: "
             "PTN-M-4ths (quartas) para os acordes quartais.");
-        m.practice.guitarists = { "Wes Montgomery", "Pat Metheny", "Joe Pass" };
+        m.practice.guitarists = { "Greg Howe", "Guthrie Govan", "Joe Satriani" };
 
         // Curated apostilas (REQ-006, CM-012); see docs/MUSIC.md.
         m.sources = {

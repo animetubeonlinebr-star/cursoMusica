@@ -33,16 +33,16 @@ std::vector<ContentItem> topic9E()
 
         h ("De onde o m7(#5) vem"),
         p (
-            "O m7(#5) nasce naturalmente do terceiro grau do campo harmônico maior. Em Do maior, o terceiro grau é Em, e o acorde de sétima sobre ele é Em7. Se a quinta subir meio tom, temos Em7(#5). Isso acontece porque a quinta aumentada corresponde a uma nota da escala seguinte, criando uma tensão que pede resolução."),
+            "O m7(#5) não é um acorde diatônico do campo harmônico maior: ele nasce da alteração da quinta do acorde menor com sétima. Subindo a quinta justa (Sol) meio tom, chega-se à quinta aumentada (Sol#) e o m7 vira m7(#5). É uma alteração de cor, não uma troca de função, e por isso o acorde costuma aparecer como passagem ou como sonoridade suspensa."),
         p (
-            "Ele também aparece no campo harmônico menor, como uma alteração do primeiro grau. O acorde menor com sétima, quando a quinta é aumentada, ganha uma cor que lembra o modo lídio. Por isso o m7(#5) é muito usado em passagens modais e em música de fusão."),
-        b ("Nasce do terceiro grau do campo maior, com a quinta alterada."),
-        b ("Aparece também como cor do primeiro grau menor."),
-        b ("E comum em passagens modais e na fusão."),
+            "Como não pertence ao campo de nenhuma escala maior, o m7(#5) se apoia na sua leitura enarmônica para ganhar uma escala. É por isso que ele é tão usado em passagens modais e em música de fusão: a sua origem é uma alteração, e a sua cor é suspensa."),
+        b ("Não é diatônico do campo maior: nasce da alteração da quinta do m7."),
+        b ("A quinta justa sobe meio tom e vira quinta aumentada."),
+        b ("É comum em passagens modais e na fusão."),
 
         h ("A enarmonia do m7(#5)"),
         p (
-            "Como a quinta aumentada de Do e Sol# (enarmonicamente Lá bemol), o m7(#5) tem uma relação enarmônica curiosa. Cm7(#5) tem as notas Do, Mib, Lab e Sib — que são as mesmas de Ab(add9)/C, ou seja, um Lá bemol com nona sobre baixo de Do. Isso significa que o m7(#5) pode ser lido como uma inversão de outro acorde, o que dá ao arranjador duas formas de escrever a mesma sonoridade."),
+            "Como a quinta aumentada de Do e Sol# (enarmonicamente Lá bemol), o m7(#5) tem uma relação enarmônica curiosa. Cm7(#5) tem as notas Do, Mib, Sol# (Lá bemol) e Sib — que são as mesmas de Ab(add9)/C, ou seja, um Lá bemol com nona sobre baixo de Do. Isso significa que o m7(#5) pode ser lido como uma inversão de outro acorde, o que dá ao arranjador duas formas de escrever a mesma sonoridade."),
         b ("Cm7(#5) = Ab(add9)/C (mesmas notas, outra grafia)."),
         b ("A ambiguidade é uma característica, não um erro."),
         b ("Escolha a grafia que melhor descreve a função do acorde."),
@@ -85,21 +85,21 @@ std::vector<ContentItem> topic9E()
         c (
             "Se o acorde soar estável demais, verifique a quinta. A quinta aumentada é o que da identidade ao m7(#5)."),
 
-        h ("O m7(#5) é a improvisação"),
+        h ("O m7(#5) na improvisação"),
         p (
-            "Para quem improvisa, o m7(#5) é uma escala em si. Sobre ele, usa-se a escala menor melódica (a escala menor com a sétima maior e a sexta maior), que contém exatamente a quinta aumentada. Tocar essa escala sobre o m7(#5) produz frases que combinam com a sonoridade do acorde. É um recurso comum na fusão e no jazz moderno."),
-        b ("Sobre o m7(#5), use a escala menor melódica."),
-        b ("A escala contém a quinta aumentada do acorde."),
+            "Para quem improvisa, o m7(#5) pede uma escala que contenha a sua quinta aumentada. A forma mais clara de chegar a ela é pela leitura enarmônica: como Cm7(#5) soa igual a Ab(add9)/C, a escala natural é o modo lídio de Lá bemol (Ab, Sib, Dó, Ré, Mib, Fá, Sol). Essa escala contém todas as notas do acorde — inclusive a quinta aumentada, que aparece como o Lá bemol do modo. É um recurso comum na fusão e no jazz moderno."),
+        b ("Sobre o m7(#5), use a escala lídia do acorde uma terça maior abaixo."),
+        b ("A escala contém a quinta aumentada do acorde (enarmônica)."),
         b ("O resultado soa moderno e fluido."),
 
-        h ("O m7(#5) é a sonoridade modal"),
+        h ("O m7(#5) e a sonoridade modal"),
         p (
-            "O m7(#5) tem uma relação direta com o modo lídio, que é o quarto modo da escala maior. No modo lídio, a quarta aumentada e a característica principal. Quando essa quarta aumentada aparece como quinta do acorde menor, temos o m7(#5). Por isso ele soa modal: é uma sonoridade que flutua, sem a direção forte dos acordes tonais."),
-        b ("O m7(#5) lembra o modo lídio."),
-        b ("A quarta aumentada do modo vira quinta aumentada do acorde."),
+            "O m7(#5) soa modal porque a quinta aumentada enfraquece a direção tonal: o acorde não tem o empurrão de um dominante nem o repouso de um menor comum. A sua cor suspensa se apoia na leitura enarmônica — um acorde maior com nona sobre o baixo (Ab(add9)/C) — e a escala que descreve essa sonoridade é a lídia. Por isso ele flutua, sem a direção forte dos acordes tonais."),
+        b ("O m7(#5) soa modal."),
+        b ("A quinta aumentada enfraquece a direção tonal."),
         b ("O som flutua, sem direção tonal forte."),
-        aud ({ "C4", "D4", "E4", "F#4", "G4", "A4", "B4", "C5" },
-             "O modo lídio sobre Do: a quarta aumentada (Fa#) é a marca da sonoridade."),
+        aud ({ "G#3", "A#3", "C4", "D4", "D#4", "F4", "G4" },
+             "A escala lídia de Lá bemol: a quarta aumentada (Ré) é a marca da sonoridade."),
 
         h ("Combinando o m7(#5) com outros acordes"),
         p (
@@ -110,10 +110,10 @@ std::vector<ContentItem> topic9E()
 
         h ("O m7(#5) e a escala menor melódica"),
         p (
-            "A escala que combina com o m7(#5) é a menor melódica, que é a escala menor natural com a sexta e a sétima elevadas. Sobre o primeiro grau dessa escala, o acorde de sétima é justamente o m7(#5). Isso explica por que a escala soa tão bem sobre o acorde: o acorde é o próprio primeiro grau da escala, e todas as notas da escala pertencem ao acorde ou às suas tensões."),
+            "A escala que combina com o m7(#5) é a menor melódica, que é a escala menor natural com a sexta e a sétima elevadas. Sobre o primeiro grau dessa escala, porém, o acorde de sétima é o m(maj7) (menor com sétima maior, como Cm(maj7) = Do-Mib-Sol-Si), e não o m7(#5). O m7(#5) e a menor melódica se aproximam pela leitura enarmônica: a escala contém a quinta aumentada (Sol#), que é a nota que dá identidade ao acorde, e por isso ela soa bem sobre ele mesmo não sendo o seu acorde diatônico."),
         b ("A menor melódica tem a sexta e a sétima elevadas."),
-        b ("O acorde de sétima do primeiro grau é o m7(#5)."),
-        b ("A escala e o acorde compartilham as mesmas notas."),
+        b ("O acorde de sétima do primeiro grau da menor melódica é o m(maj7), não o m7(#5)."),
+        b ("A escala contém a quinta aumentada do m7(#5), por isso combina com ele."),
 
         h ("O m7(#5) na partitura"),
         p (
@@ -154,7 +154,7 @@ std::vector<ContentItem> topic9E()
         h ("Resumo do tópico"),
         b ("m7(#5) = tônica, terça menor, quinta aumentada e sétima menor (0-3-8-10)."),
         b ("Difere do m7 apenas na quinta, mas a cor muda por completo."),
-        b ("Nasce do terceiro grau do campo maior, com a quinta alterada."),
+        b ("Não é diatônico do campo maior: nasce da alteração da quinta do m7."),
         b ("Tem leitura enarmônica: é uma inversão de acorde maior com nona."),
         b ("Soa suspenso e pede resolução."),
         c (

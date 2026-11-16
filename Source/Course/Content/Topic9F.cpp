@@ -51,7 +51,7 @@ std::vector<ContentItem> topic9F()
         b ("Use dedilhado ou palhetada para separar as camadas."),
         b ("A forma se desloca pelo braço como qualquer acorde."),
         part ("m9_partitura_policorde", { "C4", "E4", "G4", "D5", "F#5", "A5" },
-              "Partitura do policorde D/C: tríade de Ré sobre a tríade de Dó (com o seu áudio)."),
+              "Partitura do policorde D/C: a tríade de Dó e, sobre ela, a de Ré (com o seu áudio)."),
         c (
             "Se as duas camadas se misturarem, o policorde perde a identidade e soa apenas como um acorde cheio. Toque as camadas em registros bem separados."),
 
