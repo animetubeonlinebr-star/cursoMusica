@@ -44,9 +44,9 @@ std::vector<ContentItem> topic6G()
         b ("I → IV → iv → I: o sol maior escurece para o sol menor antes de voltar."),
         b ("I → iv → I: troca direta, com efeito melancólico."),
         b ("O iv também prepara o V7: iv → V7 → i é a cadência menor por excelência."),
-        aud ({ "C4", "E4", "G4", "B4", "F4", "A4", "C5", "E5", "F4", "G#4", "C5", "D#5" },
+        aud ({ "C4", "E4", "G4", "B4", "F4", "A4", "C5", "E5", "F4", "Ab4", "C5", "Eb5" },
              "I → IV → iv em Dó: C7M, F7M, Fm7 — o subdominante menor escurecendo a harmonia."),
-        part ("m6_partitura_subdominante", { "C4", "E4", "G4", "B4", "F4", "A4", "C5", "D#5", "C4", "E4", "G4" },
+        part ("m6_partitura_subdominante", { "C4", "E4", "G4", "B4", "F4", "Ab4", "C5", "Eb5", "C4", "E4", "G4" },
               "Partitura de I - iv - I em Dó (C7M / Fm7 / C7M). Ouça o efeito do subdominante menor."),
 
         h ("O ii meio-diminuto"),
@@ -63,7 +63,7 @@ std::vector<ContentItem> topic6G()
         b ("bVI em Dó maior: Abmaj7 (vem do campo de Dó menor)."),
         b ("bVII em Dó maior: Bb7 (vem do campo de Dó menor)."),
         b ("Progressão modal: I → bVII → IV → I (C → Bb → F → C)."),
-        aud ({ "C4", "E4", "G4", "B4", "A#3", "D4", "F4", "A4", "F4", "A4", "C5", "F5" },
+        aud ({ "C4", "E4", "G4", "B4", "Bb3", "D4", "F4", "Ab4", "F4", "A4", "C5", "E5" },
              "I → bVII → IV em Dó: C7M, Bb7, F7M — som modal e suave."),
 
         h ("O napolitano (bII)"),
@@ -100,7 +100,7 @@ std::vector<ContentItem> topic6G()
         b ("Em Dó maior: Ebmaj7 (bIII) vem do campo de Dó menor."),
         b ("Ele é a relativa maior do campo menor paralelo."),
         b ("Som: escuro e suave, usado em passagens de transição."),
-        aud ({ "D#4", "G4", "A#4", "D5" }, "Ebmaj7 (bIII): o terceiro grau abaixado, som escuro."),
+        aud ({ "Eb4", "G4", "Bb4", "D5" }, "Ebmaj7 (bIII): o terceiro grau abaixado, som escuro."),
 
         h ("De onde vêm as notas emprestadas"),
         p (
@@ -119,7 +119,7 @@ std::vector<ContentItem> topic6G()
         b ("I → iv → I: o escurecimento clássico da MPB."),
         b ("I → bVII → IV → I: o som modal da bossa e do rock."),
         b ("I → bVI → bVII → I: o som épico, muito usado em trilhas."),
-        aud ({ "C4", "E4", "G4", "B4", "F4", "A4", "C5", "E5", "F4", "A4", "C5", "F5" },
+        aud ({ "C4", "E4", "G4", "B4", "F4", "Ab4", "C5", "Eb5", "C4", "E4", "G4", "B4" },
              "I → iv → I em Dó: C7M, Fm7, C7M — o escurecimento da MPB."),
 
         h ("Como praticar os empréstimos"),

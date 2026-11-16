@@ -48,7 +48,7 @@ std::vector<ContentItem> topic6H()
         b ("Dó menor: Cm, Ddim, Eb, Fm, Gm, Ab, Bb."),
         b ("A diferença está nos graus b3, b6 e b7, que mudam três acordes."),
         aud ({ "C4", "E4", "G4", "B4" }, "C7M (campo de Dó maior): a tônica maior."),
-        aud ({ "C4", "D#4", "G4", "A#4" }, "Cm7 (campo de Dó menor): a tônica paralela menor."),
+        aud ({ "C4", "Eb4", "G4", "Bb4" }, "Cm7 (campo de Dó menor): a tônica paralela menor."),
         c (
             "Compare os dois acordes de tônica: C7M e Cm7 têm a mesma tônica (Dó), mas a terça muda (E contra Eb). É a diferença entre o campo maior e o paralelo menor."),
 
@@ -73,8 +73,8 @@ std::vector<ContentItem> topic6H()
         b ("Em tonalidade maior: empresta iv, ii(b5), bVI, bVII do campo menor paralelo."),
         b ("Em tonalidade menor: usa o V7 do campo maior paralelo para a cadência."),
         b ("A mistura cria cor sem mudar a tonalidade."),
-        aud ({ "C4", "E4", "G4", "B4", "F4", "A4", "C5", "E5", "G4", "B4", "D5", "F5", "C4", "E4", "G4", "B4" },
-             "I → IV → V → I em Dó, com o IV virando iv no meio: a mistura dos dois campos."),
+        aud ({ "C4", "E4", "G4", "B4", "F4", "Ab4", "C5", "Eb5", "G4", "B4", "D5", "F5", "C4", "E4", "G4", "B4" },
+             "I → iv → V → I em Dó: C7M, Fm7, G7, C7M — o IV escurecendo para iv na mistura dos campos."),
 
         h ("Tonalidades próximas e distantes"),
         p (
@@ -126,7 +126,7 @@ std::vector<ContentItem> topic6H()
         b ("Facilidade: tonalidades com cordas soltas são mais confortáveis."),
         b ("Voz: a tonalidade pode mudar para caber na voz do cantor."),
         aud ({ "C4", "E4", "G4", "B4" }, "C7M: o clima alegre da tonalidade maior."),
-        aud ({ "C4", "D#4", "G4", "A#4" }, "Cm7: o clima melancólico da tonalidade menor paralela."),
+        aud ({ "C4", "Eb4", "G4", "Bb4" }, "Cm7: o clima melancólico da tonalidade menor paralela."),
 
         h ("Como modular de uma tonalidade a outra"),
         p (

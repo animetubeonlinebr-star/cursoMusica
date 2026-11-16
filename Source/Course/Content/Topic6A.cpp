@@ -70,7 +70,7 @@ std::vector<ContentItem> topic6A()
             "A escala menor natural soa melancólica, introspectiva, às vezes nostálgica. Essa cor vem dos três graus abaixados. A terça menor é o que define o acorde menor; a sexta menor e a sétima menor dão o tom melancólico à melodia. Comparar a escala maior e a menor a partir da mesma tônica é a melhor forma de ouvir a diferença."),
         aud ({ "C4", "D4", "E4", "F4", "G4", "A4", "B4", "C5" },
              "Escala de Dó maior: o som alegre e resolvido."),
-        aud ({ "C4", "D4", "D#4", "F4", "G4", "G#4", "A#4", "C5" },
+        aud ({ "C4", "D4", "Eb4", "F4", "G4", "Ab4", "Bb4", "C5" },
              "Escala de Dó menor natural: as mesmas notas de partida e chegada, com a terça, a sexta e a sétima abaixadas."),
         c (
             "Ouça as duas escalas e perceba: a tônica é a mesma (Dó), mas o clima muda por completo. É a terça menor que faz toda a diferença."),

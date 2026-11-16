@@ -2,6 +2,8 @@
 
 #include <cmath>
 #include <iostream>
+#include <set>
+#include <utility>
 #include <vector>
 
 #include "Audio/AudioPortClassifier.h"
@@ -1074,6 +1076,140 @@ void testModule2()
     }
 }
 
+// A playable example is coherent when its notes really are what its caption
+// declares: every chord named in the caption is a subset of the notes played,
+// and every note belongs to the scale named in the caption. This catches the
+// class of defect the review panel found (a score whose audio played F7 while
+// the caption said Fm7, a mode whose audio had the wrong seventh).
+namespace
+{
+    struct NamedChord { juce::String symbol; int root; std::vector<int> pitchClasses; };
+
+    int pitchClassOfLetter (juce::juce_wchar c)
+    {
+        switch (c)
+        {
+            case 'C': return 0;  case 'D': return 2;  case 'E': return 4;
+            case 'F': return 5;  case 'G': return 7;  case 'A': return 9;
+            case 'B': return 11; default: return -1;
+        }
+    }
+
+    bool isAsciiLetter (juce::juce_wchar c)
+    {
+        return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
+    }
+
+    // Chord qualities used across the course, longest symbol first so that
+    // "m7(b5)" is matched before "m7" and "maj7" before "m".
+    const std::vector<std::pair<juce::String, std::vector<int>>>& chordQualities()
+    {
+        static const std::vector<std::pair<juce::String, std::vector<int>>> qualities = {
+            { "m7(b5)", { 0, 3, 6, 10 } }, { "maj7", { 0, 4, 7, 11 } },
+            { "m7M",   { 0, 3, 7, 11 } },  { "dim7", { 0, 3, 6, 9 } },
+            { "sus4",  { 0, 5, 7 } },      { "sus2", { 0, 2, 7 } },
+            { "add9",  { 0, 2, 4, 7 } },   { "aug",  { 0, 4, 8 } },
+            { "7M",    { 0, 4, 7, 11 } },  { "dim",  { 0, 3, 6 } },
+            { "m7",    { 0, 3, 7, 10 } },  { "m",    { 0, 3, 7 } },
+            { "7",     { 0, 4, 7, 10 } },  { "6",    { 0, 4, 7, 9 } },
+        };
+        return qualities;
+    }
+
+    std::vector<NamedChord> declaredChords (const juce::String& caption)
+    {
+        std::vector<NamedChord> out;
+        for (int i = 0; i < caption.length(); ++i)
+        {
+            const auto c = caption[i];
+            const int rootPc = pitchClassOfLetter (c);
+            if (rootPc < 0)
+                continue;
+            if (i > 0 && isAsciiLetter (caption[i - 1]))
+                continue;
+
+            int j = i + 1;
+            int root = rootPc;
+            if (j < caption.length() && (caption[j] == '#' || caption[j] == 'b'))
+            {
+                root += (caption[j] == '#') ? 1 : -1;
+                ++j;
+            }
+
+            for (const auto& q : chordQualities())
+            {
+                const auto& suffix = q.first;
+                if (caption.substring (j, j + suffix.length()) != suffix)
+                    continue;
+                const int end = j + suffix.length();
+                if (end < caption.length() && isAsciiLetter (caption[end]))
+                    break;
+
+                NamedChord chord;
+                chord.symbol = caption.substring (i, end);
+                chord.root = ((root % 12) + 12) % 12;
+                for (const int interval : q.second)
+                    chord.pitchClasses.push_back ((chord.root + interval) % 12);
+                out.push_back (std::move (chord));
+                i = end - 1;
+                break;
+            }
+        }
+        return out;
+    }
+
+    // Scales/modes named in captions, as pitch-class sets from the tonic. Longest
+    // name first ("lidio aumentado" before "lidio").
+    const std::vector<std::pair<juce::String, std::vector<int>>>& namedScales()
+    {
+        static const std::vector<std::pair<juce::String, std::vector<int>>> scales = {
+            { "lidio aumentado",           { 0, 2, 4, 6, 8, 9, 11 } },
+            { "locrio com segunda natural",{ 0, 2, 3, 5, 6, 8, 10 } },
+            { "menor natural",             { 0, 2, 3, 5, 7, 8, 10 } },
+            { "menor harmonica",           { 0, 2, 3, 5, 7, 8, 11 } },
+            { "menor melodica",            { 0, 2, 3, 5, 7, 9, 11 } },
+            { "lidio dominante",           { 0, 2, 4, 6, 7, 9, 10 } },
+            { "frigio dominante",          { 0, 1, 4, 5, 7, 8, 10 } },
+            { "escala alterada",           { 0, 1, 3, 4, 6, 8, 10 } },
+            { "pentatonica menor",         { 0, 3, 5, 7, 10 } },
+            { "mixolidio",                 { 0, 2, 4, 5, 7, 9, 10 } },
+            { "dorico",                    { 0, 2, 3, 5, 7, 9, 10 } },
+            { "frigio",                    { 0, 1, 3, 5, 7, 8, 10 } },
+            { "lidio",                     { 0, 2, 4, 6, 7, 9, 11 } },
+            { "locrio",                    { 0, 1, 3, 5, 6, 8, 10 } },
+            { "jonio",                     { 0, 2, 4, 5, 7, 9, 11 } },
+            { "eolio",                     { 0, 2, 3, 5, 7, 8, 10 } },
+            { "escala maior",              { 0, 2, 4, 5, 7, 9, 11 } },
+        };
+        return scales;
+    }
+
+    juce::String foldAccents (juce::String s)
+    {
+        s = s.toLowerCase();
+        const std::pair<const char*, const char*> replacements[] = {
+            { "\xc3\xad", "i" }, { "\xc3\xb3", "o" }, { "\xc3\xb4", "o" },
+            { "\xc3\xb5", "o" }, { "\xc3\xa1", "a" }, { "\xc3\xa2", "a" },
+            { "\xc3\xa3", "a" }, { "\xc3\xa9", "e" }, { "\xc3\xaa", "e" },
+            { "\xc3\xba", "u" }, { "\xc3\xa7", "c" },
+        };
+        for (const auto& r : replacements)
+            s = s.replace (r.first, r.second);
+        return s;
+    }
+
+    // Returns the pitch-class set of the scale named in the caption (rooted at
+    // the caption's tonic implied by the first note), or empty if none is named.
+    const std::pair<juce::String, std::vector<int>>* namedScale (const juce::String& caption)
+    {
+        const auto folded = foldAccents (caption);
+        for (const auto& scale : namedScales())
+            if (folded.contains (scale.first))
+                return &scale;
+        return nullptr;
+    }
+}
+
 // Module 6 — Etapa 6: escalas menores e campos harmônicos. Same shape as module
 // 2: >=5 pages per topic with images, tables, audio and scores, 3..5 exercises
 // per topic, and part of the exercises played on the instrument and verified by
@@ -1226,6 +1362,39 @@ void testModule6()
                 for (const int midi : item.notes)
                     check (midi >= 0 && midi <= 127,
                            juce::String ("topic ") + topic.id + " example uses a valid MIDI note");
+
+                // Coherence (QA): the audio must really be what the caption says.
+                // A score/audio whose caption names a chord or a scale has to
+                // play those notes, so a musically wrong example fails the suite.
+                std::set<int> played;
+                for (const int midi : item.notes)
+                    played.insert (((midi % 12) + 12) % 12);
+
+                for (const auto& chord : declaredChords (item.text))
+                {
+                    if (played.count (chord.root) == 0)
+                        continue; // the chord is only mentioned (e.g. a resolution target)
+                    bool covered = true;
+                    for (const int pc : chord.pitchClasses)
+                        covered = covered && played.count (pc) > 0;
+                    check (covered,
+                           juce::String ("topic ") + topic.id + " plays " + chord.symbol
+                               + " as its caption declares");
+                }
+
+                if (const auto* scale = namedScale (item.text))
+                {
+                    const int tonic = ((item.notes.front() % 12) + 12) % 12;
+                    std::set<int> allowed;
+                    for (const int interval : scale->second)
+                        allowed.insert ((tonic + interval) % 12);
+                    bool inScale = true;
+                    for (const int pc : played)
+                        inScale = inScale && allowed.count (pc) > 0;
+                    check (inScale,
+                           juce::String ("topic ") + topic.id + " plays the scale named in its caption ("
+                               + scale->first + ")");
+                }
             }
         }
 

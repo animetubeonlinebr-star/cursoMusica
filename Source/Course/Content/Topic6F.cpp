@@ -89,7 +89,7 @@ std::vector<ContentItem> topic6F()
             { "VII", "Bm7(b5) (vii)", "Bb7 (VII)" },
         }),
         aud ({ "C4", "E4", "G4", "B4" }, "Campo maior: C7M (I), som alegre e resolvido."),
-        aud ({ "C4", "D#4", "G4", "A#4" }, "Campo menor: Cm7 (i), som triste e melancólico."),
+        aud ({ "C4", "Eb4", "G4", "Bb4" }, "Campo menor: Cm7 (i), som triste e melancólico."),
         c (
             "A diferença entre C7M e Cm7 está só na terça (E contra Eb). Mas essa única nota muda toda a cor da música."),
 

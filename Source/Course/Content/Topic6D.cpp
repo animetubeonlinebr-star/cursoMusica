@@ -76,7 +76,7 @@ std::vector<ContentItem> topic6D()
         b ("Sobre m7M: a própria escala menor melódica."),
         b ("Sobre dominantes: o lídio dominante (4º modo) e a escala alterada (7º modo)."),
         b ("Sobre acordes meio-diminutos: o 6º modo."),
-        aud ({ "F4", "G4", "A4", "B4", "C5", "D5", "D#5", "F5" },
+        aud ({ "F4", "G4", "A4", "B4", "C5", "D5", "Eb5", "F5" },
              "Lídio dominante a partir de Fá: uma das sonoridades mais usadas sobre o V7."),
 
         h ("Erros comuns"),
@@ -92,7 +92,7 @@ std::vector<ContentItem> topic6D()
         b ("O modo 1 é a própria menor melódica."),
         b ("O modo 4 (lídio dominante) é o mais usado sobre o V7."),
         b ("O modo 7 (escala alterada) é o mais tenso, sobre o V7 alterado."),
-        aud ({ "F4", "G4", "A4", "B4", "C5", "D5", "D#5", "F5" },
+        aud ({ "F4", "G4", "A4", "B4", "C5", "D5", "Eb5", "F5" },
              "Lídio dominante a partir de Fá: uma prévia do quarto modo da melódica."),
 
         h ("As três formas da escala menor"),

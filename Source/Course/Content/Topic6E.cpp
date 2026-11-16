@@ -45,7 +45,7 @@ std::vector<ContentItem> topic6E()
         b ("Fórmula: 1 2 3 #4 #5 6 7."),
         b ("Som: flutuante, etéreo, com quinta aumentada."),
         b ("Uso: sobre acordes maj7(#5)."),
-        aud ({ "E4", "F#4", "G#4", "A#4", "C5", "D5", "E5" },
+        aud ({ "E4", "F#4", "G#4", "A#4", "C5", "D#5", "E5" },
              "Lídio aumentado a partir de Mi: som etéreo, com a quinta aumentada."),
 
         h ("Modo 4 — lídio dominante (1 2 3 #4 5 6 b7)"),
@@ -54,7 +54,7 @@ std::vector<ContentItem> topic6E()
         b ("Fórmula: 1 2 3 #4 5 6 b7."),
         b ("Som: brilhante, moderno, com #4 (o trítono do dominante)."),
         b ("Uso: sobre acordes V7 que resolvem por quinta abaixo."),
-        aud ({ "F4", "G4", "A4", "B4", "C5", "D5", "D#5", "F5" },
+        aud ({ "F4", "G4", "A4", "B4", "C5", "D5", "Eb5", "F5" },
              "Lídio dominante a partir de Fá: o som clássico sobre o V7."),
 
         h ("Modo 5 — mixolídio com sexta menor (1 2 3 4 5 b6 b7)"),
