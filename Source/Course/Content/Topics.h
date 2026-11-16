@@ -121,5 +121,16 @@ std::vector<ContentItem> topic7G();  // Dórico, Lídio e Mixolídio
 std::vector<ContentItem> topic7H();  // Mixolídio sus e Mixolídio #4
 std::vector<ContentItem> topic7I();  // Lócrio 9 e Alterado (Alt.7)
 std::vector<ContentItem> topic7J();  // Aplicações modais no rock e pop-rock
+// Module 8 (Etapa 8 — dominantes, cadências e substituições harmônicas).
+std::vector<ContentItem> topic8A();  // Dominante V7
+std::vector<ContentItem> topic8B();  // Dominantes secundários
+std::vector<ContentItem> topic8C();  // Dominantes alterados e resoluções
+std::vector<ContentItem> topic8D();  // SubV7
+std::vector<ContentItem> topic8E();  // SubIIm
+std::vector<ContentItem> topic8F();  // Empréstimos modais
+std::vector<ContentItem> topic8G();  // Dilatação do campo harmônico maior
+std::vector<ContentItem> topic8H();  // Dilatação do campo harmônico menor
+std::vector<ContentItem> topic8I();  // Progressão II-V-I maior e menor
+std::vector<ContentItem> topic8J();  // Identificação de situações que não são II-V-I
 
 } // namespace cursomusica::content

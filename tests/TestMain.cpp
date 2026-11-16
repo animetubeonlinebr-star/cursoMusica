@@ -1,5 +1,6 @@
 #include <juce_core/juce_core.h>
 
+#include <algorithm>
 #include <cmath>
 #include <iostream>
 #include <map>
@@ -2241,6 +2242,368 @@ void testModule7()
         if (m.number == 7)
             ++seen7;
     check (seen7 == 1, "module 7 appears exactly once in the catalogue");
+    // The modules form a single, contiguous, unique sequence from 1: each
+    // module's number is unique, the catalog covers 1..N without gaps, and
+    // findModule(N) returns the module with that number. This replaces the old
+    // "3..20 are placeholders" assertion so the parallel module branches
+    // (Etapas 3..10) do not conflict (AGENTS.md §4.1). Individual modules are
+    // implemented by their own branch, so the set of implemented modules is not
+    // required to be contiguous here.
+    const auto& modules = ModuleCatalog::getModules();
+    check (! modules.empty(), "the catalog lists modules");
+    for (size_t i = 0; i < modules.size(); ++i)
+    {
+        check (modules[i].number == (int) i + 1,
+               "module at index " + juce::String (i) + " has number " + juce::String (i + 1));
+        check (ModuleCatalog::findModule (modules[i].number) == &modules[i],
+               "findModule returns the module with number " + juce::String (modules[i].number));
+    }
+
+    check (ModuleCatalog::findModule (8) != nullptr && ModuleCatalog::findModule (8)->implemented,
+           "module 8 is implemented");
+}
+
+// Module 8 — Etapa 8 (dominantes, cadências e substituições harmônicas). It must
+// follow the same shape as module 2: explanation (>=5 pages per topic) with
+// images, tables, audio and scores with audio, 3..5 exercises per topic, and
+// part of the exercises played on the instrument and verified by the app.
+void testModule8()
+{
+    std::cout << "Module8\n";
+    using namespace cursomusica;
+
+    const auto* m8 = ModuleCatalog::findModule (8);
+    check (m8 != nullptr, "module 8 exists");
+    if (m8 == nullptr)
+        return;
+
+    check (m8->implemented, "module 8 is implemented");
+    check (m8->number == 8, "module 8 has number 8");
+    check (m8->usesTempo, "module 8 uses a BPM target");
+    check (m8->targetBpm == 88, "module 8 target BPM is 88 (MUSIC.md)");
+    check (m8->level == 4, "module 8 is level 4 (MUSIC.md)");
+    check (m8->lessons.size() == 10, "module 8 has ten topics (A..J)");
+    check (m8->exercises.size() >= 30, "module 8 lists a full exercise set");
+
+    // Every topic A..J has 3..5 exercises (client: "de 3 a 5 exercícios por tópico").
+    for (const auto& topic : m8->lessons)
+    {
+        int count = 0;
+        for (const auto& e : m8->exercises)
+            if (e.lessonId == topic.id)
+                ++count;
+        check (count >= 3, juce::String ("topic ") + topic.id + " has at least three exercises");
+        check (count <= 5, juce::String ("topic ") + topic.id + " has at most five exercises");
+    }
+
+    // Every exercise is tied to a topic and its id follows EX-8.<topico>.<n>.
+    for (const auto& e : m8->exercises)
+    {
+        check (e.lessonId.isNotEmpty(), "exercise " + e.id + " is tied to a topic");
+        if (! e.isGate)
+            check (e.id.startsWith ("EX-8."), "exercise " + e.id + " follows EX-8.<topico>.<n>");
+    }
+
+    // Part of the exercises is played on the instrument and verified by the
+    // detector: at least one playable exercise per topic (client request).
+    // Playable = chord montage (chordPitchClasses), progression (chordProgression),
+    // ordered notes (targets) or interval (interval.semitones).
+    juce::StringArray playableTopics;
+    for (const auto& e : m8->exercises)
+        if (e.lessonId.isNotEmpty()
+            && (! e.chordPitchClasses.empty() || ! e.chordProgression.empty()
+                || ! e.targets.empty() || e.interval.semitones > 0))
+            playableTopics.addIfNotAlreadyThere (e.lessonId);
+    for (const auto& topic : { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J" })
+        check (playableTopics.contains (topic),
+               juce::String ("topic ") + topic + " has a playable exercise");
+
+    // The chord montage exercises carry real pitch classes and are not grid-gated;
+    // every pitch class is a valid chromatic value.
+    int chordMontages = 0;
+    for (const auto& e : m8->exercises)
+        if (! e.chordPitchClasses.empty())
+        {
+            ++chordMontages;
+            check (! e.usesGrid, "chord exercise " + e.id + " is not grid-gated");
+            for (const int pc : e.chordPitchClasses)
+                check (pc >= 0 && pc <= 11, "chord exercise " + e.id + " uses a valid pitch class");
+        }
+    check (chordMontages >= 8, "module 8 asks the student to montage several chords");
+
+    // The progressions carry ordered chords with valid pitch classes.
+    int progressions = 0;
+    for (const auto& e : m8->exercises)
+        if (! e.chordProgression.empty())
+        {
+            ++progressions;
+            check (e.chordProgression.size() >= 3, "progression " + e.id + " has at least three chords");
+            for (const auto& chord : e.chordProgression)
+                for (const int pc : chord)
+                    check (pc >= 0 && pc <= 11, "progression " + e.id + " uses a valid pitch class");
+        }
+    check (progressions >= 5, "module 8 asks the student to play several progressions");
+
+    // Explanation: >=5 pages per topic, at least one table and one image, and
+    // the media the client asked for (images, audio, scores with audio).
+    auto detailChars = [] (const LessonBlock& topic)
+    {
+        int total = 0;
+        for (const auto& item : topic.detail)
+        {
+            total += item.text.length();
+            for (const auto& cell : item.columns)
+                total += cell.length();
+            for (const auto& row : item.rows)
+                for (const auto& cell : row)
+                    total += cell.length();
+        }
+        return total;
+    };
+
+    bool anyAudio = false;
+    bool anyScore = false;
+    for (const auto& topic : m8->lessons)
+    {
+        const int chars = detailChars (topic);
+        check (chars >= content::minTopicChars,
+               juce::String ("topic ") + topic.id + " has at least "
+                   + juce::String (content::minPages) + " pages (" + juce::String (chars) + " chars)");
+
+        int images = 0, tables = 0, audios = 0, scores = 0;
+        for (const auto& item : topic.detail)
+        {
+            if (item.kind == ContentKind::image) ++images;
+            else if (item.kind == ContentKind::table) ++tables;
+            else if (item.kind == ContentKind::audio) ++audios;
+            else if (item.kind == ContentKind::score) ++scores;
+        }
+        check (images >= 1, juce::String ("topic ") + topic.id + " has at least one image");
+        check (tables >= 1, juce::String ("topic ") + topic.id + " has at least one table");
+        anyAudio = anyAudio || audios > 0;
+        anyScore = anyScore || scores > 0;
+    }
+    check (anyAudio, "module 8 demonstrates the harmony with audio (REQ-004)");
+    check (anyScore, "module 8 has scores with their audio (REQ-004)");
+
+    // Every diagram and score named by the content is embedded in the binary,
+    // and every audio/score item actually carries notes to play.
+    for (const auto& topic : m8->lessons)
+        for (const auto& item : topic.detail)
+        {
+            if (item.kind == ContentKind::image || item.kind == ContentKind::score)
+                check (content::diagramExists (item.imageName),
+                       juce::String ("topic ") + topic.id + " references the image '"
+                           + item.imageName + "'");
+            if (item.kind == ContentKind::audio || item.kind == ContentKind::score)
+            {
+                check (! item.notes.empty(),
+                       juce::String ("topic ") + topic.id + " has a playable example");
+                for (const int midi : item.notes)
+                    check (midi >= 0 && midi <= 127,
+                           juce::String ("topic ") + topic.id + " example uses a valid MIDI note");
+            }
+        }
+
+    // QA: every score must sound what it writes. The diagram is a fixed image, so
+    // the only way to keep the image and the audio in sync is to pin the notes
+    // each score image is allowed to carry; if the audio diverges from the
+    // written score, this fails (the review caught a score whose image was a
+    // II-V-I menor while the audio played FM7 -> Fm7 -> C). Pitch classes are
+    // compared, not absolute octaves, because guitar music is notated an octave
+    // above the sounding pitch.
+    {
+        auto pitchClasses = [] (const std::vector<int>& midis)
+        {
+            std::vector<int> pcs;
+            for (const int midi : midis)
+                pcs.push_back (music::pitchClassOf (midi));
+            return pcs;
+        };
+
+        const std::map<juce::String, std::vector<int>> expected = {
+            // arpejo de G7 (V7 de Do): G-B-D-F
+            { "m8_partitura_v7",           { 7, 11, 2, 5 } },
+            // arpejo de D7 (V7/V de Do): D-F#-A-C
+            { "m8_partitura_v7_do_v",      { 2, 6, 9, 0 } },
+            // G7 alterado (b5 e b9): G-B-Db-F-Ab
+            { "m8_partitura_alterado",     { 7, 11, 1, 5, 8 } },
+            // arpejo de Db7 (SubV7 de Do): Db-F-Ab-Cb(=B)
+            { "m8_partitura_subv7",        { 1, 5, 8, 11 } },
+            // II-V-I maior (Dm7 - G7 - CM7): D-F-A-C / G-B-D-F / C-E-G
+            { "m8_partitura_ii_v_i",       { 2, 5, 9, 0, 7, 11, 2, 5, 0, 4, 7 } },
+            // II-V-I menor (Dm7b5 - G7 - Cm7): D-F-Ab-C / G-B-D-F / C-Eb-G
+            { "m8_partitura_ii_v_i_menor", { 2, 5, 8, 0, 7, 11, 2, 5, 0, 3, 7 } },
+            // FM7 - Fm7 - C (iv menor emprestado): F-A-C-E / F-Ab-C-Eb / C-E-G
+            { "m8_partitura_iv_menor",     { 5, 9, 0, 4, 5, 8, 0, 3, 0, 4, 7 } },
+        };
+
+        int scoresChecked = 0;
+        for (const auto& topic : m8->lessons)
+            for (const auto& item : topic.detail)
+                if (item.kind == ContentKind::score)
+                {
+                    ++scoresChecked;
+                    const auto it = expected.find (item.imageName);
+                    check (it != expected.end(),
+                           juce::String ("topic ") + topic.id + " score '"
+                               + item.imageName + "' has a pinned expected audio");
+                    if (it != expected.end())
+                        check (pitchClasses (item.notes) == it->second,
+                               juce::String ("topic ") + topic.id + " score '"
+                                   + item.imageName + "' plays exactly what the score writes");
+                }
+        check (scoresChecked >= 10, "module 8 has at least one score per topic with audio");
+    }
+
+    // QA (review round 2): a theory table must agree with the scale it describes.
+    // This pins the minor-field table of topic H: each chord symbol in the
+    // Natural/Harmônica/Melódica columns must be the diatonic seventh chord of
+    // that scale. Without it the table can teach chords that do not exist in the
+    // scale it just defined (the review found Ab7M#5 / Bdim7 in the melodic
+    // column). Chord symbols are parsed to pitch-class sets and compared.
+    {
+        using Pcs = std::vector<int>;
+        auto chordPcs = [] (const juce::String& symbol) -> Pcs
+        {
+            const auto s = symbol.trim();
+            if (s.isEmpty())
+                return {};
+            int pc = -1;
+            switch (s[0])
+            {
+                case 'C': pc = 0;  break;
+                case 'D': pc = 2;  break;
+                case 'E': pc = 4;  break;
+                case 'F': pc = 5;  break;
+                case 'G': pc = 7;  break;
+                case 'A': pc = 9;  break;
+                case 'B': pc = 11; break;
+                default: return {};
+            }
+            int i = 1;
+            while (i < s.length())
+            {
+                const auto c = s[i];
+                if (c == '#')      { ++pc; ++i; }
+                else if (c == 'b') { --pc; ++i; }
+                else break;
+            }
+            const auto quality = s.substring (i);
+            Pcs intervals;
+            if (quality == "m7M")        intervals = { 0, 3, 7, 11 };
+            else if (quality == "m7")    intervals = { 0, 3, 7, 10 };
+            else if (quality == "m7b5")  intervals = { 0, 3, 6, 10 };
+            else if (quality == "7M#5")  intervals = { 0, 4, 8, 11 };
+            else if (quality == "7M")    intervals = { 0, 4, 7, 11 };
+            else if (quality == "7")     intervals = { 0, 4, 7, 10 };
+            else if (quality == "dim7")  intervals = { 0, 3, 6, 9 };
+            else return {};
+            Pcs out;
+            for (const int iv : intervals)
+                out.push_back (((pc + iv) % 12 + 12) % 12);
+            std::sort (out.begin(), out.end());
+            return out;
+        };
+
+        // C minor: natural, harmonic and melodic scales.
+        const Pcs natural  = { 0, 2, 3, 5, 7, 8, 10 };
+        const Pcs harmonic = { 0, 2, 3, 5, 7, 8, 11 };
+        const Pcs melodic  = { 0, 2, 3, 5, 7, 9, 11 };
+        auto diatonic = [] (const Pcs& scale)
+        {
+            std::vector<Pcs> chords;
+            for (std::size_t i = 0; i < 7; ++i)
+            {
+                Pcs c;
+                for (const int step : { 0, 2, 4, 6 })
+                    c.push_back (scale[(i + (std::size_t) step) % 7]);
+                std::sort (c.begin(), c.end());
+                chords.push_back (c);
+            }
+            return chords;
+        };
+        const auto natChords = diatonic (natural);
+        const auto harChords = diatonic (harmonic);
+        const auto melChords = diatonic (melodic);
+
+        int minorTables = 0;
+        for (const auto& topic : m8->lessons)
+            for (const auto& item : topic.detail)
+                if (item.kind == ContentKind::table && item.columns.size() == 4
+                    && item.columns[0] == "Grau" && item.columns[1] == "Natural"
+                    && item.columns[2] == "Harmônica" && item.columns[3] == "Melódica")
+                {
+                    ++minorTables;
+                    int row = 0;
+                    for (const auto& r : item.rows)
+                    {
+                        if (row >= 7 || r.size() < 4)
+                            break;
+                        const std::size_t idx = (std::size_t) row;
+                        auto verify = [&] (int col, const Pcs& chord)
+                        {
+                            check (chordPcs (r[(std::size_t) col]) == chord,
+                                   juce::String ("topic ") + topic.id + " minor-field row "
+                                       + r[0] + " column " + item.columns[(std::size_t) col] + " = "
+                                       + r[(std::size_t) col] + " is the diatonic seventh chord of the scale");
+                        };
+                        verify (1, natChords[idx]);
+                        verify (2, harChords[idx]);
+                        verify (3, melChords[idx]);
+                        ++row;
+                    }
+                }
+        check (minorTables >= 1, "module 8 has the minor-field comparison table");
+    }
+
+    // The module cites >=1 pattern and >=1 guitarist (REQ-007, REQ-010).
+    check (m8->practice.patternId.isNotEmpty(), "module 8 cites a pattern");
+    check (! m8->practice.guitarists.isEmpty(), "module 8 cites at least one guitarist");
+    check (! m8->sources.isEmpty(), "module 8 cites curated sources (REQ-006)");
+
+    // The gate closes the module as a II-V-I maior on the grid (REQ-009).
+    bool hasGate = false;
+    for (const auto& e : m8->exercises)
+        if (e.isGate)
+        {
+            hasGate = true;
+            check (e.chordProgression.size() == 3, "module 8 gate has three chords (II-V-I)");
+            check (e.chordProgression.front() == std::vector<int> ({ 2, 5, 9, 0 }),
+                   "module 8 gate opens on Dm7 (ii)");
+            check (e.chordProgression.back() == std::vector<int> ({ 0, 4, 7, 11 }),
+                   "module 8 gate closes on CM7 (I)");
+            check (e.usesGrid, "module 8 gate is graded on the grid");
+        }
+    check (hasGate, "module 8 has a gate exercise");
+
+    // End-to-end check of the gate spec: the II-V-I maior played in order, on
+    // the grid, passes the evaluator (accuracy and alignment gates).
+    {
+        const Exercise* gate = nullptr;
+        for (const auto& e : m8->exercises)
+            if (e.isGate) gate = &e;
+        check (gate != nullptr, "module 8 gate exercise is available");
+
+        if (gate != nullptr)
+        {
+            course::PracticeSession session;
+            session.start (*gate, m8->targetBpm, m8->onGridTarget);
+            const double beat = 60.0 / (double) m8->targetBpm;
+            session.consume ({
+                { 0.0 * beat, 50, 0.0f }, { 0.0 * beat, 53, 0.0f },   // Dm7: D F A C
+                { 0.0 * beat, 57, 0.0f }, { 0.0 * beat, 60, 0.0f },
+                { 1.0 * beat, 55, 0.0f }, { 1.0 * beat, 59, 0.0f },   // G7: G B D F
+                { 1.0 * beat, 62, 0.0f }, { 1.0 * beat, 65, 0.0f },
+                { 2.0 * beat, 60, 0.0f }, { 2.0 * beat, 64, 0.0f },   // CM7: C E G B
+                { 2.0 * beat, 67, 0.0f }, { 2.0 * beat, 71, 0.0f },
+            });
+            session.finish();
+            const auto& state = session.getState();
+            check (state.matched == 3, "module 8 gate recognises the three chords in order");
+            check (state.passed, "module 8 gate passes the II-V-I maior on the grid");
+        }
+    }
 }
 
 int main()
@@ -2262,6 +2625,7 @@ int main()
     testModule5();
     testModule6();
     testModule7();
+    testModule8();
     testProgressDatabase();
     testProgressStore();
     testSharedSettings();

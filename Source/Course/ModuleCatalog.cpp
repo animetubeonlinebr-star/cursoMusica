@@ -1463,6 +1463,105 @@ namespace
         // Exercises: 3..5 per topic, ids EX-7.<topico>.<n>, mixing verifiable
         // quizzes with exercises played on the instrument (the app recognises
         // the notes). Playable exercises are not grid-gated.
+    // A chord-montage exercise (module 8): the student plays a chord and the app
+    // verifies the pitch classes it heard. Not grid-gated: the goal is the
+    // harmony, not the tempo.
+    Exercise chordExercise (const char* id, const char* title, const char* goal,
+                            std::initializer_list<int> pitchClasses)
+    {
+        auto e = exercise (id, juce::String::fromUTF8 (title), juce::String::fromUTF8 (goal),
+                           juce::String::fromUTF8 (
+                               "O app reconhece as notas tocadas e confere se o acorde tem as notas certas."));
+        e.chordPitchClasses.assign (pitchClasses.begin(), pitchClasses.end());
+        e.usesGrid = false;
+        return e;
+    }
+
+    // A chord-progression exercise (module 8): the student plays the progression
+    // chord by chord; the app matches each chord in order. Grid-gated when the
+    // caller keeps `usesGrid` (the gate closes the module on the metronome).
+    Exercise progressionExercise (const char* id, const char* title, const char* goal,
+                                  std::initializer_list<std::initializer_list<int>> chords)
+    {
+        auto e = exercise (id, juce::String::fromUTF8 (title), juce::String::fromUTF8 (goal),
+                           juce::String::fromUTF8 (
+                               "O app reconhece os acordes na ordem e confere se a progressão está correta."));
+        for (const auto& chord : chords)
+            e.chordProgression.push_back (std::vector<int> (chord.begin(), chord.end()));
+        e.usesGrid = false;
+        return e;
+    }
+
+    // Module 8 (Etapa 8 — dominantes, cadências e substituições harmônicas).
+    // Ten topics (A..J); 3..5 exercises per topic, ids EX-8.<topico>.<n>; the gate
+    // closes the module on the grid with a II-V-I maior (REQ-009).
+    CourseModule makeModule8()
+    {
+        CourseModule m;
+        m.number = 8;
+        m.title = juce::String::fromUTF8 ("Dominantes, cadências e substituições harmônicas");
+        m.objective = juce::String::fromUTF8 (
+            "Compreender como criar tensão, resolução e movimentação harmônica: o "
+            "dominante V7, os dominantes secundários e alterados, o SubV7, o SubIIm, "
+            "os empréstimos modais e a progressão II-V-I maior e menor.");
+        m.level = 4;          // MUSIC.md: módulos 8–10 = nível 4 (turnarounds)
+        m.targetBpm = 88;     // MUSIC.md, módulo 8
+        m.onGridTarget = 0.81f;
+        m.implemented = true;
+
+        m.lessons = {
+            detail (block ("A", juce::String::fromUTF8 ("Dominante V7"), {
+                "O quinto grau com sétima menor (0, 4, 7, 10); o trítono entre a terça e a sétima cria a tensão.",
+                "A resolução V7 → I acontece por meio-tom (voice leading).",
+                "No campo maior, o V7 é o único acorde de sétima dominante natural."
+            }), content::topic8A()),
+            detail (block ("B", juce::String::fromUTF8 ("Dominantes secundários"), {
+                "Qualquer grau pode virar tônica temporária com o seu próprio V7 (V7/x).",
+                "Constrói-se subindo uma quinta justa a partir do alvo.",
+                "A nota estranha ao campo aponta o alvo; podem se encadear em quintas."
+            }), content::topic8B()),
+            detail (block ("C", juce::String::fromUTF8 ("Dominantes alterados e resoluções"), {
+                "Alteram-se quinta e extensões (b5, #5, b9, #9, #11), nunca a terça nem a sétima.",
+                "Cada alteração tem uma direção natural de resolução por meio-tom.",
+                "O acorde alterado (alt) é o dominante de tensão máxima."
+            }), content::topic8C()),
+            detail (block ("D", juce::String::fromUTF8 ("SubV7"), {
+                "O dominante substituto fica meio-tom acima do alvo e resolve no mesmo lugar.",
+                "Compartilha o trítono com o V7; o baixo desce um semitom.",
+                "No II-V-I: Dm7 → Db7 → CM7; pode se encadear cromaticamente."
+            }), content::topic8D()),
+            detail (block ("E", juce::String::fromUTF8 ("SubIIm"), {
+                "O ii vira menor com quinta diminuta (Dm7b5): a cor do campo menor dentro do maior.",
+                "Prepara o dominante com nona menor (b9).",
+                "No II-V-I menor é o acorde natural; com o SubV7 dá a resolução mais suave."
+            }), content::topic8E()),
+            detail (block ("F", juce::String::fromUTF8 ("Empréstimos modais"), {
+                "Pegar acordes do modo paralelo (Dó menor dentro do Dó maior).",
+                "Principais: i, iv, bIII, bVI, bVII; o iv menor e o bVII são os mais usados.",
+                "Empréstimo é passageiro; modulação é permanente."
+            }), content::topic8F()),
+            detail (block ("G", juce::String::fromUTF8 ("Dilatação do campo harmônico maior"), {
+                "O campo de sete acordes se amplia com dominantes secundários, substituições e empréstimos.",
+                "Cada acorde novo exerce uma das três funções básicas.",
+                "O mapa dilatado é a base da reharmonização."
+            }), content::topic8G()),
+            detail (block ("H", juce::String::fromUTF8 ("Dilatação do campo harmônico menor"), {
+                "O campo menor é a união das escalas natural, harmônica e melódica.",
+                "A harmônica cria o V7 (dominante); a melódica acrescenta acordes de cor.",
+                "A cadência fundamental é o II-V-I menor: Dm7b5 → G7 → Cm7."
+            }), content::topic8H()),
+            detail (block ("I", juce::String::fromUTF8 ("Progressão II-V-I maior e menor"), {
+                "Reúne as três funções: subdominante (II), dominante (V) e tônica (I).",
+                "Maior: Dm7 → G7 → CM7; menor: Dm7b5 → G7 → Cm7.",
+                "O voice leading conduz as vozes por meio-tom; as notas-guia guiam a cadência."
+            }), content::topic8I()),
+            detail (block ("J", juce::String::fromUTF8 ("Identificação de situações que não são II-V-I"), {
+                "Cadência deceptiva resolve no vi; backdoor usa ivm e bVII, sem o V.",
+                "Vamp modal nunca resolve; meia cadência para no V.",
+                "Pergunte sempre: qual é o alvo e como ele é alcançado?"
+            }), content::topic8J()),
+        };
+
         auto add = [&m] (Exercise e, const char* topic)
         {
             e.lessonId = topic;
@@ -3445,6 +3544,407 @@ namespace
             "Tocar o II–V–I Dm7 – G7 – C7M – C7M a 84 BPM com ≥90% de acerto de "
             "acordes e on_grid_ratio ≥ 0,80. Os acordes são construídos pelos "
             "empilhamentos e estruturas estudados no módulo.");
+        // --- Topic A — dominante V7 ------------------------------------------
+        add (exercise ("EX-8.A.1", juce::String::fromUTF8 ("Questionário: o dominante V7"),
+                       juce::String::fromUTF8 ("Responder ao questionário de introdução ao dominante."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões do dominante.")), "A");
+        m.exercises.back().quiz = {
+            question ("Quais intervalos formam o acorde de sétima dominante (em semitons)?",
+                      { "0, 4, 7, 11", "0, 3, 7, 10", "0, 4, 7, 10", "0, 4, 8, 11" }, 2),
+            question ("Qual é o V7 de Dó maior?",
+                      { "G7", "D7", "C7", "F7" }, 0),
+            question ("O que cria a tensão do dominante?",
+                      { "A quinta justa", "O trítono entre a terça e a sétima",
+                        "A fundamental", "A repetição da tônica" }, 1),
+            question ("Na resolução G7 → C, para onde vai o Fá (sétima)?",
+                      { "Sobe para Sol", "Desce para Mi", "Permanece em Fá", "Vai para Lá" }, 1),
+            question ("No campo maior, quantos acordes de sétima dominante existem naturalmente?",
+                      { "Um (o V7)", "Dois", "Três", "Sete" }, 0),
+        };
+        add (chordExercise ("EX-8.A.2", "Montar o dominante G7",
+                            "Tocar um acorde de sétima dominante (fundamental, terça maior, quinta justa e sétima menor).",
+                            { 7, 11, 2, 5 }), "A");
+        add (exercise ("EX-8.A.3", juce::String::fromUTF8 ("Tocar o arpejo do dominante"),
+                       juce::String::fromUTF8 ("Tocar o arpejo Sol–Si–Ré–Fá do G7."),
+                       juce::String::fromUTF8 ("O app reconhece as notas na ordem e confere o arpejo do dominante.")), "A");
+        m.exercises.back().targets = notes ({ "G3", "B3", "D4", "F4" });
+        m.exercises.back().usesGrid = false;
+        add (intervalExercise ("EX-8.A.4", "Tocar o trítono do dominante",
+                               "Tocar o trítono (6 semitons) que dá a tensão ao dominante, três vezes.", 6, 3), "A");
+
+        // --- Topic B — dominantes secundários --------------------------------
+        add (exercise ("EX-8.B.1", juce::String::fromUTF8 ("Questionário: dominantes secundários"),
+                       juce::String::fromUTF8 ("Responder ao questionário dos dominantes secundários."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "B");
+        m.exercises.back().quiz = {
+            question ("O que significa V7/ii?",
+                      { "O dominante do segundo grau", "O segundo grau do dominante",
+                        "Um dominante com nona", "O dominante da tônica" }, 0),
+            question ("Como se constrói o dominante de um alvo?",
+                      { "Subindo uma quinta justa a partir do alvo",
+                        "Descendo uma quarta a partir do alvo",
+                        "Subindo meio-tom a partir do alvo",
+                        "Usando as notas do campo" }, 0),
+            question ("Em Dó maior, qual é o V7/vi (dominante de Lá menor)?",
+                      { "A7", "E7", "D7", "B7" }, 1),
+            question ("O que aponta o alvo de um dominante secundário?",
+                      { "A nota estranha ao campo harmônico",
+                        "A fundamental do I",
+                        "O volume do acorde",
+                        "A corda usada" }, 0),
+            question ("Uma cadeia de dominantes desce em:",
+                      { "quartas", "quintas", "semitons", "tons" }, 1),
+        };
+        add (chordExercise ("EX-8.B.2", "Montar o V7/ii (A7)",
+                            "Tocar o dominante de Dm em Dó maior.",
+                            { 9, 1, 4, 7 }), "B");
+        add (chordExercise ("EX-8.B.3", "Montar o V7/V (D7)",
+                            "Tocar o dominante de Sol em Dó maior.",
+                            { 2, 6, 9, 0 }), "B");
+        add (exercise ("EX-8.B.4", juce::String::fromUTF8 ("Dominantes em outras tonalidades"),
+                       juce::String::fromUTF8 ("Dizer o V7/ii e o V7/V em outras tonalidades."),
+                       juce::String::fromUTF8 ("Acerto ≥90% no questionário de transposição.")), "B");
+        m.exercises.back().quiz = {
+            question ("Em Sol maior, qual é o V7/V?",
+                      { "A7", "E7", "B7", "D7" }, 0),
+            question ("Em Fá maior, qual é o V7/ii?",
+                      { "G7", "D7", "C7", "A7" }, 1),
+            question ("O V7/IV de Dó maior é:",
+                      { "C7", "F7", "G7", "D7" }, 0),
+        };
+
+        // --- Topic C — dominantes alterados ----------------------------------
+        add (exercise ("EX-8.C.1", juce::String::fromUTF8 ("Questionário: dominantes alterados"),
+                       juce::String::fromUTF8 ("Responder ao questionário dos dominantes alterados."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "C");
+        m.exercises.back().quiz = {
+            question ("Quais notas de um dominante NUNCA se alteram?",
+                      { "A quinta e a nona", "A fundamental, a terça e a sétima",
+                        "A nona e a décima primeira", "Apenas a fundamental" }, 1),
+            question ("G7b9 tem qual nota acrescentada?",
+                      { "Lá bemol", "Lá natural", "Sol sustenido", "Fá sustenido" }, 0),
+            question ("O acorde G7#9 é conhecido como:",
+                      { "acorde hendrix", "acorde meio-diminuto",
+                        "acorde suspenso", "power chord" }, 0),
+            question ("Na resolução, a nona menor (b9) do dominante:",
+                      { "desce meio-tom", "sobe meio-tom",
+                        "permanece", "salta uma quinta" }, 0),
+            question ("O que o acorde alterado (alt) representa?",
+                      { "A tensão máxima antes da resolução",
+                        "Um acorde de repouso",
+                        "Um acorde menor",
+                        "Um acorde sem terça" }, 0),
+        };
+        add (chordExercise ("EX-8.C.2", "Montar o dominante G7b9",
+                            "Tocar um dominante com nona menor.",
+                            { 7, 11, 2, 5, 8 }), "C");
+        add (chordExercise ("EX-8.C.3", "Montar o dominante G7#9",
+                            "Tocar o 'acorde hendrix' (terça maior e nona aumentada).",
+                            { 7, 11, 2, 5, 10 }), "C");
+        add (exercise ("EX-8.C.4", juce::String::fromUTF8 ("Direção da resolução"),
+                       juce::String::fromUTF8 ("Dizer para onde cada alteração resolve."),
+                       juce::String::fromUTF8 ("Acerto ≥90% no questionário de resolução.")), "C");
+        m.exercises.back().quiz = {
+            question ("A quinta aumentada (#5) do dominante resolve:",
+                      { "subindo meio-tom", "descendo meio-tom",
+                        "permanecendo", "salta uma quarta" }, 0),
+            question ("A décima primeira aumentada (#11) resolve:",
+                      { "descendo meio-tom", "subindo meio-tom",
+                        "permanecendo", "salta uma oitava" }, 0),
+            question ("A resolução deceptiva leva o dominante a:",
+                      { "outro grau, não a tônica", "sempre à tônica",
+                        "um acorde diminuto", "um silêncio" }, 0),
+        };
+
+        // --- Topic D — SubV7 -------------------------------------------------
+        add (exercise ("EX-8.D.1", juce::String::fromUTF8 ("Questionário: SubV7"),
+                       juce::String::fromUTF8 ("Responder ao questionário do dominante substituto."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões do SubV7.")), "D");
+        m.exercises.back().quiz = {
+            question ("O SubV7 de Dó é:",
+                      { "Db7", "D7", "C7", "Gb7" }, 0),
+            question ("Por que o SubV7 resolve no mesmo lugar que o V7?",
+                      { "Porque compartilha o mesmo trítono",
+                        "Porque tem a mesma fundamental",
+                        "Porque é o mesmo acorde",
+                        "Porque tem a mesma quinta" }, 0),
+            question ("O baixo do SubV7, ao resolver, faz:",
+                      { "um salto de quarta", "um movimento de semitom descendente",
+                        "um salto de oitava", "um movimento de tom" }, 1),
+            question ("No II-V-I, o SubV7 substitui:",
+                      { "o ii", "o I", "o V7", "a melodia" }, 2),
+            question ("O SubV7 fica, em relação ao alvo:",
+                      { "meio-tom acima", "uma quinta acima",
+                        "uma terça acima", "uma oitava acima" }, 0),
+        };
+        add (chordExercise ("EX-8.D.2", "Montar o SubV7 (Db7)",
+                            "Tocar o dominante substituto de Dó.",
+                            { 1, 5, 8, 11 }), "D");
+        add (progressionExercise ("EX-8.D.3", "II-SubV7-I",
+                                  "Tocar Dm7 → Db7 → CM7, a cadência com o SubV7.",
+                                  { { 2, 5, 9, 0 }, { 1, 5, 8, 11 }, { 0, 4, 7, 11 } }), "D");
+        add (exercise ("EX-8.D.4", juce::String::fromUTF8 ("SubV7 em outras tonalidades"),
+                       juce::String::fromUTF8 ("Dizer o SubV7 de outros alvos."),
+                       juce::String::fromUTF8 ("Acerto ≥90% no questionário de transposição.")), "D");
+        m.exercises.back().quiz = {
+            question ("O SubV7 de Sol é:",
+                      { "Ab7", "A7", "Gb7", "G7" }, 0),
+            question ("O SubV7 de Fá é:",
+                      { "Gb7", "G7", "F7", "C7" }, 0),
+            question ("Uma cadeia de SubV7 desce em:",
+                      { "quintas", "semitons", "tons", "oitavas" }, 1),
+        };
+
+        // --- Topic E — SubIIm ------------------------------------------------
+        add (exercise ("EX-8.E.1", juce::String::fromUTF8 ("Questionário: SubIIm"),
+                       juce::String::fromUTF8 ("Responder ao questionário do segundo grau menor."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões do SubIIm.")), "E");
+        m.exercises.back().quiz = {
+            question ("O SubIIm em Dó maior é:",
+                      { "Dm7b5", "Dm7", "D7", "Dm6" }, 0),
+            question ("O que distingue o SubIIm do ii do campo maior?",
+                      { "A quinta diminuta", "A terça", "A sétima", "A fundamental" }, 0),
+            question ("O SubIIm costuma preparar qual dominante?",
+                      { "Com nona menor (b9)", "Com quinta aumentada",
+                        "Sem sétima", "Com nona maior" }, 0),
+            question ("No II-V-I menor, o SubIIm é:",
+                      { "o acorde natural", "uma substituição rara",
+                        "um erro", "o próprio I" }, 0),
+            question ("Qual nota do Dm7b5 reaparece como b9 do G7?",
+                      { "Lá bemol", "Lá natural", "Fá", "Dó" }, 0),
+        };
+        add (chordExercise ("EX-8.E.2", "Montar o SubIIm (Dm7b5)",
+                            "Tocar o ii menor com quinta diminuta de Dó maior.",
+                            { 2, 5, 8, 0 }), "E");
+        add (chordExercise ("EX-8.E.3", "Montar o iv menor (Fm7)",
+                            "Tocar a subdominante menor de Dó maior.",
+                            { 5, 8, 0, 3 }), "E");
+        add (exercise ("EX-8.E.4", juce::String::fromUTF8 ("SubIIm em outras tonalidades"),
+                       juce::String::fromUTF8 ("Dizer o SubIIm de outros tons."),
+                       juce::String::fromUTF8 ("Acerto ≥90% no questionário de transposição.")), "E");
+        m.exercises.back().quiz = {
+            question ("O SubIIm de Sol maior é:",
+                      { "Am7b5", "Am7", "A7", "Ab7" }, 0),
+            question ("O SubIIm de Fá maior é:",
+                      { "Gm7b5", "Gm7", "G7", "Gm7M" }, 0),
+            question ("SubIIm + SubV7 em Dó maior dá:",
+                      { "Dm7b5 → Db7 → CM7", "Dm7 → G7 → CM7",
+                        "Dm7b5 → G7 → CM7", "Dm7 → Db7 → CM7" }, 0),
+        };
+
+        // --- Topic F — empréstimos modais ------------------------------------
+        add (exercise ("EX-8.F.1", juce::String::fromUTF8 ("Questionário: empréstimos modais"),
+                       juce::String::fromUTF8 ("Responder ao questionário dos empréstimos modais."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "F");
+        m.exercises.back().quiz = {
+            question ("O que é empréstimo modal?",
+                      { "Usar um acorde do modo paralelo",
+                        "Mudar definitivamente de tom",
+                        "Tocar mais rápido",
+                        "Usar só os acordes do campo" }, 0),
+            question ("Modos paralelos compartilham:",
+                      { "a mesma tônica", "as mesmas notas",
+                        "o mesmo acorde", "o mesmo baixo" }, 0),
+            question ("O iv menor de Dó maior é:",
+                      { "Fm7", "FM7", "Gm7", "F7" }, 0),
+            question ("O bVII de Dó maior cria qual cadência?",
+                      { "mixolídia", "frígia", "deceptiva", "plagal" }, 0),
+            question ("Empréstimo modal é passageiro; modulação é:",
+                      { "permanente", "também passageira",
+                        "igual ao empréstimo", "uma substituição" }, 0),
+        };
+        add (chordExercise ("EX-8.F.2", "Montar o bVI (Ab7M)",
+                            "Tocar o bVI emprestado do Dó menor.",
+                            { 8, 0, 3, 7 }), "F");
+        add (chordExercise ("EX-8.F.3", "Montar o bVII (Bb7)",
+                            "Tocar o bVII que cria a cadência mixolídia.",
+                            { 10, 2, 5, 8 }), "F");
+        add (exercise ("EX-8.F.4", juce::String::fromUTF8 ("Empréstimos e escalas"),
+                       juce::String::fromUTF8 ("Relacionar cada acorde emprestado à sua escala."),
+                       juce::String::fromUTF8 ("Acerto ≥90% no questionário de escalas.")), "F");
+        m.exercises.back().quiz = {
+            question ("Sobre o iv menor (Fm7), qual escala usar?",
+                      { "dórica de Fá", "lídia de Fá", "mixolídia de Fá", "lócria de Fá" }, 0),
+            question ("Sobre o bVI (Ab7M), qual escala usar?",
+                      { "lídia de Lá bemol", "dórica de Lá bemol",
+                        "mixolídia de Lá bemol", "eólio de Lá bemol" }, 0),
+            question ("O bVII de Dó maior é:",
+                      { "Bb7", "B7", "Bb7M", "Bdim7" }, 0),
+        };
+
+        // --- Topic G — dilatação do campo maior ------------------------------
+        add (exercise ("EX-8.G.1", juce::String::fromUTF8 ("Questionário: dilatação do campo maior"),
+                       juce::String::fromUTF8 ("Responder ao questionário da dilatação do campo maior."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "G");
+        m.exercises.back().quiz = {
+            question ("Dilatar o campo harmônico é:",
+                      { "acrescentar acordes às funções básicas",
+                        "trocar a tonalidade",
+                        "tocar mais rápido",
+                        "remover acordes do campo" }, 0),
+            question ("Quantos acordes de sétima dominante naturais tem o campo maior?",
+                      { "um", "dois", "três", "cinco" }, 0),
+            question ("O SubV7 de Dó é:",
+                      { "Db7", "D7", "G7", "C7" }, 0),
+            question ("O SubIIm de Dó é:",
+                      { "Dm7b5", "Dm7", "D7", "Fm7" }, 0),
+            question ("No campo dilatado, o D7 (V7/V) aponta para:",
+                      { "Sol", "Dó", "Lá", "Fá" }, 0),
+        };
+        add (chordExercise ("EX-8.G.2", "Montar o V7/V (D7)",
+                            "Tocar o dominante que aponta para o Sol no campo dilatado.",
+                            { 2, 6, 9, 0 }), "G");
+        add (progressionExercise ("EX-8.G.3", "Dilatar a cadência com o V7/V",
+                                  "Tocar Dm7 → D7 → G7 → CM7.",
+                                  { { 2, 5, 9, 0 }, { 2, 6, 9, 0 },
+                                    { 7, 11, 2, 5 }, { 0, 4, 7, 11 } }), "G");
+        add (exercise ("EX-8.G.4", juce::String::fromUTF8 ("Funções do campo dilatado"),
+                       juce::String::fromUTF8 ("Classificar os acordes do campo dilatado por função."),
+                       juce::String::fromUTF8 ("Acerto ≥90% no questionário de funções.")), "G");
+        m.exercises.back().quiz = {
+            question ("A7 (V7/ii) exerce qual função?",
+                      { "subdominante", "tônica", "dominante de Dm", "empréstimo" }, 2),
+            question ("Ab7M (bVI) exerce qual função?",
+                      { "tônica", "subdominante", "empréstimo de cor", "dominante" }, 2),
+            question ("No campo dilatado, o que o G7 pode virar?",
+                      { "Db7 (SubV7)", "Dm7b5", "FM7", "Am7" }, 0),
+        };
+
+        // --- Topic H — dilatação do campo menor ------------------------------
+        add (exercise ("EX-8.H.1", juce::String::fromUTF8 ("Questionário: dilatação do campo menor"),
+                       juce::String::fromUTF8 ("Responder ao questionário da dilatação do campo menor."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "H");
+        m.exercises.back().quiz = {
+            question ("O campo menor é a união de quantas escalas?",
+                      { "uma", "duas", "três", "sete" }, 2),
+            question ("Qual escala menor cria o dominante (V7)?",
+                      { "natural", "harmônica", "melódica", "dórica" }, 1),
+            question ("No campo menor natural, o quinto grau é:",
+                      { "G7", "Gm7", "Gm7b5", "Gdim7" }, 1),
+            question ("A cadência fundamental do menor é:",
+                      { "Dm7b5 → G7 → Cm7", "Dm7 → G7 → CM7",
+                        "Fm7 → Bb7 → Cm7", "Cm7 → Fm7 → G7" }, 0),
+            question ("O que a escala melódica acrescenta ao campo menor?",
+                      { "acordes de cor (Dm7, F7)", "o dominante",
+                        "a tônica menor", "nada" }, 0),
+        };
+        add (chordExercise ("EX-8.H.2", "Montar a tônica menor (Cm7)",
+                            "Tocar o i do campo menor de Dó.",
+                            { 0, 3, 7, 10 }), "H");
+        add (chordExercise ("EX-8.H.3", "Montar o dominante do menor (G7)",
+                            "Tocar o V7 que vem da escala menor harmônica.",
+                            { 7, 11, 2, 5 }), "H");
+        add (exercise ("EX-8.H.4", juce::String::fromUTF8 ("Escalas do campo menor"),
+                       juce::String::fromUTF8 ("Relacionar cada acorde do menor à sua escala."),
+                       juce::String::fromUTF8 ("Acerto ≥90% no questionário de escalas.")), "H");
+        m.exercises.back().quiz = {
+            question ("Sobre o Cm7, qual escala usar?",
+                      { "dórica de Dó", "lócria de Dó", "lídia de Dó", "mixolídia de Dó" }, 0),
+            question ("Sobre o Dm7b5, qual escala usar?",
+                      { "lócria de Ré", "dórica de Ré", "frígia de Ré", "lídia de Ré" }, 0),
+            question ("Sobre o G7 do menor, qual escala usar?",
+                      { "mixolídia (ou alterada)", "dórica", "lócria", "lídia" }, 0),
+        };
+
+        // --- Topic I — II-V-I maior e menor ----------------------------------
+        add (exercise ("EX-8.I.1", juce::String::fromUTF8 ("Questionário: II-V-I"),
+                       juce::String::fromUTF8 ("Responder ao questionário do II-V-I."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões do II-V-I.")), "I");
+        m.exercises.back().quiz = {
+            question ("Quais funções o II-V-I reúne?",
+                      { "subdominante, dominante e tônica",
+                        "tônica, tônica e dominante",
+                        "dominante e empréstimo",
+                        "apenas dominante" }, 0),
+            question ("O II-V-I maior em Dó é:",
+                      { "Dm7 → G7 → CM7", "Dm7b5 → G7 → Cm7",
+                        "Dm7 → Db7 → CM7", "Fm7 → Bb7 → CM7" }, 0),
+            question ("O II-V-I menor em Dó é:",
+                      { "Dm7b5 → G7 → Cm7", "Dm7 → G7 → CM7",
+                        "Dm7 → Db7 → Cm7", "Fm7 → G7 → Cm7" }, 0),
+            question ("O que conduz as vozes no II-V-I?",
+                      { "o voice leading por meio-tom", "o volume",
+                        "a corda usada", "a velocidade" }, 0),
+            question ("As notas-guia de um acorde são:",
+                      { "a terça e a sétima", "a tônica e a quinta",
+                        "a nona e a décima primeira", "a fundamental e a oitava" }, 0),
+        };
+        add (progressionExercise ("EX-8.I.2", "II-V-I maior",
+                                  "Tocar Dm7 → G7 → CM7.",
+                                  { { 2, 5, 9, 0 }, { 7, 11, 2, 5 }, { 0, 4, 7, 11 } }), "I");
+        add (progressionExercise ("EX-8.I.3", "II-V-I menor",
+                                  "Tocar Dm7b5 → G7 → Cm7.",
+                                  { { 2, 5, 8, 0 }, { 7, 11, 2, 5 }, { 0, 3, 7, 10 } }), "I");
+        add (exercise ("EX-8.I.4", juce::String::fromUTF8 ("II-V-I em outras tonalidades"),
+                       juce::String::fromUTF8 ("Dizer o II-V-I em outras tonalidades."),
+                       juce::String::fromUTF8 ("Acerto ≥90% no questionário de transposição.")), "I");
+        m.exercises.back().quiz = {
+            question ("O II-V-I maior em Sol é:",
+                      { "Am7 → D7 → GM7", "Am7b5 → D7 → Gm7",
+                        "Am7 → Db7 → GM7", "Cm7 → F7 → GM7" }, 0),
+            question ("O II-V-I menor em Lá menor é:",
+                      { "Bm7b5 → E7 → Am7", "Bm7 → E7 → Am7",
+                        "Bm7b5 → Bb7 → Am7", "Dm7 → G7 → Am7" }, 0),
+            question ("No II-V-I menor, o dominante costuma receber:",
+                      { "b9", "#11 apenas", "nona maior", "nenhuma tensão" }, 0),
+        };
+
+        // --- Topic J — situações que não são II-V-I --------------------------
+        add (exercise ("EX-8.J.1", juce::String::fromUTF8 ("Questionário: o que não é II-V-I"),
+                       juce::String::fromUTF8 ("Responder ao questionário das falsas cadências."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "J");
+        m.exercises.back().quiz = {
+            question ("A cadência deceptiva resolve em:",
+                      { "no vi", "no I", "no IV", "no V" }, 0),
+            question ("A cadência de backdoor usa:",
+                      { "iv menor e bVII", "ii e V", "só o V", "só o IV" }, 0),
+            question ("Um vamp modal:",
+                      { "nunca resolve", "sempre resolve no I",
+                        "tem dois dominantes", "é um II-V-I" }, 0),
+            question ("A meia cadência para:",
+                      { "no V", "no I", "no vi", "no bVII" }, 0),
+            question ("A pergunta-chave para identificar uma progressão é:",
+                      { "qual é o alvo e como ele é alcançado",
+                        "quantos acordes tem",
+                        "quem compôs",
+                        "qual o andamento" }, 0),
+        };
+        add (progressionExercise ("EX-8.J.2", "Cadência deceptiva",
+                                  "Tocar Dm7 → G7 → Am7 (o dominante resolve no vi).",
+                                  { { 2, 5, 9, 0 }, { 7, 11, 2, 5 }, { 9, 0, 4, 7 } }), "J");
+        add (progressionExercise ("EX-8.J.3", "Cadência de backdoor",
+                                  "Tocar Fm7 → Bb7 → CM7 (sem passar pelo V).",
+                                  { { 5, 8, 0, 3 }, { 10, 2, 5, 8 }, { 0, 4, 7, 11 } }), "J");
+        add (exercise ("EX-8.J.4", juce::String::fromUTF8 ("Identificar a progressão"),
+                       juce::String::fromUTF8 ("Nomear as progressões pelo alvo."),
+                       juce::String::fromUTF8 ("Acerto ≥90% na identificação.")), "J");
+        m.exercises.back().quiz = {
+            question ("G7 → Am7 é:",
+                      { "cadência deceptiva", "II-V-I", "backdoor", "plagal" }, 0),
+            question ("Fm7 → Bb7 → CM7 é:",
+                      { "cadência de backdoor", "II-V-I maior", "vamp modal", "deceptiva" }, 0),
+            question ("Dm7 → G7 (repetindo) é:",
+                      { "um vamp modal", "um II-V-I", "uma deceptiva", "um backdoor" }, 0),
+        };
+
+        // The gate closes the module: play a II-V-I maior on the grid, built
+        // from the material of the module (REQ-009, REQ-015).
+        auto& gate = m.exercises.emplace_back (exercise (
+            "GATE-8", juce::String::fromUTF8 ("Desafio de gate — II-V-I maior (Dm7–G7–CM7)"),
+            juce::String::fromUTF8 ("Tocar Dm7 – G7 – CM7 a 88 BPM, na grade do metrônomo."),
+            juce::String::fromUTF8 ("Acordes reconhecidos e alinhados à grade (≥ 0,81).")));
+        gate.isGate = true;
+        gate.lessonId = "I";
+        gate.chordProgression = {
+            { 2, 5, 9, 0 },   // Dm7
+            { 7, 11, 2, 5 },  // G7
+            { 0, 4, 7, 11 },  // CM7
+        };
+
+        m.gateChallenge = juce::String::fromUTF8 (
+            "Tocar Dm7 – G7 – CM7 (II-V-I maior, nível 4) a 88 BPM com ≥90% de "
+            "acerto de acordes e on_grid_ratio ≥ 0,81. A cadência usa o dominante "
+            "estudado no módulo.");
 
         // Pattern and links the module must cite (REQ-007, REQ-010).
         m.practice.patternId = "PTN-A-DROP2";
@@ -3458,6 +3958,17 @@ namespace
         m.sources = {
             "pdf-teoria-elementar-da-musica-ricordi-osvaldo-lacerda",
             "pdf-p-classtruncatedtext-module-lineclamped-85ulhh-style-max-lines5bohumil-med-teoria-da-musica-5-edicao-p",
+            "Arpejos de sétima em Drop 2: a digitação fixa 1-3-5-7 aplica-se a "
+            "qualquer acorde do módulo (Dm7, G7, CM7, Db7), de modo que o aluno "
+            "ouve cada nota do dominante e da sua substituição. Complemento: "
+            "PTN-M-4ths (quartas) para ouvir o movimento das quintas.");
+        m.practice.guitarists = { "Joe Pass", "Wes Montgomery", "Pat Metheny" };
+
+        // Curated apostilas (REQ-006, CM-012); see docs/MUSIC.md §8.
+        m.sources = {
+            "pdf-p-classtruncatedtext-module-lineclamped-85ulhh-style-max-lines5bohumil-med-teoria-da-musica-5-edicao-p",
+            "pdf-desvendando-os-segredos-da-guitarra-fusion",
+            "pdf-teoria-elementar-da-musica-ricordi-osvaldo-lacerda",
             "pdf-mozart-mello-livroestudosdeguitarra4em1",
             "pdf-caged-e-derivaoes-de-acordes-marcelo-mello-apostila-de-violao-e-guitarra-vol1",
         };
@@ -3501,6 +4012,7 @@ const std::vector<CourseModule>& ModuleCatalog::getModules()
         makePlaceholder (7,  "II–V–I (aplicação)",                  3,  84,  0.80f),
         makeModule7(),
         makePlaceholder (8,  "Turnarounds",                         4,  88,  0.81f),
+        makeModule8(),
         makePlaceholder (9,  "Turnarounds (variações)",             4,  92,  0.81f),
         makePlaceholder (10, "Turnarounds (aplicação)",             4,  96,  0.82f),
         makePlaceholder (11, "Blues de 12 compassos",               5, 100,  0.82f),

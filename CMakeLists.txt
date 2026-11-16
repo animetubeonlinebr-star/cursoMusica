@@ -155,6 +155,16 @@ target_sources(CursoMusica PRIVATE
     Source/Course/Content/Topic7H.cpp
     Source/Course/Content/Topic7I.cpp
     Source/Course/Content/Topic7J.cpp
+    Source/Course/Content/Topic8A.cpp
+    Source/Course/Content/Topic8B.cpp
+    Source/Course/Content/Topic8C.cpp
+    Source/Course/Content/Topic8D.cpp
+    Source/Course/Content/Topic8E.cpp
+    Source/Course/Content/Topic8F.cpp
+    Source/Course/Content/Topic8G.cpp
+    Source/Course/Content/Topic8H.cpp
+    Source/Course/Content/Topic8I.cpp
+    Source/Course/Content/Topic8J.cpp
     Source/UI/Design/LookAndFeel.cpp
     Source/UI/Design/Panel.cpp
     Source/UI/LevelMeter.cpp
@@ -395,6 +405,16 @@ target_sources(CursoMusicaTests PRIVATE
     Source/Course/Content/Topic7H.cpp
     Source/Course/Content/Topic7I.cpp
     Source/Course/Content/Topic7J.cpp
+    Source/Course/Content/Topic8A.cpp
+    Source/Course/Content/Topic8B.cpp
+    Source/Course/Content/Topic8C.cpp
+    Source/Course/Content/Topic8D.cpp
+    Source/Course/Content/Topic8E.cpp
+    Source/Course/Content/Topic8F.cpp
+    Source/Course/Content/Topic8G.cpp
+    Source/Course/Content/Topic8H.cpp
+    Source/Course/Content/Topic8I.cpp
+    Source/Course/Content/Topic8J.cpp
     Source/Audio/AudioPortClassifier.cpp
     Source/Audio/PluginSearchPaths.cpp)
 
