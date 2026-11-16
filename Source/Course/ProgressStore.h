@@ -55,6 +55,9 @@ public:
     void setUnlockAll (bool shouldUnlockAll) noexcept { unlockAll = shouldUnlockAll; }
     bool isUnlockAll() const noexcept { return unlockAll.load(); }
 
+    // Wipes the student's progress: the local record and, when the mirror is
+    // configured, the database rows too (docs/DATA.md). Without the remote wipe
+    // the next reconcile would bring the old record back.
     void reset();
 
     // Diagnostics (no secrets): whether remote storage is configured in this
@@ -71,6 +74,7 @@ private:
     void save() const;
     void enqueueRemote (int moduleNumber, bool passed);
     void enqueueRemoteExercise (const juce::String& exerciseId, double accuracyPercent);
+    void enqueueRemoteWipe();
 
     // The key is "exercise/<id>", the value is the accuracy in percent.
     static juce::String exerciseKey (const juce::String& exerciseId);
@@ -79,6 +83,13 @@ private:
     std::atomic<bool> unlockAll { false };
     std::atomic<bool> remoteConnected { false };
     bool remoteConfigured = false;
+
+    // A reset must clear the mirror too; until that wipe lands, the background
+    // reconcile must not raise the local record from the still-stale remote row
+    // (otherwise the erased progress would come straight back). recordLock
+    // serialises reset() against that reconcile.
+    juce::CriticalSection recordLock;
+    std::atomic<bool> remoteWipePending { false };
 
     // Shared with every other persisting component (see AppSettings): a second
     // PropertiesFile over the same file would drop the keys it never loaded.

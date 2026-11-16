@@ -605,6 +605,14 @@ void testProgressDatabase()
     const auto all = scoped.loadExerciseResults();
     check (all.size() == 2, "all exercise results of the student are listed");
 
+    // The student can erase their data (docs/DATA.md): clearProgress() must wipe
+    // every row of this student and leave the other students untouched.
+    check (scoped.clearProgress(), "clearProgress wipes the student's rows");
+    check (scoped.loadHighestPassedModule() == -1, "the progress record is gone");
+    check (scoped.loadExerciseResult ("gate-1") == -1, "the exercise result is gone");
+    check (scoped.loadExerciseResults().empty(), "no exercise result survives the wipe");
+    check (scoped.clearProgress(), "clearing an already empty record is fine");
+
     std::cout << "  (integration against PostgreSQL verified)\n";
 }
 
@@ -661,6 +669,18 @@ void testProgressStore()
         check (reopened.getHighestPassedModule() == 0, "reset clears the record");
         check (reopened.getExerciseAccuracy ("gate-1") == -1,
                "reset clears the per-exercise percentages too");
+
+        // Regression: the mirror must not resurrect the erased record. A reset
+        // also wipes the database rows, and until that wipe lands the background
+        // reconcile is blocked; otherwise it would raise highestPassedModule back
+        // from the stale remote row (this made the suite flaky in CI, where a
+        // real PostgreSQL is present).
+        if (reopened.isRemoteConfigured())
+        {
+            juce::Thread::sleep (2500);
+            check (reopened.getHighestPassedModule() == 0,
+                   "the mirror does not restore the erased record");
+        }
     }
 
     // And the per-exercise percentage survives a restart as well.
