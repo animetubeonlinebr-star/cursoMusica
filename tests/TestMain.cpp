@@ -9,7 +9,9 @@
 #include <vector>
 
 #include "Audio/AudioPortClassifier.h"
+#include "Audio/PitchDetector.h"
 #include "Audio/PluginSearchPaths.h"
+#include "UI/PairedSlots.h"
 #include "Course/Content/Diagrams.h"
 #include "Course/Content/Topics.h"
 #include "Course/Content/ScoreNotes.h"
@@ -853,6 +855,119 @@ void testPluginSearchPaths()
     PluginSearchPaths fromArray;
     fromArray.setFromArray ({ "C:/A", "", "C:/A", "C:/B" });
     check (fromArray.size() == 2, "setFromArray drops blanks and duplicates");
+
+    // Regression (client bug 2026-11-16): the scan walked the whole computer
+    // because it always added the format's default locations on top of the
+    // selected folders. Once a configured folder exists, it must be the *only*
+    // thing searched; the defaults apply only when nothing is configured.
+    const auto existingFolder = juce::File::getSpecialLocation (juce::File::tempDirectory);
+    const auto missingFolder = existingFolder.getChildFile ("cursomusica_pasta_inexistente_xyz");
+
+    juce::FileSearchPath defaults;
+    defaults.add (existingFolder.getChildFile ("vst3_defaults"));
+
+    PluginSearchPaths onlyStale;
+    onlyStale.add (missingFolder.getFullPathName());
+    check (onlyStale.resolveExisting().getNumPaths() == 0, "a stale entry is not searched");
+    check (onlyStale.resolveScanFolders (defaults).getNumPaths() == defaults.getNumPaths(),
+           "with no usable folder the scan falls back to the default locations");
+
+    PluginSearchPaths configured;
+    configured.add (existingFolder.getFullPathName());
+    const auto scan = configured.resolveScanFolders (defaults);
+    check (scan.getNumPaths() == 1, "a configured folder replaces the default locations");
+    check (scan[0] == existingFolder, "the scan searches the configured folder");
+    bool defaultPresent = false;
+    for (int i = 0; i < scan.getNumPaths(); ++i)
+        if (scan[i] == defaults[0])
+            defaultPresent = true;
+    check (! defaultPresent, "the default locations are not searched once a folder is configured");
+
+    PluginSearchPaths mixed;
+    mixed.add (missingFolder.getFullPathName());
+    mixed.add (existingFolder.getFullPathName());
+    check (mixed.resolveScanFolders (defaults).getNumPaths() == 1,
+           "only the folders that exist are searched");
+}
+
+// Regression for the crash that closed the app when any topic of modules 2..10
+// was opened (client bug 2026-11-16): the central pane kept two parallel arrays
+// for the "Ouvir exemplo" buttons — the rectangles and the notes each plays —
+// and grew only the first one, so writing the notes list ran past its end and
+// corrupted the heap. ensurePairedSlots keeps them the same length.
+void testPairedSlots()
+{
+    std::cout << "PairedSlots (audio button bookkeeping)\n";
+    using cursomusica::ui::ensurePairedSlots;
+
+    std::vector<int> slots;
+    std::vector<std::vector<int>> payloads;
+
+    ensurePairedSlots (slots, payloads, 0);
+    check (slots.size() == 1 && payloads.size() == 1,
+           "the first button grows both lists to one slot");
+
+    // The old code only grew `slots`; indexing payloads[3] would then be
+    // out of bounds. Both must reach the requested index together.
+    ensurePairedSlots (slots, payloads, 3);
+    check (slots.size() == 4, "the rectangle list reaches the requested index");
+    check (payloads.size() == 4, "the notes list reaches the requested index too");
+    check (payloads[3].empty(), "a freshly grown notes slot is empty, not garbage");
+
+    // Writing at the last valid index of both lists is now safe.
+    payloads[3] = { 60, 64, 67 };
+    check (payloads[3].size() == 3, "the notes of the last button can be stored");
+
+    // A later, smaller index must not shrink the lists (they are indexed by the
+    // paint order, which can revisit an earlier button).
+    ensurePairedSlots (slots, payloads, 1);
+    check (slots.size() == 4 && payloads.size() == 4, "an earlier index does not shrink the lists");
+}
+
+// The tuner's signal path in isolation: the YIN detector must turn a known tone
+// into the matching frequency and must report nothing for silence. This is the
+// half of the "tuner shows no signal" bug that lives outside the audio device:
+// even with the callback registered, a detector that never locks would leave the
+// needle at "no signal".
+void testPitchDetector()
+{
+    std::cout << "PitchDetector (tuner signal path)\n";
+
+    constexpr double sampleRate = 48000.0;
+
+    auto tone = [] (double frequency, double rate, int samples)
+    {
+        std::vector<float> data ((size_t) samples);
+        for (int i = 0; i < samples; ++i)
+            data[(size_t) i] = (float) (0.5 * std::sin (2.0 * juce::MathConstants<double>::pi
+                                                        * frequency * (double) i / rate));
+        return data;
+    };
+
+    cursomusica::PitchDetector detector;
+    detector.prepare (sampleRate);
+
+    const auto a2 = tone (110.0, sampleRate, 8192);
+    float detected = 0.0f;
+    for (int offset = 0; offset + 1024 <= (int) a2.size(); offset += 1024)
+        detected = detector.processBlock (a2.data() + offset, 1024);
+
+    check (detected > 0.0f, "a played tone is detected (not silence)");
+    check (std::abs (detected - 110.0f) < 2.0f,
+           "A2 (110 Hz) is reported within 2 Hz, got " + juce::String (detected, 1) + " Hz");
+
+    const auto e4 = tone (329.63, sampleRate, 8192);
+    for (int offset = 0; offset + 1024 <= (int) e4.size(); offset += 1024)
+        detected = detector.processBlock (e4.data() + offset, 1024);
+    check (std::abs (detected - 329.63f) < 3.0f,
+           "E4 (329.63 Hz) is reported within 3 Hz, got " + juce::String (detected, 1) + " Hz");
+
+    // Silence must not be reported as a pitch (the "no signal" state).
+    std::vector<float> silence (4096, 0.0f);
+    float silentReading = 0.0f;
+    for (int offset = 0; offset + 1024 <= (int) silence.size(); offset += 1024)
+        silentReading = detector.processBlock (silence.data() + offset, 1024);
+    check (silentReading <= 0.0f, "silence is reported as no pitch (0 Hz)");
 }
 
 // Interval theory (module 2): the mapping between semitones and interval names
@@ -3041,6 +3156,8 @@ int main()
     testProgression();
     testAudioPortClassifier();
     testPluginSearchPaths();
+    testPairedSlots();
+    testPitchDetector();
     testIntervals();
     testIntervalEvaluation();
     testModuleCatalog();

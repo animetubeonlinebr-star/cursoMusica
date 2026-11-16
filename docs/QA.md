@@ -51,12 +51,15 @@ Dono: **qa**. Estratégia de teste, execuções e defeitos. Evidência obrigató
 |---|---|---|---|
 | 2026-11-02 | `feat/measurement-engine` (Módulo 1) | **85/85 checagens verdes** (`ctest` no CI). Smoke manual em Xvfb: módulos 2+ bloqueados com aviso; após registrar `highestPassedModule=1`, o Módulo 2 abre; trilha de prática exibe `PTN-R-PALM` + "Referência: Juninho Afram"; bloco I (rítmica) e seção "Apostilas" (curadoria) renderizam no fim do módulo | `CursoMusicaTests`, job Linux do CI; capturas do smoke |
 | 2026-11-02 | `feat/multi-agent-framework` | Build não aplicável (só docs/agentes neste ciclo); sem suíte ainda | — |
+| 2026-11-16 | `test` (correções dos 3 bugs do cliente) | **7209/7209 checagens verdes** (`ctest`, build Linux). Regressões novas: `testPitchDetector` (afinador: tom detectado, silêncio vazio), `testPairedSlots` (crash do tópico), `testPluginSearchPaths` estendido (varredura confinada às pastas). Build da GUI (`Curso Musica Studio`) sem avisos | `CursoMusicaTests`, build Ninja local (JUCE 8.0.4) |
 
 ## Defeitos
 
 | ID | Severidade | Descrição | Dono | Status |
 |---|---|---|---|---|
-| — | — | Nenhum registrado | — | — |
+| QA-001 | Alta | **Afinador sem sinal.** `AudioEngine::initialise()` abria o dispositivo mas **nunca registrava o callback** (`openBestInputDevice()` não tinha chamador), então o callback de áudio nunca era invocado e `detectedFrequencyHz`/`inputLevelDb` ficavam em zero para sempre — o afinador mostrava "no signal" mesmo com entrada/saída configuradas. Correção: `initialise()` chama `openBestInputDevice()` e garante o `addAudioCallback(this)`. Regressão: `testPitchDetector` (tom sintético A2/E4 detectado; silêncio → 0 Hz) | developer | Corrigido (2026-11-16) |
+| QA-002 | Alta | **Varredura de VST3 varria o computador inteiro e não listava os `.vst3`.** O scan sempre somava os locais padrão do formato às pastas escolhidas, então percorria o sistema todo; e o resultado da pasta selecionada se perdia no volume. Correção: `PluginSearchPaths::resolveScanFolders()` — as pastas configuradas **substituem** os locais padrão quando existem; os padrões só valem sem nenhuma pasta configurada. `PluginHost` usa a mesma regra na varredura e na poda. Regressão: `testPluginSearchPaths` (pasta configurada exclui os padrões; pasta morta cai no padrão) | developer | Corrigido (2026-11-16) |
+| QA-003 | Crítica | **App encerrava ao abrir qualquer tópico de módulo ≠ 1.** O painel central mantinha dois vetores paralelos para os botões "Ouvir exemplo" (retângulos e notas) e crescia **só o primeiro**; `audioNotes[index]` escrevia além do fim e corrompia o heap. Só o Módulo 1 escapava por não ter itens de áudio/partitura; os módulos 2–10 têm. Correção: `ui::ensurePairedSlots()` (`Source/UI/PairedSlots.h`) cresce os dois juntos. Regressão: `testPairedSlots` | developer | Corrigido (2026-11-16) |
 
 ## Pendências
 

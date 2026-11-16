@@ -33,15 +33,16 @@ public:
     PluginSearchPaths& getSearchPaths() noexcept { return searchPaths; }
     const PluginSearchPaths& getSearchPaths() const noexcept { return searchPaths; }
     // Persists the current folder list and drops the cached plugin types that
-    // came from folders no longer configured.
+    // fall outside the folders the scan will now search.
     void saveSearchPaths();
-    // The folder list changed: forget the plugins that lived in removed folders
-    // so a rescan does not keep offering them.
+    // The folder list changed: forget the plugins the next scan would not find,
+    // so the list never offers a plugin the scan can no longer reach.
     void prunePluginsOutsideSearchPaths();
 
-    // Scans the configured VST3 locations (default locations plus the user's
-    // folders). Runs on a background thread; the callback is invoked on the
-    // message thread as the scan progresses.
+    // Scans the configured VST3 locations: the user's folders when any is
+    // configured, the format's default locations otherwise. Runs on a background
+    // thread; the callback is invoked on the message thread as the scan
+    // progresses.
     void scanForPlugins (std::function<void (float progress, const juce::String& current)> onProgress,
                          std::function<void()> onFinished);
 

@@ -38,14 +38,22 @@ Restrições:
    mesmo `PropertiesFile` que já guarda o cache de plugins. Gravar chama
    `saveIfNeeded()` na hora: a janela escreve a cada edição e o app pode fechar
    antes do temporizador do `PropertiesFile`.
-3. **A varredura soma os dois conjuntos**, sem duplicar: locais padrão do
-   formato mais as pastas do usuário que existem no disco
-   (`resolveExisting()`). Uma pasta apagada não quebra o scan nem desaparece da
-   lista — o usuário vê e corrige.
+3. **A varredura usa as pastas configuradas, e só elas.** Havendo ao menos
+   uma pasta configurada existente no disco (`resolveExisting()`), essa lista
+   **substitui** os locais padrão do formato; os padrões só são usados quando
+   nada foi configurado (ou quando todas as entradas estão mortas), para que
+   uma instalação nova ainda encontre plugins sem configuração. Uma pasta
+   apagada não quebra o scan nem desaparece da lista — o usuário vê e corrige.
+   *(Atualizado 2026-11-16: antes os padrões eram **somados** às pastas, o que
+   fazia a varredura percorrer o computador inteiro — bug do cliente. A regra
+   vive em `PluginSearchPaths::resolveScanFolders()` e é a mesma usada pela
+   varredura e pela poda.)*
 4. **A poda é por descendência, não igualdade.** Ao remover uma pasta, os
    plugins que moravam nela saem do cache; a checagem usa `File::isAChildOf`
-   para reconhecer o arquivo `.vst3` dentro da pasta, e os locais padrão são
-   sempre considerados válidos.
+   para reconhecer o arquivo `.vst3` dentro da pasta. Desde 2026-11-16 a poda
+   usa o **mesmo conjunto que a varredura** (`resolveScanFolders`): um plugin
+   fora das pastas configuradas sai da lista, porque a próxima varredura não o
+   alcançaria.
 5. **A UI é uma janela própria** (`Source/UI/PluginPathsComponent.*`), aberta
    pelo botão "Pastas…" ao lado da tabela de plugins. O grid tem duas colunas
    (o caminho e um botão que abre o seletor de diretório da linha) e o rodapé

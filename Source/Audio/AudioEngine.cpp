@@ -29,6 +29,20 @@ void AudioEngine::initialise()
     deviceManager.initialiseWithDefaultDevices (1, 2);
     levelSmoothingCoefficient = 0.3f;
 
+    // Opening the device is not enough: without a registered callback the audio
+    // never reaches the engine, so the tuner and the level meter sat forever at
+    // "no signal" even with the ports configured. openBestInputDevice() opens the
+    // best backend and registers `this`; the fallback keeps the callback even
+    // when no preferred backend is available, so the engine is never silent by
+    // accident.
+    openBestInputDevice();
+
+    if (! running.load())
+    {
+        deviceManager.addAudioCallback (this);
+        running.store (true);
+    }
+
     startThread (juce::Thread::Priority::high);
 }
 

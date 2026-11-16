@@ -101,4 +101,16 @@ juce::FileSearchPath PluginSearchPaths::resolveExisting() const
     return result;
 }
 
+juce::FileSearchPath PluginSearchPaths::resolveScanFolders (const juce::FileSearchPath& defaults) const
+{
+    auto configured = resolveExisting();
+
+    // The user's folders replace the defaults: the scan is confined to what was
+    // selected. Only an empty (or fully stale) list falls back to the defaults.
+    if (configured.getNumPaths() > 0)
+        return configured;
+
+    return defaults;
+}
+
 } // namespace cursomusica

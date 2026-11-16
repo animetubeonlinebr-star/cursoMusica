@@ -113,7 +113,8 @@ PluginPathsComponent::PluginPathsComponent (PluginSearchPaths& pathsToEdit)
 
     hintLabel.setText (juce::String::fromUTF8 (
                            "Informe as pastas onde estão os arquivos .vst3. A varredura procura "
-                           "também nos locais padrão do sistema."),
+                           "somente nessas pastas; sem nenhuma configurada, usa os locais padrão "
+                           "do sistema."),
                        juce::dontSendNotification);
     hintLabel.setFont (th::type::makeFont (th::type::caption));
     hintLabel.setColour (juce::Label::textColourId, th::colour::textSecondary);

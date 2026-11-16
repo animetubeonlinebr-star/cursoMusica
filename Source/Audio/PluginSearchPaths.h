@@ -50,6 +50,15 @@ public:
     // scan; a stale entry is kept in the list so the user can fix or remove it.
     juce::FileSearchPath resolveExisting() const;
 
+    // The folders the scan must actually search.
+    //
+    // The client asked the scan to stay inside the folders they selected instead
+    // of walking the whole computer: once at least one configured folder exists
+    // on disk, that set is the whole search path. Only when nothing is configured
+    // (or every entry is stale) does `defaults` — the format's own locations —
+    // apply, so a fresh install still finds plugins without any configuration.
+    juce::FileSearchPath resolveScanFolders (const juce::FileSearchPath& defaults) const;
+
 private:
     std::vector<juce::String> paths;
 };
