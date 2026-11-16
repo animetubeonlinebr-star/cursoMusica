@@ -34,7 +34,7 @@ std::vector<ContentItem> topic7B()
         b ("Base: três quartas justas empilhadas (Dó–Fá–Sib–Mib)."),
         b ("Topo: uma terça maior que define o centro (Mib–Sol)."),
         b ("O acorde é móvel: o mesmo desenho serve para qualquer centro."),
-        aud ({ "C4", "F4", "A#3", "D#4", "G4" }, "Acorde quartal no estilo So What: quartas empilhadas com terça no topo. Som suspenso e modal."),
+        aud ({ "C4", "F4", "A#4", "D#5", "G5" }, "Acorde quartal no estilo So What: quartas empilhadas com terça no topo. Som suspenso e modal."),
         img ("m7_quartais_empilhadas", "Empilhamento quartal: quartas justas sobrepostas, com a terça no topo."),
 
         h ("Quartas justas e quartas aumentadas"),
@@ -58,7 +58,7 @@ std::vector<ContentItem> topic7B()
             { "quintas (1-5-9)", "aberto, forte", "power chords, rock" },
         }),
         aud ({ "C4", "E4", "G4", "B4" }, "Empilhamento de terças: Cmaj7, claro e definido."),
-        aud ({ "C4", "F4", "A#3", "D#4" }, "Empilhamento de quartas: som suspenso, sem maior nem menor."),
+        aud ({ "C4", "F4", "A#4", "D#5" }, "Empilhamento de quartas: som suspenso, sem maior nem menor."),
 
         h ("Como usar na guitarra"),
         p (
@@ -83,7 +83,7 @@ std::vector<ContentItem> topic7B()
         b ("Duas vozes: um par de quartas, leve e aberto."),
         b ("Três vozes: o voicing modal mais comum."),
         b ("Quatro vozes: som cheio, ótimo para acompanhamento."),
-        aud ({ "C4", "F4", "A#3", "D#4", "G4" }, "Quatro vozes quartais com a terça no topo: som modal completo."),
+        aud ({ "C4", "F4", "A#4", "D#5", "G5" }, "Quatro vozes quartais com a terça no topo: som modal completo."),
 
         h ("Quartal e a bossa moderna"),
         p (
@@ -145,7 +145,7 @@ std::vector<ContentItem> topic7B()
         b ("O acorde de So What empilha três quartas e uma terça no topo."),
         b ("É a ferramenta principal dos vamps modais."),
         b ("Cuidado com a quarta aumentada, que muda a cor do empilhamento."),
-        part ("m7_partitura_quartal", { "C4", "F4", "A#3", "D#4", "G4" },
+        part ("m7_partitura_quartal", { "C4", "F4", "A#4", "D#5", "G5" },
               "Partitura: acorde quartal no estilo So What (quartas empilhadas com terça no topo). Ouça o som modal."),
     };
 }

@@ -29,8 +29,8 @@ std::vector<ContentItem> topic7I()
         b ("Fórmula do lócrio: 1 b2 b3 4 b5 b6 b7."),
         b ("Fórmula do lócrio 9: 1 2 b3 4 b5 b6 b7 (a nona natural substitui a b2)."),
         b ("Acorde típico: Xm7b5 (meio-diminuto), como II grau de um II–V–I menor."),
-        aud ({ "C4", "D4", "D#4", "F4", "F#4", "G#3", "A#3" }, "Escala lócrio 9 em Dó: meio-diminuto com a nona natural. Som tenso, mas mais suave que o lócrio puro."),
-        aud ({ "C4", "D#4", "F#4", "A#3" }, "Acorde meio-diminuto de Dó (Cm7b5): a base do lócrio 9."),
+        aud ({ "C4", "D4", "D#4", "F4", "F#4", "G#4", "A#4" }, "Escala lócrio 9 em Dó: meio-diminuto com a nona natural. Som tenso, mas mais suave que o lócrio puro."),
+        aud ({ "C4", "D#4", "F#4", "A#4" }, "Acorde meio-diminuto de Dó (Cm7b5): a base do lócrio 9."),
         c (
             "O lócrio 9 aparece no II grau dos II–V–I menores (por exemplo, Cm7b5 → F7alt → Bbm). A nona natural suaviza a tensão e faz a passagem para o dominante soar mais natural."),
 
@@ -49,8 +49,8 @@ std::vector<ContentItem> topic7I()
         b ("Fórmula: 1 b9 #9 3 b5 #5 b7."),
         b ("Acorde típico: X7alt (dominante alterado)."),
         b ("Som de tensão máxima; resolve meio-tom abaixo (ou uma quinta abaixo)."),
-        aud ({ "C4", "D#4", "E4", "F#4", "G#3", "A#3" }, "Escala alterada em Dó: dominante com todas as tensões. Som máximo de tensão."),
-        aud ({ "C4", "E4", "G#3", "A#3" }, "Acorde C7#5: uma das tensões do alterado (a quinta aumentada)."),
+        aud ({ "C4", "C#4", "D#4", "E4", "F#4", "G#4", "A#4" }, "Escala alterada em Dó: dominante com todas as tensões. Som máximo de tensão."),
+        aud ({ "C4", "E4", "G#4", "A#4" }, "Acorde C7#5: uma das tensões do alterado (a quinta aumentada)."),
         img ("m7_locrio_alterado", "Lócrio 9 e alterado: as duas escalas de tensão do módulo."),
 
         h ("A resolução do alterado"),
@@ -59,7 +59,7 @@ std::vector<ContentItem> topic7I()
         b ("Resolve meio-tom abaixo: C7alt → Dbmaj7 (se o alvo for maior)."),
         b ("Resolve uma quinta abaixo: C7alt → Fm (se o alvo for menor)."),
         b ("A tensão existe para criar a resolução."),
-        aud ({ "C4", "D#4", "E4", "F#4", "G#3", "A#3", "C#4" }, "C7alt resolvendo em Dó#: ouça a tensão e o alívio da resolução."),
+        aud ({ "C4", "C#4", "D#4", "E4", "F#4", "G#4", "A#4", "F4" }, "C7alt resolvendo em Fá: ouça a tensão e o alívio da resolução."),
 
         h ("Lócrio 9 e alterado no II–V–I menor"),
         p (
@@ -67,8 +67,8 @@ std::vector<ContentItem> topic7I()
         b ("II grau: Xm7b5, escala lócrio 9."),
         b ("V grau: X7alt, escala alterada."),
         b ("I grau: Xm (menor), a resolução."),
-        aud ({ "C4", "D#4", "F#4", "A#3" }, "II grau: Cm7b5 (lócrio 9)."),
-        aud ({ "F3", "A3", "B3", "D#4", "G#3" }, "V grau: F7alt (alterado)."),
+        aud ({ "C4", "D#4", "F#4", "A#4" }, "II grau: Cm7b5 (lócrio 9)."),
+        aud ({ "F3", "F#3", "G#3", "A3", "B3", "C#4", "D#4" }, "V grau: F7alt (alterado)."),
         aud ({ "A#3", "C#4", "F4" }, "I grau: Bbm (menor), a resolução do II–V–I menor."),
 
         h ("Comparando as duas escalas"),
@@ -108,7 +108,7 @@ std::vector<ContentItem> topic7I()
         b ("Lócrio: 1 b2 b3 4 b5 b6 b7."),
         b ("Lócrio 9: 1 2 b3 4 b5 b6 b7."),
         b ("A nona natural suaviza a tensão do modo."),
-        aud ({ "C4", "D4", "D#4", "F4", "F#4", "G#3", "A#3" }, "Lócrio 9 em Dó: a nona natural suaviza o som do meio-diminuto."),
+        aud ({ "C4", "D4", "D#4", "F4", "F#4", "G#4", "A#4" }, "Lócrio 9 em Dó: a nona natural suaviza o som do meio-diminuto."),
 
         h ("Alterado: as duas quintas e as duas nonas"),
         p (
@@ -116,7 +116,7 @@ std::vector<ContentItem> topic7I()
         b ("Quinta alterada: b5 e #5 (as duas)."),
         b ("Nona alterada: b9 e #9 (as duas)."),
         b ("Todas as tensões do dominante em uma só escala."),
-        aud ({ "C4", "D#4", "E4", "F#4", "G#3", "A#3" }, "Alterado em Dó: as duas quintas e as duas nonas alteradas."),
+        aud ({ "C4", "C#4", "D#4", "E4", "F#4", "G#4", "A#4" }, "Alterado em Dó: as duas quintas e as duas nonas alteradas."),
 
         h ("Como o alterado resolve"),
         p (
@@ -169,7 +169,7 @@ std::vector<ContentItem> topic7I()
         b ("Alterado: 1 b9 #9 3 b5 #5 b7 (tensão máxima)."),
         b ("Alterado combina com X7alt e resolve meio-tom abaixo."),
         b ("As duas aparecem juntas no II–V–I menor."),
-        part ("m7_partitura_alterado", { "C4", "D#4", "E4", "F#4", "G#3", "A#3" },
+        part ("m7_partitura_alterado", { "C4", "C#4", "D#4", "E4", "F#4", "G#4", "A#4" },
               "Partitura: escala alterada em Dó (Alt.7). Ouça a tensão máxima do dominante alterado."),
     };
 }

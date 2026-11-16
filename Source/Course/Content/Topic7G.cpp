@@ -40,7 +40,7 @@ std::vector<ContentItem> topic7G()
         b ("Fórmula: 1 2 b3 4 5 6 b7."),
         b ("Nota característica: a sexta maior (6)."),
         b ("Acorde típico: Xm7 ou Xm6 — combinam com o dórico."),
-        aud ({ "C4", "D4", "D#4", "F4", "G4", "A4", "A#3", "C5" }, "Escala dórica em Dó: menor com sexta maior (Lá). Som aberto e modal."),
+        aud ({ "C4", "D4", "D#4", "F4", "G4", "A4", "A#4", "C5" }, "Escala dórica em Dó: menor com sexta maior (Lá). Som aberto e modal."),
         img ("m7_modos_tres", "Dórico, lídio e mixolídio: a mesma escala maior vista de três graus diferentes."),
 
         h ("Lídio"),
@@ -75,7 +75,7 @@ std::vector<ContentItem> topic7G()
         b ("Fórmula: 1 2 3 4 5 6 b7."),
         b ("Nota característica: a sétima menor (b7)."),
         b ("Acorde típico: X7 (dominante) ou X7sus4 — combinam com o mixolídio."),
-        aud ({ "C4", "D4", "E4", "F4", "G4", "A4", "A#3", "C5" }, "Escala mixolídia em Dó: maior com sétima menor (Sib). Som de dominante."),
+        aud ({ "C4", "D4", "E4", "F4", "G4", "A4", "A#4", "C5" }, "Escala mixolídia em Dó: maior com sétima menor (Sib). Som de dominante."),
 
         h ("Comparando os três"),
         p (
@@ -86,8 +86,8 @@ std::vector<ContentItem> topic7G()
             { "mixolídio", "maior (3)", "b7 (menor)", "dominante, blues" },
         }),
         aud ({ "C4", "D#4", "G4", "A4" }, "Arpejo de Cm7 com a sexta (Lá): a cor do dórico."),
-        aud ({ "C4", "E4", "G4", "F#4" }, "Acorde de Dó com a quarta aumentada (Fá#): a cor do lídio."),
-        aud ({ "C4", "E4", "G4", "A#3" }, "Acorde de C7 (com Sib): a cor do mixolídio."),
+        aud ({ "C4", "E4", "F#4", "G4" }, "Acorde de Dó com a quarta aumentada (Fá#): a cor do lídio."),
+        aud ({ "C4", "E4", "G4", "A#4" }, "Acorde de C7 (com Sib): a cor do mixolídio."),
 
         h ("Onde cada modo aparece"),
         p (
@@ -174,7 +174,7 @@ std::vector<ContentItem> topic7G()
         b ("Mixolídio: maior com sétima menor (1 2 3 4 5 6 b7)."),
         b ("Cada modo combina com uma família de acordes."),
         b ("A nota característica é o que define o modo."),
-        part ("m7_partitura_dorico", { "C4", "D4", "D#4", "F4", "G4", "A4", "A#3", "C5" },
+        part ("m7_partitura_dorico", { "C4", "D4", "D#4", "F4", "G4", "A4", "A#4", "C5" },
               "Partitura: escala dórica em Dó. Ouça a sexta maior (Lá), a nota que dá a cor do modo."),
     };
 }

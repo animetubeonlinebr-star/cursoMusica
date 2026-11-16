@@ -58,8 +58,8 @@ std::vector<ContentItem> topic7A()
         p (
             "Repare no padrão: cada linha é uma sequência de terças maiores (3M) e menores (3m). O acorde diminuto usa três terças menores; o aumentado usa três maiores; as demais qualidades misturam os dois tamanhos. Aprender a ver a fórmula de terças é o que permite construir qualquer acorde em qualquer tônica."),
         aud ({ "C4", "E4", "G4", "B4" }, "Dó com sétima maior (Cmaj7): terças 3M–3m–3M, som brilhante e suspenso."),
-        aud ({ "C4", "E4", "G4", "A#3" }, "Dó com sétima dominante (C7): 3M–3m–3m, som que pede resolução."),
-        aud ({ "C4", "D#4", "G4", "A#3" }, "Dó menor com sétima (Cm7): 3m–3M–3m, som fechado e estável."),
+        aud ({ "C4", "E4", "G4", "A#4" }, "Dó com sétima dominante (C7): 3M–3m–3m, som que pede resolução."),
+        aud ({ "C4", "D#4", "G4", "A#4" }, "Dó menor com sétima (Cm7): 3m–3M–3m, som fechado e estável."),
 
         h ("Do empilhamento às tensões"),
         p (

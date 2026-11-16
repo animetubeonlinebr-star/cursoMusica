@@ -64,7 +64,7 @@ std::vector<ContentItem> topic7E()
         b ("Mixolídio: a escala maior com sétima menor."),
         b ("Lídio dominante: maior com sétima menor e #11."),
         b ("Alterado: a escala de tensão máxima sobre o dominante."),
-        aud ({ "C4", "E4", "G4", "A#3", "F#4" }, "C7#11 (lídio dominante): tensão com brilho."),
+        aud ({ "C4", "E4", "F#4", "G4", "A#4" }, "C7#11 (lídio dominante): tensão com brilho."),
 
         h ("O acorde meio-diminuto"),
         p (

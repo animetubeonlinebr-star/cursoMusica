@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <iostream>
+#include <map>
 #include <vector>
 
 #include "Audio/AudioPortClassifier.h"
@@ -1207,6 +1208,92 @@ void testModule7()
                            juce::String ("topic ") + topic.id + " example uses a valid MIDI note");
             }
         }
+
+    // Content correctness (the review found audio that did not match the
+    // notated score and a target the student could not pass). These assertions
+    // check the actual musical content, not just its presence.
+
+    // (a) A score's audio must be exactly what the score image notates, and an
+    //     audio example that teaches an ascending stack/scale must sound
+    //     ascending (its caption announces a scale/empilhamento).
+    auto ascendingLine = [] (const std::vector<int>& notes)
+    {
+        for (size_t i = 1; i < notes.size(); ++i)
+            if (notes[i] <= notes[i - 1])
+                return false;
+        return true;
+    };
+
+    const std::map<juce::String, std::vector<int>> scoreNotation {
+        { "m7_partitura_tercas",      { 60, 64, 67, 71 } },                 // Cmaj7
+        { "m7_partitura_quartal",     { 60, 65, 70, 75, 79 } },             // C F Bb Eb G
+        { "m7_partitura_outros",      { 48, 55, 62, 69 } },                 // quintas
+        { "m7_partitura_triade_meio", { 48, 55, 59, 62 } },                 // Cmaj9
+        { "m7_partitura_familias",    { 50, 53, 57, 60, 64 } },             // Dm9
+        { "m7_partitura_caged",       { 60, 62, 64, 65, 67, 69, 71, 72 } }, // C maior
+        { "m7_partitura_dorico",      { 60, 62, 63, 65, 67, 69, 70, 72 } }, // dorico
+        { "m7_partitura_sus",         { 60, 65, 67, 70 } },                 // C7sus4
+        { "m7_partitura_alterado",    { 60, 61, 63, 64, 66, 68, 70 } },     // alterado
+        { "m7_partitura_vamp_modal",  { 60, 62, 63, 65, 67, 69, 70, 72 } }, // dorico
+    };
+
+    int scoresChecked = 0;
+    for (const auto& topic : m7->lessons)
+        for (const auto& item : topic.detail)
+        {
+            if (item.kind == ContentKind::score)
+            {
+                const auto it = scoreNotation.find (item.imageName);
+                check (it != scoreNotation.end(),
+                       "score " + item.imageName + " is known to the content test");
+                if (it != scoreNotation.end())
+                    check (item.notes == it->second,
+                           "score " + item.imageName + " audio matches the notated image");
+                ++scoresChecked;
+            }
+            else if (item.kind == ContentKind::audio)
+            {
+                if (item.text.containsIgnoreCase ("escala")
+                    || item.text.containsIgnoreCase ("empilhamento"))
+                    check (ascendingLine (item.notes),
+                           "ascending example '" + item.text.substring (0, 24) + "...' rises");
+            }
+        }
+    check (scoresChecked >= 10, "module 7 has all ten scores checked for notation");
+
+    // (b) A scale exercise's target is the correct ascending sequence, and (c)
+    //     playing that sequence correctly must pass the real evaluator (this is
+    //     the regression for EX-7.G.2, which failed with matched=7/8).
+    const std::map<juce::String, std::vector<int>> scaleTargets {
+        { "EX-7.F.2", { 60, 62, 64, 65, 67, 69, 71, 72 } }, // C maior
+        { "EX-7.F.3", { 62, 64, 65, 67, 69, 71, 72, 74 } }, // D dorico (no tom)
+        { "EX-7.G.2", { 60, 62, 63, 65, 67, 69, 70, 72 } }, // C dorico
+        { "EX-7.G.3", { 60, 62, 64, 66, 67, 69, 71, 72 } }, // C lidio
+    };
+
+    for (const auto& e : m7->exercises)
+    {
+        const auto it = scaleTargets.find (e.id);
+        if (it == scaleTargets.end())
+            continue;
+
+        std::vector<int> actual;
+        for (const auto& t : e.targets)
+            actual.push_back (t.midi);
+        check (actual == it->second, "exercise " + e.id + " target is the correct ascending scale");
+
+        std::vector<course::NoteEvent> played;
+        double t = 0.0;
+        for (const int midi : it->second)
+        {
+            played.push_back ({ t, midi, 0.0f });
+            t += 0.4;
+        }
+        const auto result = course::evaluator::evaluateSequence (e.targets, played);
+        check (result.passed,
+               "playing " + e.id + " correctly passes the evaluator (matched="
+                   + juce::String (result.matched) + "/" + juce::String (result.total) + ")");
+    }
 
     // The module cites >=1 pattern and >=1 guitarist (REQ-007, REQ-010).
     check (m7->practice.patternId.isNotEmpty(), "module 7 cites a pattern");

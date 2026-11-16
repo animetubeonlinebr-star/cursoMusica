@@ -1450,7 +1450,7 @@ namespace
         add (exercise ("EX-7.G.2", juce::String::fromUTF8 ("Tocar a escala dórica"),
                        juce::String::fromUTF8 ("Tocar a escala dórica em Dó (menor com a sexta maior)."),
                        juce::String::fromUTF8 ("O app reconhece a sequência da escala dórica em Dó.")), "G");
-        m.exercises.back().targets = notes ({ "C4", "D4", "D#4", "F4", "G4", "A4", "A#3", "C5" });
+        m.exercises.back().targets = notes ({ "C4", "D4", "D#4", "F4", "G4", "A4", "A#4", "C5" });
         m.exercises.back().usesGrid = false;
         add (exercise ("EX-7.G.3", juce::String::fromUTF8 ("Tocar a escala lídia"),
                        juce::String::fromUTF8 ("Tocar a escala lídia em Dó (maior com a quarta aumentada)."),

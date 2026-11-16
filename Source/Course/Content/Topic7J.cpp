@@ -29,7 +29,7 @@ std::vector<ContentItem> topic7J()
         b ("Vamps de um acorde dominante (X7)."),
         b ("Riffs que não resolvem."),
         b ("Solos sobre bases estáticas."),
-        aud ({ "C4", "D4", "E4", "F4", "G4", "A4", "A#3", "C5" }, "Mixolídio em Dó: o som dominante do rock, com a sétima menor (Sib)."),
+        aud ({ "C4", "D4", "E4", "F4", "G4", "A4", "A#4", "C5" }, "Mixolídio em Dó: o som dominante do rock, com a sétima menor (Sib)."),
         img ("m7_aplicacoes_rock", "Aplicações modais no rock: cada modo, um tipo de vamp e de cor."),
 
         h ("Dórico no rock e no pop"),
@@ -38,7 +38,7 @@ std::vector<ContentItem> topic7J()
         b ("Riffs menores com energia."),
         b ("Vamps em Xm7."),
         b ("Solos que combinam menor com movimento."),
-        aud ({ "C4", "D4", "D#4", "F4", "G4", "A4", "A#3", "C5" }, "Dórico em Dó: menor com a sexta maior (Lá). Menor cheio de energia."),
+        aud ({ "C4", "D4", "D#4", "F4", "G4", "A4", "A#4", "C5" }, "Dórico em Dó: menor com a sexta maior (Lá). Menor cheio de energia."),
 
         h ("Lídio no rock progressivo e na música instrumental"),
         p (
@@ -54,7 +54,7 @@ std::vector<ContentItem> topic7J()
         b ("Pentatônica menor: contida no dórico e no eólio."),
         b ("Pentatônica maior: contida no jônio, lídio e mixolídio."),
         b ("A pentatônica é um bom ponto de partida; os modos acrescentam cor."),
-        aud ({ "C4", "D#4", "F4", "G4", "A#3", "C5" }, "Pentatônica menor em Dó: as notas estáveis do menor, contidas nos modos menores."),
+        aud ({ "C4", "D#4", "F4", "G4", "A#4", "C5" }, "Pentatônica menor em Dó: as notas estáveis do menor, contidas nos modos menores."),
 
         h ("Aplicações por modo: resumo prático"),
         p (
@@ -93,7 +93,7 @@ std::vector<ContentItem> topic7J()
         b ("Escolha o modo pela emoção que quer transmitir."),
         b ("Use as tríades do meio para construir os voicings."),
         b ("Mantenha o centro claro para o ouvido não se perder."),
-        aud ({ "C4", "D4", "D#4", "F4", "G4", "A4", "A#3", "C5" }, "Vamp modal em Dó dórico: o som do rock menor com energia."),
+        aud ({ "C4", "D4", "D#4", "F4", "G4", "A4", "A#4", "C5" }, "Vamp modal em Dó dórico: o som do rock menor com energia."),
 
         h ("Improvisando sobre vamps modais"),
         p (
@@ -116,7 +116,7 @@ std::vector<ContentItem> topic7J()
         b ("Frígio: som espanhol, comum no metal e no flamenco."),
         b ("Eólio: menor natural, som melancólico do rock e do metal."),
         b ("A segunda menor (frígio) é a nota característica do modo."),
-        aud ({ "C4", "C#4", "D#4", "F4", "G4", "G#3", "A#3" }, "Frígio em Dó: menor com segunda menor (Réb). Som espanhol."),
+        aud ({ "C4", "C#4", "D#4", "F4", "G4", "G#4", "A#4" }, "Frígio em Dó: menor com segunda menor (Réb). Som espanhol."),
 
         h ("Os modos e o riff de guitarra"),
         p (
@@ -132,7 +132,7 @@ std::vector<ContentItem> topic7J()
         b ("Dois acordes do mesmo campo: um modo só."),
         b ("Dois centros diferentes: troque o modo."),
         b ("O ouvido percebe a cor e o movimento."),
-        aud ({ "C4", "D4", "D#4", "F4", "G4", "A4", "A#3", "C5" }, "Vamp de dois acordes em Dó dórico: a cor modal em movimento."),
+        aud ({ "C4", "D4", "D#4", "F4", "G4", "A4", "A#4", "C5" }, "Vamp de dois acordes em Dó dórico: a cor modal em movimento."),
 
         h ("Transcrevendo e reconhecendo o modal"),
         p (
@@ -165,7 +165,7 @@ std::vector<ContentItem> topic7J()
         b ("Modos: dórico, lídio, mixolídio e as suas variações."),
         b ("Tensões: sus, #4, lócrio 9 e alterado."),
         b ("Aplicação: vamps modais no rock e no pop-rock."),
-        part ("m7_partitura_vamp_modal", { "C4", "D4", "D#4", "F4", "G4", "A4", "A#3", "C5" },
+        part ("m7_partitura_vamp_modal", { "C4", "D4", "D#4", "F4", "G4", "A4", "A#4", "C5" },
               "Partitura: vamp modal em Dó dórico, o som do rock menor. Ouça a cor do modo."),
     };
 }

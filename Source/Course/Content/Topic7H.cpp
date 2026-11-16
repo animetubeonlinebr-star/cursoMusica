@@ -28,8 +28,8 @@ std::vector<ContentItem> topic7H()
         b ("Fórmula: 1 2 4 5 6 b7 (sem a terça)."),
         b ("Acorde típico: X7sus4."),
         b ("Som suspenso, sem resolução imediata."),
-        aud ({ "C4", "F4", "G4", "A#3" }, "Acorde sus de Dó (C7sus4): quarta no lugar da terça, som suspenso."),
-        aud ({ "C4", "D4", "F4", "G4", "A4", "A#3", "C5" }, "Escala mixolídia sus em Dó: sem a terça, suspensa."),
+        aud ({ "C4", "F4", "G4", "A#4" }, "Acorde sus de Dó (C7sus4): quarta no lugar da terça, som suspenso."),
+        aud ({ "C4", "D4", "F4", "G4", "A4", "A#4", "C5" }, "Escala mixolídia sus em Dó: sem a terça, suspensa."),
         c (
             "O acorde sus aparece muito em música pop, gospel e bossa, porque o som suspenso cria expectativa sem definir maior ou menor. O mixolídio sus é a escala que combina com esse acorde."),
 
@@ -48,8 +48,8 @@ std::vector<ContentItem> topic7H()
         b ("Fórmula: 1 2 3 #4 5 6 b7."),
         b ("Acorde típico: X7#11."),
         b ("Som tenso e brilhante ao mesmo tempo."),
-        aud ({ "C4", "E4", "G4", "A#3", "F#4" }, "Acorde de Dó com #11 (C7#11): a cor do lídio dominante."),
-        aud ({ "C4", "D4", "E4", "F#4", "G4", "A4", "A#3", "C5" }, "Escala mixolídia #4 em Dó: dominante com a quarta aumentada."),
+        aud ({ "C4", "E4", "F#4", "G4", "A#4" }, "Acorde de Dó com #11 (C7#11): a cor do lídio dominante."),
+        aud ({ "C4", "D4", "E4", "F#4", "G4", "A4", "A#4", "C5" }, "Escala mixolídia #4 em Dó: dominante com a quarta aumentada."),
         img ("m7_modos_sus_alt", "Mixolídio sus e mixolídio #4: duas variações do dominante, duas cores."),
 
         h ("Comparando as três variações do mixolídio"),
@@ -60,9 +60,9 @@ std::vector<ContentItem> topic7H()
             { "mixolídio sus", "1 2 4 5 6 b7", "terça → quarta (4)", "X7sus4" },
             { "mixolídio #4", "1 2 3 #4 5 6 b7", "quarta → #4", "X7#11" },
         }),
-        aud ({ "C4", "E4", "G4", "A#3" }, "C7: mixolídio natural, com a terça."),
-        aud ({ "C4", "F4", "G4", "A#3" }, "C7sus4: mixolídio sus, com a quarta no lugar da terça."),
-        aud ({ "C4", "E4", "F#4", "A#3" }, "C7#11: mixolídio #4, com a quarta aumentada."),
+        aud ({ "C4", "E4", "G4", "A#4" }, "C7: mixolídio natural, com a terça."),
+        aud ({ "C4", "F4", "G4", "A#4" }, "C7sus4: mixolídio sus, com a quarta no lugar da terça."),
+        aud ({ "C4", "E4", "F#4", "A#4" }, "C7#11: mixolídio #4, com a quarta aumentada."),
 
         h ("Aplicações do mixolídio sus"),
         p (
@@ -174,7 +174,7 @@ std::vector<ContentItem> topic7H()
         b ("As duas são variações do dominante, com cores diferentes."),
         b ("A escolha depende da tensão presente no acorde."),
         b ("Elas preparam o estudo do dominante alterado."),
-        part ("m7_partitura_sus", { "C4", "F4", "G4", "A#3" },
+        part ("m7_partitura_sus", { "C4", "F4", "G4", "A#4" },
               "Partitura: acorde sus de Dó (C7sus4). Ouça o som suspenso, sem a terça."),
     };
 }
