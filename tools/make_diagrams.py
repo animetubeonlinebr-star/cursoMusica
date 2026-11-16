@@ -1019,7 +1019,9 @@ def d_m4_abertas_fechadas():
 
 
 def d_m4_inversoes():
-    h = 780
+    braco_h = 6 * 28                 # seis cordas, com folga para as notas
+    pitch = 220                      # passo entre linhas: caber rotulo + braco + folga
+    h = 920
     img, d = canvas(h, BG)
     frame(d, h)
     y = title(d, "Inversoes da triade de Do (C - E - G)")
@@ -1030,9 +1032,9 @@ def d_m4_inversoes():
         ("2a inversao (Sol no baixo)", [-1, -1, 5, 5, 5, -1], "Sol - Do - Mi"),
     ]
     for k, (label, frets, cap) in enumerate(rows):
-        top = y + 60 + k * 170
+        top = y + 60 + k * pitch
         d.text((MARGIN, top), label, font=font(20, True), fill=CYAN, anchor="la")
-        string_labels(d, MARGIN + 10, top + 34, 6 * 30, gap_font=font(13, True))
+        string_labels(d, MARGIN + 10, top + 34, braco_h, gap_font=font(13, True))
         # Pitch classes actually sounded, and the bass = lowest sounding string
         # (the first non-muted entry, since TUNING runs from the 6th to the 1st).
         sounded = {(open_midi + f) % 12 for (open_midi, _), f in zip(TUNING, frets) if f >= 0}
@@ -1040,7 +1042,7 @@ def d_m4_inversoes():
         played = [f for f in frets if f >= 0]
         start = max(0, min(played) - 1)
         n = max(5, max(played) - start + 2)
-        fretboard(d, MARGIN + 40, top + 34, W - 2 * MARGIN - 80, 6 * 30, n_frets=n,
+        fretboard(d, MARGIN + 40, top + 34, W - 2 * MARGIN - 80, braco_h, n_frets=n,
                   start_fret=start, highlight=sounded, root_pc=bass_pc, note_font=font(12, True))
         d.text((W - MARGIN, top + 34), cap, font=font(17, True), fill=GOLD, anchor="ra")
     d.text((W / 2, h - 74), "Roxo: nota do baixo (a que define a inversao). Ciano: as demais notas do acorde.",

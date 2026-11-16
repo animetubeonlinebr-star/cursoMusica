@@ -1259,7 +1259,10 @@ void testModule4()
     // The score `m4_partitura_familia` shows the major triad and then the two
     // notes that move down to turn it into the diminished triad (Dó–Mi–Sol →
     // Dó–Mi♭–Sol♭). Its audio must match the image note for note: pitch classes
-    // 0, 4, 7 (major) then 3, 6 (the diminished third and fifth).
+    // 0, 4, 7 (major) then 3, 6 (the diminished third and fifth). The visual
+    // side is guaranteed by the single definition of the score in
+    // tools/make_diagrams.py, which draws exactly these notes; this check
+    // guards the audio that the app actually plays against that definition.
     for (const auto& topic : m4->lessons)
         for (const auto& item : topic.detail)
             if (item.kind == ContentKind::score && item.imageName == "m4_partitura_familia")

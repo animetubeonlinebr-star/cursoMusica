@@ -80,7 +80,7 @@ std::vector<ContentItem> topic4F()
         b ("Terça: define maior ou menor."),
         b ("Quinta: define justa, aumentada ou diminuta."),
         b ("Sétima: define a família (7M, 7, m7…)."),
-        aud ({ "C4", "E4", "G4", "C4", "Eb4", "G4", "C4", "E4", "Ab4", "C4", "Eb4", "Gb4" },
+        aud ({ "C4", "E4", "G4", "C4", "Eb4", "G4", "C4", "E4", "G#4", "C4", "Eb4", "Gb4" },
              "Alterando uma nota de cada vez: maior, menor, aumentado, diminuto."),
 
         h ("Acordes suspensos"),
