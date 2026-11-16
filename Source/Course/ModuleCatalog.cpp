@@ -1327,6 +1327,75 @@ namespace
         // Exercises: three per topic, mixing verifiable quizzes with playable
         // exercises the app checks by recognising the notes. Ids follow
         // EX-5.<topico>.<n>, numbered per topic, as modules 1 and 2.
+    // Module 6 — Etapa 6: escalas menores e campos harmônicos. It follows the
+    // module-2 pattern: >=5 pages per topic with images, tables, audio and
+    // scores (each score with its own audio), 3..5 exercises per topic mixing
+    // verifiable quizzes and playable exercises the app recognises, and a gate
+    // that closes the module on the grid (REQ-009, REQ-015).
+    CourseModule makeModule6()
+    {
+        CourseModule m;
+        m.number = 6;
+        m.title = juce::String::fromUTF8 ("Escalas menores e campos harmônicos");
+        m.objective = juce::String::fromUTF8 (
+            "Ampliar a compreensão harmônica e melódica para as tonalidades menores: "
+            "as três escalas menores, os seus modos e os campos harmônicos menores.");
+        m.level = 3;          // MUSIC.md: módulos 5–7 = nível 3
+        m.targetBpm = 80;     // MUSIC.md, módulo 6
+        m.onGridTarget = 0.80f;
+        m.implemented = true;
+
+        m.lessons = {
+            detail (block ("A", juce::String::fromUTF8 ("Escala menor natural"), {
+                "Escala menor natural (eólio): 1 2 b3 4 5 b6 b7.",
+                "É a relativa menor de uma escala maior: mesmas notas, outro repouso.",
+                "A terça menor define o caráter melancólico da escala."
+            }), content::topic6A()),
+            detail (block ("B", juce::String::fromUTF8 ("Escala menor harmônica"), {
+                "Escala menor harmônica: 1 2 b3 4 5 b6 7 — a menor natural com o 7º elevado.",
+                "A sensível (7) cria a cadência V7 → i.",
+                "O intervalo de segunda aumentada (b6 → 7) dá o caráter exótico."
+            }), content::topic6B()),
+            detail (block ("C", juce::String::fromUTF8 ("Modos da menor harmônica"), {
+                "A menor harmônica gera sete modos, um por grau.",
+                "O quinto (frígio dominante) é o mais usado; o primeiro e o quarto vêm em seguida.",
+                "Cada modo combina com um tipo de acorde."
+            }), content::topic6C()),
+            detail (block ("D", juce::String::fromUTF8 ("Escala menor melódica"), {
+                "Escala menor melódica: 1 2 b3 4 5 6 7 — o 6º e o 7º elevados.",
+                "Sobe suave a partir do 5º grau; padrão T-S-T-T-T-T-S.",
+                "É a base das sonoridades modernas do jazz e da bossa."
+            }), content::topic6D()),
+            detail (block ("E", juce::String::fromUTF8 ("Modos da menor melódica"), {
+                "A menor melódica gera sete modos, um por grau.",
+                "O quarto (lídio dominante) e o sétimo (escala alterada) são os mais usados no jazz.",
+                "Cada modo combina com um tipo de acorde."
+            }), content::topic6E()),
+            detail (block ("F", juce::String::fromUTF8 ("Campos harmônicos menores e funções dos acordes"), {
+                "Campo harmônico é o conjunto de acordes que nasce da escala.",
+                "Campo menor natural: i, ii, III, iv, v, VI, VII; harmônico troca o v pelo V7.",
+                "Funções: tônica (i, III), subdominante (ii, iv, VI), dominante (v/V, VII)."
+            }), content::topic6F()),
+            detail (block ("G", juce::String::fromUTF8 ("Subdominantes menores"), {
+                "Subdominante menor: acordes do campo menor paralelo usados no campo maior.",
+                "O iv menor é o mais comum: I → IV → iv → I.",
+                "bVI, bVII e bII (napolitano) são empréstimos modais e cromáticos."
+            }), content::topic6G()),
+            detail (block ("H", juce::String::fromUTF8 ("Relações entre os campos maior e menor"), {
+                "Relativa: mesma armadura, outra tônica (Dó maior ↔ Lá menor).",
+                "Paralela: mesma tônica, outra armadura (Dó maior ↔ Dó menor).",
+                "Tonalidades próximas facilitam a modulação."
+            }), content::topic6H()),
+            detail (block ("I", juce::String::fromUTF8 ("Modos dórico, frígio, lídio, mixolídio e lócrio"), {
+                "Os sete modos gregos são a escala maior vista de sete pontos de partida.",
+                "Jônio (maior), dórico, frígio, lídio, mixolídio, eólio (menor) e lócrio.",
+                "Cada acorde do campo tem um modo que combina com ele."
+            }), content::topic6I()),
+        };
+
+        // Exercises: 3..5 per topic, mixing verifiable quizzes and playable
+        // exercises the app recognises (interval or chord). Ids follow
+        // EX-6.<topico>.<n>, numbered per topic, as modules 1 and 2.
         auto add = [&m] (Exercise e, const char* topic)
         {
             e.lessonId = topic;
@@ -2526,6 +2595,369 @@ namespace
             "pdf-teoria-elementar-da-musica-ricordi-osvaldo-lacerda",
             "pdf-p-classtruncatedtext-module-lineclamped-85ulhh-style-max-lines5bohumil-med-teoria-da-musica-5-edicao-p",
             "pdf-caged-e-derivaoes-de-acordes-marcelo-mello-apostila-de-violao-e-guitarra-vol1",
+        // --- Topic A — escala menor natural ----------------------------------
+        add (exercise ("EX-6.A.1", juce::String::fromUTF8 ("Questionário: escala menor natural"),
+                       juce::String::fromUTF8 ("Responder ao questionário da escala menor natural."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões da menor natural.")), "A");
+        m.exercises.back().quiz = {
+            question ("Quantas notas tem a escala menor natural?",
+                      { "7", "5", "8", "12" }, 0),
+            question ("Quais graus são abaixados na menor natural em relação à maior?",
+                      { "a terça, a sexta e a sétima",
+                        "apenas a terça",
+                        "a quarta e a quinta",
+                        "nenhum" }, 0),
+            question ("Qual é a relativa menor de Dó maior?",
+                      { "Lá menor", "Si menor", "Ré menor", "Mi menor" }, 0),
+            question ("Em Lá menor natural, as notas são:",
+                      { "A B C D E F G", "A B C# D E F# G#",
+                        "A B C D E F# G#", "A Bb C D Eb F G" }, 0),
+            question ("O modo grego que é a escala menor natural chama-se:",
+                      { "eólio", "jônio", "dórico", "lócrio" }, 0),
+        };
+        add (intervalExercise ("EX-6.A.2", "Tocar a terça menor",
+                               "Tocar uma terça menor (3 semitons), três vezes.", 3, 3), "A");
+        add (intervalExercise ("EX-6.A.3", "Tocar a sétima menor",
+                               "Tocar uma sétima menor (10 semitons), duas vezes.", 10, 2), "A");
+        add (exercise ("EX-6.A.4", juce::String::fromUTF8 ("Graus da menor natural"),
+                       juce::String::fromUTF8 ("Nomear os graus e a relativa da escala menor."),
+                       juce::String::fromUTF8 ("Acerto ≥90% no questionário dos graus.")), "A");
+        m.exercises.back().quiz = {
+            question ("Em Lá menor, qual é o sexto grau?",
+                      { "Fá", "Fá#", "Sol", "Sol#" }, 0),
+            question ("Em Lá menor, qual é o sétimo grau?",
+                      { "Sol", "Sol#", "Fá#", "Lá" }, 0),
+            question ("O padrão de intervalos da menor natural é:",
+                      { "T S T T S T T", "T S T T T T S", "T T S T T T S", "S T T S T T T" }, 0),
+        };
+
+        // --- Topic B — escala menor harmônica --------------------------------
+        add (exercise ("EX-6.B.1", juce::String::fromUTF8 ("Questionário: escala menor harmônica"),
+                       juce::String::fromUTF8 ("Responder ao questionário da menor harmônica."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões da menor harmônica.")), "B");
+        m.exercises.back().quiz = {
+            question ("A escala menor harmônica eleva qual grau?",
+                      { "o sétimo", "o sexto", "o terceiro", "o quarto" }, 0),
+            question ("O intervalo entre o b6 e o 7 na menor harmônica é:",
+                      { "segunda aumentada", "terça menor",
+                        "segunda maior", "quarta justa" }, 0),
+            question ("Em Lá menor harmônica, o sétimo grau é:",
+                      { "Sol#", "Sol", "Fá#", "Lá" }, 0),
+            question ("Para que serve a menor harmônica?",
+                      { "dar força à cadência V7 → i", "suavizar a melodia",
+                        "formar acordes suspensos", "substituir a escala maior" }, 0),
+            question ("A sensível da escala de Lá menor é:",
+                      { "Sol#", "Sol", "Lá", "Fá" }, 0),
+        };
+        add (intervalExercise ("EX-6.B.2", "Tocar a sétima maior (sensível)",
+                               "Tocar uma sétima maior (11 semitons), três vezes.", 11, 3), "B");
+        add (intervalExercise ("EX-6.B.3", "Tocar a sexta menor",
+                               "Tocar uma sexta menor (8 semitons), duas vezes.", 8, 2), "B");
+        add (exercise ("EX-6.B.4", juce::String::fromUTF8 ("Menor natural x harmônica"),
+                       juce::String::fromUTF8 ("Comparar as duas escalas menores."),
+                       juce::String::fromUTF8 ("Acerto ≥90% na comparação.")), "B");
+        m.exercises.back().quiz = {
+            question ("A diferença entre a menor natural e a menor harmônica está:",
+                      { "no sétimo grau", "na terça", "na quinta", "no ritmo" }, 0),
+            question ("A segunda aumentada da menor harmônica soa:",
+                      { "exótica e dramática", "suave e igual à maior",
+                        "idêntica à oitava", "sem tensão" }, 0),
+            question ("A sensível da menor harmônica serve para:",
+                      { "puxar para a tônica", "aumentar o volume",
+                        "mudar a tonalidade", "formar quintas" }, 0),
+        };
+
+        // --- Topic C — modos da menor harmônica ------------------------------
+        add (exercise ("EX-6.C.1", juce::String::fromUTF8 ("Questionário: modos da menor harmônica"),
+                       juce::String::fromUTF8 ("Responder ao questionário dos modos da harmônica."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões dos modos.")), "C");
+        m.exercises.back().quiz = {
+            question ("Quantos modos gera a escala menor harmônica?",
+                      { "sete", "cinco", "doze", "três" }, 0),
+            question ("O modo mais usado da menor harmônica é:",
+                      { "o quinto (frígio dominante)", "o primeiro",
+                        "o sétimo", "o quarto" }, 0),
+            question ("O frígio dominante tem qual terça?",
+                      { "maior", "menor", "justa", "diminuta" }, 0),
+            question ("Os modos da menor harmônica servem para:",
+                      { "improvisar sobre cada acorde do campo", "afinar o instrumento",
+                        "substituir o metrônomo", "formar escalas maiores" }, 0),
+        };
+        add (intervalExercise ("EX-6.C.2", "Tocar a segunda menor (frígio dominante)",
+                               "Tocar uma segunda menor (1 semitom), três vezes.", 1, 3), "C");
+        add (exercise ("EX-6.C.3", juce::String::fromUTF8 ("Aplicar os modos"),
+                       juce::String::fromUTF8 ("Relacionar cada modo da harmônica ao seu acorde."),
+                       juce::String::fromUTF8 ("Acerto ≥90% no questionário de aplicação.")), "C");
+        m.exercises.back().quiz = {
+            question ("O frígio dominante é usado sobre:",
+                      { "acordes de dominante (V7)", "acordes maiores com sétima",
+                        "acordes diminutos", "acordes suspensos" }, 0),
+            question ("O primeiro modo da menor harmônica é:",
+                      { "a própria escala menor harmônica", "o jônio",
+                        "o lócrio", "o mixolídio" }, 0),
+            question ("Cada modo da menor harmônica combina com:",
+                      { "um tipo de acorde", "um andamento fixo",
+                        "uma corda do instrumento", "uma tonalidade só" }, 0),
+        };
+
+        // --- Topic D — escala menor melódica ---------------------------------
+        add (exercise ("EX-6.D.1", juce::String::fromUTF8 ("Questionário: escala menor melódica"),
+                       juce::String::fromUTF8 ("Responder ao questionário da menor melódica."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões da menor melódica.")), "D");
+        m.exercises.back().quiz = {
+            question ("A escala menor melódica eleva quais graus?",
+                      { "o sexto e o sétimo", "o sétimo", "o terceiro", "o sexto" }, 0),
+            question ("O padrão de intervalos da menor melódica é:",
+                      { "T S T T T T S", "T S T T S T T", "T T S T T T S", "S T T T T S T" }, 0),
+            question ("Em Lá menor melódica, as notas são:",
+                      { "A B C D E F# G#", "A B C D E F G#",
+                        "A B C D E F G", "A B C# D E F# G#" }, 0),
+            question ("A menor melódica é muito usada em:",
+                      { "jazz e bossa", "rock pesado apenas",
+                        "música medieval", "nenhum estilo" }, 0),
+            question ("A terça da menor melódica é:",
+                      { "menor", "maior", "aumentada", "diminuta" }, 0),
+        };
+        add (intervalExercise ("EX-6.D.2", "Tocar a sétima maior",
+                               "Tocar uma sétima maior (11 semitons), três vezes.", 11, 3), "D");
+        add (intervalExercise ("EX-6.D.3", "Tocar a sexta maior",
+                               "Tocar uma sexta maior (9 semitons), duas vezes.", 9, 2), "D");
+        add (exercise ("EX-6.D.4", juce::String::fromUTF8 ("As três menores"),
+                       juce::String::fromUTF8 ("Distinguir as três escalas menores pelo 6º e 7º graus."),
+                       juce::String::fromUTF8 ("Acerto ≥90% na distinção das três menores.")), "D");
+        m.exercises.back().quiz = {
+            question ("Qual escala menor tem o 6º e o 7º graus elevados?",
+                      { "a menor melódica", "a menor natural",
+                        "a menor harmônica", "a pentatônica" }, 0),
+            question ("Qual escala menor tem apenas o 7º grau elevado?",
+                      { "a menor harmônica", "a menor melódica",
+                        "a menor natural", "a pentatônica" }, 0),
+            question ("A menor melódica soa:",
+                      { "suave e moderna", "exótica e angular",
+                        "idêntica à maior", "sem terça" }, 0),
+        };
+
+        // --- Topic E — modos da menor melódica -------------------------------
+        add (exercise ("EX-6.E.1", juce::String::fromUTF8 ("Questionário: modos da menor melódica"),
+                       juce::String::fromUTF8 ("Responder ao questionário dos modos da melódica."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões dos modos da melódica.")), "E");
+        m.exercises.back().quiz = {
+            question ("O quarto modo da menor melódica é:",
+                      { "lídio dominante", "frígio", "dórico", "eólio" }, 0),
+            question ("O sétimo modo da menor melódica é:",
+                      { "a escala alterada", "o lócrio", "o jônio", "o mixolídio" }, 0),
+            question ("O lídio dominante é usado sobre:",
+                      { "acordes de dominante (V7)", "acordes menores",
+                        "acordes diminutos", "acordes suspensos" }, 0),
+            question ("A escala alterada serve para:",
+                      { "criar máxima tensão sobre o V7", "repousar na tônica",
+                        "formar acordes maiores", "afinar a guitarra" }, 0),
+        };
+        add (intervalExercise ("EX-6.E.2", "Tocar o trítono (lídio dominante)",
+                               "Tocar um trítono (6 semitons), três vezes.", 6, 3), "E");
+        add (intervalExercise ("EX-6.E.3", "Tocar a segunda menor (alterada)",
+                               "Tocar uma segunda menor (1 semitono), duas vezes.", 1, 2), "E");
+        add (exercise ("EX-6.E.4", juce::String::fromUTF8 ("Modos e acordes da melódica"),
+                       juce::String::fromUTF8 ("Relacionar cada modo da melódica ao seu acorde."),
+                       juce::String::fromUTF8 ("Acerto ≥90% no questionário de aplicação.")), "E");
+        m.exercises.back().quiz = {
+            question ("O modo 1 da menor melódica combina com qual acorde?",
+                      { "m7M", "maj7", "dim7", "sus4" }, 0),
+            question ("O modo 6 da menor melódica (lócrio 2 natural) é usado sobre:",
+                      { "acordes meio-diminutos", "acordes maiores",
+                        "acordes suspensos", "acordes diminutos de sétima" }, 0),
+            question ("O lídio dominante é brilhante porque contém:",
+                      { "a quarta aumentada (#4)", "a sexta menor",
+                        "a terça menor", "a segunda menor" }, 0),
+        };
+
+        // --- Topic F — campos harmônicos menores -----------------------------
+        add (exercise ("EX-6.F.1", juce::String::fromUTF8 ("Questionário: campos harmônicos menores"),
+                       juce::String::fromUTF8 ("Responder ao questionário dos campos menores."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões dos campos menores.")), "F");
+        m.exercises.back().quiz = {
+            question ("O campo harmônico menor natural tem qual dominante?",
+                      { "v menor (sem sensível)", "V7 maior",
+                        "V7 diminuto", "não tem dominante" }, 0),
+            question ("Qual acorde do campo menor harmônico dá força à cadência?",
+                      { "V7", "i", "iv", "VI" }, 0),
+            question ("No campo menor, o segundo grau é:",
+                      { "meio-diminuto", "maior",
+                        "menor com sétima maior", "aumentado" }, 0),
+            question ("A cadência menor por excelência é:",
+                      { "i → iv → V7 → i", "I → IV → V → I",
+                        "i → ii → iii → i", "I → vi → ii → V" }, 0),
+            question ("O i do campo menor melódico é:",
+                      { "m7M", "m7", "maj7", "dim7" }, 0),
+        };
+        add (exercise ("EX-6.F.2", juce::String::fromUTF8 ("Montar a tríade menor"),
+                       juce::String::fromUTF8 ("Tocar uma tríade menor (tônica, terça menor e quinta justa)."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere os intervalos da tríade menor.")), "F");
+        m.exercises.back().chordPitchClasses = { 0, 3, 7 };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-6.F.3", juce::String::fromUTF8 ("Montar a tríade diminuta"),
+                       juce::String::fromUTF8 ("Tocar uma tríade diminuta (tônica, terça menor e quinta diminuta)."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere os intervalos da tríade diminuta.")), "F");
+        m.exercises.back().chordPitchClasses = { 0, 3, 6 };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-6.F.4", juce::String::fromUTF8 ("Funções no campo menor"),
+                       juce::String::fromUTF8 ("Identificar as funções dos acordes do campo menor."),
+                       juce::String::fromUTF8 ("Acerto ≥90% no questionário das funções.")), "F");
+        m.exercises.back().quiz = {
+            question ("Qual é a função do iv no campo menor?",
+                      { "subdominante", "tônica", "dominante", "nenhuma" }, 0),
+            question ("Qual é a função do V7 no campo menor harmônico?",
+                      { "dominante", "tônica", "subdominante", "nenhuma" }, 0),
+            question ("Os graus de tônica no campo menor são:",
+                      { "i e III", "ii e iv", "v e VII", "apenas o i" }, 0),
+        };
+
+        // --- Topic G — subdominantes menores ---------------------------------
+        add (exercise ("EX-6.G.1", juce::String::fromUTF8 ("Questionário: subdominantes menores"),
+                       juce::String::fromUTF8 ("Responder ao questionário dos subdominantes menores."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões dos empréstimos.")), "G");
+        m.exercises.back().quiz = {
+            question ("O subdominante menor (iv) vem de onde?",
+                      { "do campo menor paralelo", "do campo maior",
+                        "da escala pentatônica", "do blues" }, 0),
+            question ("Em Dó maior, o iv emprestado é:",
+                      { "Fm7", "F7M", "Gm7", "Am7" }, 0),
+            question ("Qual nota o iv acrescenta ao campo de Dó maior?",
+                      { "Ab (b6)", "A natural", "F#", "B" }, 0),
+            question ("Os empréstimos modais servem para:",
+                      { "dar cor à harmonia", "mudar a afinação",
+                        "acelerar o tempo", "substituir o metrônomo" }, 0),
+        };
+        add (exercise ("EX-6.G.2", juce::String::fromUTF8 ("Montar o iv menor"),
+                       juce::String::fromUTF8 ("Tocar uma tríade menor (o iv emprestado, tônica, terça menor e quinta justa)."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere os intervalos do iv menor.")), "G");
+        m.exercises.back().chordPitchClasses = { 0, 3, 7 };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-6.G.3", juce::String::fromUTF8 ("Tocar a progressão I–iv–I"),
+                       juce::String::fromUTF8 ("Tocar C7M – Fm7 – C7M (I–iv–I em Dó maior)."),
+                       juce::String::fromUTF8 ("O app reconhece os acordes e confere a progressão do empréstimo.")), "G");
+        m.exercises.back().chordProgression = {
+            { 0, 4, 7 },    // C
+            { 5, 8, 0 },    // Fm
+            { 0, 4, 7 },    // C
+        };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-6.G.4", juce::String::fromUTF8 ("Empréstimos do campo menor"),
+                       juce::String::fromUTF8 ("Reconhecer os acordes emprestados do campo menor paralelo."),
+                       juce::String::fromUTF8 ("Acerto ≥90% no questionário dos empréstimos.")), "G");
+        m.exercises.back().quiz = {
+            question ("Em Dó maior, o bVII emprestado é:",
+                      { "Bb7", "Bm7", "C7", "Db7" }, 0),
+            question ("O acorde napolitano (bII) em Dó maior é:",
+                      { "Db maior", "D menor", "Cb maior", "Eb maior" }, 0),
+            question ("O ii meio-diminuto emprestado em Dó maior é:",
+                      { "Dm7(b5)", "Dm7", "D7", "Dbm7" }, 0),
+        };
+
+        // --- Topic H — relações entre os campos ------------------------------
+        add (exercise ("EX-6.H.1", juce::String::fromUTF8 ("Questionário: relações entre os campos"),
+                       juce::String::fromUTF8 ("Responder ao questionário das relações maior/menor."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões das relações.")), "H");
+        m.exercises.back().quiz = {
+            question ("Dó maior e Lá menor são tonalidades:",
+                      { "relativas", "paralelas", "vizinhas", "distantes" }, 0),
+            question ("Dó maior e Dó menor são tonalidades:",
+                      { "paralelas", "relativas", "iguais", "enarmônicas" }, 0),
+            question ("A relativa menor de uma tonalidade maior começa no:",
+                      { "sexto grau", "quinto grau", "terceiro grau", "segundo grau" }, 0),
+            question ("Duas tonalidades vizinhas no ciclo das quintas compartilham:",
+                      { "seis notas", "nenhuma nota",
+                        "todas as sete notas", "apenas a tônica" }, 0),
+        };
+        add (intervalExercise ("EX-6.H.2", "Tocar a sexta maior (relativa)",
+                               "Tocar uma sexta maior (9 semitons), duas vezes.", 9, 2), "H");
+        add (exercise ("EX-6.H.3", juce::String::fromUTF8 ("Maior, relativa e paralela"),
+                       juce::String::fromUTF8 ("Distinguir as relações entre as tonalidades."),
+                       juce::String::fromUTF8 ("Acerto ≥90% na distinção das relações.")), "H");
+        m.exercises.back().quiz = {
+            question ("Relativa e paralela diferem em que?",
+                      { "a relativa compartilha as notas; a paralela, a tônica",
+                        "são a mesma coisa",
+                        "a paralela compartilha as notas",
+                        "nenhuma relação existe" }, 0),
+            question ("A relativa maior de Lá menor é:",
+                      { "Dó maior", "Mi maior", "Sol maior", "Ré maior" }, 0),
+            question ("Qual tonalidade é mais próxima de Dó maior?",
+                      { "Sol maior", "Fá# maior", "Dó# maior", "Lá maior" }, 0),
+        };
+
+        // --- Topic I — modos gregos ------------------------------------------
+        add (exercise ("EX-6.I.1", juce::String::fromUTF8 ("Questionário: modos gregos"),
+                       juce::String::fromUTF8 ("Responder ao questionário dos modos gregos."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões dos modos gregos.")), "I");
+        m.exercises.back().quiz = {
+            question ("Qual modo grego é a própria escala maior?",
+                      { "jônio", "dórico", "lídio", "mixolídio" }, 0),
+            question ("O modo dórico tem qual nota característica?",
+                      { "sexta maior", "segunda menor",
+                        "quarta aumentada", "sétima menor" }, 0),
+            question ("O modo frígio tem:",
+                      { "segunda menor (b2)", "sexta maior",
+                        "quarta aumentada", "sétima maior" }, 0),
+            question ("O modo mixolídio é usado sobre:",
+                      { "acordes de dominante (7)", "acordes menores",
+                        "acordes diminutos", "acordes suspensos" }, 0),
+            question ("O modo lócrio tem:",
+                      { "quinta diminuta (b5)", "quinta justa",
+                        "quarta aumentada", "sexta maior" }, 0),
+        };
+        add (intervalExercise ("EX-6.I.2", "Tocar a quarta aumentada (lídio)",
+                               "Tocar uma quarta aumentada (6 semitons), três vezes.", 6, 3), "I");
+        add (intervalExercise ("EX-6.I.3", "Tocar a sétima menor (mixolídio)",
+                               "Tocar uma sétima menor (10 semitons), duas vezes.", 10, 2), "I");
+        add (exercise ("EX-6.I.4", juce::String::fromUTF8 ("Modos e acordes"),
+                       juce::String::fromUTF8 ("Relacionar cada modo grego ao acorde do campo."),
+                       juce::String::fromUTF8 ("Acerto ≥90% no questionário de aplicação.")), "I");
+        m.exercises.back().quiz = {
+            question ("O dórico combina com qual acorde?",
+                      { "m7", "maj7", "7", "dim7" }, 0),
+            question ("O lídio combina com qual acorde?",
+                      { "maj7", "m7", "7", "m7(b5)" }, 0),
+            question ("O mixolídio combina com qual acorde?",
+                      { "7", "maj7", "m7", "dim7" }, 0),
+        };
+
+        // The gate closes the module: a ii–V–i minor cadence on the grid, built
+        // from the chords of the minor field (REQ-009, REQ-015).
+        auto& gate = m.exercises.emplace_back (exercise (
+            "GATE-6", juce::String::fromUTF8 ("Desafio de gate — cadência menor ii–V–i"),
+            juce::String::fromUTF8 ("Tocar Bm7(b5) – E7 – Am7 – Am7 a 80 BPM, na grade do metrônomo."),
+            juce::String::fromUTF8 ("Acordes reconhecidos e alinhados à grade (≥ 0,80).")));
+        gate.isGate = true;
+        gate.lessonId = "H";
+        gate.chordProgression = {
+            { 11, 2, 5, 9 },   // Bm7(b5)
+            { 4, 8, 11, 2 },   // E7
+            { 9, 0, 4, 7 },    // Am7
+            { 9, 0, 4, 7 },    // Am7
+        };
+
+        m.gateChallenge = juce::String::fromUTF8 (
+            "Tocar a cadência menor ii–V–i (Bm7(b5) – E7 – Am7 – Am7) a 80 BPM "
+            "com ≥90% de acerto de acordes e on_grid_ratio ≥ 0,80. Os acordes vêm "
+            "do campo harmônico menor estudado no módulo.");
+
+        // Pattern and link the module must cite (REQ-007, REQ-010).
+        m.practice.patternId = "PTN-M-3rds";
+        m.practice.patternUse = juce::String::fromUTF8 (
+            "Terças: o padrão 1-3, 2-4, 3-5… percorre a escala menor saltando um "
+            "grau, o que faz o aluno ouvir a terça (que define o caráter menor) "
+            "em movimento. Complemento: PTN-A-TRIAD (arpejos de tríade) para "
+            "tocar os acordes do campo menor.");
+        m.practice.guitarists = { "Wes Montgomery", "Pat Metheny", "Santana" };
+
+        // Curated apostilas (REQ-006, CM-012); see docs/MUSIC.md §2.1.
+        m.sources = {
+            "pdf-teoria-elementar-da-musica-ricordi-osvaldo-lacerda",
+            "pdf-p-classtruncatedtext-module-lineclamped-85ulhh-style-max-lines5bohumil-med-teoria-da-musica-5-edicao-p",
+            "pdf-caged-e-derivaoes-de-acordes-marcelo-mello-apostila-de-violao-e-guitarra-vol1",
+            "pdf-mozart-mello-livroestudosdeguitarra4em1",
+            "pdf-desvendando-os-segredos-da-guitarra-fusion",
         };
 
         return m;
@@ -2563,6 +2995,7 @@ const std::vector<CourseModule>& ModuleCatalog::getModules()
         makePlaceholder (5,  "II–V–I",                              3,  76,  0.79f),
         makeModule5(),
         makePlaceholder (6,  "II–V–I (menor)",                      3,  80,  0.80f),
+        makeModule6(),
         makePlaceholder (7,  "II–V–I (aplicação)",                  3,  84,  0.80f),
         makePlaceholder (8,  "Turnarounds",                         4,  88,  0.81f),
         makePlaceholder (9,  "Turnarounds (variações)",             4,  92,  0.81f),

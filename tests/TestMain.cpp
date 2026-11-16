@@ -3,6 +3,8 @@
 #include <cmath>
 #include <iostream>
 #include <map>
+#include <set>
+#include <utility>
 #include <vector>
 
 #include "Audio/AudioPortClassifier.h"
@@ -537,6 +539,14 @@ void testModuleCatalog()
     // old "modules 3..20 are placeholders" assertion, which stopped being true
     // as soon as a later module landed and would conflict between branches.
     checkModuleCatalogShape (modules);
+    // Modules are implemented in parallel branches, so the set of implemented
+    // modules cannot be fixed here. The invariant that holds for any set: every
+    // number is unique and every implemented module is findable by its number.
+    for (const auto& m : modules)
+        if (m.implemented)
+            check (ModuleCatalog::findModule (m.number) != nullptr
+                       && ModuleCatalog::findModule (m.number)->implemented,
+                   "implemented module " + juce::String (m.number) + " is findable by number");
 
     // The client asked the graphical material (fretboard, CAGED shapes, rhythm
     // figures) to be shown as images instead of text art. Every diagram named by
@@ -732,6 +742,7 @@ void testExerciseFilter()
     // the same topic against module 1 must list its exercises. The placeholder
     // module is picked dynamically so this stays valid as modules land in
     // parallel (AGENTS.md §4.1).
+    // is found dynamically so the parallel module branches do not conflict.
     const CourseModule* placeholder = nullptr;
     for (const auto& m : ModuleCatalog::getModules())
         if (! m.implemented)
@@ -750,6 +761,8 @@ void testExerciseFilter()
         const auto inPlaceholder = exercisesForTopic (*placeholder, topicC);
         check (inPlaceholder.empty(), "a placeholder module has no exercises for topic C");
     }
+        check (exercisesForTopic (*placeholder, topicC).empty(),
+               "a placeholder module has no exercises for topic C");
 
     // Every returned index really belongs to the topic, and none is missed.
     int totalC = 0;
@@ -1271,6 +1284,185 @@ void testModule5()
     {
         int count = 0;
         for (const auto& e : m5->exercises)
+    // Modules are implemented in parallel branches, so the set of implemented
+    // modules cannot be fixed here. The invariants that hold for any set: the
+    // catalogue still lists 20 modules, every number is unique, and every
+    // implemented module is findable by its number.
+    const auto& modules = ModuleCatalog::getModules();
+    check (modules.size() == 20, "the catalogue still lists 20 modules");
+    juce::Array<int> numbers;
+    for (const auto& m : modules)
+    {
+        check (! numbers.contains (m.number), "module number " + juce::String (m.number) + " is unique");
+        numbers.add (m.number);
+        if (m.implemented)
+            check (ModuleCatalog::findModule (m.number) != nullptr,
+                   "implemented module " + juce::String (m.number) + " is findable by number");
+    }
+}
+
+// A playable example is coherent when its notes really are what its caption
+// declares: every chord named in the caption is a subset of the notes played,
+// and every note belongs to the scale named in the caption. This catches the
+// class of defect the review panel found (a score whose audio played F7 while
+// the caption said Fm7, a mode whose audio had the wrong seventh).
+namespace
+{
+    struct NamedChord { juce::String symbol; int root; std::vector<int> pitchClasses; };
+
+    int pitchClassOfLetter (juce::juce_wchar c)
+    {
+        switch (c)
+        {
+            case 'C': return 0;  case 'D': return 2;  case 'E': return 4;
+            case 'F': return 5;  case 'G': return 7;  case 'A': return 9;
+            case 'B': return 11; default: return -1;
+        }
+    }
+
+    bool isAsciiLetter (juce::juce_wchar c)
+    {
+        return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
+    }
+
+    // Chord qualities used across the course, longest symbol first so that
+    // "m7(b5)" is matched before "m7" and "maj7" before "m".
+    const std::vector<std::pair<juce::String, std::vector<int>>>& chordQualities()
+    {
+        static const std::vector<std::pair<juce::String, std::vector<int>>> qualities = {
+            { "m7(b5)", { 0, 3, 6, 10 } }, { "maj7", { 0, 4, 7, 11 } },
+            { "m7M",   { 0, 3, 7, 11 } },  { "dim7", { 0, 3, 6, 9 } },
+            { "sus4",  { 0, 5, 7 } },      { "sus2", { 0, 2, 7 } },
+            { "add9",  { 0, 2, 4, 7 } },   { "aug",  { 0, 4, 8 } },
+            { "7M",    { 0, 4, 7, 11 } },  { "dim",  { 0, 3, 6 } },
+            { "m7",    { 0, 3, 7, 10 } },  { "m",    { 0, 3, 7 } },
+            { "7",     { 0, 4, 7, 10 } },  { "6",    { 0, 4, 7, 9 } },
+        };
+        return qualities;
+    }
+
+    std::vector<NamedChord> declaredChords (const juce::String& caption)
+    {
+        std::vector<NamedChord> out;
+        for (int i = 0; i < caption.length(); ++i)
+        {
+            const auto c = caption[i];
+            const int rootPc = pitchClassOfLetter (c);
+            if (rootPc < 0)
+                continue;
+            if (i > 0 && isAsciiLetter (caption[i - 1]))
+                continue;
+
+            int j = i + 1;
+            int root = rootPc;
+            if (j < caption.length() && (caption[j] == '#' || caption[j] == 'b'))
+            {
+                root += (caption[j] == '#') ? 1 : -1;
+                ++j;
+            }
+
+            for (const auto& q : chordQualities())
+            {
+                const auto& suffix = q.first;
+                if (caption.substring (j, j + suffix.length()) != suffix)
+                    continue;
+                const int end = j + suffix.length();
+                if (end < caption.length() && isAsciiLetter (caption[end]))
+                    break;
+
+                NamedChord chord;
+                chord.symbol = caption.substring (i, end);
+                chord.root = ((root % 12) + 12) % 12;
+                for (const int interval : q.second)
+                    chord.pitchClasses.push_back ((chord.root + interval) % 12);
+                out.push_back (std::move (chord));
+                i = end - 1;
+                break;
+            }
+        }
+        return out;
+    }
+
+    // Scales/modes named in captions, as pitch-class sets from the tonic. Longest
+    // name first ("lidio aumentado" before "lidio").
+    const std::vector<std::pair<juce::String, std::vector<int>>>& namedScales()
+    {
+        static const std::vector<std::pair<juce::String, std::vector<int>>> scales = {
+            { "lidio aumentado",           { 0, 2, 4, 6, 8, 9, 11 } },
+            { "locrio com segunda natural",{ 0, 2, 3, 5, 6, 8, 10 } },
+            { "menor natural",             { 0, 2, 3, 5, 7, 8, 10 } },
+            { "menor harmonica",           { 0, 2, 3, 5, 7, 8, 11 } },
+            { "menor melodica",            { 0, 2, 3, 5, 7, 9, 11 } },
+            { "lidio dominante",           { 0, 2, 4, 6, 7, 9, 10 } },
+            { "frigio dominante",          { 0, 1, 4, 5, 7, 8, 10 } },
+            { "escala alterada",           { 0, 1, 3, 4, 6, 8, 10 } },
+            { "pentatonica menor",         { 0, 3, 5, 7, 10 } },
+            { "mixolidio",                 { 0, 2, 4, 5, 7, 9, 10 } },
+            { "dorico",                    { 0, 2, 3, 5, 7, 9, 10 } },
+            { "frigio",                    { 0, 1, 3, 5, 7, 8, 10 } },
+            { "lidio",                     { 0, 2, 4, 6, 7, 9, 11 } },
+            { "locrio",                    { 0, 1, 3, 5, 6, 8, 10 } },
+            { "jonio",                     { 0, 2, 4, 5, 7, 9, 11 } },
+            { "eolio",                     { 0, 2, 3, 5, 7, 8, 10 } },
+            { "escala maior",              { 0, 2, 4, 5, 7, 9, 11 } },
+        };
+        return scales;
+    }
+
+    juce::String foldAccents (juce::String s)
+    {
+        s = s.toLowerCase();
+        const std::pair<const char*, const char*> replacements[] = {
+            { "\xc3\xad", "i" }, { "\xc3\xb3", "o" }, { "\xc3\xb4", "o" },
+            { "\xc3\xb5", "o" }, { "\xc3\xa1", "a" }, { "\xc3\xa2", "a" },
+            { "\xc3\xa3", "a" }, { "\xc3\xa9", "e" }, { "\xc3\xaa", "e" },
+            { "\xc3\xba", "u" }, { "\xc3\xa7", "c" },
+        };
+        for (const auto& r : replacements)
+            s = s.replace (r.first, r.second);
+        return s;
+    }
+
+    // Returns the pitch-class set of the scale named in the caption (rooted at
+    // the caption's tonic implied by the first note), or empty if none is named.
+    const std::pair<juce::String, std::vector<int>>* namedScale (const juce::String& caption)
+    {
+        const auto folded = foldAccents (caption);
+        for (const auto& scale : namedScales())
+            if (folded.contains (scale.first))
+                return &scale;
+        return nullptr;
+    }
+}
+
+// Module 6 — Etapa 6: escalas menores e campos harmônicos. Same shape as module
+// 2: >=5 pages per topic with images, tables, audio and scores, 3..5 exercises
+// per topic, and part of the exercises played on the instrument and verified by
+// the app.
+void testModule6()
+{
+    std::cout << "Module6\n";
+    using namespace cursomusica;
+
+    const auto* m6 = ModuleCatalog::findModule (6);
+    check (m6 != nullptr, "module 6 exists");
+    if (m6 == nullptr)
+        return;
+
+    check (m6->implemented, "module 6 is implemented");
+    check (m6->number == 6, "module 6 has number 6");
+    check (m6->usesTempo, "module 6 uses a BPM target");
+    check (m6->targetBpm == 80, "module 6 target BPM is 80 (MUSIC.md)");
+    check (m6->level == 3, "module 6 is level 3 (MUSIC.md)");
+    check (m6->lessons.size() == 9, "module 6 has nine topics (A..I)");
+    check (m6->lessons.front().id == "A" && m6->lessons.back().id == "I",
+           "module 6 topics run A..I in order");
+
+    // Every topic A..I has 3..5 exercises (client: "de 3 a 5 exercícios por tópico").
+    for (const auto& topic : m6->lessons)
+    {
+        int count = 0;
+        for (const auto& e : m6->exercises)
             if (e.lessonId == topic.id)
                 ++count;
         check (count >= 3, juce::String ("topic ") + topic.id + " has at least three exercises");
@@ -1353,6 +1545,20 @@ void testModule5()
         const auto prefix = juce::String ("EX-4.") + topic.id + ".";
         int expected = 0;
         for (const auto& e : m4->exercises)
+    // Every exercise is tied to a topic and its id follows EX-6.<topico>.<n>.
+    for (const auto& e : m6->exercises)
+    {
+        check (e.lessonId.isNotEmpty(), "exercise " + e.id + " is tied to a topic");
+        if (! e.isGate)
+            check (e.id.startsWith ("EX-6."), "exercise " + e.id + " follows EX-6.<topico>.<n>");
+    }
+
+    // Ids are numbered in order per topic.
+    for (const auto& topic : m6->lessons)
+    {
+        const auto prefix = juce::String ("EX-6.") + topic.id + ".";
+        int expected = 0;
+        for (const auto& e : m6->exercises)
             if (e.lessonId == topic.id && ! e.isGate)
             {
                 ++expected;
@@ -1400,6 +1606,34 @@ void testModule5()
 
     // An interval exercise must not gate on the grid and must be valid.
     for (const auto& e : m4->exercises)
+    // detector: at least one playable exercise per topic (quiz, interval or
+    // chord), as module 1 and 2 require (client request).
+    juce::StringArray playableTopics;
+    for (const auto& e : m6->exercises)
+    {
+        const bool playable = e.isQuiz() || e.interval.semitones > 0
+                                || ! e.targets.empty() || ! e.chordPitchClasses.empty()
+                                || ! e.chordProgression.empty();
+        if (playable && e.lessonId.isNotEmpty())
+            playableTopics.addIfNotAlreadyThere (e.lessonId);
+    }
+    for (const auto& topic : { "A", "B", "C", "D", "E", "F", "G", "H", "I" })
+        check (playableTopics.contains (topic),
+               juce::String ("topic ") + topic + " has an executable exercise");
+
+    // At least one interval exercise per topic (the app recognises the notes and
+    // checks the distance, in any position of the neck).
+    juce::StringArray intervalTopics;
+    for (const auto& e : m6->exercises)
+        if (e.interval.semitones > 0 && e.lessonId.isNotEmpty())
+            intervalTopics.addIfNotAlreadyThere (e.lessonId);
+    for (const auto& topic : { "A", "B", "C", "D", "E", "H", "I" })
+        check (intervalTopics.contains (topic),
+               juce::String ("topic ") + topic + " has a playable interval exercise");
+
+    // An interval exercise must not gate on the grid, and the app must be able
+    // to verify it.
+    for (const auto& e : m6->exercises)
         if (e.interval.semitones > 0)
         {
             check (! e.usesGrid, "interval exercise " + e.id + " is not grid-gated");
@@ -1489,6 +1723,7 @@ void testModule5()
     for (const auto& topic : m3->lessons)
     for (const auto& topic : m4->lessons)
     for (const auto& topic : m5->lessons)
+    for (const auto& topic : m6->lessons)
     {
         const int chars = detailChars (topic);
         check (chars >= content::minTopicChars,
@@ -1527,6 +1762,12 @@ void testModule5()
     // Every diagram and score named by the content is embedded in the binary,
     // and every audio/score item actually carries notes to play.
     for (const auto& topic : m5->lessons)
+    check (anyAudio, "module 6 demonstrates the minor scales with audio (REQ-004)");
+    check (anyScore, "module 6 has scores with their audio (REQ-004)");
+
+    // Every diagram and score named by the content is embedded in the binary,
+    // and every audio/score item actually carries notes to play.
+    for (const auto& topic : m6->lessons)
         for (const auto& item : topic.detail)
         {
             if (item.kind == ContentKind::image || item.kind == ContentKind::score)
@@ -1653,6 +1894,72 @@ void testModule5()
     // The catalog shape (unique numbers, contiguous implementations, content in
     // every implemented module) is asserted generically by
     // checkModuleCatalogShape(), called from testModuleCatalog().
+
+                // Coherence (QA): the audio must really be what the caption says.
+                // A score/audio whose caption names a chord or a scale has to
+                // play those notes, so a musically wrong example fails the suite.
+                std::set<int> played;
+                for (const int midi : item.notes)
+                    played.insert (((midi % 12) + 12) % 12);
+
+                for (const auto& chord : declaredChords (item.text))
+                {
+                    if (played.count (chord.root) == 0)
+                        continue; // the chord is only mentioned (e.g. a resolution target)
+                    bool covered = true;
+                    for (const int pc : chord.pitchClasses)
+                        covered = covered && played.count (pc) > 0;
+                    check (covered,
+                           juce::String ("topic ") + topic.id + " plays " + chord.symbol
+                               + " as its caption declares");
+                }
+
+                if (const auto* scale = namedScale (item.text))
+                {
+                    const int tonic = ((item.notes.front() % 12) + 12) % 12;
+                    std::set<int> allowed;
+                    for (const int interval : scale->second)
+                        allowed.insert ((tonic + interval) % 12);
+                    bool inScale = true;
+                    for (const int pc : played)
+                        inScale = inScale && allowed.count (pc) > 0;
+                    check (inScale,
+                           juce::String ("topic ") + topic.id + " plays the scale named in its caption ("
+                               + scale->first + ")");
+
+                    // Completeness (QA): the caption names the whole scale, so the
+                    // example must sound every degree of it — an example that
+                    // omits a degree (or, as a side effect, skips a step) is not
+                    // the scale the caption declares.
+                    bool complete = true;
+                    for (const int pc : allowed)
+                        complete = complete && played.count (pc) > 0;
+                    check (complete,
+                           juce::String ("topic ") + topic.id + " plays every degree of the scale named in its caption ("
+                               + scale->first + ")");
+                }
+            }
+        }
+
+    // The module cites >=1 pattern and >=1 guitarist (REQ-007, REQ-010).
+    check (m6->practice.patternId.isNotEmpty(), "module 6 cites a pattern");
+    check (! m6->practice.guitarists.isEmpty(), "module 6 cites at least one guitarist");
+    check (m6->sources.size() >= 1, "module 6 cites its curated apostilas");
+
+    // The gate closes the module as a ii–V–i minor cadence on the grid (REQ-009).
+    bool hasGate = false;
+    for (const auto& e : m6->exercises)
+        if (e.isGate)
+        {
+            hasGate = true;
+            check (e.chordProgression.size() == 4, "module 6 gate has four chords");
+            check (e.chordProgression.front() == std::vector<int> ({ 11, 2, 5, 9 }),
+                   "module 6 gate opens on Bm7(b5) (ii of the minor field)");
+            check (e.chordProgression.back() == std::vector<int> ({ 9, 0, 4, 7 }),
+                   "module 6 gate closes on Am7 (i of the minor field)");
+            check (e.usesGrid, "module 6 gate is grid-gated");
+        }
+    check (hasGate, "module 6 has a gate exercise");
 }
 
 int main()
@@ -1672,6 +1979,7 @@ int main()
     testModule3();
     testModule4();
     testModule5();
+    testModule6();
     testProgressDatabase();
     testProgressStore();
     testSharedSettings();
