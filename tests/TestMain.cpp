@@ -1,5 +1,6 @@
 #include <juce_core/juce_core.h>
 
+#include <algorithm>
 #include <cmath>
 #include <iostream>
 #include <map>
@@ -1254,6 +1255,107 @@ void testModule8()
                                    + item.imageName + "' plays exactly what the score writes");
                 }
         check (scoresChecked >= 10, "module 8 has at least one score per topic with audio");
+    }
+
+    // QA (review round 2): a theory table must agree with the scale it describes.
+    // This pins the minor-field table of topic H: each chord symbol in the
+    // Natural/Harmônica/Melódica columns must be the diatonic seventh chord of
+    // that scale. Without it the table can teach chords that do not exist in the
+    // scale it just defined (the review found Ab7M#5 / Bdim7 in the melodic
+    // column). Chord symbols are parsed to pitch-class sets and compared.
+    {
+        using Pcs = std::vector<int>;
+        auto chordPcs = [] (const juce::String& symbol) -> Pcs
+        {
+            const auto s = symbol.trim();
+            if (s.isEmpty())
+                return {};
+            int pc = -1;
+            switch (s[0])
+            {
+                case 'C': pc = 0;  break;
+                case 'D': pc = 2;  break;
+                case 'E': pc = 4;  break;
+                case 'F': pc = 5;  break;
+                case 'G': pc = 7;  break;
+                case 'A': pc = 9;  break;
+                case 'B': pc = 11; break;
+                default: return {};
+            }
+            int i = 1;
+            while (i < s.length())
+            {
+                const auto c = s[i];
+                if (c == '#')      { ++pc; ++i; }
+                else if (c == 'b') { --pc; ++i; }
+                else break;
+            }
+            const auto quality = s.substring (i);
+            Pcs intervals;
+            if (quality == "m7M")        intervals = { 0, 3, 7, 11 };
+            else if (quality == "m7")    intervals = { 0, 3, 7, 10 };
+            else if (quality == "m7b5")  intervals = { 0, 3, 6, 10 };
+            else if (quality == "7M#5")  intervals = { 0, 4, 8, 11 };
+            else if (quality == "7M")    intervals = { 0, 4, 7, 11 };
+            else if (quality == "7")     intervals = { 0, 4, 7, 10 };
+            else if (quality == "dim7")  intervals = { 0, 3, 6, 9 };
+            else return {};
+            Pcs out;
+            for (const int iv : intervals)
+                out.push_back (((pc + iv) % 12 + 12) % 12);
+            std::sort (out.begin(), out.end());
+            return out;
+        };
+
+        // C minor: natural, harmonic and melodic scales.
+        const Pcs natural  = { 0, 2, 3, 5, 7, 8, 10 };
+        const Pcs harmonic = { 0, 2, 3, 5, 7, 8, 11 };
+        const Pcs melodic  = { 0, 2, 3, 5, 7, 9, 11 };
+        auto diatonic = [] (const Pcs& scale)
+        {
+            std::vector<Pcs> chords;
+            for (std::size_t i = 0; i < 7; ++i)
+            {
+                Pcs c;
+                for (const int step : { 0, 2, 4, 6 })
+                    c.push_back (scale[(i + (std::size_t) step) % 7]);
+                std::sort (c.begin(), c.end());
+                chords.push_back (c);
+            }
+            return chords;
+        };
+        const auto natChords = diatonic (natural);
+        const auto harChords = diatonic (harmonic);
+        const auto melChords = diatonic (melodic);
+
+        int minorTables = 0;
+        for (const auto& topic : m8->lessons)
+            for (const auto& item : topic.detail)
+                if (item.kind == ContentKind::table && item.columns.size() == 4
+                    && item.columns[0] == "Grau" && item.columns[1] == "Natural"
+                    && item.columns[2] == "Harmônica" && item.columns[3] == "Melódica")
+                {
+                    ++minorTables;
+                    int row = 0;
+                    for (const auto& r : item.rows)
+                    {
+                        if (row >= 7 || r.size() < 4)
+                            break;
+                        const std::size_t idx = (std::size_t) row;
+                        auto verify = [&] (int col, const Pcs& chord)
+                        {
+                            check (chordPcs (r[(std::size_t) col]) == chord,
+                                   juce::String ("topic ") + topic.id + " minor-field row "
+                                       + r[0] + " column " + item.columns[(std::size_t) col] + " = "
+                                       + r[(std::size_t) col] + " is the diatonic seventh chord of the scale");
+                        };
+                        verify (1, natChords[idx]);
+                        verify (2, harChords[idx]);
+                        verify (3, melChords[idx]);
+                        ++row;
+                    }
+                }
+        check (minorTables >= 1, "module 8 has the minor-field comparison table");
     }
 
     // The module cites >=1 pattern and >=1 guitarist (REQ-007, REQ-010).

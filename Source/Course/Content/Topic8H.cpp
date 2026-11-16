@@ -48,29 +48,29 @@ std::vector<ContentItem> topic8H()
 
         h ("A dilatação pela menor melódica"),
         p (
-            "A escala menor melódica sobe também o sexto grau (Lá bemol vira Lá natural). Isso muda vários acordes: o Dm7b5 pode virar Dm7, o Fm7 vira F7, o Ab7M vira Ab7M#5. Esses acordes acrescentam cores novas ao campo menor, e são muito usados no jazz. A menor melódica é a fonte de grande parte das sonoridades sofisticadas do menor."),
+            "A escala menor melódica sobe também o sexto grau (Lá bemol vira Lá natural). Isso muda vários acordes: o Dm7b5 vira Dm7, o Fm7 vira F7 e o Ab7M vira Am7b5 — o sexto grau naturalizado (Lá) forma um acorde meio-diminuto, não um maior. Esses acordes acrescentam cores novas ao campo menor, e são muito usados no jazz. A menor melódica é a fonte de grande parte das sonoridades sofisticadas do menor."),
         b ("Dm7b5 (natural) vira Dm7 (melódica)."),
         b ("Fm7 (natural) vira F7 (melódica): um dominante do bIII."),
         b ("A menor melódica gera os dominantes internos do campo menor."),
         tbl ({ "Grau", "Natural", "Harmônica", "Melódica" }, {
-            { "i", "Cm7", "Cm7", "Cm7" },
+            { "i", "Cm7", "Cm7M", "Cm7M" },
             { "ii", "Dm7b5", "Dm7b5", "Dm7" },
             { "bIII", "Eb7M", "Eb7M#5", "Eb7M#5" },
             { "iv", "Fm7", "Fm7", "F7" },
-            { "v/V", "Gm7", "G7", "G7" },
-            { "bVI", "Ab7M", "Ab7M", "Ab7M#5" },
-            { "bVII", "Bb7", "Bdim7", "Bdim7" },
+            { "v", "Gm7", "G7", "G7" },
+            { "bVI", "Ab7M", "Ab7M", "Am7b5" },
+            { "bVII", "Bb7", "Bdim7", "Bm7b5" },
         }),
 
         h ("O mapa completo do campo menor"),
         p (
-            "Reunindo as três escalas, o campo menor dilatado de Dó contém: Cm7, Cm7M, Cm6; Dm7b5, Dm7; Eb7M, Eb7M#5; Fm7, F7; Gm7, G7; Ab7M, Ab7M#5; Bb7, Bdim7. Esse é o vocabulário completo do menor, e cada acorde exerce uma função. A tônica admite Cm7, Cm6 e Cm7M; a subdominante admite Fm7, F7, Dm7b5 e Dm7; o dominante admite G7, Gm7 e Bdim7."),
+            "Reunindo as três escalas, o campo menor dilatado de Dó contém: Cm7, Cm7M, Cm6; Dm7b5, Dm7; Eb7M, Eb7M#5; Fm7, F7; Gm7, G7; Ab7M, Am7b5; Bb7, Bdim7, Bm7b5. Esse é o vocabulário completo do menor, e cada acorde exerce uma função. A tônica admite Cm7, Cm6 e Cm7M; a subdominante admite Fm7, F7, Dm7b5 e Dm7; o dominante admite G7, Gm7 e Bdim7."),
         tbl ({ "Função", "Acordes", "Origem" }, {
             { "Tônica", "Cm7, Cm6, Cm7M", "natural, melódica" },
             { "Subdominante", "Fm7, F7, Dm7b5, Dm7", "natural, melódica" },
             { "Dominante", "G7, Gm7, Bdim7", "harmônica, natural" },
             { "Cor", "Eb7M, Ab7M, Bb7", "natural" },
-            { "Cor", "Eb7M#5, Ab7M#5", "harmônica, melódica" },
+            { "Cor", "Eb7M#5, Am7b5", "harmônica, melódica" },
         }),
 
         h ("A cadência no campo menor"),
@@ -112,10 +112,10 @@ std::vector<ContentItem> topic8H()
 
         h ("A dilatação do menor em outras tonalidades"),
         p (
-            "A dilatação do campo menor vale para qualquer tonalidade. Em Lá menor, o campo natural é Am7, Bm7b5, C7M, Dm7, Em7, F7M, G7; a harmônica acrescenta E7 (o dominante); a melódica acrescenta Bm7, D7, F7M#5. O processo é o mesmo em qualquer tom: reúna as três escalas e você tem o campo menor completo."),
+            "A dilatação do campo menor vale para qualquer tonalidade. Em Lá menor, o campo natural é Am7, Bm7b5, C7M, Dm7, Em7, F7M, G7; a harmônica acrescenta E7 (o dominante); a melódica acrescenta Bm7, D7 e F#m7b5 — o sexto grau naturalizado (Fá sustenido) forma um acorde meio-diminuto. O processo é o mesmo em qualquer tom: reúna as três escalas e você tem o campo menor completo."),
         b ("Em Dó menor: Cm7, Dm7b5, Eb7M, Fm7, Gm7, Ab7M, Bb7 (natural)."),
         b ("Harmônica acrescenta: G7 (dominante)."),
-        b ("Melódica acrescenta: Dm7, F7, Ab7M#5."),
+        b ("Melódica acrescenta: Dm7, F7, Am7b5."),
         tbl ({ "Tonalidade", "i", "ii", "V7" }, {
             { "Dó menor", "Cm7", "Dm7b5", "G7" },
             { "Lá menor", "Am7", "Bm7b5", "E7" },
@@ -166,7 +166,7 @@ std::vector<ContentItem> topic8H()
         h ("Resumo do tópico"),
         b ("O campo menor é a união de três escalas: natural, harmônica e melódica."),
         b ("A natural não tem dominante; a harmônica o cria (V7)."),
-        b ("A melódica acrescenta acordes de cor (Dm7, F7, Ab7M#5)."),
+        b ("A melódica acrescenta acordes de cor (Dm7, F7, Am7b5)."),
         b ("A cadência fundamental é o II-V-I menor (Dm7b5 → G7 → Cm7)."),
         b ("O dominante do menor é sempre um empréstimo da harmônica."),
         c (
