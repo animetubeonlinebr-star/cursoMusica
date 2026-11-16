@@ -703,6 +703,12 @@ def staff(d, x, y, w, notes, clef=True, caption=None):
     ref = diatonic_index("E", 4)
     step = w / (len(notes) + 1)
     for i, (letter, octave, accidental) in enumerate(notes):
+        # The renderer reads only letter[0] and draws the accidental only when
+        # the third field is set, so a note must be spelled ("C", 4, "#") — not
+        # ("C#", 4, None), which silently drops the sharp.
+        if len(letter) != 1 or accidental not in (None, "#", "b"):
+            raise ValueError(f"malformed note { (letter, octave, accidental) }: "
+                             "use (letter, octave, '#'|'b'|None)")
         cx = x + step * (i + 1)
         pos = diatonic_index(letter, octave) - ref
         cy = bottom - pos * (gap / 2)
@@ -1185,7 +1191,7 @@ def _m10_score(notes, caption):
 
 def d_m10_partitura_turnaround():
     return _m10_score([("C", 4, None), ("E", 4, None), ("G", 4, None), ("B", 4, None),
-                       ("C#", 4, None), ("E", 4, None), ("G", 4, None), ("A", 4, None),
+                       ("C", 4, "#"), ("E", 4, None), ("G", 4, None), ("A", 4, None),
                        ("D", 4, None), ("F", 4, None), ("A", 4, None), ("C", 5, None),
                        ("G", 3, None), ("B", 3, None), ("D", 4, None), ("F", 4, None)],
                       "Partitura: turnaround C7M - A7 - Dm7 - G7 (arpejos)")

@@ -1209,6 +1209,24 @@ void testModule10()
             }
         }
 
+    // The turnaround score must spell A7, not Am7: its audio has to contain the
+    // C# (the major third of A7). Without it the printed score would teach the
+    // wrong note (panel finding R2-1).
+    bool foundTurnaround = false;
+    for (const auto& topic : m10->lessons)
+        for (const auto& item : topic.detail)
+            if (item.kind == ContentKind::score
+                && item.imageName == "m10_partitura_turnaround")
+            {
+                foundTurnaround = true;
+                bool hasCSharp = false;
+                for (const int midi : item.notes)
+                    if (midi % 12 == 1)
+                        hasCSharp = true;
+                check (hasCSharp, "the turnaround score spells A7 with its C# (not Am7)");
+            }
+    check (foundTurnaround, "module 10 carries the turnaround score");
+
     // The module cites >=1 pattern and >=1 guitarist (REQ-007, REQ-010).
     check (m10->practice.patternId.isNotEmpty(), "module 10 cites a pattern");
     check (! m10->practice.guitarists.isEmpty(), "module 10 cites at least one guitarist");
