@@ -48,8 +48,8 @@ std::vector<ContentItem> topic4B()
             { "Aumentada", "0–4–8", "Dó–Mi–Sol♯", "suspensa, flutuante" },
             { "Diminuta", "0–3–6", "Dó–Mi♭–Sol♭", "tensa, instável" },
         }),
-        aud ({ "C4", "E4", "G#4" }, "Tríade aumentada (Dó–Mi–Sol♯): som suspenso, que parece não resolver."),
-        aud ({ "C4", "D#4", "F#4" }, "Tríade diminuta (Dó–Mi♭–Sol♭): som tenso e instável."),
+        aud ({ "C4", "E4", "Ab4" }, "Tríade aumentada (Dó–Mi–Sol♯): som suspenso, que parece não resolver."),
+        aud ({ "C4", "Eb4", "Gb4" }, "Tríade diminuta (Dó–Mi♭–Sol♭): som tenso e instável."),
 
         h ("Onde a aumentada aparece"),
         p (
@@ -71,7 +71,7 @@ std::vector<ContentItem> topic4B()
         b ("Maior e menor: repousam, soam resolvidas."),
         b ("Aumentada: flutua, não repousa."),
         b ("Diminuta: tensiona, pede para resolver."),
-        aud ({ "C4", "E4", "G4", "C4", "E4", "G#4", "C4", "D#4", "F#4" },
+        aud ({ "C4", "E4", "G4", "C4", "E4", "Ab4", "C4", "Eb4", "Gb4" },
              "Dó maior, aumentado e diminuto em sequência: sinta o contraste de estabilidade."),
 
         h ("Tocar as tríades alteradas no instrumento"),
@@ -134,8 +134,8 @@ std::vector<ContentItem> topic4B()
         b ("Use a aumentada como acorde de passagem antes de um acorde estável."),
         b ("Use a diminuta para ligar dois acordes por cromatismo."),
         b ("A tensão precisa de contraste: não toque tudo alterado."),
-        part ("m4_partitura_familia", { "C4", "E4", "G4", "D#4", "F#4" },
-              "Partitura da família de Dó: da tríade maior (Dó–Mi–Sol) para a diminuta (Dó–Mi♭–Sol♭)."),
+        part ("m4_partitura_familia", { "C4", "E4", "G4", "Eb4", "Gb4" },
+              "Partitura da família de Dó: a tríade maior (Dó–Mi–Sol) e, em seguida, a terça e a quinta que descem para formar a diminuta (Dó–Mi♭–Sol♭)."),
 
         h ("Erros comuns"),
         p (

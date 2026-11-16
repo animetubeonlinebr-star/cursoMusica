@@ -97,7 +97,7 @@ std::vector<ContentItem> topic4C()
 
         h ("Disposição aberta com cordas soltas"),
         p (
-            "Uma das belezas da guitarra é poder usar cordas soltas na disposição aberta. Isso dá um som cristalino, com muito corpo, típico do violão. Em Dó maior, você pode tocar Dó na 5ª corda, Sol na 1ª corda solta e Mi na 4ª — a corda solta acrescenta brilho e ressonância. Esse recurso é explorado em arranjos de MPB, de bossa nova e de música instrumental."),
+            "Uma das belezas da guitarra é poder usar cordas soltas na disposição aberta. Isso dá um som cristalino, com muito corpo, típico do violão. Em Dó maior, você pode tocar Dó na 5ª corda (casa 3), Sol na 1ª corda (casa 3) e Mi na 1ª corda solta — a corda solta acrescenta brilho e ressonância. Esse recurso é explorado em arranjos de MPB, de bossa nova e de música instrumental."),
         b ("Cordas soltas acrescentam brilho e ressonância."),
         b ("Som típico do violão e da música instrumental."),
         b ("Explore as cordas soltas dentro do acorde."),

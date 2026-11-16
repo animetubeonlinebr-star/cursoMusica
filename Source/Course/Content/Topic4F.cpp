@@ -40,7 +40,7 @@ std::vector<ContentItem> topic4F()
         b ("Essenciais: tônica, terça e sétima."),
         b ("Quinta: dispensável na maioria dos casos."),
         b ("Tensões (9, 11, 13): cor, mas opcionais."),
-        aud ({ "C4", "E4", "A#4" }, "Acorde reduzido ao essencial (Dó–Mi–Si♭): ainda se reconhece o dominante."),
+        aud ({ "C4", "E4", "Bb4" }, "Acorde reduzido ao essencial (Dó–Mi–Si♭): ainda se reconhece o dominante."),
 
         h ("Formação das tríades e das tétrades"),
         p (
@@ -80,7 +80,7 @@ std::vector<ContentItem> topic4F()
         b ("Terça: define maior ou menor."),
         b ("Quinta: define justa, aumentada ou diminuta."),
         b ("Sétima: define a família (7M, 7, m7…)."),
-        aud ({ "C4", "E4", "G4", "C4", "D#4", "G4", "C4", "E4", "G#4", "C4", "D#4", "F#4" },
+        aud ({ "C4", "E4", "G4", "C4", "Eb4", "G4", "C4", "E4", "Ab4", "C4", "Eb4", "Gb4" },
              "Alterando uma nota de cada vez: maior, menor, aumentado, diminuto."),
 
         h ("Acordes suspensos"),

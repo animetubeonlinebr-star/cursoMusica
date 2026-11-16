@@ -51,7 +51,7 @@ std::vector<ContentItem> topic4E()
         b ("Tríade menor + sétima menor = m7."),
         b ("Tríade menor + sétima maior = m(maj7) — raro, som suspenso."),
         aud ({ "C4", "E4", "G4", "B4" }, "Dó com sétima maior (Dó7M): brilho e suspensão."),
-        aud ({ "C4", "E4", "G4", "A#4" }, "Dó com sétima dominante (Dó7): tensão que pede resolução."),
+        aud ({ "C4", "E4", "G4", "Bb4" }, "Dó com sétima dominante (Dó7): tensão que pede resolução."),
 
         h ("O que cada tétrade comunica"),
         p (

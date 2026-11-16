@@ -1024,18 +1024,28 @@ def d_m4_inversoes():
     frame(d, h)
     y = title(d, "Inversoes da triade de Do (C - E - G)")
     y = subtitle(d, "A inversao muda qual nota fica no baixo; o acorde continua sendo Do maior.", y)
-    string_labels(d, MARGIN + 10, y + 60, 3 * 40, gap_font=font(15, True))
-    for k, (label, frets, cap) in enumerate([
-            ("Fundamental (Do no baixo)", [-1, -1, 10, 9, 8, -1], "Do - Mi - Sol"),
-            ("1a inversao (Mi no baixo)", [-1, -1, 2, 0, 1, -1], "Mi - Sol - Do"),
-            ("2a inversao (Sol no baixo)", [-1, -1, 5, 5, 5, -1], "Sol - Do - Mi")]):
+    rows = [
+        ("Fundamental (Do no baixo)", [-1, -1, 10, 9, 8, -1], "Do - Mi - Sol"),
+        ("1a inversao (Mi no baixo)", [-1, -1, 2, 0, 1, -1], "Mi - Sol - Do"),
+        ("2a inversao (Sol no baixo)", [-1, -1, 5, 5, 5, -1], "Sol - Do - Mi"),
+    ]
+    for k, (label, frets, cap) in enumerate(rows):
         top = y + 60 + k * 170
         d.text((MARGIN, top), label, font=font(20, True), fill=CYAN, anchor="la")
-        string_labels(d, MARGIN + 10, top + 34, 3 * 34, gap_font=font(14, True))
-        fretboard(d, MARGIN + 40, top + 34, W - 2 * MARGIN - 80, 3 * 34, n_frets=11,
-                  start_fret=0, highlight={0, 4, 7}, root_pc=0, note_font=font(13, True))
+        string_labels(d, MARGIN + 10, top + 34, 6 * 30, gap_font=font(13, True))
+        # Pitch classes actually sounded, and the bass = lowest sounding string
+        # (the first non-muted entry, since TUNING runs from the 6th to the 1st).
+        sounded = {(open_midi + f) % 12 for (open_midi, _), f in zip(TUNING, frets) if f >= 0}
+        bass_pc = next((open_midi + f) % 12 for (open_midi, _), f in zip(TUNING, frets) if f >= 0)
+        played = [f for f in frets if f >= 0]
+        start = max(0, min(played) - 1)
+        n = max(5, max(played) - start + 2)
+        fretboard(d, MARGIN + 40, top + 34, W - 2 * MARGIN - 80, 6 * 30, n_frets=n,
+                  start_fret=start, highlight=sounded, root_pc=bass_pc, note_font=font(12, True))
         d.text((W - MARGIN, top + 34), cap, font=font(17, True), fill=GOLD, anchor="ra")
-    d.text((W / 2, h - 46), "Mesmas notas, ordem diferente: muda a conducao de vozes.",
+    d.text((W / 2, h - 74), "Roxo: nota do baixo (a que define a inversao). Ciano: as demais notas do acorde.",
+           font=font(18), fill=TXT2, anchor="mm")
+    d.text((W / 2, h - 40), "Mesmas notas, ordem diferente: muda a conducao de vozes.",
            font=font(20, True), fill=TXT2, anchor="mm")
     return img
 
@@ -1179,8 +1189,8 @@ def d_m4_partitura_tetrade():
 
 def d_m4_partitura_familia():
     return _score_image("m4_familia", [("C", 4, None), ("E", 4, None), ("G", 4, None),
-                                       ("E", 4, "b"), ("G", 4, None)],
-                        "Partitura: familia de Do (maior -> menor)")
+                                       ("E", 4, "b"), ("G", 4, "b")],
+                        "Partitura: familia de Do (maior -> diminuta)")
 
 
 def d_m4_partitura_progressao():

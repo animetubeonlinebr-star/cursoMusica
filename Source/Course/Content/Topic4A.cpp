@@ -49,11 +49,11 @@ std::vector<ContentItem> topic4A()
         h ("Maior e menor: a mesma forma, uma nota diferente"),
         p (
             "No braço, o acorde maior e o menor da mesma tônica ficam muito próximos. Muitas vezes basta levantar ou baixar um dedo na corda onde está a terça. Essa proximidade é a chave para trocar entre maior e menor sem mudar de posição — e é a base da harmonia que você vai usar em todas as músicas."),
-        b ("Dó maior: Dó–Mi–Sol (a terça, Mi, está na 3ª corda solta)."),
+        b ("Dó maior: Dó–Mi–Sol (a terça, Mi, é a 1ª corda solta; a 6ª também é Mi, duas oitavas abaixo)."),
         b ("Dó menor: Dó–Mi♭–Sol (a mesma forma, com a terça abaixada um semitom)."),
         b ("Ouvir a terça é ouvir a diferença entre os dois acordes."),
         aud ({ "C4", "E4", "G4" }, "Tríade maior (Dó–Mi–Sol): som aberto e estável."),
-        aud ({ "C4", "D#4", "G4" }, "Tríade menor (Dó–Mi♭–Sol): só a terça mudou, o som ficou fechado."),
+        aud ({ "C4", "Eb4", "G4" }, "Tríade menor (Dó–Mi♭–Sol): só a terça mudou, o som ficou fechado."),
 
         h ("Como ouvir a diferença"),
         p (

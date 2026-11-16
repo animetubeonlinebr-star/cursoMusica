@@ -110,8 +110,8 @@ std::vector<ContentItem> topic4H()
         b ("Fase 3: troca no tempo."),
         b ("Fase 4: acompanha a progressão inteira."),
         b ("Fase 5: cria livremente."),
-        part ("m4_partitura_familia", { "C4", "E4", "G4", "D#4", "F#4" },
-              "Partitura da família de Dó: a forma maior (Dó–Mi–Sol) e a diminuta (Dó–Mi♭–Sol♭)."),
+        part ("m4_partitura_familia", { "C4", "E4", "G4", "Eb4", "Gb4" },
+              "Partitura da família de Dó: a forma maior (Dó–Mi–Sol) e, em seguida, a terça e a quinta que descem para formar a diminuta (Dó–Mi♭–Sol♭)."),
 
         h ("Erros comuns"),
         p (

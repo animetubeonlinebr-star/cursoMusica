@@ -1255,6 +1255,21 @@ void testModule4()
                    "module 4 gate moves to A minor");
         }
     check (hasGate, "module 4 has a gate exercise");
+
+    // The score `m4_partitura_familia` shows the major triad and then the two
+    // notes that move down to turn it into the diminished triad (Dó–Mi–Sol →
+    // Dó–Mi♭–Sol♭). Its audio must match the image note for note: pitch classes
+    // 0, 4, 7 (major) then 3, 6 (the diminished third and fifth).
+    for (const auto& topic : m4->lessons)
+        for (const auto& item : topic.detail)
+            if (item.kind == ContentKind::score && item.imageName == "m4_partitura_familia")
+            {
+                std::vector<int> pcs;
+                for (const int m : item.notes)
+                    pcs.push_back (m % 12);
+                check (pcs == std::vector<int> ({ 0, 4, 7, 3, 6 }),
+                       "family score audio matches the image (Dó–Mi–Sol → Mi♭–Sol♭)");
+            }
 }
 
 int main()

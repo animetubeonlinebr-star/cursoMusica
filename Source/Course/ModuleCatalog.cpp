@@ -1546,9 +1546,10 @@ namespace
         };
 
         m.gateChallenge = juce::String::fromUTF8 (
-            "Tocar C – Am – F – G (vamp de 2 acordes, nível 2) a 72 BPM com ≥90% de "
-            "acerto de acordes e on_grid_ratio ≥ 0,78. Os acordes são tríades "
-            "construídas pelos intervalos estudados no módulo.");
+            "Tocar C – Am – F – G (quatro acordes; o modelo de improvisação do "
+            "nível 2 é o 'vamp de 2 acordes') a 72 BPM com ≥90% de acerto de "
+            "acordes e on_grid_ratio ≥ 0,78. Os acordes são tríades construídas "
+            "pelos intervalos estudados no módulo.");
 
         // Pattern and link the module must cite (REQ-007, REQ-010).
         m.practice.patternId = "PTN-A-TRIAD";
