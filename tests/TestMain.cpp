@@ -1071,10 +1071,10 @@ void testModule2()
         }
     check (hasGate, "module 2 has a gate exercise");
 
-    // The implemented modules are contiguous from 1 (no gaps), each number is
-    // unique in the catalog, and findModule(3) resolves to the module. This
-    // replaces a fixed "3..20 are placeholders" assertion so the parallel module
-    // branches do not conflict (AGENTS.md §4.1).
+    // The implemented modules are contiguous from 1 (no gaps) and each number is
+    // unique in the catalog. This replaces a fixed "3..20 are placeholders"
+    // assertion so the parallel module branches do not conflict (AGENTS.md §4.1);
+    // the assertions specific to module 3 live in testModule3().
     const auto& modules = ModuleCatalog::getModules();
     juce::StringArray seenNumbers;
     bool seenPlaceholder = false;
@@ -1091,9 +1091,6 @@ void testModule2()
         else
             seenPlaceholder = true;
     }
-
-    check (ModuleCatalog::findModule (3) != nullptr, "module 3 exists");
-    check (ModuleCatalog::findModule (3)->implemented, "module 3 is implemented");
 }
 
 // Module 3 — Etapa 3: ritmo, leitura e levadas. It must follow the same shape as
@@ -1140,18 +1137,32 @@ void testModule3()
     }
 
     // Part of the exercises is played on the instrument and verified by the
-    // detector: at least one executable exercise per topic (client request).
+    // detector (client request): every topic needs at least one exercise that is
+    // really played — a quiz alone does not satisfy this. A separate check below
+    // covers the broader "has a playable exercise" notion.
+    juce::StringArray playedTopics;
     juce::StringArray playableTopics;
     for (const auto& e : m3->exercises)
     {
-        const bool playable = e.isQuiz() || ! e.targets.empty() || ! e.chordPitchClasses.empty()
+        if (e.lessonId.isEmpty())
+            continue;
+
+        const bool played = ! e.targets.empty() || ! e.chordPitchClasses.empty()
                                 || ! e.chordProgression.empty();
-        if (playable && e.lessonId.isNotEmpty() && ! playableTopics.contains (e.lessonId))
+        if (played && ! playedTopics.contains (e.lessonId))
+            playedTopics.add (e.lessonId);
+
+        const bool playable = played || e.isQuiz();
+        if (playable && ! playableTopics.contains (e.lessonId))
             playableTopics.add (e.lessonId);
     }
     for (const auto& topic : { "A", "B", "C", "D", "E", "F", "G", "H" })
+    {
+        check (playedTopics.contains (topic),
+               juce::String ("topic ") + topic + " has an exercise played on the instrument");
         check (playableTopics.contains (topic),
                juce::String ("topic ") + topic + " has a playable exercise");
+    }
 
     // The rhythmic module grades its playable exercises on the grid (REQ-015):
     // every playable non-quiz exercise keeps usesGrid = true, and carries a spec

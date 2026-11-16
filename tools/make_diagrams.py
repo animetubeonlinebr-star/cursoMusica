@@ -1246,8 +1246,8 @@ def d_m3_konokol():
     items = [("TA", "seminima (1 pulso)", "TA"),
              ("TA-KI", "duas colcheias", "TA-KI"),
              ("TA-KI-TA-KI", "quatro semicolcheias", "TA-KI-TA-KI"),
-             ("TA-KA", "duas tercinas (Konokol)", "TA-KA"),
-             ("TA-KI-TA", "grupo de tres com pausa", "TA-KI-TA"),
+             ("TA-KI-TA", "tres tercinas", "TA-KI-TA"),
+             ("TA-KA", "duas partes iguais", "TA-KA"),
              ("DIN", "acento/ataque forte", "DIN")]
     _bullets(d, y + 40, items)
     d.text((W / 2, h - 50), "Falar a celula em voz alta antes de tocar alinha mao, ouvido e tempo.",

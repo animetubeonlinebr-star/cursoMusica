@@ -1495,11 +1495,15 @@ namespace
             question ("Um 7/8 pode ser agrupado como:",
                       { "2 + 2 + 3", "5 + 5", "3 + 3 + 3", "sempre 4 + 3" }, 0),
         };
-        add (exercise ("EX-3.G.2", juce::String::fromUTF8 ("Tocar em 6/8 na grade"),
-                       juce::String::fromUTF8 ("Tocar seis colcheias (Dó, Ré, Mi) em 6/8, na grade, agrupando 3 + 3."),
-                       juce::String::fromUTF8 ("Notas reconhecidas e alinhadas à grade (on_grid_ratio ≥ 0,77).")), "G");
+        // 6/8 is compound: the eighth notes group 3 + 3 around the dotted-minim
+        // pulse. TempoGrid does not model 6/8 directly, so the exercise is graded
+        // on a triplet grid (3 ticks per beat) where six notes over two beats
+        // land exactly as two groups of three.
+        add (exercise ("EX-3.G.2", juce::String::fromUTF8 ("Seis colcheias em 6/8 na grade ternária"),
+                       juce::String::fromUTF8 ("Tocar seis colcheias (Dó, Ré, Mi) agrupando 3 + 3, o balanço do 6/8, na grade ternária a 68 BPM."),
+                       juce::String::fromUTF8 ("Notas reconhecidas e alinhadas à grade ternária (on_grid_ratio ≥ 0,77).")), "G");
         m.exercises.back().targets = notes ({ "C4", "C4", "C4", "D4", "D4", "D4" });
-        m.exercises.back().subdivision = course::TempoGrid::Subdivision::eighth;
+        m.exercises.back().subdivision = course::TempoGrid::Subdivision::triplet;
         add (exercise ("EX-3.G.3", juce::String::fromUTF8 ("Formula incomum 5/4"),
                        juce::String::fromUTF8 ("Reconhecer os agrupamentos de um 5/4 e de um 7/8."),
                        juce::String::fromUTF8 ("Acerto ≥90% nas questões de fórmulas incomuns.")), "G");
@@ -1587,7 +1591,7 @@ namespace
             { juce::String::fromUTF8 ("Semicolcheias"), juce::String::fromUTF8 ("4 por tempo (4/16)"),
               juce::String::fromUTF8 ("TA-KI-TA-KI") },
             { juce::String::fromUTF8 ("Tercinas"), juce::String::fromUTF8 ("3 por tempo (ternário)"),
-              juce::String::fromUTF8 ("TÁ-KA") },
+              juce::String::fromUTF8 ("TÁ-KI-TA") },
         };
 
         // Curated apostilas (REQ-006, CM-012); see docs/MUSIC.md. The rhythm

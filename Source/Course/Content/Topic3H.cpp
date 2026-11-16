@@ -23,7 +23,7 @@ std::vector<ContentItem> topic3H()
             { "TA", "seminima", "1 pulso" },
             { "TA-KI", "duas colcheias", "2 por pulso" },
             { "TA-KI-TA-KI", "quatro semicolcheias", "4 por pulso" },
-            { "TA-KA", "duas tercinas", "subdivisao ternaria" },
+            { "TA-KI-TA", "tres tercinas", "subdivisao ternaria" },
             { "DIN", "acento forte", "marcar o tempo forte" },
         }),
         b ("TÁ: semínima (um pulso)."),
