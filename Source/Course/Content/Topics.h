@@ -79,5 +79,15 @@ std::vector<ContentItem> topic3E();  // Levadas com palheta
 std::vector<ContentItem> topic3F();  // Levadas com os dedos e mapa da mão direita
 std::vector<ContentItem> topic3G();  // Compassos simples, compostos e fórmulas incomuns
 std::vector<ContentItem> topic3H();  // Sílabas rítmicas (Konokol), percussões e efeito sanfona
+// Module 4 (Etapa 4 — construção de acordes: tríades e tétrades).
+std::vector<ContentItem> topic4A();  // Tríades maiores e menores
+std::vector<ContentItem> topic4B();  // Tríades aumentadas e diminutas
+std::vector<ContentItem> topic4C();  // Tríades abertas e fechadas
+std::vector<ContentItem> topic4D();  // Inversões
+std::vector<ContentItem> topic4E();  // Tétrades
+std::vector<ContentItem> topic4F();  // Formação de acordes
+std::vector<ContentItem> topic4G();  // Sistema 5 (CAGED) e famílias de acordes
+std::vector<ContentItem> topic4H();  // As cinco fases das famílias
+std::vector<ContentItem> topic4I();  // Acordes clean e distribuição pelo braço
 
 } // namespace cursomusica::content

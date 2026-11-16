@@ -456,6 +456,31 @@ void testModuleCatalog()
                        + juce::String (m.number) + ")");
         else
             catalogPlaceholder = true;
+    // Modules are implemented in parallel branches (this module 4; modules 3..10
+    // elsewhere), so the old "3..20 are placeholders" rule no longer holds and a
+    // strict "contiguous from 1" rule would fail whenever a higher module lands
+    // before a lower one. The generic invariants are: every number appears once,
+    // module 1 (and 2) is implemented, module 4 is implemented, and every module
+    // that is not implemented is an honest placeholder (no lessons, no flag).
+    {
+        juce::Array<int> numbers;
+        for (const auto& m : modules)
+        {
+            check (! numbers.contains (m.number),
+                   juce::String ("module number ") + juce::String (m.number) + " is unique");
+            numbers.add (m.number);
+            if (! m.implemented)
+                check (m.lessons.empty(),
+                       juce::String ("module ") + juce::String (m.number)
+                           + " is an honest placeholder (no lessons)");
+        }
+
+        const auto* first = ModuleCatalog::findModule (1);
+        check (first != nullptr && first->implemented, "module 1 is implemented");
+
+        const auto* fourth = ModuleCatalog::findModule (4);
+        check (fourth != nullptr && fourth->implemented,
+               "module 4 is implemented (this branch)");
     }
 
     // The client asked the graphical material (fretboard, CAGED shapes, rhythm
@@ -1122,6 +1147,38 @@ void testModule3()
     {
         int count = 0;
         for (const auto& e : m3->exercises)
+    // Modules 3..20 used to be asserted as placeholders here. That rule no
+    // longer holds once other modules exist (this branch adds module 4; parallel
+    // branches add 3..10), so the generic catalogue invariants live in
+    // testModuleCatalog() and are not repeated per module.
+}
+
+void testModule4()
+{
+    std::cout << "Module4\n";
+    using namespace cursomusica;
+
+    const auto* m4 = ModuleCatalog::findModule (4);
+    check (m4 != nullptr, "module 4 exists");
+    if (m4 == nullptr)
+        return;
+
+    check (m4->implemented, "module 4 is implemented");
+    check (m4->number == 4, "module 4 has number 4");
+    check (m4->usesTempo, "module 4 uses a BPM target");
+    check (m4->targetBpm == 72, "module 4 target BPM is 72 (MUSIC.md)");
+    check (m4->level == 2, "module 4 is level 2 (MUSIC.md)");
+    check (m4->title == juce::String::fromUTF8 ("Construção de acordes: tríades e tétrades"),
+           "module 4 carries the Etapa 4 title");
+    check (m4->lessons.size() == 9, "module 4 has nine topics (A..I)");
+    check (m4->lessons.front().id == "A" && m4->lessons.back().id == "I",
+           "module 4 blocks run A..I in order");
+
+    // Every topic A..I has 3..5 exercises (client: "de 3 a 5 exercícios por tópico").
+    for (const auto& topic : m4->lessons)
+    {
+        int count = 0;
+        for (const auto& e : m4->exercises)
             if (e.lessonId == topic.id)
                 ++count;
         check (count >= 3, juce::String ("topic ") + topic.id + " has at least three exercises");
@@ -1191,6 +1248,76 @@ void testModule3()
 
     // Explanation: >=5 pages per topic, at least one table and one image, and
     // the media the client asked for (images, audio, scores with audio).
+    // Every exercise is tied to a topic and its id follows EX-4.<topico>.<n>,
+    // numbered in order per topic.
+    for (const auto& e : m4->exercises)
+    {
+        check (e.lessonId.isNotEmpty(), "exercise " + e.id + " is tied to a topic");
+        if (! e.isGate)
+            check (e.id.startsWith ("EX-4."), "exercise " + e.id + " follows EX-4.<topico>.<n>");
+    }
+    for (const auto& topic : m4->lessons)
+    {
+        const auto prefix = juce::String ("EX-4.") + topic.id + ".";
+        int expected = 0;
+        for (const auto& e : m4->exercises)
+            if (e.lessonId == topic.id && ! e.isGate)
+            {
+                ++expected;
+                check (e.id == prefix + juce::String (expected),
+                       juce::String ("exercise ids of topic ") + topic.id
+                           + " are numbered in order (" + e.id + ")");
+            }
+    }
+
+    // Part of the exercises is played on the instrument and verified by the
+    // detector: every topic owns at least one playable exercise (a chord the app
+    // recognises by pitch classes, an interval it measures, or a quiz).
+    for (const auto& topic : m4->lessons)
+    {
+        bool playable = false;
+        for (const auto& e : m4->exercises)
+            if (e.lessonId == topic.id)
+                playable = playable || e.isQuiz() || ! e.chordPitchClasses.empty()
+                            || e.interval.semitones > 0 || ! e.targets.empty()
+                            || ! e.chordProgression.empty();
+        check (playable, juce::String ("topic ") + topic.id + " has at least one executable exercise");
+    }
+
+    // At least one chord exercise per topic is verified by the detector (the app
+    // recognises the notes of the chord, accepting any position on the neck).
+    juce::StringArray chordTopics;
+    for (const auto& e : m4->exercises)
+        if (! e.chordPitchClasses.empty() && e.lessonId.isNotEmpty())
+            chordTopics.addIfNotAlreadyThere (e.lessonId);
+    for (const auto& topic : { "A", "B", "C", "D", "E", "F", "G", "H", "I" })
+        check (chordTopics.contains (topic),
+               juce::String ("topic ") + topic + " has a chord exercise recognised by the app");
+
+    // A chord exercise must not gate on the grid, and its pitch classes are valid.
+    for (const auto& e : m4->exercises)
+        if (! e.chordPitchClasses.empty())
+        {
+            check (! e.usesGrid, "chord exercise " + e.id + " is not grid-gated");
+            check (e.chordPitchClasses.size() >= 3,
+                   "chord exercise " + e.id + " asks for at least three notes");
+            for (const int pc : e.chordPitchClasses)
+                check (pc >= 0 && pc <= 11,
+                       "chord exercise " + e.id + " uses a valid pitch class");
+        }
+
+    // An interval exercise must not gate on the grid and must be valid.
+    for (const auto& e : m4->exercises)
+        if (e.interval.semitones > 0)
+        {
+            check (! e.usesGrid, "interval exercise " + e.id + " is not grid-gated");
+            check (e.interval.repeats >= 1, "interval exercise " + e.id + " asks for at least one repeat");
+            check (e.interval.semitones >= 1 && e.interval.semitones <= 12,
+                   "interval exercise " + e.id + " has a valid semitone distance");
+        }
+
+    // Explanation: >=5 pages per topic, at least one table and one image, and the
+    // media the client asked for (images, audio, scores with audio).
     auto detailChars = [] (const LessonBlock& topic)
     {
         int total = 0;
@@ -1209,6 +1336,7 @@ void testModule3()
     bool anyAudio = false;
     bool anyScore = false;
     for (const auto& topic : m3->lessons)
+    for (const auto& topic : m4->lessons)
     {
         const int chars = detailChars (topic);
         check (chars >= content::minTopicChars,
@@ -1234,6 +1362,13 @@ void testModule3()
     // Every diagram and score named by the content is embedded in the binary,
     // and every audio/score item actually carries notes to play.
     for (const auto& topic : m3->lessons)
+    check (anyAudio, "module 4 demonstrates chords with audio (REQ-004)");
+    check (anyScore, "module 4 has scores with their audio (REQ-004)");
+
+    // Every diagram and score named by the content is embedded in the binary,
+    // and every audio/score item actually carries notes to play (a score without
+    // its audio is a defect).
+    for (const auto& topic : m4->lessons)
         for (const auto& item : topic.detail)
         {
             if (item.kind == ContentKind::image || item.kind == ContentKind::score)
@@ -1271,6 +1406,43 @@ void testModule3()
                    "module 3 gate opens on C major");
         }
     check (hasGate, "module 3 has a gate exercise");
+    // The module cites >=1 pattern and >=1 guitarist (REQ-007, REQ-010) and the
+    // curated apostilas (REQ-006).
+    check (m4->practice.patternId.isNotEmpty(), "module 4 cites a pattern");
+    check (! m4->practice.guitarists.isEmpty(), "module 4 cites at least one guitarist");
+    check (m4->sources.size() >= 3, "module 4 cites its curated apostilas");
+
+    // The gate closes the module as a I–vi–IV–V vamp on the grid (REQ-009).
+    bool hasGate = false;
+    for (const auto& e : m4->exercises)
+        if (e.isGate)
+        {
+            hasGate = true;
+            check (e.chordProgression.size() == 4, "module 4 gate has four chords");
+            check (e.chordProgression.front() == std::vector<int> ({ 0, 4, 7 }),
+                   "module 4 gate opens on C major");
+            check (e.chordProgression[1] == std::vector<int> ({ 9, 0, 4 }),
+                   "module 4 gate moves to A minor");
+        }
+    check (hasGate, "module 4 has a gate exercise");
+
+    // The score `m4_partitura_familia` shows the major triad and then the two
+    // notes that move down to turn it into the diminished triad (Dó–Mi–Sol →
+    // Dó–Mi♭–Sol♭). Its audio must match the image note for note: pitch classes
+    // 0, 4, 7 (major) then 3, 6 (the diminished third and fifth). The visual
+    // side is guaranteed by the single definition of the score in
+    // tools/make_diagrams.py, which draws exactly these notes; this check
+    // guards the audio that the app actually plays against that definition.
+    for (const auto& topic : m4->lessons)
+        for (const auto& item : topic.detail)
+            if (item.kind == ContentKind::score && item.imageName == "m4_partitura_familia")
+            {
+                std::vector<int> pcs;
+                for (const int m : item.notes)
+                    pcs.push_back (m % 12);
+                check (pcs == std::vector<int> ({ 0, 4, 7, 3, 6 }),
+                       "family score audio matches the image (Dó–Mi–Sol → Mi♭–Sol♭)");
+            }
 }
 
 int main()
@@ -1288,6 +1460,7 @@ int main()
     testModuleCatalog();
     testModule2();
     testModule3();
+    testModule4();
     testProgressDatabase();
     testProgressStore();
     testSharedSettings();

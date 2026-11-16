@@ -1205,6 +1205,193 @@ def d_m3_compassos():
              ("5/4 e 7/8", "formulas incomuns", "prog rock, jazz moderno")]
     _bullets(d, y + 40, items)
     d.text((W / 2, h - 50), "Simples: subdivide em 2. Composto: subdivide em 3 (o tempo vira tercina).",
+# Modulo 4 — construcao de acordes: triades e tetrades.
+# --------------------------------------------------------------------------
+def _info_rows(d, y, rows, x=MARGIN, w=None, row_h=52):
+    """Lista de linhas (rotulo | texto | destaque), no estilo dos outros diagramas."""
+    w = w or (W - 2 * MARGIN)
+    for i, (a, b, c) in enumerate(rows):
+        yy = y + i * row_h
+        d.rounded_rectangle([x, yy, x + w, yy + row_h - 8], radius=8,
+                            fill=RAISED if i % 2 == 0 else SURFACE)
+        d.text((x + 18, yy + (row_h - 8) / 2), a, font=font(21, True), fill=ACCENT, anchor="lm")
+        d.text((x + 300, yy + (row_h - 8) / 2), b, font=font(20), fill=TXT, anchor="lm")
+        if c:
+            d.text((x + w - 18, yy + (row_h - 8) / 2), c, font=font(20, True), fill=CYAN, anchor="rm")
+    return y + len(rows) * row_h
+
+
+def d_m4_triades_maior_menor():
+    h = 720
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Triades: maior e menor")
+    y = subtitle(d, "Tonica e quinta iguais; so a terca muda: 4 semitons (maior) ou 3 (menor).", y)
+    chord_box(d, W / 2 - 300, y + 70, 150, 170, [-1, 3, 2, 0, 1, 0], "Do maior (C)",
+              start_fret=1, caption="Do - Mi - Sol  (0, 4, 7)", note_font=font(13, True))
+    chord_box(d, W / 2 + 300, y + 70, 150, 170, [-1, 3, 5, 5, 4, 3], "Do menor (Cm)",
+              start_fret=3, caption="Do - Mib - Sol  (0, 3, 7)", note_font=font(13, True))
+    _info_rows(d, y + 320, [
+        ("Maior (0,4,7)", "terca maior define o som aberto/alegre", "C  Dm  E  F  G  Am"),
+        ("Menor (0,3,7)", "terca menor define o som fechado/triste", "Cm  Dm  Em  Fm  Gm"),
+        ("Regra", "mesma forma desloca a tonica; a qualidade vem da terca", "3a define o acorde"),
+    ])
+    return img
+
+
+def d_m4_triades_aum_dim():
+    h = 720
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Triades aumentada e diminuta")
+    y = subtitle(d, "A quinta se altera: aumentada sobe 1 semitom (0,4,8); diminuta desce 1 (0,3,6).", y)
+    chord_box(d, W / 2 - 300, y + 70, 150, 170, [-1, 3, 2, 1, 1, 0], "Do aumentado (Caug)",
+              start_fret=1, caption="Do - Mi - Sol#  (0, 4, 8)", note_font=font(12, True))
+    chord_box(d, W / 2 + 300, y + 70, 150, 170, [-1, 3, 4, 5, 4, -1], "Do diminuto (Cdim)",
+              start_fret=1, caption="Do - Mib - Solb  (0, 3, 6)", note_font=font(12, True))
+    _info_rows(d, y + 320, [
+        ("Aumentada (0,4,8)", "quinta aumentada: som suspenso, de passagem", "Caug"),
+        ("Diminuta (0,3,6)", "quinta diminuta: som tenso, quase instavel", "Cdim"),
+        ("Onde aparecem", "vii do campo harmonico e dominantes alteradas", "Bdim, G7(b9)"),
+    ])
+    return img
+
+
+def d_m4_abertas_fechadas():
+    h = 760
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Triades abertas e fechadas")
+    y = subtitle(d, "Fechada: as notas ficam juntas, dentro de uma oitava. Aberta: as notas se espalham.", y)
+    chord_box(d, W / 2 - 300, y + 60, 140, 160, [0, 3, 2, 0, 1, 0], "Fechada (C, 1a pos.)",
+              start_fret=1, caption="notas vizinhas no braco", note_font=font(12, True))
+    chord_box(d, W / 2 + 300, y + 60, 140, 160, [-1, -1, 2, 5, 5, 3], "Aberta (C no 2o setor)",
+              start_fret=2, caption="notas separadas por cordas", note_font=font(12, True))
+    _info_rows(d, y + 300, [
+        ("Fechada", "notas empilhadas: som compacto, ideal p/ acompanhar", "C na 1a posicao"),
+        ("Aberta", "notas espalhadas por varias cordas: som amplo", "C com cordas soltas"),
+        ("Uso", "aberta brilha no violao; fechada corta na mixagem", "escolha pelo contexto"),
+    ])
+    return img
+
+
+def d_m4_inversoes():
+    braco_h = 6 * 28                 # seis cordas, com folga para as notas
+    pitch = 220                      # passo entre linhas: caber rotulo + braco + folga
+    h = 920
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Inversoes da triade de Do (C - E - G)")
+    y = subtitle(d, "A inversao muda qual nota fica no baixo; o acorde continua sendo Do maior.", y)
+    rows = [
+        ("Fundamental (Do no baixo)", [-1, -1, 10, 9, 8, -1], "Do - Mi - Sol"),
+        ("1a inversao (Mi no baixo)", [-1, -1, 2, 0, 1, -1], "Mi - Sol - Do"),
+        ("2a inversao (Sol no baixo)", [-1, -1, 5, 5, 5, -1], "Sol - Do - Mi"),
+    ]
+    for k, (label, frets, cap) in enumerate(rows):
+        top = y + 60 + k * pitch
+        d.text((MARGIN, top), label, font=font(20, True), fill=CYAN, anchor="la")
+        string_labels(d, MARGIN + 10, top + 34, braco_h, gap_font=font(13, True))
+        # Pitch classes actually sounded, and the bass = lowest sounding string
+        # (the first non-muted entry, since TUNING runs from the 6th to the 1st).
+        sounded = {(open_midi + f) % 12 for (open_midi, _), f in zip(TUNING, frets) if f >= 0}
+        bass_pc = next((open_midi + f) % 12 for (open_midi, _), f in zip(TUNING, frets) if f >= 0)
+        played = [f for f in frets if f >= 0]
+        start = max(0, min(played) - 1)
+        n = max(5, max(played) - start + 2)
+        fretboard(d, MARGIN + 40, top + 34, W - 2 * MARGIN - 80, braco_h, n_frets=n,
+                  start_fret=start, highlight=sounded, root_pc=bass_pc, note_font=font(12, True))
+        d.text((W - MARGIN, top + 34), cap, font=font(17, True), fill=GOLD, anchor="ra")
+    d.text((W / 2, h - 74), "Roxo: nota do baixo (a que define a inversao). Ciano: as demais notas do acorde.",
+           font=font(18), fill=TXT2, anchor="mm")
+    d.text((W / 2, h - 40), "Mesmas notas, ordem diferente: muda a conducao de vozes.",
+           font=font(20, True), fill=TXT2, anchor="mm")
+    return img
+
+
+def d_m4_tetrades():
+    h = 760
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Tetrades: a triade mais a setima")
+    y = subtitle(d, "A setima define a familia: maior (11), menor (10) ou diminuta (9) semitons acima.", y)
+    boxes = [([-1, 3, 2, 0, 0, 0], "Do7M", 1, "Do-Mi-Sol-Si  (0,4,7,11)"),
+             ([-1, 3, 2, 3, 1, 0], "Do7", 1, "Do-Mi-Sol-Sib  (0,4,7,10)"),
+             ([8, 10, 8, 8, 8, 8], "Dom7", 8, "Do-Mib-Sol-Sib  (0,3,7,10)"),
+             ([-1, 3, 4, 3, 4, -1], "Dom7(b5)", 1, "Do-Mib-Solb-Sib  (0,3,6,10)")]
+    bw = (W - 2 * MARGIN) / 4
+    for i, (frets, name, start, cap) in enumerate(boxes):
+        chord_box(d, MARGIN + bw * (i + 0.5), y + 60, 120, 150, frets, name,
+                  start_fret=start, caption=cap, note_font=font(11, True))
+    _info_rows(d, y + 330, [
+        ("7a maior (0,4,7,11)", "som brilhante e suspenso", "C7M, F7M"),
+        ("7a dominante (0,4,7,10)", "som tenso que pede resolucao", "G7, C7"),
+        ("7a menor (0,3,7,10)", "som do blues e da MPB", "Cm7, Am7"),
+        ("meio-diminuto (0,3,6,10)", "usado no ii do menor", "Bm7(b5), Dm7(b5)"),
+    ])
+    return img
+
+
+def d_m4_formacao_acordes():
+    h = 740
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Formacao de acordes: intervalos empilhados sobre a tonica")
+    y = subtitle(d, "O nome do acorde descreve os intervalos: tonica, terca, quinta e (na tetrade) a setima.", y)
+    groups = [("Triade maior (0,4,7)", ["Do", "Mi", "Sol"], ACCENT),
+              ("Triade menor (0,3,7)", ["Do", "Mib", "Sol"], CYAN),
+              ("Tetrade 7a maior (0,4,7,11)", ["Do", "Mi", "Sol", "Si"], SUCCESS),
+              ("Tetrade 7a dominante (0,4,7,10)", ["Do", "Mi", "Sol", "Sib"], GOLD)]
+    top = y + 40
+    for i, (name, notes, color) in enumerate(groups):
+        yy = top + i * 118
+        d.text((MARGIN, yy + 8), name, font=font(23, True), fill=color, anchor="la")
+        for k, note in enumerate(notes):
+            cx = MARGIN + 46 + k * 120
+            cy = yy + 66
+            d.ellipse([cx - 36, cy - 36, cx + 36, cy + 36], fill=RAISED, outline=color, width=3)
+            d.text((cx, cy), note, font=font(22, True), fill=TXT, anchor="mm")
+    d.text((W / 2, h - 44), "Empilhe tercas a partir da tonica e voce nomeia qualquer acorde.",
+           font=font(20), fill=TXT2, anchor="mm")
+    return img
+
+
+def d_m4_caged_familias():
+    h = 780
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Sistema 5 (CAGED): as cinco formas do acorde de Do maior")
+    y = subtitle(d, "Cinco formas cobrem o braco inteiro e se repetem a cada 12 casas.", y)
+    shapes = [([-1, 3, 2, 0, 1, 0], "C", 1, "forma de C"),
+              ([-1, 3, 5, 5, 5, 3], "A", 3, "forma de A"),
+              ([8, 7, 5, 5, 5, 8], "G", 5, "forma de G"),
+              ([8, 10, 10, 9, 8, 8], "E", 8, "forma de E"),
+              ([-1, -1, 10, 9, 8, 8], "D", 8, "forma de D")]
+    bw = (W - 2 * MARGIN) / 5
+    for i, (frets, name, start, cap) in enumerate(shapes):
+        chord_box(d, MARGIN + bw * (i + 0.5), y + 60, 110, 150, frets, name,
+                  start_fret=start, caption=cap, note_font=font(11, True))
+    _info_rows(d, y + 320, [
+        ("Ordem no braco", "C -> A -> G -> E -> D, subindo pelas casas", "repete na casa 12"),
+        ("Familia", "cada forma serve para maior, menor e setima", "muda a qualidade"),
+        ("Ligacao", "a ultima nota de uma forma e a primeira da proxima", "braco inteiro"),
+    ])
+    return img
+
+
+def d_m4_cinco_fases():
+    h = 700
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "As cinco fases das familias de acordes")
+    y = subtitle(d, "Cada familia (maior, menor, 7...) aprende-se em cinco fases, da forma a aplicacao.", y)
+    rows = [("Fase 1", "reconhecer a forma no braco", "so a posicao"),
+            ("Fase 2", "tocar a forma em todas as posicoes", "CAGED"),
+            ("Fase 3", "mudar de acorde mantendo a forma", "conducao de vozes"),
+            ("Fase 4", "aplicar em progressao (C-Am-Dm-G)", "musica real"),
+            ("Fase 5", "criar/inverter livremente", "dominio")]
+    _info_rows(d, y + 40, rows, row_h=76)
+    d.text((W / 2, h - 44), "Fase 1 e 2: forma. Fase 3 e 4: mudanca. Fase 5: liberdade.",
            font=font(20, True), fill=GOLD, anchor="mm")
     return img
 
@@ -1340,6 +1527,83 @@ DIAGRAMS.update({
     "m3_partitura_dedos": d_m3_partitura_dedos,
     "m3_partitura_compasso": d_m3_partitura_compasso,
     "m3_partitura_konokol": d_m3_partitura_konokol,
+def d_m4_acordes_clean():
+    h = 720
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Acordes clean: pestana e meio barre sem ruido")
+    y = subtitle(d, "Corda abafada ou zumbido estraga o acorde: dedo atras do traste e polegar no meio do braco.", y)
+    chord_box(d, W / 2 - 300, y + 60, 150, 170, [1, 3, 3, 2, 1, 1], "Fa maior (pestana)",
+              start_fret=1, caption="6 cordas soando limpas", note_font=font(12, True))
+    chord_box(d, W / 2 + 300, y + 60, 150, 170, [-1, 2, 4, 4, 3, 2], "Si menor (meio barre)",
+              start_fret=2, caption="5 cordas, a 6a abafada", note_font=font(12, True))
+    _info_rows(d, y + 300, [
+        ("Dedo atras do traste", "o som sai limpo, sem abafamento", "limpeza"),
+        ("Polegar no meio do braco", "da alavanca para a pestana", "forca"),
+        ("Cordas certas", "abafe (x) as cordas que nao pertencem ao acorde", "clean"),
+    ])
+    return img
+
+
+def d_m4_distribuicao_braco():
+    h = 720
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Distribuicao da triade de Do pelo braco")
+    y = subtitle(d, "As mesmas notas (Do - Mi - Sol) reaparecem por todo o braco: escolha a regiao que encaixa.", y)
+    string_labels(d, MARGIN + 10, y + 50, 6 * 46, gap_font=font(15, True))
+    fretboard(d, MARGIN + 50, y + 50, W - 2 * MARGIN - 60, 6 * 46, n_frets=12,
+              start_fret=0, highlight={0, 4, 7}, root_pc=0, note_font=font(12, True))
+    d.text((MARGIN, h - 100), "Roxo: tonica (Do). Ciano: terca (Mi) e quinta (Sol).",
+           font=font(20), fill=TXT2, anchor="la")
+    d.text((MARGIN, h - 60), "Achar a tonica primeiro: o resto da triade esta sempre a 3 e a 7 semitons.",
+           font=font(20, True), fill=GOLD, anchor="la")
+    return img
+
+
+def d_m4_partitura_triade():
+    return _score_image("m4_triade", [("C", 4, None), ("E", 4, None), ("G", 4, None), ("C", 5, None)],
+                        "Partitura: triade de Do maior (Do-Mi-Sol-Do)")
+
+
+def d_m4_partitura_inversao():
+    return _score_image("m4_inversao", [("E", 4, None), ("G", 4, None), ("C", 5, None)],
+                        "Partitura: 1a inversao (Mi-Sol-Do)")
+
+
+def d_m4_partitura_tetrade():
+    return _score_image("m4_tetrade", [("C", 4, None), ("E", 4, None), ("G", 4, None),
+                                       ("B", 4, None), ("C", 5, None)],
+                        "Partitura: tetrade de Do7M (Do-Mi-Sol-Si)")
+
+
+def d_m4_partitura_familia():
+    return _score_image("m4_familia", [("C", 4, None), ("E", 4, None), ("G", 4, None),
+                                       ("E", 4, "b"), ("G", 4, "b")],
+                        "Partitura: familia de Do (maior -> diminuta)")
+
+
+def d_m4_partitura_progressao():
+    return _score_image("m4_progressao", [("C", 4, None), ("A", 4, None), ("D", 4, None), ("G", 4, None)],
+                        "Partitura: fundamentais da progressao C-Am-Dm-G")
+
+
+DIAGRAMS.update({
+    "m4_triades_maior_menor": d_m4_triades_maior_menor,
+    "m4_triades_aum_dim": d_m4_triades_aum_dim,
+    "m4_abertas_fechadas": d_m4_abertas_fechadas,
+    "m4_inversoes": d_m4_inversoes,
+    "m4_tetrades": d_m4_tetrades,
+    "m4_formacao_acordes": d_m4_formacao_acordes,
+    "m4_caged_familias": d_m4_caged_familias,
+    "m4_cinco_fases": d_m4_cinco_fases,
+    "m4_acordes_clean": d_m4_acordes_clean,
+    "m4_distribuicao_braco": d_m4_distribuicao_braco,
+    "m4_partitura_triade": d_m4_partitura_triade,
+    "m4_partitura_inversao": d_m4_partitura_inversao,
+    "m4_partitura_tetrade": d_m4_partitura_tetrade,
+    "m4_partitura_familia": d_m4_partitura_familia,
+    "m4_partitura_progressao": d_m4_partitura_progressao,
 })
 
 

@@ -1178,6 +1178,79 @@ namespace
         // and counting) and playable exercises graded on the metronome grid (the
         // app recognises the notes and checks the alignment, REQ-008/REQ-015).
         // Ids follow EX-3.<topico>.<n>, numbered per topic.
+    // Module 4 — Etapa 4: construção de acordes (tríades e tétrades). Following
+    // module 2's pattern: part of the exercises is played on the instrument and
+    // the app recognises the notes (Exercise::chordPitchClasses / Exercise::interval),
+    // so any position on the neck is accepted. Every topic carries images,
+    // tables, audio examples and scores with their audio, and >=5 pages
+    // (content::minTopicChars).
+    CourseModule makeModule4()
+    {
+        CourseModule m;
+        m.number = 4;
+        m.title = juce::String::fromUTF8 ("Construção de acordes: tríades e tétrades");
+        m.objective = juce::String::fromUTF8 (
+            "Compreender a formação dos acordes e suas diferentes possibilidades de "
+            "execução — construindo tríades e tétrades, identificando as notas e "
+            "executando inversões e posições.");
+        m.level = 2;          // MUSIC.md: módulos 3–4 = nível 2 (vamps de 2 acordes)
+        m.targetBpm = 72;     // MUSIC.md, módulo 4
+        m.onGridTarget = 0.78f;
+        m.implemented = true;
+
+        m.lessons = {
+            detail (block ("A", juce::String::fromUTF8 ("Tríades maiores e menores"), {
+                "Tríade é um acorde de três notas: tônica, terça e quinta.",
+                "Maior = 0–4–7; menor = 0–3–7; a diferença está na terça.",
+                "A receita vale em qualquer tônica e posição do braço."
+            }), content::topic4A()),
+            detail (block ("B", juce::String::fromUTF8 ("Tríades aumentadas e diminutas"), {
+                "Aumentada = 0–4–8 (quinta aumentada); diminuta = 0–3–6 (quinta diminuta).",
+                "São sons de tensão: a aumentada flutua, a diminuta pede resolução.",
+                "Na cifra: '+' ou 'aug' para aumentada, 'dim' ou '°' para diminuta."
+            }), content::topic4B()),
+            detail (block ("C", juce::String::fromUTF8 ("Tríades abertas e fechadas"), {
+                "Disposição é a ordem e o espaçamento das notas do acorde.",
+                "Fechada: notas próximas, som compacto; aberta: espalhadas, som amplo.",
+                "As notas não mudam; só a distribuição muda."
+            }), content::topic4C()),
+            detail (block ("D", juce::String::fromUTF8 ("Inversões"), {
+                "Inverter é mudar a nota do baixo, mantendo as mesmas notas.",
+                "Fundamental: tônica no baixo; 1ª inversão: terça; 2ª inversão: quinta.",
+                "Na cifra, a inversão vem depois da barra (C/E, C/G)."
+            }), content::topic4D()),
+            detail (block ("E", juce::String::fromUTF8 ("Tétrades"), {
+                "Tétrade = tríade + sétima: 7M, 7, m7 e m7♭5.",
+                "A sétima maior (11 semitons) repousa; a menor (10) pede resolução.",
+                "Tétrades dão a cor do jazz, da bossa e da MPB."
+            }), content::topic4E()),
+            detail (block ("F", juce::String::fromUTF8 ("Formação de acordes"), {
+                "Formar acorde = empilhar terças sobre a tônica.",
+                "As notas essenciais são a tônica, a terça e a sétima.",
+                "A cifra dá a tônica e a qualidade; a receita de semitons monta o acorde."
+            }), content::topic4F()),
+            detail (block ("G", juce::String::fromUTF8 ("Sistema 5 (CAGED) e famílias de acordes"), {
+                "O CAGED é um mapa de cinco formas que cobrem o braço.",
+                "Cada forma é um molde: serve para maior, menor, sétima e outras.",
+                "As formas se conectam em ciclo: C → A → G → E → D → C."
+            }), content::topic4G()),
+            detail (block ("H", juce::String::fromUTF8 ("As cinco fases das famílias"), {
+                "Cinco fases: forma → transposição → troca → progressão → criação.",
+                "Cada fase dá a base para a seguinte; respeite a ordem.",
+                "As fases valem para qualquer família (maior, menor, dominante…)."
+            }), content::topic4H()),
+            detail (block ("I", juce::String::fromUTF8 ("Acordes clean e distribuição pelo braço"), {
+                "Clean: sem corda abafada, sem zumbido e sem nota errada.",
+                "Dedo junto ao traste, pressão mínima, cordas certas abafadas.",
+                "Distribuir é escolher a região do braço e a nota do baixo."
+            }), content::topic4I()),
+        };
+
+        // Exercises: at least three per topic, mixing verifiable quizzes and
+        // playable exercises. The app recognises the notes of a chord
+        // (chordPitchClasses) or the distance the instrument produced
+        // (intervalExercise), so any position on the neck is accepted. Ids
+        // follow EX-4.<topico>.<n>, numbered per topic.
         auto add = [&m] (Exercise e, const char* topic)
         {
             e.lessonId = topic;
@@ -1565,6 +1638,354 @@ namespace
             { 0, 4, 7 },    // C
             { 7, 11, 2 },   // G
             { 0, 4, 7 },    // C
+        // --- Topic A — tríades maiores e menores -----------------------------
+        add (exercise ("EX-4.A.1", juce::String::fromUTF8 ("Questionário: tríades"),
+                       juce::String::fromUTF8 ("Responder ao questionário de formação das tríades."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões de tríades.")), "A");
+        m.exercises.back().quiz = {
+            question ("Quantas notas tem uma tríade?",
+                      { "duas", "três", "quatro", "cinco" }, 1),
+            question ("Uma tríade maior é formada por quais semitons?",
+                      { "0, 4, 7", "0, 3, 7", "0, 3, 6", "0, 4, 8" }, 0),
+            question ("A diferença entre a tríade maior e a menor está:",
+                      { "na tônica", "na terça", "na quinta", "na oitava" }, 1),
+            question ("Qual é a única nota que muda de Dó maior para Dó menor?",
+                      { "Mi vira Mi♭", "Sol vira Sol♭", "Dó vira Si", "Sol vira Lá" }, 0),
+            question ("Tocar o mesmo acorde em outra posição do braço:",
+                      { "muda o acorde", "muda as notas", "mantém o acorde", "muda a tonalidade" }, 2),
+        };
+        add (exercise ("EX-4.A.2", juce::String::fromUTF8 ("Tocar a tríade maior"),
+                       juce::String::fromUTF8 ("Tocar uma tríade maior (tônica, terça maior e quinta justa)."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere a tríade maior (0–4–7), em qualquer posição do braço.")), "A");
+        m.exercises.back().chordPitchClasses = { 0, 4, 7 };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-4.A.3", juce::String::fromUTF8 ("Tocar a tríade menor"),
+                       juce::String::fromUTF8 ("Tocar uma tríade menor (tônica, terça menor e quinta justa)."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere a tríade menor (0–3–7), em qualquer posição do braço.")), "A");
+        m.exercises.back().chordPitchClasses = { 0, 3, 7 };
+        m.exercises.back().usesGrid = false;
+        add (intervalExercise ("EX-4.A.4", "A terça da tríade",
+                               "Tocar uma terça maior (4 semitons) a partir de qualquer nota, três vezes.", 4, 3), "A");
+        add (exercise ("EX-4.A.5", juce::String::fromUTF8 ("Nomear as notas da tríade"),
+                       juce::String::fromUTF8 ("Dizer as três notas de tríades básicas."),
+                       juce::String::fromUTF8 ("Acerto ≥90% no questionário de notas.")), "A");
+        m.exercises.back().quiz = {
+            question ("Quais são as notas de Dó maior?",
+                      { "Dó–Mi–Sol", "Dó–Mi♭–Sol", "Dó–Fá–Sol", "Dó–Mi–Lá" }, 0),
+            question ("Quais são as notas de Lá menor?",
+                      { "Lá–Dó–Mi", "Lá–Dó♯–Mi", "Lá–Ré–Fá", "Lá–Si–Mi" }, 0),
+            question ("Em Sol maior, qual é a terça?",
+                      { "Si", "Lá", "Dó", "Ré" }, 0),
+            question ("Em Ré menor, qual é a terça?",
+                      { "Fá", "Fá♯", "Sol", "Lá" }, 0),
+        };
+
+        // --- Topic B — tríades aumentadas e diminutas ------------------------
+        add (exercise ("EX-4.B.1", juce::String::fromUTF8 ("Questionário: aumentadas e diminutas"),
+                       juce::String::fromUTF8 ("Responder ao questionário das tríades alteradas."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "B");
+        m.exercises.back().quiz = {
+            question ("A tríade aumentada usa quais semitons?",
+                      { "0, 4, 7", "0, 3, 7", "0, 4, 8", "0, 3, 6" }, 2),
+            question ("A tríade diminuta usa quais semitons?",
+                      { "0, 4, 7", "0, 3, 7", "0, 4, 8", "0, 3, 6" }, 3),
+            question ("Quais são as notas de Dó aumentado?",
+                      { "Dó–Mi–Sol♯", "Dó–Mi♭–Sol♭", "Dó–Mi–Sol", "Dó–Mi♭–Sol" }, 0),
+            question ("Quais são as notas de Dó diminuto?",
+                      { "Dó–Mi–Sol♯", "Dó–Mi♭–Sol♭", "Dó–Mi–Sol", "Dó–Mi♭–Sol" }, 1),
+            question ("A tríade diminuta aparece naturalmente no grau:",
+                      { "I", "IV", "V", "vii" }, 3),
+        };
+        add (exercise ("EX-4.B.2", juce::String::fromUTF8 ("Tocar a tríade aumentada"),
+                       juce::String::fromUTF8 ("Tocar uma tríade aumentada (tônica, terça maior e quinta aumentada)."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere a tríade aumentada (0–4–8), em qualquer posição do braço.")), "B");
+        m.exercises.back().chordPitchClasses = { 0, 4, 8 };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-4.B.3", juce::String::fromUTF8 ("Tocar a tríade diminuta"),
+                       juce::String::fromUTF8 ("Tocar uma tríade diminuta (tônica, terça menor e quinta diminuta)."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere a tríade diminuta (0–3–6), em qualquer posição do braço.")), "B");
+        m.exercises.back().chordPitchClasses = { 0, 3, 6 };
+        m.exercises.back().usesGrid = false;
+        add (intervalExercise ("EX-4.B.4", "A quinta alterada",
+                               "Tocar um trítono (6 semitons) a partir de qualquer nota, duas vezes.", 6, 2), "B");
+
+        // --- Topic C — tríades abertas e fechadas ----------------------------
+        add (exercise ("EX-4.C.1", juce::String::fromUTF8 ("Questionário: abertas e fechadas"),
+                       juce::String::fromUTF8 ("Responder ao questionário das disposições."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões de disposição.")), "C");
+        m.exercises.back().quiz = {
+            question ("Na disposição fechada, as notas ficam:",
+                      { "próximas umas das outras", "espalhadas pelo braço",
+                        "sempre na 1ª corda", "sempre em oitavas" }, 0),
+            question ("Na disposição aberta, o som é:",
+                      { "compacto e direto", "amplo e cheio",
+                        "sempre menor", "sempre igual" }, 1),
+            question ("Mudar a disposição de um acorde:",
+                      { "muda as notas", "muda o acorde",
+                        "mantém as notas", "muda a tonalidade" }, 2),
+            question ("Uma disposição ideal para acompanhamento rítmico é:",
+                      { "fechada", "aberta", "aleatória", "sem notas" }, 0),
+        };
+        add (exercise ("EX-4.C.2", juce::String::fromUTF8 ("Dó maior em disposição fechada"),
+                       juce::String::fromUTF8 ("Tocar Dó maior com as notas próximas (disposição fechada)."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere o acorde (0–4–7), em qualquer posição do braço.")), "C");
+        m.exercises.back().chordPitchClasses = { 0, 4, 7 };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-4.C.3", juce::String::fromUTF8 ("Sol maior em disposição aberta"),
+                       juce::String::fromUTF8 ("Tocar Sol maior com as notas espalhadas (disposição aberta)."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere o acorde (7–11–2), em qualquer posição do braço.")), "C");
+        m.exercises.back().chordPitchClasses = { 7, 11, 2 };
+        m.exercises.back().usesGrid = false;
+        add (intervalExercise ("EX-4.C.4", "A quinta do acorde",
+                               "Tocar uma quinta justa (7 semitons) a partir de qualquer nota, três vezes.", 7, 3), "C");
+
+        // --- Topic D — inversões ---------------------------------------------
+        add (exercise ("EX-4.D.1", juce::String::fromUTF8 ("Questionário: inversões"),
+                       juce::String::fromUTF8 ("Responder ao questionário das inversões."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões de inversão.")), "D");
+        m.exercises.back().quiz = {
+            question ("Inverter um acorde é:",
+                      { "mudar a nota do baixo", "mudar as notas do acorde",
+                        "mudar a tonalidade", "tirar uma nota" }, 0),
+            question ("Na 1ª inversão, qual nota fica no baixo?",
+                      { "a tônica", "a terça", "a quinta", "a sétima" }, 1),
+            question ("Na 2ª inversão, qual nota fica no baixo?",
+                      { "a tônica", "a terça", "a quinta", "a sétima" }, 2),
+            question ("A cifra C/E significa:",
+                      { "Dó com Mi no baixo", "Mi com Dó no baixo",
+                        "Dó com Sol no baixo", "Dó menor" }, 0),
+            question ("O acorde invertido, em relação ao original:",
+                      { "é outro acorde", "tem as mesmas notas",
+                        "tem menos notas", "muda a tonalidade" }, 1),
+        };
+        add (exercise ("EX-4.D.2", juce::String::fromUTF8 ("Dó maior com Mi no baixo"),
+                       juce::String::fromUTF8 ("Tocar Dó maior na 1ª inversão (Mi no baixo)."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere o acorde (0–4–7), em qualquer posição do braço.")), "D");
+        m.exercises.back().chordPitchClasses = { 0, 4, 7 };
+        m.exercises.back().usesGrid = false;
+        add (intervalExercise ("EX-4.D.3", "A terça menor da inversão",
+                               "Tocar uma terça menor (3 semitons) a partir de qualquer nota, três vezes.", 3, 3), "D");
+        add (exercise ("EX-4.D.4", juce::String::fromUTF8 ("Inversões e a linha do baixo"),
+                       juce::String::fromUTF8 ("Relacionar inversões à condução do baixo."),
+                       juce::String::fromUTF8 ("Acerto ≥90% no questionário de aplicação.")), "D");
+        m.exercises.back().quiz = {
+            question ("A principal aplicação das inversões é:",
+                      { "suavizar a linha do baixo", "aumentar o volume",
+                        "mudar a tonalidade", "tocar mais rápido" }, 0),
+            question ("Numa progressão que desce por graus, a inversão serve para:",
+                      { "manter o baixo caminhando", "abafar as cordas",
+                        "tirar a terça", "tocar mais alto" }, 0),
+            question ("A 2ª inversão soa:",
+                      { "estável e conclusiva", "instável, de passagem",
+                        "igual à fundamental", "sempre menor" }, 1),
+        };
+
+        // --- Topic E — tétrades ----------------------------------------------
+        add (exercise ("EX-4.E.1", juce::String::fromUTF8 ("Questionário: tétrades"),
+                       juce::String::fromUTF8 ("Responder ao questionário das tétrades."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões de tétrades.")), "E");
+        m.exercises.back().quiz = {
+            question ("Uma tétrade é formada por:",
+                      { "três notas", "quatro notas", "cinco notas", "duas notas" }, 1),
+            question ("C7M (sétima maior) usa qual sétima?",
+                      { "11 semitons (maior)", "10 semitons (menor)",
+                        "9 semitons", "12 semitons" }, 0),
+            question ("C7 (dominante) usa qual sétima?",
+                      { "11 semitons", "10 semitons", "6 semitons", "7 semitons" }, 1),
+            question ("Cm7 tem os semitons:",
+                      { "0, 3, 7, 10", "0, 4, 7, 11", "0, 4, 7, 10", "0, 3, 6, 10" }, 0),
+            question ("O acorde meio-diminuto (m7♭5) tem os semitons:",
+                      { "0, 3, 6, 10", "0, 4, 7, 11", "0, 3, 7, 10", "0, 4, 8, 11" }, 0),
+        };
+        add (exercise ("EX-4.E.2", juce::String::fromUTF8 ("Tocar a sétima maior"),
+                       juce::String::fromUTF8 ("Tocar uma tétrade de sétima maior (tônica, terça, quinta e sétima maior)."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere a tétrade 7M (0–4–7–11), em qualquer posição do braço.")), "E");
+        m.exercises.back().chordPitchClasses = { 0, 4, 7, 11 };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-4.E.3", juce::String::fromUTF8 ("Tocar o dominante"),
+                       juce::String::fromUTF8 ("Tocar uma tétrade de sétima dominante (tônica, terça, quinta e sétima menor)."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere a tétrade 7 (0–4–7–10), em qualquer posição do braço.")), "E");
+        m.exercises.back().chordPitchClasses = { 0, 4, 7, 10 };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-4.E.4", juce::String::fromUTF8 ("Tocar a menor com sétima"),
+                       juce::String::fromUTF8 ("Tocar uma tétrade menor com sétima (tônica, terça menor, quinta e sétima menor)."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere a tétrade m7 (0–3–7–10), em qualquer posição do braço.")), "E");
+        m.exercises.back().chordPitchClasses = { 0, 3, 7, 10 };
+        m.exercises.back().usesGrid = false;
+        add (intervalExercise ("EX-4.E.5", "A sétima maior",
+                               "Tocar uma sétima maior (11 semitons) a partir de qualquer nota, duas vezes.", 11, 2), "E");
+
+        // --- Topic F — formação de acordes -----------------------------------
+        add (exercise ("EX-4.F.1", juce::String::fromUTF8 ("Questionário: formação de acordes"),
+                       juce::String::fromUTF8 ("Responder ao questionário da formação de acordes."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões de formação.")), "F");
+        m.exercises.back().quiz = {
+            question ("Formar um acorde é:",
+                      { "empilhar terças sobre a tônica", "somar volumes",
+                        "repetir a tônica", "tocar só a quinta" }, 0),
+            question ("As notas essenciais de um acorde são:",
+                      { "tônica, terça e sétima", "tônica e quinta",
+                        "só a terça", "todas as notas" }, 0),
+            question ("Acrescentar a sétima menor (10 semitons) a uma tríade maior forma:",
+                      { "acorde de sétima maior", "acorde de sétima dominante",
+                        "acorde diminuto", "acorde suspenso" }, 1),
+            question ("As notas de F7M são:",
+                      { "Fá–Lá–Dó–Mi", "Fá–Lá♭–Dó–Mi♭", "Fá–Lá–Dó–Mi♭", "Fá–Sol–Dó–Mi" }, 0),
+            question ("O acorde suspenso (sus4) substitui a terça por:",
+                      { "a quarta", "a quinta", "a sétima", "a nona" }, 0),
+        };
+        add (exercise ("EX-4.F.2", juce::String::fromUTF8 ("Montar Fá maior"),
+                       juce::String::fromUTF8 ("Tocar Fá maior (Fá–Lá–Dó), formada por empilhamento de terças."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere o acorde (5–9–0), em qualquer posição do braço.")), "F");
+        m.exercises.back().chordPitchClasses = { 5, 9, 0 };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-4.F.3", juce::String::fromUTF8 ("Montar Sol maior"),
+                       juce::String::fromUTF8 ("Tocar Sol maior (Sol–Si–Ré), formada por empilhamento de terças."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere o acorde (7–11–2), em qualquer posição do braço.")), "F");
+        m.exercises.back().chordPitchClasses = { 7, 11, 2 };
+        m.exercises.back().usesGrid = false;
+        add (intervalExercise ("EX-4.F.4", "A quinta da formação",
+                               "Tocar uma quinta justa (7 semitons) a partir de qualquer nota, três vezes.", 7, 3), "F");
+        add (exercise ("EX-4.F.5", juce::String::fromUTF8 ("Ler a cifra e formar o acorde"),
+                       juce::String::fromUTF8 ("Relacionar cifra, tônica e qualidade."),
+                       juce::String::fromUTF8 ("Acerto ≥90% no questionário de cifra.")), "F");
+        m.exercises.back().quiz = {
+            question ("Na cifra, 'm' significa:",
+                      { "maior", "menor", "aumentado", "meio-diminuto" }, 1),
+            question ("Na cifra, '7M' significa:",
+                      { "sétima maior", "sétima menor", "sétima dominante", "menor com sétima" }, 0),
+            question ("A cifra 'Am7' pede:",
+                      { "Lá menor com sétima", "Lá maior com sétima",
+                        "Lá diminuto", "Lá suspenso" }, 0),
+            question ("A tônica de 'Dm' é:",
+                      { "Ré", "Fá", "Lá", "Dó" }, 0),
+        };
+
+        // --- Topic G — CAGED e famílias --------------------------------------
+        add (exercise ("EX-4.G.1", juce::String::fromUTF8 ("Questionário: CAGED e famílias"),
+                       juce::String::fromUTF8 ("Responder ao questionário do sistema CAGED."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões do CAGED.")), "G");
+        m.exercises.back().quiz = {
+            question ("As cinco formas do CAGED são:",
+                      { "C, A, G, E, D", "A, B, C, D, E", "I, IV, V, vi, vii", "Dó, Ré, Mi, Fá, Sol" }, 0),
+            question ("Cada forma do CAGED é:",
+                      { "um molde para várias qualidades", "um acorde único",
+                        "uma escala apenas", "uma corda" }, 0),
+            question ("Para transformar uma forma maior em menor:",
+                      { "desça a terça um semitom", "suba a quinta um semitom",
+                        "tire a tônica", "dobre a tônica" }, 0),
+            question ("A ordem do ciclo das formas é:",
+                      { "C → A → G → E → D", "A → C → E → G → D",
+                        "E → A → D → G → C", "G → E → D → A → C" }, 0),
+            question ("Dentro de Dó maior, o grau V pertence à família:",
+                      { "maior", "menor", "dominante", "diminuta" }, 2),
+        };
+        add (exercise ("EX-4.G.2", juce::String::fromUTF8 ("Lá menor pela família"),
+                       juce::String::fromUTF8 ("Tocar Lá menor (Lá–Dó–Mi) usando uma forma do CAGED."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere o acorde (9–0–4), em qualquer posição do braço.")), "G");
+        m.exercises.back().chordPitchClasses = { 9, 0, 4 };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-4.G.3", juce::String::fromUTF8 ("Ré menor pela família"),
+                       juce::String::fromUTF8 ("Tocar Ré menor (Ré–Fá–Lá) usando uma forma do CAGED."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere o acorde (2–5–9), em qualquer posição do braço.")), "G");
+        m.exercises.back().chordPitchClasses = { 2, 5, 9 };
+        m.exercises.back().usesGrid = false;
+        add (intervalExercise ("EX-4.G.4", "A terça da família",
+                               "Tocar uma terça maior (4 semitons) a partir de qualquer nota, três vezes.", 4, 3), "G");
+
+        // --- Topic H — as cinco fases ----------------------------------------
+        add (exercise ("EX-4.H.1", juce::String::fromUTF8 ("Questionário: as cinco fases"),
+                       juce::String::fromUTF8 ("Responder ao questionário das cinco fases."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões das fases.")), "H");
+        m.exercises.back().quiz = {
+            question ("A ordem das cinco fases é:",
+                      { "forma → transposição → troca → progressão → criação",
+                        "criação → forma → troca → transposição → progressão",
+                        "transposição → forma → criação → troca → progressão",
+                        "progressão → troca → forma → criação → transposição" }, 0),
+            question ("Na fase 1, o objetivo é:",
+                      { "montar a forma sem olhar", "criar vozes próprias",
+                        "improvisar", "tocar rápido" }, 0),
+            question ("Na fase 2, você treina:",
+                      { "transpor a forma pelo braço", "abafar cordas",
+                        "afinar", "cantar" }, 0),
+            question ("A partir de qual fase o metrônomo é essencial?",
+                      { "1", "2", "3", "5" }, 2),
+            question ("A fase 5 é a fase de:",
+                      { "criar e inverter livremente", "decorar formas",
+                        "tocar devagar", "ler cifra" }, 0),
+        };
+        add (exercise ("EX-4.H.2", juce::String::fromUTF8 ("Dó maior pelas fases"),
+                       juce::String::fromUTF8 ("Tocar Dó maior (Dó–Mi–Sol) montando a forma com precisão."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere o acorde (0–4–7), em qualquer posição do braço.")), "H");
+        m.exercises.back().chordPitchClasses = { 0, 4, 7 };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-4.H.3", juce::String::fromUTF8 ("Menor com sétima pelas fases"),
+                       juce::String::fromUTF8 ("Tocar Lá menor com sétima (Lá–Dó–Mi–Sol)."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere a tétrade m7 (9–0–4–7), em qualquer posição do braço.")), "H");
+        m.exercises.back().chordPitchClasses = { 9, 0, 4, 7 };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-4.H.4", juce::String::fromUTF8 ("Das fases para a música"),
+                       juce::String::fromUTF8 ("Relacionar as fases ao acompanhamento real."),
+                       juce::String::fromUTF8 ("Acerto ≥90% no questionário de aplicação.")), "H");
+        m.exercises.back().quiz = {
+            question ("Pular etapas no estudo das famílias:",
+                      { "acelera sem prejuízo", "gera vícios difíceis de corrigir",
+                        "é indiferente", "é obrigatório" }, 1),
+            question ("A fase 4 consiste em:",
+                      { "aplicar a família em uma progressão", "decorar formas",
+                        "afinar o instrumento", "só ler cifra" }, 0),
+            question ("A velocidade deve ser buscada:",
+                      { "antes da precisão", "depois da precisão",
+                        "nunca", "só no palco" }, 1),
+        };
+
+        // --- Topic I — acordes clean e distribuição --------------------------
+        add (exercise ("EX-4.I.1", juce::String::fromUTF8 ("Questionário: clean e distribuição"),
+                       juce::String::fromUTF8 ("Responder ao questionário de acordes clean."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões de limpeza.")), "I");
+        m.exercises.back().quiz = {
+            question ("Um acorde clean é aquele que:",
+                      { "não tem corda abafada nem zumbido", "é tocado bem rápido",
+                        "usa todas as cordas", "tem sempre sétima" }, 0),
+            question ("Para o som sair limpo, o dedo deve pressionar:",
+                      { "junto ao traste", "no meio da casa",
+                        "em cima do traste", "na corda vizinha" }, 0),
+            question ("As cordas que não pertencem ao acorde devem ser:",
+                      { "abafadas de propósito", "tocadas normalmente",
+                        "sempre soltas", "sempre a 12ª casa" }, 0),
+            question ("Na pestana, o polegar deve:",
+                      { "apoiar no meio do braço", "ficar solto",
+                        "apertar a corda", "apoiar no captador" }, 0),
+            question ("Distribuir acordes pelo braço é:",
+                      { "escolher a região e a nota do baixo", "tocar mais alto",
+                        "abafar todas as cordas", "usar só a 1ª posição" }, 0),
+        };
+        add (exercise ("EX-4.I.2", juce::String::fromUTF8 ("Dó maior clean"),
+                       juce::String::fromUTF8 ("Tocar Dó maior sem nenhuma corda abafada."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere o acorde (0–4–7), em qualquer posição do braço.")), "I");
+        m.exercises.back().chordPitchClasses = { 0, 4, 7 };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-4.I.3", juce::String::fromUTF8 ("Sol maior em outra região"),
+                       juce::String::fromUTF8 ("Tocar Sol maior distribuído em uma região diferente do braço."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere o acorde (7–11–2), em qualquer posição do braço.")), "I");
+        m.exercises.back().chordPitchClasses = { 7, 11, 2 };
+        m.exercises.back().usesGrid = false;
+        add (intervalExercise ("EX-4.I.4", "A quinta limpa",
+                               "Tocar uma quinta justa (7 semitons) a partir de qualquer nota, três vezes.", 7, 3), "I");
+
+        // The gate closes the module: a I–vi–IV–V vamp of triads on the grid,
+        // built from the chord construction studied here (REQ-009, REQ-015).
+        auto& gate = m.exercises.emplace_back (exercise (
+            "GATE-4", juce::String::fromUTF8 ("Desafio de gate — vamp C–Am–F–G"),
+            juce::String::fromUTF8 ("Tocar C – Am – F – G a 72 BPM, na grade do metrônomo."),
+            juce::String::fromUTF8 ("Acordes reconhecidos e alinhados à grade (≥ 0,78).")));
+        gate.isGate = true;
+        gate.lessonId = "I";
+        gate.chordProgression = {
+            { 0, 4, 7 },    // C
+            { 9, 0, 4 },    // Am
+            { 5, 9, 0 },    // F
             { 7, 11, 2 },   // G
         };
 
@@ -1602,12 +2023,33 @@ namespace
             "pdf-p-classtruncatedtext-module-lineclamped-85ulhh-style-max-lines5bohumil-med-teoria-da-musica-5-edicao-p",
             "pdf-mozart-mello-livroestudosdeguitarra4em1",
             "pdf-teoria-elementar-da-musica-ricordi-osvaldo-lacerda",
+            "Tocar C – Am – F – G (quatro acordes; o modelo de improvisação do "
+            "nível 2 é o 'vamp de 2 acordes') a 72 BPM com ≥90% de acerto de "
+            "acordes e on_grid_ratio ≥ 0,78. Os acordes são tríades construídas "
+            "pelos intervalos estudados no módulo.");
+
+        // Pattern and link the module must cite (REQ-007, REQ-010).
+        m.practice.patternId = "PTN-A-TRIAD";
+        m.practice.patternUse = juce::String::fromUTF8 (
+            "Arpejos de tríades em três cordas (varredura e retorno): o aluno ouve "
+            "as três notas do acorde em sequência, ligando a forma à construção. "
+            "Complemento: PTN-A-DROP2 (arpejos de sétima em Drop 2) para as tétrades.");
+        m.practice.guitarists = { "Eric Johnson", "John Petrucci", "Andy Timmons" };
+
+        // Curated apostilas (REQ-006, CM-012); see docs/MUSIC.md §1.1.
+        m.sources = {
+            "pdf-caged-e-derivaoes-de-acordes-marcelo-mello-apostila-de-violao-e-guitarra-vol1",
+            "pdf-desvendando-os-segredos-da-guitarra-fusion",
+            "pdf-teoria-elementar-da-musica-ricordi-osvaldo-lacerda",
+            "pdf-p-classtruncatedtext-module-lineclamped-85ulhh-style-max-lines5bohumil-med-teoria-da-musica-5-edicao-p",
+            "pdf-mozart-mello-livroestudosdeguitarra4em1",
         };
 
         return m;
     }
 
     // Modules 4..20 exist as placeholders so the list is honest about what is
+    // Modules 3..20 exist as placeholders so the list is honest about what is
     // coming (ADR 0005): level, target BPM and alignment come from MUSIC.md.
     CourseModule makePlaceholder (int number, const char* title, int level,
                                   int targetBpm, float onGridTarget)
@@ -1633,6 +2075,8 @@ const std::vector<CourseModule>& ModuleCatalog::getModules()
         makeModule2(),
         makeModule3(),
         makePlaceholder (4,  "Vamps de 2 acordes (aplicação)",      2,  72,  0.78f),
+        makePlaceholder (3,  "Vamps de 2 acordes",                  2,  68,  0.77f),
+        makeModule4(),
         makePlaceholder (5,  "II–V–I",                              3,  76,  0.79f),
         makePlaceholder (6,  "II–V–I (menor)",                      3,  80,  0.80f),
         makePlaceholder (7,  "II–V–I (aplicação)",                  3,  84,  0.80f),
