@@ -132,5 +132,15 @@ std::vector<ContentItem> topic8G();  // Dilatação do campo harmônico maior
 std::vector<ContentItem> topic8H();  // Dilatação do campo harmônico menor
 std::vector<ContentItem> topic8I();  // Progressão II-V-I maior e menor
 std::vector<ContentItem> topic8J();  // Identificação de situações que não são II-V-I
+// Module 9 (Etapa 9 — harmonia avançada e estruturas especiais).
+std::vector<ContentItem> topic9A();  // Acordes diminutos e suas funções
+std::vector<ContentItem> topic9B();  // Dominantes diminutos (DomDim)
+std::vector<ContentItem> topic9C();  // Ciclos diminutos
+std::vector<ContentItem> topic9D();  // Campos harmônicos diminutos
+std::vector<ContentItem> topic9E();  // Acorde m7(#5)
+std::vector<ContentItem> topic9F();  // Policordes
+std::vector<ContentItem> topic9G();  // Simetria e escalas simétricas
+std::vector<ContentItem> topic9H();  // Relações entre campos harmônicos
+std::vector<ContentItem> topic9I();  // Sonoridades especiais
 
 } // namespace cursomusica::content
