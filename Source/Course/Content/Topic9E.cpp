@@ -110,10 +110,10 @@ std::vector<ContentItem> topic9E()
 
         h ("O m7(#5) e a escala menor melódica"),
         p (
-            "A escala que combina com o m7(#5) é a menor melódica, que é a escala menor natural com a sexta e a sétima elevadas. Sobre o primeiro grau dessa escala, porém, o acorde de sétima é o m(maj7) (menor com sétima maior, como Cm(maj7) = Do-Mib-Sol-Si), e não o m7(#5). O m7(#5) e a menor melódica se aproximam pela leitura enarmônica: a escala contém a quinta aumentada (Sol#), que é a nota que dá identidade ao acorde, e por isso ela soa bem sobre ele mesmo não sendo o seu acorde diatônico."),
+            "A escala que contém as quatro notas do m7(#5) é a menor melódica de outra tônica, não a do próprio acorde. A menor melódica de Dó (Dó-Ré-Mib-Fá-Sol-Lá-Si) tem o primeiro grau m(maj7) = Do-Mib-Sol-Si, e não contém a quinta aumentada Sol#. Já a menor melódica de Dó# (Dó#-Ré#-Mi-Fá#-Sol#-Lá#-Dó) contém, sobre o baixo de Dó, exatamente Mib, Sol# e Sib — as notas do Cm7(#5). Por isso a escala que serve ao acorde é a menor melódica de Dó# (ou, enarmonicamente, de Ré bemol)."),
         b ("A menor melódica tem a sexta e a sétima elevadas."),
-        b ("O acorde de sétima do primeiro grau da menor melódica é o m(maj7), não o m7(#5)."),
-        b ("A escala contém a quinta aumentada do m7(#5), por isso combina com ele."),
+        b ("O acorde de sétima do primeiro grau da menor melódica de Dó é o m(maj7), não o m7(#5)."),
+        b ("A menor melódica que contém a quinta aumentada do Cm7(#5) é a de Dó# (Ré bemol)."),
 
         h ("O m7(#5) na partitura"),
         p (

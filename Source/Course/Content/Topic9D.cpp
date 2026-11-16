@@ -30,7 +30,7 @@ std::vector<ContentItem> topic9D()
             { "Meio-tom-tom", "0 - 1 - 3 - 4 - 6 - 7 - 9 - 10", "7, dim7, m7, m7(b5)" },
         }),
         c (
-            "O campo do DomDim é o da escala meio-tom/tom. É por isso que ele é tão usado sobre dominantes: a escala já contém as tensões 9 bemol, 11 e 13."),
+            "O campo do DomDim é o da escala meio-tom/tom. É por isso que ele é tão usado sobre dominantes: a escala já contém as tensões 9 bemol, 9 sustenida, 11 aumentada e 13."),
 
         h ("O campo diminuto tom-meio-tom"),
         p (
@@ -43,7 +43,7 @@ std::vector<ContentItem> topic9D()
         p (
             "Quando empilhamos terças sobre a escala meio-tom-tom, o resultado é um campo dominado por acordes dominantes. Quatro deles, separados por terças menores, dividem a mesma escala. Esse é o campo do DomDim, e por isso ele é tão útil sobre progressões de jazz, onde o dominante precisa ser enriquecido."),
         b ("Quatro acordes dominantes a uma terça menor de distância."),
-        b ("Todos usam as mesmas tensões (9 bemol, 11, 13)."),
+        b ("Todos usam as mesmas tensões (9 bemol, 9 sustenida, 11 aumentada e 13)."),
         b ("E o campo de onde vem o dim7 substituto."),
 
         h ("A relação entre campo diminuto e campo maior"),
@@ -83,18 +83,17 @@ std::vector<ContentItem> topic9D()
         p (
             "Quando você improvisa sobre um acorde dominante, o campo diminuto dá as notas que soam modernas. Em vez de tocar apenas a escala do acorde, você usa a escala diminuta meio-tom/tom e obtém as tensões que caracterizam o som. O campo, portanto, não é só uma lista de acordes: é um conjunto de notas que orienta a melodia."),
         b ("Sobre o dominante, use a escala diminuta meio-tom/tom."),
-        b ("As tensões 9 bemol, 11 e 13 aparecem na melodia."),
+        b ("As tensões 9 bemol, 9 sustenida, 11 aumentada e 13 aparecem na melodia."),
         b ("O campo orienta tanto a harmonia quanto a improvisação."),
 
         h ("As tensões do campo diminuto"),
         p (
-            "As tensões do campo diminuto tem um papel específico. A nona bemol cria a tensão principal; a décima terceira e a décima primeira acrescentam cor. Juntas, elas dão ao acorde dominante uma sonoridade que não existe no campo maior tradicional. Saber nomear cada tensão ajuda a controlar a cor que você quer."),
+            "As tensões do campo diminuto tem um papel específico. A nona bemol cria a tensão principal; a nona sustenida, a décima primeira aumentada e a décima terceira acrescentam cor. Juntas, elas dão ao acorde dominante uma sonoridade que não existe no campo maior tradicional. Saber nomear cada tensão ajuda a controlar a cor que você quer."),
         tbl ({ "Tensão", "Distância (semitons)", "Efeito" }, {
             { "9 bemol", "1", "tensão principal" },
             { "9 sustenida", "3", "cor (enarmonia da 3a menor)" },
             { "11 aumentada", "6", "tensão moderna" },
             { "13", "9", "cor, décima terceira" },
-            { "13 bemol", "8", "cor menor sobre o dominante" },
         }),
         c (
             "Não é preciso usar todas as tensões. Escolha uma ou duas e deixe que elas definam a cor do momento."),

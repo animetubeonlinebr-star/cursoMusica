@@ -35,7 +35,7 @@ std::vector<ContentItem> topic9B()
         p (
             "Toda sonoridade nasce de uma escala. O DomDim nasce da escala diminuta na forma meio-tom, tom, meio-tom, tom. Partindo de Do, a escala é: Do, Reb, Mib, Mi, Fa#, Sol, Lá, Sib. Repare na alternância: um semitom, um tom, um semitom, um tom, e assim por diante."),
         p (
-            "O nome DomDim vem justamente de o acorde ser dominante e a escala ser diminuta. Sobre cada nota dessa escala, o dominante ganha as tensões 9 bemol, 11 justa e 13 bemol — o pacote completo do jazz."),
+            "O nome DomDim vem justamente de o acorde ser dominante e a escala ser diminuta. Sobre cada nota dessa escala, o dominante ganha as tensões 9 bemol, 9 sustenida, 11 aumentada e 13 — o pacote completo do jazz."),
         tbl ({ "Grau na escala", "Nota a partir de Do", "Distância (semitons)", "Papel no acorde" }, {
             { "1", "Do", "0", "fundamental" },
             { "b2", "Reb", "1", "nona bemol" },
