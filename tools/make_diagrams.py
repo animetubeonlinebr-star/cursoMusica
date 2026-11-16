@@ -974,321 +974,6 @@ DIAGRAMS.update({
 
 
 # --------------------------------------------------------------------------
-# Modulo 3 — ritmo, leitura e levadas.
-# --------------------------------------------------------------------------
-def _rhythm_row(d, x, y, w, cells, gap_after=0):
-    """Faixa de figuras ritmicas: `cells` = [(kind, silaba)] em uma linha."""
-    n = len(cells)
-    step = w / max(1, n)
-    for i, (kind, syll) in enumerate(cells):
-        cx = x + step * (i + 0.5)
-        _note_glyph(d, cx, y, kind, ACCENT)
-        d.text((cx, y + 46), syll, font=font(18, True), fill=CYAN, anchor="mm")
-    return y + gap_after
-
-
-def _bullets(d, y, items, color=ACCENT):
-    for i, item in enumerate(items):
-        yy = y + i * 54
-        d.rounded_rectangle([MARGIN, yy, W - MARGIN, yy + 46], radius=8,
-                            fill=RAISED if i % 2 == 0 else SURFACE)
-        d.text((MARGIN + 18, yy + 23), item[0], font=font(21, True), fill=color, anchor="lm")
-        d.text((MARGIN + 300, yy + 23), item[1], font=font(20), fill=TXT, anchor="lm")
-        if len(item) > 2:
-            d.text((W - MARGIN - 18, yy + 23), item[2], font=font(19), fill=TXT2, anchor="rm")
-    return y + len(items) * 54
-
-
-def d_m3_leitura_ritmica():
-    h = 720
-    img, d = canvas(h, BG)
-    frame(d, h)
-    y = title(d, "Leitura ritmica: figuras, valores e silabas")
-    y = subtitle(d, "Cada figura vale metade da anterior; a silaba ajuda a contar em voz alta.", y)
-    figures = [("whole", "Semibreve", "4 tempos", "TA-A-A-A"),
-               ("half", "Minima", "2 tempos", "TA-A"),
-               ("quarter", "Seminima", "1 tempo", "TA"),
-               ("eighth", "Colcheia", "1/2 tempo", "TA-KI"),
-               ("sixteenth", "Semicolcheia", "1/4 tempo", "TA-KI-TA-KI")]
-    top = y + 70
-    for i, (kind, name, value, syll) in enumerate(figures):
-        yy = top + i * 88
-        _note_glyph(d, MARGIN + 60, yy + 26, kind)
-        d.text((MARGIN + 130, yy + 4), name, font=font(25, True), fill=TXT, anchor="la")
-        d.text((MARGIN + 130, yy + 40), f"{value}   -   {syll}", font=font(20),
-               fill=CYAN, anchor="la")
-        d.rounded_rectangle([MARGIN + 620, yy + 12, W - MARGIN, yy + 44], radius=6,
-                            fill=ACCENT_MUTED)
-        d.text((MARGIN + 636, yy + 28), "contar antes de tocar", font=font(18), fill=TXT2, anchor="lm")
-    d.text((W / 2, h - 52), "Ler o ritmo e contar a subdivisao: a base de tocar na grade.",
-# Modulo 8 — dominantes, cadencias e substituicoes harmonicas.
-# --------------------------------------------------------------------------
-def rows_box(d, top, rows, height=52, gap=8, cols=(0, 300, 640, 900),
-             colors=(ACCENT, TXT, CYAN, GOLD), font_size=20):
-    """Lista de linhas de texto alinhadas em colunas."""
-    for i, row in enumerate(rows):
-        yy = top + i * (height + gap)
-        d.rounded_rectangle([MARGIN, yy, W - MARGIN, yy + height], radius=8,
-                            fill=RAISED if i % 2 == 0 else SURFACE)
-        for k, cell in enumerate(row):
-            if k >= len(cols) or not cell:
-                continue
-            d.text((MARGIN + cols[k] + 16, yy + height / 2), cell,
-                   font=font(font_size, k == 0), fill=colors[k % len(colors)],
-                   anchor="lm")
-    return top + len(rows) * (height + gap)
-
-
-def d_m8_dominante_v7():
-    h = 720
-    img, d = canvas(h, BG)
-    frame(d, h)
-    y = title(d, "O dominante V7 e a sua tensao")
-    y = subtitle(d, "O V7 traz a terca e a setima em tritono; elas resolvem por semitom.", y)
-    # Acorde G7 em destaque + notas.
-    chord_box(d, W / 2, y + 90, 320, 240, [-1, -1, -1, 0, 0, 3], "G7 (V7 de Do)",
-              start_fret=1, caption="3a = Si, 7a = Fa: o tritono pede resolucao")
-    notes = [("G", "tonica", "5a da escala"),
-             ("B", "terca maior", "sensivel de Do"),
-             ("D", "quinta justa", "estavel"),
-             ("F", "setima menor", "resolves para Mi")]
-    top = y + 400
-    for i, (n, role, res) in enumerate(notes):
-        yy = top + i * 58
-        d.rounded_rectangle([MARGIN, yy, W - MARGIN, yy + 50], radius=8,
-                            fill=RAISED if i % 2 == 0 else SURFACE)
-        d.text((MARGIN + 18, yy + 25), n, font=font(24, True), fill=ACCENT, anchor="lm")
-        d.text((MARGIN + 120, yy + 25), role, font=font(21), fill=TXT, anchor="lm")
-        d.text((MARGIN + 460, yy + 25), res, font=font(20, True), fill=CYAN, anchor="lm")
-    d.text((W / 2, h - 40), "Fa (7a) desce para Mi; Si (3a) sobe para Do: resolucao V7 -> I.",
-           font=font(20, True), fill=GOLD, anchor="mm")
-    return img
-
-
-def d_m3_pulsacao_subdivisao():
-    h = 700
-    img, d = canvas(h, BG)
-    frame(d, h)
-    y = title(d, "Pulsacao e subdivisao")
-    y = subtitle(d, "O pulso e constante; a subdivisao divide cada pulso em partes iguais.", y)
-    x0, x1 = MARGIN + 80, W - MARGIN - 20
-    top = y + 90
-    beat_w = (x1 - x0) / 4
-    d.line([x0, top - 20, x1, top - 20], fill=TXT, width=3)
-    for b in range(4):
-        bx = x0 + b * beat_w
-        d.line([bx, top - 30, bx, top + 150], fill=BORDER, width=2)
-        d.text((bx + beat_w / 2, top), "1", font=font(30, True), fill=TXT, anchor="mm")
-        d.text((bx + beat_w / 2, top + 46), "TA", font=font(22, True), fill=CYAN, anchor="mm")
-        d.text((bx + beat_w / 2, top + 88), "TA-KI", font=font(20), fill=TXT2, anchor="mm")
-        d.text((bx + beat_w / 2, top + 126), "TA-KI-TA-KI", font=font(18), fill=TXT_DIS, anchor="mm")
-    d.line([x1, top - 30, x1, top + 150], fill=BORDER, width=2)
-    d.text((MARGIN, h - 150), "Semínima (1x por pulso) -> colcheia (2x) -> semicolcheia (4x).",
-           font=font(21), fill=TXT2, anchor="la")
-    d.text((MARGIN, h - 108), "A subdivisao dobra a cada nivel: e o que o metronomo faz para voce.",
-           font=font(21), fill=TXT2, anchor="la")
-    d.text((MARGIN, h - 60), "Tocar na grade = alinhar a nota ao pulso ou a sua subdivisao.",
-           font=font(21, True), fill=GOLD, anchor="la")
-    return img
-
-
-def d_m3_cifrado_divisao():
-    h = 620
-    img, d = canvas(h, BG)
-    frame(d, h)
-    y = title(d, "Cifrado com divisao: o acorde repartido no compasso")
-    y = subtitle(d, "A cifra diz o acorde; a divisao diz como ele e tocado no tempo.", y)
-    items = [("C", "acorde inteiro no tempo 1", "1 acorde = 1 compasso"),
-             ("C  C  C  C", "um acorde por tempo", "4 ataques"),
-             ("C  -  G  -", "dois acordes, com contratempo", "ritmo de base"),
-             ("C  C/G  C/E", "acorde com baixo (slash chord)", "baixo em movimento"),
-             ("C7  C6  C7M", "acordes por grau dentro do compasso", "conducao harmonica")]
-    _bullets(d, y + 40, items)
-    d.text((W / 2, h - 50), "Ler a cifra e dividir o compasso: e o que transforma o acorde em levada.",
-def d_m8_dominantes_secundarios():
-    h = 680
-    img, d = canvas(h, BG)
-    frame(d, h)
-    y = title(d, "Dominantes secundarios em Do maior")
-    y = subtitle(d, "Qualquer grau vira tonica temporaria com o seu proprio V7.", y)
-    rows = [("V7/ii", "A7", "-> Dm", "La-Do#-Mi-Sol"),
-            ("V7/iii", "B7", "-> Em", "Si-Re#-Fa#-La"),
-            ("V7/IV", "C7", "-> F", "Do-Mi-Sol-Sib"),
-            ("V7/V", "D7", "-> G", "Re-Fa#-La-Do"),
-            ("V7/vi", "E7", "-> Am", "Mi-Sol#-Si-Re")]
-    rows_box(d, y + 40, rows, cols=(0, 180, 480, 720))
-    d.text((W / 2, h - 46), "O acidente (sustenido/bemol) cria a sensivel do novo alvo.",
-           font=font(20, True), fill=GOLD, anchor="mm")
-    return img
-
-
-def d_m3_celulas_ritmicas():
-    h = 700
-    img, d = canvas(h, BG)
-    frame(d, h)
-    y = title(d, "Celulas ritmicas de acompanhamento")
-    y = subtitle(d, "Uma celula e um desenho de ataques que se repete no compasso.", y)
-    top = y + 70
-    cells = [("Semininas", "TA TA TA TA", ["quarter"] * 4),
-             ("Colcheias", "TA-KI TA-KI TA-KI TA-KI", ["eighth"] * 8),
-             ("Rock", "TA  TA-KI TA  TA-KI", ["quarter", "eighth", "eighth", "quarter", "eighth", "eighth"]),
-             ("Samba", "TA-KI  TA  TA-KI", ["eighth", "eighth", "quarter", "eighth", "eighth"])]
-    for i, (name, syll, kinds) in enumerate(cells):
-        yy = top + i * 120
-        d.text((MARGIN, yy), name, font=font(23, True), fill=ACCENT, anchor="la")
-        _rhythm_row(d, MARGIN + 150, yy + 20, W - 2 * MARGIN - 150, [(k, "") for k in kinds])
-        d.text((MARGIN + 150, yy + 86), syll, font=font(18), fill=CYAN, anchor="la")
-    d.text((W / 2, h - 46), "Repetir a celula mantendo o pulso firme e o que cria o groove.",
-def d_m8_dominantes_alterados():
-    h = 700
-    img, d = canvas(h, BG)
-    frame(d, h)
-    y = title(d, "Dominantes alterados sobre G7")
-    y = subtitle(d, "A alteracao acrescenta tensao e aponta o caminho para Do.", y)
-    rows = [("G7b9", "Ab na ponta", "tensao forte sobre o V"),
-            ("G7#9", "A# (Bb)", "som de blues, 'acorde hendrix'"),
-            ("G7b5", "Db", "substitui a 5a justa"),
-            ("G7#5", "D# (Eb)", "5a aumentada, som suspenso"),
-            ("G7#11", "C#", "cor lidia dominante"),
-            ("G7alt", "todas juntas", "maxima tensao antes do I")]
-    rows_box(d, y + 40, rows, height=56)
-    d.text((W / 2, h - 44), "Quanto mais alteracoes, mais o ouvido espera a resolucao.",
-           font=font(20, True), fill=GOLD, anchor="mm")
-    return img
-
-
-def d_m3_acentuacoes():
-    h = 620
-    img, d = canvas(h, BG)
-    frame(d, h)
-    y = title(d, "Acentuacoes: onde o ataque fica forte")
-    y = subtitle(d, "Acento (>) reforca um tempo ou contratempo; o resto fica mais leve.", y)
-    x0, x1 = MARGIN + 60, W - MARGIN - 20
-    top = y + 100
-    beat_w = (x1 - x0) / 4
-    accented = {0, 2}
-    for b in range(4):
-        bx = x0 + b * beat_w
-        d.line([bx, top - 40, bx, top + 120], fill=BORDER, width=2)
-        strong = b in accented
-        d.text((bx + beat_w / 2, top), ">", font=font(34, True),
-               fill=GOLD if strong else TXT_DIS, anchor="mm")
-        d.text((bx + beat_w / 2, top + 54), str(b + 1), font=font(28, True),
-               fill=TXT if strong else TXT2, anchor="mm")
-        d.text((bx + beat_w / 2, top + 96), "TA", font=font(20, True),
-               fill=CYAN if strong else TXT_DIS, anchor="mm")
-    d.line([x1, top - 40, x1, top + 120], fill=BORDER, width=2)
-    d.text((MARGIN, h - 140), "Tempos fortes (1 e 3) sustentam a danca; fracos (2 e 4) pedem resposta.",
-           font=font(21), fill=TXT2, anchor="la")
-    d.text((MARGIN, h - 96), "No samba e no funk o acento cai no contratempo (o 'e' do tempo).",
-           font=font(21), fill=TXT2, anchor="la")
-    d.text((MARGIN, h - 52), "Acentuar sem perder o pulso: o detalhe que faz a levada soar viva.",
-# Modulo 5 — campo harmonico maior e funcoes harmonicas.
-# --------------------------------------------------------------------------
-def _table(d, y, headers, rows, col_x, row_h=46, header_color=ACCENT):
-    """Tabela simples: `col_x` = posicoes x de cada coluna."""
-    d.text((MARGIN, y), headers[0], font=font(19, True), fill=header_color, anchor="la")
-    for i, head in enumerate(headers[1:], start=1):
-        d.text((col_x[i], y), head, font=font(19, True), fill=header_color, anchor="la")
-    for r, row in enumerate(rows):
-        yy = y + 32 + r * row_h
-        fill = RAISED if r % 2 == 0 else SURFACE
-        d.rounded_rectangle([MARGIN, yy, W - MARGIN, yy + row_h - 6], radius=8, fill=fill)
-        for c, cell in enumerate(row):
-            color = TXT if c == 0 else TXT2
-            d.text((col_x[c] if c else MARGIN + 14, yy + (row_h - 6) / 2), cell,
-                   font=font(20, True if c == 0 else False), fill=color, anchor="lm")
-    return y + 32 + len(rows) * row_h
-
-
-def d_m5_escala_maior_graus():
-    h = 700
-    img, d = canvas(h, BG)
-    frame(d, h)
-    y = title(d, "A escala maior: graus, tons e semitons")
-    y = subtitle(d, "Padrao T - T - S - T - T - T - S. Os semitons ficam entre 3-4 e 7-8.", y)
-    piano(d, MARGIN + 30, y + 30, W - 2 * MARGIN - 60, 230)
-    steps = ["T", "T", "S", "T", "T", "T", "S"]
-    kw = (W - 2 * MARGIN - 60) / 8
-    for i, s in enumerate(steps):
-        d.text((MARGIN + 30 + (i + 1) * kw, y + 300), s, font=font(24, True),
-               fill=GOLD if s == "S" else CYAN, anchor="mm")
-    notes = ["Do", "Re", "Mi", "Fa", "Sol", "La", "Si", "Do"]
-    for i, n in enumerate(notes):
-        d.text((MARGIN + 30 + i * kw, y + 350), n, font=font(22, True), fill=TXT, anchor="mm")
-        d.text((MARGIN + 30 + i * kw, y + 386), str(i + 1), font=font(20, True),
-               fill=ACCENT, anchor="mm")
-    d.text((MARGIN, y + 450), "Os graus (1..8) numeram as notas da escala; a tonica e o grau 1.",
-           font=font(21), fill=TXT2, anchor="la")
-    d.text((MARGIN, y + 492), "O mesmo padrao vale em qualquer tonica: muda a nota, nao o desenho.",
-           font=font(21, True), fill=GOLD, anchor="la")
-    d.text((MARGIN, y + 534), "Graus 1, 3 e 5 formam a triade de tonica daquele tom.",
-           font=font(21), fill=CYAN, anchor="la")
-    return img
-
-
-def d_m5_graus_romanos():
-    h = 680
-    img, d = canvas(h, BG)
-    frame(d, h)
-    y = title(d, "Os graus em algarismo romano")
-    y = subtitle(d, "Maiusculo = acorde maior; minusculo = menor; circulo = diminuto.", y)
-    items = [("I", "C", "maior", ACCENT), ("ii", "Dm", "menor", CYAN),
-             ("iii", "Em", "menor", CYAN), ("IV", "F", "maior", ACCENT),
-             ("V", "G", "maior", ACCENT), ("vi", "Am", "menor", CYAN),
-             ("vii", "Bdim", "diminuto", GOLD)]
-    top = y + 40
-    for i, (deg, chord, quality, color) in enumerate(items):
-        yy = top + i * 66
-        d.rounded_rectangle([MARGIN, yy, W - MARGIN, yy + 56], radius=8,
-                            fill=RAISED if i % 2 == 0 else SURFACE)
-        d.text((MARGIN + 24, yy + 28), deg + ("o" if quality == "diminuto" else ""),
-               font=font(24, True), fill=color, anchor="lm")
-        d.text((MARGIN + 220, yy + 28), chord, font=font(22, True), fill=TXT, anchor="lm")
-        d.text((MARGIN + 520, yy + 28), quality, font=font(21), fill=TXT2, anchor="lm")
-        d.text((MARGIN + 820, yy + 28),
-               "repouso" if deg in ("I", "iii", "vi") else
-               ("afastamento" if deg in ("IV", "ii") else "tensao"),
-               font=font(20, True), fill=CYAN, anchor="lm")
-    return img
-
-
-def d_m5_campo_harmonico_maior():
-    h = 700
-    img, d = canvas(h, BG)
-    frame(d, h)
-    y = title(d, "Campo harmonico maior (de Do)")
-    y = subtitle(d, "I ii iii IV V vi vii - os sete acordes que nascem da escala maior.", y)
-    chords = [("C", "I"), ("Dm", "ii"), ("Em", "iii"), ("F", "IV"),
-              ("G", "V"), ("Am", "vi"), ("Bdim", "vii")]
-    bw = (W - 2 * MARGIN) / 4
-    for i, (name, deg) in enumerate(chords):
-        cx = MARGIN + bw * (i % 4 + 0.5)
-        cy = y + 60 + (i // 4) * 220
-        d.rounded_rectangle([cx - bw / 2 + 20, cy, cx + bw / 2 - 20, cy + 150],
-                            radius=12, fill=RAISED, outline=BORDER, width=2)
-        d.text((cx, cy + 40), deg + ("o" if deg == "vii" else ""), font=font(30, True),
-               fill=ACCENT, anchor="mm")
-        d.text((cx, cy + 90), name, font=font(26, True), fill=TXT, anchor="mm")
-        quality = "maior" if deg in ("I", "IV", "V") else ("menor" if deg != "vii" else "diminuto")
-        d.text((cx, cy + 126), quality, font=font(19), fill=CYAN, anchor="mm")
-    d.text((W / 2, h - 52), "Padrao fixo: I ii iii IV V vi vii. Vale em qualquer tonalidade.",
-           font=font(21, True), fill=GOLD, anchor="mm")
-    return img
-
-
-def d_m5_campo_harmonico_braco():
-    h = 720
-    img, d = canvas(h, BG)
-    frame(d, h)
-    y = title(d, "Campo harmonico de Do no braco")
-    y = subtitle(d, "Tonica (Do) em violeta, terceira em ciano, quinta em dourado.", y)
-    string_labels(d, MARGIN + 30, y + 60, 6 * 58)
-    fretboard(d, MARGIN + 50, y + 60, W - 2 * MARGIN - 50, 6 * 58,
-              highlight={0, 4, 7}, root_pc=0)
-    d.text((MARGIN, h - 116), "As tríades do campo se montam sobre as notas destacadas.",
-           font=font(21), fill=TXT2, anchor="la")
-    d.text((MARGIN, h - 74), "Ache a tonica (Do) e conte os graus para achar cada acorde.",
 # Modulo 9 — harmonia avancada e estruturas especiais.
 # --------------------------------------------------------------------------
 def _rows_panel(d, y, items, row_h=56, label_w=360, font_size=21):
@@ -1411,6 +1096,362 @@ def d_m9_ciclos_diminutos():
     return img
 
 
+def d_m9_campo_diminuto():
+    h = 700
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Campos harmonicos das escalas diminutas")
+    y = subtitle(d, "As duas escalas de 8 notas geram campos diferentes ao empilhar tercas.", y)
+    cols = [("Tom - meio - tom (0,2,3,5,6,8,9,11)",
+             ["dois dim7 a um tom", "Cdim7 e Ddim7", "0-3-6-9 / 0-3-6-9"], CYAN),
+            ("Meio - tom - meio (0,1,3,4,6,7,9,10)",
+             ["quatro dominantes", "C7  Eb7  Gb7  A7", "cada um com 7(b9)"], ACCENT)]
+    col_w = (W - 2 * MARGIN) / 2
+    for c, (name, lines, color) in enumerate(cols):
+        x = MARGIN + c * col_w
+        d.rounded_rectangle([x + 10, y + 40, x + col_w - 10, y + 400], radius=12, fill=RAISED)
+        d.text((x + col_w / 2, y + 80), name, font=font(20, True), fill=color, anchor="mm")
+        for i, line in enumerate(lines):
+            d.text((x + col_w / 2, y + 160 + i * 54), line, font=font(23), fill=TXT, anchor="mm")
+    d.text((W / 2, h - 60), "A escala diminuta tem 8 notas e apenas 3 transposicoes distintas.",
+           font=font(20), fill=TXT2, anchor="mm")
+    return img
+
+
+def d_m9_m7s5():
+    h = 700
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Acorde m7(#5): a quinta aumentada")
+    y = subtitle(d, "0-3-8-10 (tonica, 3a menor, 5a aumentada, 7a menor).", y)
+    chord_box(d, MARGIN + 200, y + 90, 200, 210, [-1, 3, 6, 3, 4, -1], "Cm7(#5)",
+              start_fret=1, caption="Do - Mib - Lab - Sib")
+    items = [("Cm7(#5)", "0-3-8-10", "cor e suspensao"),
+             ("= Ab(add9)/C", "mesmas notas, outro nome", "enarmonia"),
+             ("m7 com 5a justa", "0-3-7-10", "compare e ouça")]
+    top = y + 90
+    for i, (name, desc, feel) in enumerate(items):
+        yy = top + i * 96
+        d.rounded_rectangle([MARGIN + 480, yy, W - MARGIN, yy + 80], radius=10,
+                            fill=RAISED if i % 2 == 0 else SURFACE)
+        d.text((MARGIN + 500, yy + 20), name, font=font(22, True), fill=ACCENT, anchor="la")
+        d.text((MARGIN + 500, yy + 52), desc, font=font(19), fill=TXT, anchor="la")
+        d.text((W - MARGIN - 16, yy + 40), feel, font=font(19, True), fill=CYAN, anchor="rm")
+    d.text((W / 2, h - 54), "A quinta aumentada deixa o acorde suspenso: nem maior, nem menor, nem dominante.",
+           font=font(20), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m9_policordes():
+    h = 700
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Policordes: dois acordes empilhados")
+    y = subtitle(d, "Escreve-se o acorde de cima sobre o de baixo; cada camada e uma triade.", y)
+    upper = ["Re", "Fa#", "La"]
+    lower = ["Do", "Mi", "Sol"]
+    for row, (name, notes, color) in enumerate([("Triade superior", upper, CYAN),
+                                                ("Triade inferior", lower, ACCENT)]):
+        yy = y + 60 + row * 190
+        d.text((MARGIN, yy), name, font=font(22, True), fill=color, anchor="la")
+        for k, note in enumerate(notes):
+            cx = MARGIN + 380 + k * 150
+            cy = yy + 50
+            d.ellipse([cx - 44, cy - 44, cx + 44, cy + 44], fill=RAISED, outline=color, width=3)
+            d.text((cx, cy), note, font=font(24, True), fill=TXT, anchor="mm")
+    d.text((W / 2, y + 330), "D sobre C  =  D/C", font=font(30, True), fill=GOLD, anchor="mm")
+    d.text((MARGIN, h - 110), "O baixo (inferior) fixa a harmonia; o superior acrescenta tensao.",
+           font=font(20), fill=TXT2, anchor="la")
+    d.text((MARGIN, h - 70), "Policorde = duas triades; slash chord = um acorde com nota estranha no baixo.",
+           font=font(20), fill=TXT2, anchor="la")
+    return img
+
+
+def d_m9_simetria():
+    h = 700
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Simetria: escalas que dividem a oitava")
+    y = subtitle(d, "Quando a oitava se divide em partes iguais, a escala se repete no braco.", y)
+    items = [("Diminuta (8 notas)", "0-1-3-4-6-7-9-10: divide em 4 tercas menores", "3 escalas"),
+             ("Tom inteiro (6 notas)", "0-2-4-6-8-10: divide em 6 tons", "2 escalas"),
+             ("Aumentada (6 notas)", "0-3-4-7-8-11: tercas maiores + semitons", "4 escalas"),
+             ("Pentatonica", "nao e simetrica: e uma selecao da escala", "12 escalas")]
+    _rows_panel(d, y, items, row_h=62, label_w=380)
+    d.text((W / 2, h - 54), "A simetria permite deslocar a digitacao sem mudar o desenho do braco.",
+           font=font(20), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m9_relacoes_campos():
+    h = 760
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Relacoes entre campos harmonicos")
+    y = subtitle(d, "Campos vizinhos no circulo das quintas compartilham seis das sete notas.", y)
+    cx, cy = W / 2, y + 330
+    _cycle_ring(d, cx, cy, 260, 150,
+                ["C", "G", "D", "A", "E", "B", "F#", "Db", "Ab", "Eb", "Bb", "F"], [])
+    d.text((MARGIN, h - 150), "Um acorde comum aos dois campos e o pivo da modulacao.",
+           font=font(21), fill=TXT2, anchor="la")
+    d.text((MARGIN, h - 112), "Dominantes secundarios e diminutos ligam campos distantes.",
+           font=font(21), fill=TXT2, anchor="la")
+    d.text((MARGIN, h - 74), "O dim7 e o mesmo em quatro campos: e uma ponte entre eles.",
+           font=font(21, True), fill=GOLD, anchor="la")
+    return img
+
+
+def d_m9_sonoridades():
+    h = 680
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Sonoridades especiais")
+    y = subtitle(d, "Estruturas que fogem do acorde terca-sobre-terca e criam cores novas.", y)
+    items = [("Quartal (So What)", "empilha quartas em vez de tercas", "aberto"),
+             ("Cluster", "notas vizinhas soando juntas", "denso"),
+             ("Add9 / 6-9", "triade com a nona ou a sexta e a nona", "luminoso"),
+             ("Slash / inversao", "acorde com nota estranha no baixo", "movel"),
+             ("Upper structure", "triade sobre um dominante", "tenso")]
+    _rows_panel(d, y, items, row_h=56, label_w=380)
+    d.text((W / 2, h - 46), "Cada sonoridade tem um uso: cor, tensao, movimento ou repouso.",
+           font=font(20), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m9_partitura_dim7():
+    return _score_image("m9_partitura_dim7", [("C", 4, None), ("E", 4, "b"), ("G", 4, "b"),
+                                              ("A", 4, None), ("C", 5, None)],
+                        "Partitura: arpejo de Cdim7 (Do-Mib-Solb-La-Do)")
+
+
+def d_m9_partitura_domdim():
+    return _score_image("m9_partitura_domdim", [("C", 4, None), ("E", 4, None), ("G", 4, None),
+                                                ("B", 4, "b"), ("D", 5, "b")],
+                        "Partitura: C7(b9) - Do-Mi-Sol-Sib-Reb")
+
+
+def d_m9_partitura_m7s5():
+    return _score_image("m9_partitura_m7s5", [("C", 4, None), ("E", 4, "b"), ("G", 4, "#"),
+                                              ("B", 4, "b"), ("C", 5, None)],
+                        "Partitura: arpejo de Cm7(#5) - Do-Mib-Sol#-Sib")
+
+
+def d_m9_partitura_policorde():
+    return _score_image("m9_partitura_policorde", [("C", 4, None), ("E", 4, None), ("G", 4, None),
+                                                   ("D", 5, None), ("F", 5, "#"), ("A", 5, None)],
+                        "Partitura: policorde D/C - triade de Do (baixo) e de Re (agudo)")
+
+
+DIAGRAMS.update({
+    "m9_diminuto_formacao": d_m9_diminuto_formacao,
+    "m9_diminuto_funcoes": d_m9_diminuto_funcoes,
+    "m9_domdim_escala": d_m9_domdim_escala,
+    "m9_ciclos_diminutos": d_m9_ciclos_diminutos,
+    "m9_campo_diminuto": d_m9_campo_diminuto,
+    "m9_m7s5": d_m9_m7s5,
+    "m9_policordes": d_m9_policordes,
+    "m9_simetria": d_m9_simetria,
+    "m9_relacoes_campos": d_m9_relacoes_campos,
+    "m9_sonoridades": d_m9_sonoridades,
+    "m9_partitura_dim7": d_m9_partitura_dim7,
+    "m9_partitura_domdim": d_m9_partitura_domdim,
+    "m9_partitura_m7s5": d_m9_partitura_m7s5,
+    "m9_partitura_policorde": d_m9_partitura_policorde,
+})
+
+
+def _write_score_notes_header(path: str) -> None:
+    """Emit the notes drawn on each score image as a C++ header the tests read.
+
+    Keeps the score image and the audio beside it in sync: the test compares the
+    notes of a ContentItem of kind score with the ones recorded here (the same
+    notes the image draws)."""
+    lines = [
+        "#pragma once",
+        "",
+        "// GENERATED by tools/make_diagrams.py - do not edit by hand.",
+        "// Notes drawn on each score image, so the tests can prove a score image",
+        "// and the audio played beside it carry the same notes.",
+        "",
+        "#include <juce_core/juce_core.h>",
+        "",
+        "#include <vector>",
+        "",
+        "namespace cursomusica::content::scoreNotes",
+        "{",
+        "",
+        "struct Entry { const char* stem; std::vector<int> notes; };",
+        "",
+        "inline const std::vector<Entry>& all()",
+        "{",
+        "    static const std::vector<Entry> entries = {",
+    ]
+    for stem in sorted(SCORE_NOTES):
+        notes = ", ".join(str(n) for n in SCORE_NOTES[stem])
+        lines.append(f'        {{ "{stem}", {{ {notes} }} }},')
+    lines += [
+        "    };",
+        "    return entries;",
+        "}",
+        "",
+        "} // namespace cursomusica::content::scoreNotes",
+        "",
+    ]
+    with open(path, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines))
+
+
+
+
+
+
+# --------------------------------------------------------------------------
+# Modulo 3 — ritmo, leitura e levadas.
+# --------------------------------------------------------------------------
+def _rhythm_row(d, x, y, w, cells, gap_after=0):
+    """Faixa de figuras ritmicas: `cells` = [(kind, silaba)] em uma linha."""
+    n = len(cells)
+    step = w / max(1, n)
+    for i, (kind, syll) in enumerate(cells):
+        cx = x + step * (i + 0.5)
+        _note_glyph(d, cx, y, kind, ACCENT)
+        d.text((cx, y + 46), syll, font=font(18, True), fill=CYAN, anchor="mm")
+    return y + gap_after
+
+
+def _bullets(d, y, items, color=ACCENT):
+    for i, item in enumerate(items):
+        yy = y + i * 54
+        d.rounded_rectangle([MARGIN, yy, W - MARGIN, yy + 46], radius=8,
+                            fill=RAISED if i % 2 == 0 else SURFACE)
+        d.text((MARGIN + 18, yy + 23), item[0], font=font(21, True), fill=color, anchor="lm")
+        d.text((MARGIN + 300, yy + 23), item[1], font=font(20), fill=TXT, anchor="lm")
+        if len(item) > 2:
+            d.text((W - MARGIN - 18, yy + 23), item[2], font=font(19), fill=TXT2, anchor="rm")
+    return y + len(items) * 54
+
+
+def d_m3_leitura_ritmica():
+    h = 720
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Leitura ritmica: figuras, valores e silabas")
+    y = subtitle(d, "Cada figura vale metade da anterior; a silaba ajuda a contar em voz alta.", y)
+    figures = [("whole", "Semibreve", "4 tempos", "TA-A-A-A"),
+               ("half", "Minima", "2 tempos", "TA-A"),
+               ("quarter", "Seminima", "1 tempo", "TA"),
+               ("eighth", "Colcheia", "1/2 tempo", "TA-KI"),
+               ("sixteenth", "Semicolcheia", "1/4 tempo", "TA-KI-TA-KI")]
+    top = y + 70
+    for i, (kind, name, value, syll) in enumerate(figures):
+        yy = top + i * 88
+        _note_glyph(d, MARGIN + 60, yy + 26, kind)
+        d.text((MARGIN + 130, yy + 4), name, font=font(25, True), fill=TXT, anchor="la")
+        d.text((MARGIN + 130, yy + 40), f"{value}   -   {syll}", font=font(20),
+               fill=CYAN, anchor="la")
+        d.rounded_rectangle([MARGIN + 620, yy + 12, W - MARGIN, yy + 44], radius=6,
+                            fill=ACCENT_MUTED)
+        d.text((MARGIN + 636, yy + 28), "contar antes de tocar", font=font(18), fill=TXT2, anchor="lm")
+    d.text((W / 2, h - 52), "Ler o ritmo e contar a subdivisao: a base de tocar na grade.",
+           font=font(20, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m3_pulsacao_subdivisao():
+    h = 700
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Pulsacao e subdivisao")
+    y = subtitle(d, "O pulso e constante; a subdivisao divide cada pulso em partes iguais.", y)
+    x0, x1 = MARGIN + 80, W - MARGIN - 20
+    top = y + 90
+    beat_w = (x1 - x0) / 4
+    d.line([x0, top - 20, x1, top - 20], fill=TXT, width=3)
+    for b in range(4):
+        bx = x0 + b * beat_w
+        d.line([bx, top - 30, bx, top + 150], fill=BORDER, width=2)
+        d.text((bx + beat_w / 2, top), "1", font=font(30, True), fill=TXT, anchor="mm")
+        d.text((bx + beat_w / 2, top + 46), "TA", font=font(22, True), fill=CYAN, anchor="mm")
+        d.text((bx + beat_w / 2, top + 88), "TA-KI", font=font(20), fill=TXT2, anchor="mm")
+        d.text((bx + beat_w / 2, top + 126), "TA-KI-TA-KI", font=font(18), fill=TXT_DIS, anchor="mm")
+    d.line([x1, top - 30, x1, top + 150], fill=BORDER, width=2)
+    d.text((MARGIN, h - 150), "Semínima (1x por pulso) -> colcheia (2x) -> semicolcheia (4x).",
+           font=font(21), fill=TXT2, anchor="la")
+    d.text((MARGIN, h - 108), "A subdivisao dobra a cada nivel: e o que o metronomo faz para voce.",
+           font=font(21), fill=TXT2, anchor="la")
+    d.text((MARGIN, h - 60), "Tocar na grade = alinhar a nota ao pulso ou a sua subdivisao.",
+           font=font(21, True), fill=GOLD, anchor="la")
+    return img
+
+
+def d_m3_cifrado_divisao():
+    h = 620
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Cifrado com divisao: o acorde repartido no compasso")
+    y = subtitle(d, "A cifra diz o acorde; a divisao diz como ele e tocado no tempo.", y)
+    items = [("C", "acorde inteiro no tempo 1", "1 acorde = 1 compasso"),
+             ("C  C  C  C", "um acorde por tempo", "4 ataques"),
+             ("C  -  G  -", "dois acordes, com contratempo", "ritmo de base"),
+             ("C  C/G  C/E", "acorde com baixo (slash chord)", "baixo em movimento"),
+             ("C7  C6  C7M", "acordes por grau dentro do compasso", "conducao harmonica")]
+    _bullets(d, y + 40, items)
+    d.text((W / 2, h - 50), "Ler a cifra e dividir o compasso: e o que transforma o acorde em levada.",
+           font=font(20, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m3_celulas_ritmicas():
+    h = 700
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Celulas ritmicas de acompanhamento")
+    y = subtitle(d, "Uma celula e um desenho de ataques que se repete no compasso.", y)
+    top = y + 70
+    cells = [("Semininas", "TA TA TA TA", ["quarter"] * 4),
+             ("Colcheias", "TA-KI TA-KI TA-KI TA-KI", ["eighth"] * 8),
+             ("Rock", "TA  TA-KI TA  TA-KI", ["quarter", "eighth", "eighth", "quarter", "eighth", "eighth"]),
+             ("Samba", "TA-KI  TA  TA-KI", ["eighth", "eighth", "quarter", "eighth", "eighth"])]
+    for i, (name, syll, kinds) in enumerate(cells):
+        yy = top + i * 120
+        d.text((MARGIN, yy), name, font=font(23, True), fill=ACCENT, anchor="la")
+        _rhythm_row(d, MARGIN + 150, yy + 20, W - 2 * MARGIN - 150, [(k, "") for k in kinds])
+        d.text((MARGIN + 150, yy + 86), syll, font=font(18), fill=CYAN, anchor="la")
+    d.text((W / 2, h - 46), "Repetir a celula mantendo o pulso firme e o que cria o groove.",
+           font=font(20, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m3_acentuacoes():
+    h = 620
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Acentuacoes: onde o ataque fica forte")
+    y = subtitle(d, "Acento (>) reforca um tempo ou contratempo; o resto fica mais leve.", y)
+    x0, x1 = MARGIN + 60, W - MARGIN - 20
+    top = y + 100
+    beat_w = (x1 - x0) / 4
+    accented = {0, 2}
+    for b in range(4):
+        bx = x0 + b * beat_w
+        d.line([bx, top - 40, bx, top + 120], fill=BORDER, width=2)
+        strong = b in accented
+        d.text((bx + beat_w / 2, top), ">", font=font(34, True),
+               fill=GOLD if strong else TXT_DIS, anchor="mm")
+        d.text((bx + beat_w / 2, top + 54), str(b + 1), font=font(28, True),
+               fill=TXT if strong else TXT2, anchor="mm")
+        d.text((bx + beat_w / 2, top + 96), "TA", font=font(20, True),
+               fill=CYAN if strong else TXT_DIS, anchor="mm")
+    d.line([x1, top - 40, x1, top + 120], fill=BORDER, width=2)
+    d.text((MARGIN, h - 140), "Tempos fortes (1 e 3) sustentam a danca; fracos (2 e 4) pedem resposta.",
+           font=font(21), fill=TXT2, anchor="la")
+    d.text((MARGIN, h - 96), "No samba e no funk o acento cai no contratempo (o 'e' do tempo).",
+           font=font(21), fill=TXT2, anchor="la")
+    d.text((MARGIN, h - 52), "Acentuar sem perder o pulso: o detalhe que faz a levada soar viva.",
+           font=font(21, True), fill=GOLD, anchor="la")
+    return img
+
+
 def d_m3_levadas_palheta():
     h = 700
     img, d = canvas(h, BG)
@@ -1432,23 +1473,6 @@ def d_m3_levadas_palheta():
             d.text((cx, yy + 30), s, font=font(34, True),
                    fill=CYAN if s == "v" else GOLD, anchor="mm")
     d.text((W / 2, h - 46), "Palhetada alternada economiza movimento e mantem o tempo estavel.",
-def d_m8_subv7():
-    h = 680
-    img, d = canvas(h, BG)
-    frame(d, h)
-    y = title(d, "SubV7: o dominante substituto")
-    y = subtitle(d, "Db7 toma o lugar de G7: o mesmo tritono, o baixo desce meio-tom.", y)
-    left = W / 2 - 300
-    chord_box(d, left, y + 90, 300, 230, [-1, -1, -1, 1, 2, 1], "G7",
-              start_fret=1, caption="G-B-D-F (tritono B-F)")
-    chord_box(d, W / 2 + 300, y + 90, 300, 230, [-1, -1, -1, 4, 2, 1], "Db7",
-              start_fret=1, caption="Db-F-Ab-Cb (tritono F-Cb=B)")
-    d.text((W / 2, y + 150), "=", font=font(48, True), fill=GOLD, anchor="mm")
-    rows = [("G7", "5a -> 1a: baixo sobe (G -> C)", "resolucao forte"),
-            ("Db7", "5a -> 1a: baixo desce (Db -> C)", "cromatismo"),
-            ("Tritono comum", "B (=Cb) e F nos dois acordes", "ligacao")]
-    rows_box(d, y + 360, rows, cols=(0, 300, 720))
-    d.text((W / 2, h - 44), "SubV7 entra em qualquer lugar onde caberia o V7 do alvo.",
            font=font(20, True), fill=GOLD, anchor="mm")
     return img
 
@@ -1521,180 +1545,6 @@ def d_m3_levadas_dedos():
             color = TXT_DIS if s == "-" else (ACCENT if s == "p" else CYAN)
             d.text((cx, yy + 30), s, font=font(30, True), fill=color, anchor="mm")
     d.text((W / 2, h - 46), "Separar grave e agudo e o que da independencia a mao direita.",
-def d_m5_funcoes_tres():
-    h = 700
-    img, d = canvas(h, BG)
-    frame(d, h)
-    y = title(d, "As tres funcoes harmonicas")
-    y = subtitle(d, "Tonica (repouso), subdominante (afastamento) e dominante (tensao).", y)
-    cols = [("TONICA", "repouso", ["I (C)", "iii (Em)", "vi (Am)"], ACCENT, "em casa"),
-            ("SUBDOMINANTE", "afastamento", ["IV (F)", "ii (Dm)"], CYAN, "sai de casa"),
-            ("DOMINANTE", "tensao", ["V (G)", "V7 (G7)", "vii (Bdim)"], GOLD, "pede voltar")]
-    col_w = (W - 2 * MARGIN) / 3
-    for c, (name, role, chords, color, feel) in enumerate(cols):
-        x = MARGIN + c * col_w
-        d.rounded_rectangle([x + 12, y + 30, x + col_w - 12, y + 30 + 380],
-                            radius=12, fill=RAISED, outline=color, width=3)
-        d.text((x + col_w / 2, y + 70), name, font=font(26, True), fill=color, anchor="mm")
-        d.text((x + col_w / 2, y + 112), role, font=font(21), fill=TXT2, anchor="mm")
-        for i, ch in enumerate(chords):
-            d.text((x + col_w / 2, y + 170 + i * 52), ch, font=font(23, True),
-                   fill=TXT, anchor="mm")
-        d.text((x + col_w / 2, y + 30 + 350), feel, font=font(20, True), fill=color, anchor="mm")
-    d.text((W / 2, h - 60), "I - IV - V - I percorre as tres funcoes e volta ao repouso.",
-           font=font(21, True), fill=GOLD, anchor="mm")
-    return img
-
-
-def d_m5_relativos():
-    h = 640
-    img, d = canvas(h, BG)
-    frame(d, h)
-    y = title(d, "Acordes relativos: mesma armadura, cores diferentes")
-    y = subtitle(d, "O relativo menor esta 3 semitons abaixo do acorde maior.", y)
-    pairs = [("C", "Am", "Do e Mi em comum"), ("G", "Em", "Sol e Si em comum"),
-             ("F", "Dm", "Fa e La em comum"), ("D", "Bm", "Re e Fa# em comum")]
-    top = y + 40
-    for i, (maj, minr, common) in enumerate(pairs):
-        yy = top + i * 96
-        d.rounded_rectangle([MARGIN, yy, W - MARGIN, yy + 82], radius=10, fill=RAISED)
-        d.text((MARGIN + 40, yy + 41), maj, font=font(34, True), fill=ACCENT, anchor="lm")
-        d.text((MARGIN + 180, yy + 41), "<->", font=font(26, True), fill=TXT_DIS, anchor="lm")
-        d.text((MARGIN + 320, yy + 41), minr, font=font(34, True), fill=CYAN, anchor="lm")
-        d.text((MARGIN + 560, yy + 41), common, font=font(21), fill=TXT2, anchor="lm")
-    d.text((W / 2, h - 56), "Duas das tres notas sao iguais: por isso a troca soa suave.",
-           font=font(21, True), fill=GOLD, anchor="mm")
-    return img
-
-
-def d_m5_relativos_campo():
-    h = 620
-    img, d = canvas(h, BG)
-    frame(d, h)
-    y = title(d, "Pares de relativos no campo de Do")
-    y = subtitle(d, "Cada acorde maior do campo tem o seu relativo menor dois graus depois.", y)
-    pairs = [("I", "C", "vi", "Am"), ("IV", "F", "ii", "Dm"), ("V", "G", "iii", "Em")]
-    top = y + 60
-    for i, (d1, c1, d2, c2) in enumerate(pairs):
-        yy = top + i * 130
-        d.rounded_rectangle([MARGIN + 60, yy, W - MARGIN - 60, yy + 104], radius=12,
-                            fill=RAISED if i % 2 == 0 else SURFACE)
-        d.text((MARGIN + 160, yy + 52), f"{d1} {c1}", font=font(28, True), fill=ACCENT, anchor="mm")
-        d.text((W / 2, yy + 52), "<->", font=font(26, True), fill=TXT_DIS, anchor="mm")
-        d.text((W - MARGIN - 160, yy + 52), f"{d2} {c2}", font=font(28, True), fill=CYAN, anchor="mm")
-    d.text((W / 2, h - 56), "Trocar um acorde pelo seu relativo muda a cor sem mudar a funcao.",
-def d_m8_subiim():
-    h = 660
-    img, d = canvas(h, BG)
-    frame(d, h)
-    y = title(d, "SubIIm: o segundo grau menor")
-    y = subtitle(d, "O ii vira meio-diminuto (Dm7b5) e empresta a cor do menor.", y)
-    rows = [("IIm7 (normal)", "Dm7 -> G7 -> C", "Do maior puro"),
-            ("SubIIm", "Dm7b5 -> G7(b9) -> C", "cor menor no ii"),
-            ("iv menor", "Fm7 (emprestado)", "SubIIm na subdominante"),
-            ("Efeito", "G7 ganha b9 (Ab)", "tensao extra")]
-    rows_box(d, y + 50, rows, height=58)
-    d.text((W / 2, h - 44), "SubIIm = o ii do campo menor, usado dentro do maior.",
-# Modulo 10 — analise harmonica, verticalizacao e reharmonizacao.
-# --------------------------------------------------------------------------
-def _m10_table(d, y, headers, rows, col_x, row_h=52, title_color=ACCENT):
-    d.text((col_x[0], y), headers[0], font=font(19, True), fill=title_color, anchor="la")
-    for i, head in enumerate(headers[1:], start=1):
-        d.text((col_x[i], y), head, font=font(19, True), fill=title_color, anchor="la")
-    for r, row in enumerate(rows):
-        yy = y + 30 + r * row_h
-        d.rounded_rectangle([MARGIN, yy, W - MARGIN, yy + row_h - 8], radius=8,
-                            fill=RAISED if r % 2 == 0 else SURFACE)
-        for c, cell in enumerate(row):
-            color = CYAN if c == 0 else TXT
-            d.text((col_x[c], yy + (row_h - 8) / 2), cell, font=font(20, True if c == 0 else False),
-                   fill=color, anchor="lm")
-    return y + 30 + len(rows) * row_h
-
-
-def d_m10_analise_harmonica():
-    h = 720
-    img, d = canvas(h, BG)
-    frame(d, h)
-    y = title(d, "Analise harmonica: grau, funcao e escala de cada acorde")
-    y = subtitle(d, "Primeiro nomeie o grau (I, vi, ii, V); depois a funcao; depois a escala do improviso.", y)
-    _m10_table(
-        d, y + 30,
-        ["Acorde", "Grau", "Funcao", "Escala / cor"],
-        [["C7M", "I", "tonica", "jonio (modo I)"],
-         ["A7", "VI7", "dominante secundario", "mixolidio alterado"],
-         ["Dm7", "ii", "subdominante", "dorico"],
-         ["G7", "V", "dominante", "mixolidio"]],
-        col_x=[MARGIN + 18, MARGIN + 260, MARGIN + 420, MARGIN + 760])
-    d.text((MARGIN, h - 92), "Todo acorde diz tres coisas: de onde vem (grau), o que faz (funcao) e como soa (escala).",
-           font=font(20), fill=TXT2, anchor="la")
-    d.text((MARGIN, h - 54), "O ciclo ii-V-I em Do: Dm7 -> G7 -> C7M. A analise revela o caminho antes de tocar.",
-           font=font(20, True), fill=GOLD, anchor="la")
-    return img
-
-
-def d_m10_analise_melodica():
-    h = 700
-    img, d = canvas(h, BG)
-    frame(d, h)
-    y = title(d, "Analise melodica: notas do acorde x notas de tensao")
-    y = subtitle(d, "Sobre Dm7, cada nota da melodia tem um papel: repouso (acorde) ou tensao (passagem).", y)
-    notes = [("D", "fundamental", "repouso", SUCCESS), ("F", "3a menor", "repouso", SUCCESS),
-             ("A", "5a justa", "repouso", SUCCESS), ("C", "7a menor", "repouso", SUCCESS),
-             ("E", "9a", "tensao", GOLD), ("B", "13a", "tensao", GOLD),
-             ("G", "11a", "tensao (evitar)", DANGER)]
-    top = y + 40
-    for i, (note, role, feel, color) in enumerate(notes):
-        yy = top + i * 62
-        d.rounded_rectangle([MARGIN, yy, W - MARGIN, yy + 52], radius=8, fill=RAISED)
-        d.ellipse([MARGIN + 30, yy + 10, MARGIN + 72, yy + 42], fill=color)
-        d.text((MARGIN + 51, yy + 26), note, font=font(22, True), fill=BG, anchor="mm")
-        d.text((MARGIN + 110, yy + 26), role, font=font(21, True), fill=TXT, anchor="lm")
-        d.text((MARGIN + 620, yy + 26), feel, font=font(20), fill=color, anchor="lm")
-    d.text((W / 2, h - 50), "Repouso cai no tempo forte; tensao pede resolucao no proximo acorde.",
-           font=font(20, True), fill=CYAN, anchor="mm")
-    return img
-
-
-def d_m10_escolha_modal():
-    h = 780
-    img, d = canvas(h, BG)
-    frame(d, h)
-    y = title(d, "Escolha modal: qual modo sobre cada acorde")
-    y = subtitle(d, "O modo nao vem da escala da musica: vem do acorde que esta soando naquele compasso.", y)
-    rows = [["Cm7 (dorico)", "menor, 6a maior", "jazz modal, funk"],
-            ["Cm7 (eolio)", "menor, 6a menor", "menor natural"],
-            ["Cmaj7 (jonio)", "maior, 7a maior", "tonica classica"],
-            ["Cmaj7 (lidio)", "maior, 4a aumentada", "brilho flutuante"],
-            ["C7 (mixolidio)", "maior, 7a menor", "dominante, blues"],
-            ["C7 (lidio b7)", "maior, #11", "dominante flutuante"],
-            ["Cm7b5 (locrio)", "menor, 5a dim.", "II do menor"]]
-    _m10_table(d, y + 30, ["Acorde / modo", "Cor caracteristica", "Uso tipico"], rows,
-               col_x=[MARGIN + 18, MARGIN + 480, MARGIN + 880], row_h=58)
-    return img
-
-
-def d_m10_verticalizacao():
-    h = 660
-    img, d = canvas(h, BG)
-    frame(d, h)
-    y = title(d, "Verticalizacao: transformar melodia em harmonia")
-    y = subtitle(d, "Pegue cada nota da melodia e empilhe intervalos a partir dela para criar o acorde.", y)
-    melody = ["A", "G", "F", "E"]
-    top = y + 60
-    d.text((MARGIN, top - 10), "Melodia:", font=font(22, True), fill=ACCENT, anchor="la")
-    for i, note in enumerate(melody):
-        cx = MARGIN + 200 + i * 150
-        d.ellipse([cx - 34, top - 44, cx + 34, top + 24], fill=ACCENT)
-        d.text((cx, top - 10), note, font=font(26, True), fill=TXT, anchor="mm")
-    stacks = [("Am7", ["A", "C", "E", "G"]), ("G7", ["G", "B", "D", "F"]),
-              ("F7M", ["F", "A", "C", "E"]), ("Em7", ["E", "G", "B", "D"])]
-    for i, (chord, notes) in enumerate(stacks):
-        cx = MARGIN + 200 + i * 150
-        d.text((cx, top + 70), chord, font=font(22, True), fill=CYAN, anchor="mm")
-        for k, n in enumerate(notes):
-            d.text((cx, top + 110 + k * 34), n, font=font(20), fill=TXT2, anchor="mm")
-    d.text((W / 2, h - 56), "A melodia A-G-F-E vira Am7 - G7 - F7M - Em7: a harmonia nasce das proprias notas.",
            font=font(20, True), fill=GOLD, anchor="mm")
     return img
 
@@ -1713,6 +1563,148 @@ def d_m3_compassos():
              ("5/4 e 7/8", "formulas incomuns", "prog rock, jazz moderno")]
     _bullets(d, y + 40, items)
     d.text((W / 2, h - 50), "Simples: subdivide em 2. Composto: subdivide em 3 (o tempo vira tercina).",
+           font=font(20, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m3_formulas_incomuns():
+    h = 640
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Formulas de compasso incomuns")
+    y = subtitle(d, "Agrupar os tempos em blocos de 2 e 3 mantem a pulsacao compreensivel.", y)
+    top = y + 70
+    patterns = [("5/4", ["3", "2"], "Take Five"),
+                ("5/4", ["2", "3"], "Mission Impossible"),
+                ("7/8", ["2", "2", "3"], "prog rock"),
+                ("7/8", ["3", "2", "2"], "balkan"),
+                ("9/8", ["3", "3", "3"], "compasso composto")]
+    for i, (meter, groups, note) in enumerate(patterns):
+        yy = top + i * 96
+        d.text((MARGIN, yy + 20), meter, font=font(28, True), fill=ACCENT, anchor="la")
+        x = MARGIN + 200
+        for g in groups:
+            w = int(g) * 60
+            d.rounded_rectangle([x, yy, x + w - 10, yy + 52], radius=8,
+                                fill=RAISED, outline=CYAN, width=2)
+            d.text((x + (w - 10) / 2, yy + 26), g, font=font(26, True), fill=CYAN, anchor="mm")
+            x += w + 10
+        d.text((W - MARGIN, yy + 26), note, font=font(19), fill=TXT2, anchor="rm")
+    d.text((W / 2, h - 46), "Contar os grupos (ex.: 1-2-3 / 1-2) e o que torna o compasso tocavel.",
+           font=font(20, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m3_konokol():
+    h = 660
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Silabas ritmicas (Konokol) e percussao vocal")
+    y = subtitle(d, "Falar o ritmo com silabas antes de tocar organiza a subdivisao.", y)
+    items = [("TA", "seminima (1 pulso)", "TA"),
+             ("TA-KI", "duas colcheias", "TA-KI"),
+             ("TA-KI-TA-KI", "quatro semicolcheias", "TA-KI-TA-KI"),
+             ("TA-KI-TA", "tres tercinas", "TA-KI-TA"),
+             ("TA-KA", "duas partes iguais", "TA-KA"),
+             ("DIN", "acento/ataque forte", "DIN")]
+    _bullets(d, y + 40, items)
+    d.text((W / 2, h - 50), "Falar a celula em voz alta antes de tocar alinha mao, ouvido e tempo.",
+           font=font(20, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m3_percussao_sanfona():
+    h = 640
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Percussao no violao e efeito sanfona")
+    y = subtitle(d, "Bater na madeira e usar o efeito sanfona dao groove sem mudar o acorde.", y)
+    items = [("Batida na madeira", "percussao no tampo", "marca o tempo"),
+             ("Percussao no cavalete", "som seco e curto", "contratempo"),
+             ("Efeito sanfona", "abre e fecha o acorde", "levada de samba/choro"),
+             ("Abafamento (mute)", "corda abafada pela mao", "chuck"),
+             ("Harmonico percussivo", "toque leve sobre o traste", "cor ritmica")]
+    _bullets(d, y + 40, items)
+    d.text((W / 2, h - 50), "O efeito sanfona alterna o acorde aberto e abafado, criando pulsacao.",
+           font=font(20, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m3_partitura_leitura():
+    return _score_image("leitura", [("C", 4, None), ("C", 4, None), ("D", 4, None), ("E", 4, None)],
+                        "Partitura: leitura ritmica em Do (contar e tocar)")
+
+
+def d_m3_partitura_subdivisao():
+    return _score_image("subdivisao", [("C", 4, None), ("D", 4, None), ("E", 4, None), ("F", 4, None),
+                                       ("G", 4, None), ("F", 4, None), ("E", 4, None), ("D", 4, None)],
+                        "Partitura: escala em Do, um passo por pulso")
+
+
+def d_m3_partitura_cifrado():
+    return _score_image("cifrado", [("C", 4, None), ("E", 4, None), ("G", 4, None), ("G", 4, None),
+                                    ("E", 4, None), ("C", 4, None)],
+                        "Partitura: arpejo de Do maior dividindo o compasso")
+
+
+def d_m3_partitura_celula():
+    return _score_image("celula", [("C", 4, None), ("E", 4, None), ("G", 4, None), ("E", 4, None)],
+                        "Partitura: celula de acompanhamento (Do maior)")
+
+
+def d_m3_partitura_palheta():
+    return _score_image("palheta", [("E", 3, None), ("E", 3, None), ("E", 3, None), ("E", 3, None),
+                                    ("E", 3, None), ("E", 3, None), ("E", 3, None), ("E", 3, None)],
+                        "Partitura: palhetada alternada na corda 6 (Mi)")
+
+
+def d_m3_partitura_dedos():
+    return _score_image("dedos", [("C", 4, None), ("E", 4, None), ("G", 4, None), ("C", 5, None),
+                                  ("G", 4, None), ("E", 4, None), ("C", 4, None), ("G", 3, None)],
+                        "Partitura: arpejo com os dedos (Do maior)")
+
+
+def d_m3_partitura_compasso():
+    return _score_image("compasso", [("C", 4, None), ("D", 4, None), ("E", 4, None),
+                                     ("D", 4, None), ("C", 4, None), ("D", 4, None)],
+                        "Partitura: 6/8 em Do (agrupar as colcheias em 3 + 3)")
+
+
+def d_m3_partitura_konokol():
+    return _score_image("konokol", [("C", 4, None), ("E", 4, None), ("D", 4, None), ("F", 4, None),
+                                    ("E", 4, None), ("G", 4, None), ("C", 5, None), ("G", 4, None)],
+                        "Partitura: celula ritmica em Do para falar e tocar")
+
+
+DIAGRAMS.update({
+    "m3_leitura_ritmica": d_m3_leitura_ritmica,
+    "m3_pulsacao_subdivisao": d_m3_pulsacao_subdivisao,
+    "m3_cifrado_divisao": d_m3_cifrado_divisao,
+    "m3_celulas_ritmicas": d_m3_celulas_ritmicas,
+    "m3_acentuacoes": d_m3_acentuacoes,
+    "m3_levadas_palheta": d_m3_levadas_palheta,
+    "m3_direcoes_palheta": d_m3_direcoes_palheta,
+    "m3_mapa_mao_direita": d_m3_mapa_mao_direita,
+    "m3_levadas_dedos": d_m3_levadas_dedos,
+    "m3_compassos": d_m3_compassos,
+    "m3_formulas_incomuns": d_m3_formulas_incomuns,
+    "m3_konokol": d_m3_konokol,
+    "m3_percussao_sanfona": d_m3_percussao_sanfona,
+    "m3_partitura_leitura": d_m3_partitura_leitura,
+    "m3_partitura_subdivisao": d_m3_partitura_subdivisao,
+    "m3_partitura_cifrado": d_m3_partitura_cifrado,
+    "m3_partitura_celula": d_m3_partitura_celula,
+    "m3_partitura_palheta": d_m3_partitura_palheta,
+    "m3_partitura_dedos": d_m3_partitura_dedos,
+    "m3_partitura_compasso": d_m3_partitura_compasso,
+    "m3_partitura_konokol": d_m3_partitura_konokol,
+})
+
+
+
+
+
+# --------------------------------------------------------------------------
 # Modulo 4 — construcao de acordes: triades e tetrades.
 # --------------------------------------------------------------------------
 def _info_rows(d, y, rows, x=MARGIN, w=None, row_h=52):
@@ -1860,68 +1852,6 @@ def d_m4_formacao_acordes():
             d.ellipse([cx - 36, cy - 36, cx + 36, cy + 36], fill=RAISED, outline=color, width=3)
             d.text((cx, cy), note, font=font(22, True), fill=TXT, anchor="mm")
     d.text((W / 2, h - 44), "Empilhe tercas a partir da tonica e voce nomeia qualquer acorde.",
-# Modulo 7 — Empilhamentos, estruturas modais e sonoridades.
-# --------------------------------------------------------------------------
-def _stack_rows(d, top, groups, note_font=None):
-    """Desenha grupos de notas empilhadas; `groups` = [(rotulo, [notas], cor)]."""
-    note_font = note_font or font(24, True)
-    for i, (name, notes, color) in enumerate(groups):
-        yy = top + i * 118
-        d.text((MARGIN, yy + 10), name, font=font(23, True), fill=color, anchor="la")
-        for k, note in enumerate(notes):
-            cx = MARGIN + 60 + k * 128
-            cy = yy + 72
-            d.ellipse([cx - 38, cy - 38, cx + 38, cy + 38], fill=RAISED, outline=color, width=3)
-            d.text((cx, cy), note, font=note_font, fill=TXT, anchor="mm")
-
-
-def d_m7_tercas_empilhadas():
-    h = 720
-    img, d = canvas(h, BG)
-    frame(d, h)
-    y = title(d, "Empilhamento de tercas")
-    y = subtitle(d, "Cada nota nova comeca onde a anterior terminou; a mistura de tercas define a qualidade.", y)
-    _stack_rows(d, y + 40, [
-        ("Triade maior 1-3-5 (0,4,7)", ["Do", "Mi", "Sol"], ACCENT),
-        ("Tetrade 7M 1-3-5-7 (0,4,7,11)", ["Do", "Mi", "Sol", "Si"], SUCCESS),
-        ("Dominante 1-3-5-b7 (0,4,7,10)", ["Do", "Mi", "Sol", "Sib"], GOLD),
-        ("Menor 1-b3-5-b7 (0,3,7,10)", ["Do", "Mib", "Sol", "Sib"], CYAN),
-    ])
-    d.text((W / 2, h - 40), "As tercas empilhadas definem maior, menor e dominante.",
-           font=font(20), fill=TXT2, anchor="mm")
-    return img
-
-
-def d_m7_quartais_empilhadas():
-    h = 700
-    img, d = canvas(h, BG)
-    frame(d, h)
-    y = title(d, "Empilhamento de quartas (som de So What)")
-    y = subtitle(d, "Quartas justas sobrepostas; sem terca, o acorde e suspenso (nem maior, nem menor).", y)
-    _stack_rows(d, y + 40, [
-        ("Duas quartas: Do-Fa-Sib (0,5,10)", ["Do", "Fa", "Sib"], CYAN),
-        ("Tres quartas: Do-Fa-Sib-Mib (0,5,10,15)", ["Do", "Fa", "Sib", "Mib"], ACCENT),
-        ("So What: quartas + terca no topo (Sol)", ["Do", "Fa", "Sib", "Mib", "Sol"], GOLD),
-    ])
-    d.text((W / 2, h - 60), "O acorde quartal nao tem cara de maior nem de menor: ele suspende.",
-           font=font(20), fill=TXT2, anchor="mm")
-    d.text((W / 2, h - 34), "Mova o mesmo desenho pelo braco para qualquer centro modal.",
-           font=font(19, True), fill=GOLD, anchor="mm")
-    return img
-
-
-def d_m7_outros_empilhamentos():
-    h = 760
-    img, d = canvas(h, BG)
-    frame(d, h)
-    y = title(d, "Outros empilhamentos: quintas, segundas e mistos")
-    y = subtitle(d, "Cada distancia entre as notas produz uma cor diferente.", y)
-    _stack_rows(d, y + 34, [
-        ("Quintas: Do-Sol-Re-La (forte, aberto)", ["Do", "Sol", "Re", "La"], ACCENT),
-        ("Segundas: Do-Re-Mi (aglomerado, tenso)", ["Do", "Re", "Mi"], GOLD),
-        ("Misto (quarta + terca): Do-Fa-La", ["Do", "Fa", "La"], CYAN),
-    ])
-    d.text((W / 2, h - 40), "Quintas dao forca; segundas dao tensao; mistos dao cor sob medida.",
            font=font(20), fill=TXT2, anchor="mm")
     return img
 
@@ -1962,200 +1892,10 @@ def d_m4_cinco_fases():
             ("Fase 5", "criar/inverter livremente", "dominio")]
     _info_rows(d, y + 40, rows, row_h=76)
     d.text((W / 2, h - 44), "Fase 1 e 2: forma. Fase 3 e 4: mudanca. Fase 5: liberdade.",
-def d_m8_emprestimos_modais():
-    h = 720
-    img, d = canvas(h, BG)
-    frame(d, h)
-    y = title(d, "Emprestimos modais: acordes do Do menor no Do maior")
-    y = subtitle(d, "O modo paralelo (mesma tonica, outra qualidade) doa acordes.", y)
-    rows = [("Cm", "i menor", "Do menor paralelo"),
-            ("Fm7", "iv menor", "subdominante menor"),
-            ("Gm7", "v menor", "dominante enfraquecido"),
-            ("Ab7M", "bVI", "cor dramatica"),
-            ("Bb7", "bVII", "cadencia mixolidia"),
-            ("Eb7M", "bIII", "brilho modal")]
-    rows_box(d, y + 40, rows, height=56)
-    d.text((W / 2, h - 44), "Emprestimo modal = pegar acorde do campo paralelo emprestado.",
-def d_m10_conexao_campos():
-    h = 700
-    img, d = canvas(h, BG)
-    frame(d, h)
-    y = title(d, "Conexao entre campos harmonicos (acordes-pivo)")
-    y = subtitle(d, "Dois centros se ligam por acordes que existem nos dois campos: os acordes-pivo.", y)
-    left = [("C7M", "I"), ("Am7", "vi"), ("Dm7", "ii"), ("G7", "V")]
-    right = [("F7M", "I"), ("Dm7", "vi"), ("Gm7", "ii"), ("C7", "V")]
-    cx = W / 2
-    d.text((MARGIN + 120, y + 30), "Campo de Do", font=font(24, True), fill=ACCENT, anchor="mm")
-    d.text((W - MARGIN - 120, y + 30), "Campo de Fa", font=font(24, True), fill=CYAN, anchor="mm")
-    for i in range(4):
-        yy = y + 90 + i * 100
-        d.rounded_rectangle([MARGIN + 30, yy, MARGIN + 250, yy + 66], radius=10, fill=RAISED)
-        d.text((MARGIN + 140, yy + 33), left[i][0] + " (" + left[i][1] + ")",
-               font=font(22, True), fill=TXT, anchor="mm")
-        d.rounded_rectangle([W - MARGIN - 250, yy, W - MARGIN - 30, yy + 66], radius=10, fill=RAISED)
-        d.text((W - MARGIN - 140, yy + 33), right[i][0] + " (" + right[i][1] + ")",
-               font=font(22, True), fill=TXT, anchor="mm")
-    for i, j, label in [(2, 0, "Dm7 = vi de Fa"), (3, 3, "G7 -> C7 (V-V)")]:
-        yy = y + 90 + i * 100 + 33
-        y2 = y + 90 + j * 100 + 33
-        d.line([MARGIN + 260, yy, W - MARGIN - 260, y2], fill=GOLD, width=3)
-        d.text((cx, (yy + y2) / 2 - 14), label, font=font(19, True), fill=GOLD, anchor="mm")
-    d.text((W / 2, h - 52), "Dm7 e o pivo: ii de Do, vi de Fa. Ele muda de funcao sem mudar de acorde.",
            font=font(20, True), fill=GOLD, anchor="mm")
     return img
 
 
-def d_m3_formulas_incomuns():
-    h = 640
-    img, d = canvas(h, BG)
-    frame(d, h)
-    y = title(d, "Formulas de compasso incomuns")
-    y = subtitle(d, "Agrupar os tempos em blocos de 2 e 3 mantem a pulsacao compreensivel.", y)
-    top = y + 70
-    patterns = [("5/4", ["3", "2"], "Take Five"),
-                ("5/4", ["2", "3"], "Mission Impossible"),
-                ("7/8", ["2", "2", "3"], "prog rock"),
-                ("7/8", ["3", "2", "2"], "balkan"),
-                ("9/8", ["3", "3", "3"], "compasso composto")]
-    for i, (meter, groups, note) in enumerate(patterns):
-        yy = top + i * 96
-        d.text((MARGIN, yy + 20), meter, font=font(28, True), fill=ACCENT, anchor="la")
-        x = MARGIN + 200
-        for g in groups:
-            w = int(g) * 60
-            d.rounded_rectangle([x, yy, x + w - 10, yy + 52], radius=8,
-                                fill=RAISED, outline=CYAN, width=2)
-            d.text((x + (w - 10) / 2, yy + 26), g, font=font(26, True), fill=CYAN, anchor="mm")
-            x += w + 10
-        d.text((W - MARGIN, yy + 26), note, font=font(19), fill=TXT2, anchor="rm")
-    d.text((W / 2, h - 46), "Contar os grupos (ex.: 1-2-3 / 1-2) e o que torna o compasso tocavel.",
-           font=font(20, True), fill=GOLD, anchor="mm")
-    return img
-
-
-def d_m3_konokol():
-    h = 660
-    img, d = canvas(h, BG)
-    frame(d, h)
-    y = title(d, "Silabas ritmicas (Konokol) e percussao vocal")
-    y = subtitle(d, "Falar o ritmo com silabas antes de tocar organiza a subdivisao.", y)
-    items = [("TA", "seminima (1 pulso)", "TA"),
-             ("TA-KI", "duas colcheias", "TA-KI"),
-             ("TA-KI-TA-KI", "quatro semicolcheias", "TA-KI-TA-KI"),
-             ("TA-KI-TA", "tres tercinas", "TA-KI-TA"),
-             ("TA-KA", "duas partes iguais", "TA-KA"),
-             ("DIN", "acento/ataque forte", "DIN")]
-    _bullets(d, y + 40, items)
-    d.text((W / 2, h - 50), "Falar a celula em voz alta antes de tocar alinha mao, ouvido e tempo.",
-           font=font(20, True), fill=GOLD, anchor="mm")
-    return img
-
-
-def d_m3_percussao_sanfona():
-    h = 640
-    img, d = canvas(h, BG)
-    frame(d, h)
-    y = title(d, "Percussao no violao e efeito sanfona")
-    y = subtitle(d, "Bater na madeira e usar o efeito sanfona dao groove sem mudar o acorde.", y)
-    items = [("Batida na madeira", "percussao no tampo", "marca o tempo"),
-             ("Percussao no cavalete", "som seco e curto", "contratempo"),
-             ("Efeito sanfona", "abre e fecha o acorde", "levada de samba/choro"),
-             ("Abafamento (mute)", "corda abafada pela mao", "chuck"),
-             ("Harmonico percussivo", "toque leve sobre o traste", "cor ritmica")]
-    _bullets(d, y + 40, items)
-    d.text((W / 2, h - 50), "O efeito sanfona alterna o acorde aberto e abafado, criando pulsacao.",
-def d_m10_vozes_internas():
-    h = 640
-    img, d = canvas(h, BG)
-    frame(d, h)
-    y = title(d, "Vozes internas: conduzir cada linha com o menor movimento")
-    y = subtitle(d, "Quatro vozes (soprano, contralto, tenor, baixo) andando por graus proximos.", y)
-    chords = [("C7M", ["E", "G", "B", "C"]), ("Am7", ["E", "A", "C", "A"]),
-              ("Dm7", ["F", "A", "C", "D"]), ("G7", ["F", "G", "B", "D"])]
-    top = y + 70
-    labels = ["Soprano", "Contralto", "Tenor", "Baixo"]
-    for v in range(4):
-        d.text((MARGIN, top + v * 60), labels[v], font=font(19, True), fill=ACCENT, anchor="la")
-    for i, (chord, voices) in enumerate(chords):
-        cx = MARGIN + 340 + i * 210
-        d.text((cx, top - 34), chord, font=font(23, True), fill=CYAN, anchor="mm")
-        for v, note in enumerate(voices):
-            d.rounded_rectangle([cx - 40, top + v * 60 - 22, cx + 40, top + v * 60 + 22],
-                                radius=8, fill=RAISED, outline=BORDER)
-            d.text((cx, top + v * 60), note, font=font(22, True), fill=TXT, anchor="mm")
-    d.text((W / 2, h - 56), "O F comum a Dm7 e G7 fica parado: e a nota que amarra os dois acordes.",
-           font=font(20, True), fill=GOLD, anchor="mm")
-    return img
-
-
-def d_m3_partitura_leitura():
-    return _score_image("leitura", [("C", 4, None), ("C", 4, None), ("D", 4, None), ("E", 4, None)],
-                        "Partitura: leitura ritmica em Do (contar e tocar)")
-
-
-def d_m3_partitura_subdivisao():
-    return _score_image("subdivisao", [("C", 4, None), ("D", 4, None), ("E", 4, None), ("F", 4, None),
-                                       ("G", 4, None), ("F", 4, None), ("E", 4, None), ("D", 4, None)],
-                        "Partitura: escala em Do, um passo por pulso")
-
-
-def d_m3_partitura_cifrado():
-    return _score_image("cifrado", [("C", 4, None), ("E", 4, None), ("G", 4, None), ("G", 4, None),
-                                    ("E", 4, None), ("C", 4, None)],
-                        "Partitura: arpejo de Do maior dividindo o compasso")
-
-
-def d_m3_partitura_celula():
-    return _score_image("celula", [("C", 4, None), ("E", 4, None), ("G", 4, None), ("E", 4, None)],
-                        "Partitura: celula de acompanhamento (Do maior)")
-
-
-def d_m3_partitura_palheta():
-    return _score_image("palheta", [("E", 3, None), ("E", 3, None), ("E", 3, None), ("E", 3, None),
-                                    ("E", 3, None), ("E", 3, None), ("E", 3, None), ("E", 3, None)],
-                        "Partitura: palhetada alternada na corda 6 (Mi)")
-
-
-def d_m3_partitura_dedos():
-    return _score_image("dedos", [("C", 4, None), ("E", 4, None), ("G", 4, None), ("C", 5, None),
-                                  ("G", 4, None), ("E", 4, None), ("C", 4, None), ("G", 3, None)],
-                        "Partitura: arpejo com os dedos (Do maior)")
-
-
-def d_m3_partitura_compasso():
-    return _score_image("compasso", [("C", 4, None), ("D", 4, None), ("E", 4, None),
-                                     ("D", 4, None), ("C", 4, None), ("D", 4, None)],
-                        "Partitura: 6/8 em Do (agrupar as colcheias em 3 + 3)")
-
-
-def d_m3_partitura_konokol():
-    return _score_image("konokol", [("C", 4, None), ("E", 4, None), ("D", 4, None), ("F", 4, None),
-                                    ("E", 4, None), ("G", 4, None), ("C", 5, None), ("G", 4, None)],
-                        "Partitura: celula ritmica em Do para falar e tocar")
-
-
-DIAGRAMS.update({
-    "m3_leitura_ritmica": d_m3_leitura_ritmica,
-    "m3_pulsacao_subdivisao": d_m3_pulsacao_subdivisao,
-    "m3_cifrado_divisao": d_m3_cifrado_divisao,
-    "m3_celulas_ritmicas": d_m3_celulas_ritmicas,
-    "m3_acentuacoes": d_m3_acentuacoes,
-    "m3_levadas_palheta": d_m3_levadas_palheta,
-    "m3_direcoes_palheta": d_m3_direcoes_palheta,
-    "m3_mapa_mao_direita": d_m3_mapa_mao_direita,
-    "m3_levadas_dedos": d_m3_levadas_dedos,
-    "m3_compassos": d_m3_compassos,
-    "m3_formulas_incomuns": d_m3_formulas_incomuns,
-    "m3_konokol": d_m3_konokol,
-    "m3_percussao_sanfona": d_m3_percussao_sanfona,
-    "m3_partitura_leitura": d_m3_partitura_leitura,
-    "m3_partitura_subdivisao": d_m3_partitura_subdivisao,
-    "m3_partitura_cifrado": d_m3_partitura_cifrado,
-    "m3_partitura_celula": d_m3_partitura_celula,
-    "m3_partitura_palheta": d_m3_partitura_palheta,
-    "m3_partitura_dedos": d_m3_partitura_dedos,
-    "m3_partitura_compasso": d_m3_partitura_compasso,
-    "m3_partitura_konokol": d_m3_partitura_konokol,
 def d_m4_acordes_clean():
     h = 720
     img, d = canvas(h, BG)
@@ -2233,6 +1973,189 @@ DIAGRAMS.update({
     "m4_partitura_tetrade": d_m4_partitura_tetrade,
     "m4_partitura_familia": d_m4_partitura_familia,
     "m4_partitura_progressao": d_m4_partitura_progressao,
+})
+
+
+
+
+
+# --------------------------------------------------------------------------
+# Modulo 5 — campo harmonico maior e funcoes harmonicas.
+# --------------------------------------------------------------------------
+def _table(d, y, headers, rows, col_x, row_h=46, header_color=ACCENT):
+    """Tabela simples: `col_x` = posicoes x de cada coluna."""
+    d.text((MARGIN, y), headers[0], font=font(19, True), fill=header_color, anchor="la")
+    for i, head in enumerate(headers[1:], start=1):
+        d.text((col_x[i], y), head, font=font(19, True), fill=header_color, anchor="la")
+    for r, row in enumerate(rows):
+        yy = y + 32 + r * row_h
+        fill = RAISED if r % 2 == 0 else SURFACE
+        d.rounded_rectangle([MARGIN, yy, W - MARGIN, yy + row_h - 6], radius=8, fill=fill)
+        for c, cell in enumerate(row):
+            color = TXT if c == 0 else TXT2
+            d.text((col_x[c] if c else MARGIN + 14, yy + (row_h - 6) / 2), cell,
+                   font=font(20, True if c == 0 else False), fill=color, anchor="lm")
+    return y + 32 + len(rows) * row_h
+
+
+def d_m5_escala_maior_graus():
+    h = 700
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "A escala maior: graus, tons e semitons")
+    y = subtitle(d, "Padrao T - T - S - T - T - T - S. Os semitons ficam entre 3-4 e 7-8.", y)
+    piano(d, MARGIN + 30, y + 30, W - 2 * MARGIN - 60, 230)
+    steps = ["T", "T", "S", "T", "T", "T", "S"]
+    kw = (W - 2 * MARGIN - 60) / 8
+    for i, s in enumerate(steps):
+        d.text((MARGIN + 30 + (i + 1) * kw, y + 300), s, font=font(24, True),
+               fill=GOLD if s == "S" else CYAN, anchor="mm")
+    notes = ["Do", "Re", "Mi", "Fa", "Sol", "La", "Si", "Do"]
+    for i, n in enumerate(notes):
+        d.text((MARGIN + 30 + i * kw, y + 350), n, font=font(22, True), fill=TXT, anchor="mm")
+        d.text((MARGIN + 30 + i * kw, y + 386), str(i + 1), font=font(20, True),
+               fill=ACCENT, anchor="mm")
+    d.text((MARGIN, y + 450), "Os graus (1..8) numeram as notas da escala; a tonica e o grau 1.",
+           font=font(21), fill=TXT2, anchor="la")
+    d.text((MARGIN, y + 492), "O mesmo padrao vale em qualquer tonica: muda a nota, nao o desenho.",
+           font=font(21, True), fill=GOLD, anchor="la")
+    d.text((MARGIN, y + 534), "Graus 1, 3 e 5 formam a triade de tonica daquele tom.",
+           font=font(21), fill=CYAN, anchor="la")
+    return img
+
+
+def d_m5_graus_romanos():
+    h = 680
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Os graus em algarismo romano")
+    y = subtitle(d, "Maiusculo = acorde maior; minusculo = menor; circulo = diminuto.", y)
+    items = [("I", "C", "maior", ACCENT), ("ii", "Dm", "menor", CYAN),
+             ("iii", "Em", "menor", CYAN), ("IV", "F", "maior", ACCENT),
+             ("V", "G", "maior", ACCENT), ("vi", "Am", "menor", CYAN),
+             ("vii", "Bdim", "diminuto", GOLD)]
+    top = y + 40
+    for i, (deg, chord, quality, color) in enumerate(items):
+        yy = top + i * 66
+        d.rounded_rectangle([MARGIN, yy, W - MARGIN, yy + 56], radius=8,
+                            fill=RAISED if i % 2 == 0 else SURFACE)
+        d.text((MARGIN + 24, yy + 28), deg + ("o" if quality == "diminuto" else ""),
+               font=font(24, True), fill=color, anchor="lm")
+        d.text((MARGIN + 220, yy + 28), chord, font=font(22, True), fill=TXT, anchor="lm")
+        d.text((MARGIN + 520, yy + 28), quality, font=font(21), fill=TXT2, anchor="lm")
+        d.text((MARGIN + 820, yy + 28),
+               "repouso" if deg in ("I", "iii", "vi") else
+               ("afastamento" if deg in ("IV", "ii") else "tensao"),
+               font=font(20, True), fill=CYAN, anchor="lm")
+    return img
+
+
+def d_m5_campo_harmonico_maior():
+    h = 700
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Campo harmonico maior (de Do)")
+    y = subtitle(d, "I ii iii IV V vi vii - os sete acordes que nascem da escala maior.", y)
+    chords = [("C", "I"), ("Dm", "ii"), ("Em", "iii"), ("F", "IV"),
+              ("G", "V"), ("Am", "vi"), ("Bdim", "vii")]
+    bw = (W - 2 * MARGIN) / 4
+    for i, (name, deg) in enumerate(chords):
+        cx = MARGIN + bw * (i % 4 + 0.5)
+        cy = y + 60 + (i // 4) * 220
+        d.rounded_rectangle([cx - bw / 2 + 20, cy, cx + bw / 2 - 20, cy + 150],
+                            radius=12, fill=RAISED, outline=BORDER, width=2)
+        d.text((cx, cy + 40), deg + ("o" if deg == "vii" else ""), font=font(30, True),
+               fill=ACCENT, anchor="mm")
+        d.text((cx, cy + 90), name, font=font(26, True), fill=TXT, anchor="mm")
+        quality = "maior" if deg in ("I", "IV", "V") else ("menor" if deg != "vii" else "diminuto")
+        d.text((cx, cy + 126), quality, font=font(19), fill=CYAN, anchor="mm")
+    d.text((W / 2, h - 52), "Padrao fixo: I ii iii IV V vi vii. Vale em qualquer tonalidade.",
+           font=font(21, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m5_campo_harmonico_braco():
+    h = 720
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Campo harmonico de Do no braco")
+    y = subtitle(d, "Tonica (Do) em violeta, terceira em ciano, quinta em dourado.", y)
+    string_labels(d, MARGIN + 30, y + 60, 6 * 58)
+    fretboard(d, MARGIN + 50, y + 60, W - 2 * MARGIN - 50, 6 * 58,
+              highlight={0, 4, 7}, root_pc=0)
+    d.text((MARGIN, h - 116), "As tríades do campo se montam sobre as notas destacadas.",
+           font=font(21), fill=TXT2, anchor="la")
+    d.text((MARGIN, h - 74), "Ache a tonica (Do) e conte os graus para achar cada acorde.",
+           font=font(21, True), fill=GOLD, anchor="la")
+    return img
+
+
+def d_m5_funcoes_tres():
+    h = 700
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "As tres funcoes harmonicas")
+    y = subtitle(d, "Tonica (repouso), subdominante (afastamento) e dominante (tensao).", y)
+    cols = [("TONICA", "repouso", ["I (C)", "iii (Em)", "vi (Am)"], ACCENT, "em casa"),
+            ("SUBDOMINANTE", "afastamento", ["IV (F)", "ii (Dm)"], CYAN, "sai de casa"),
+            ("DOMINANTE", "tensao", ["V (G)", "V7 (G7)", "vii (Bdim)"], GOLD, "pede voltar")]
+    col_w = (W - 2 * MARGIN) / 3
+    for c, (name, role, chords, color, feel) in enumerate(cols):
+        x = MARGIN + c * col_w
+        d.rounded_rectangle([x + 12, y + 30, x + col_w - 12, y + 30 + 380],
+                            radius=12, fill=RAISED, outline=color, width=3)
+        d.text((x + col_w / 2, y + 70), name, font=font(26, True), fill=color, anchor="mm")
+        d.text((x + col_w / 2, y + 112), role, font=font(21), fill=TXT2, anchor="mm")
+        for i, ch in enumerate(chords):
+            d.text((x + col_w / 2, y + 170 + i * 52), ch, font=font(23, True),
+                   fill=TXT, anchor="mm")
+        d.text((x + col_w / 2, y + 30 + 350), feel, font=font(20, True), fill=color, anchor="mm")
+    d.text((W / 2, h - 60), "I - IV - V - I percorre as tres funcoes e volta ao repouso.",
+           font=font(21, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m5_relativos():
+    h = 640
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Acordes relativos: mesma armadura, cores diferentes")
+    y = subtitle(d, "O relativo menor esta 3 semitons abaixo do acorde maior.", y)
+    pairs = [("C", "Am", "Do e Mi em comum"), ("G", "Em", "Sol e Si em comum"),
+             ("F", "Dm", "Fa e La em comum"), ("D", "Bm", "Re e Fa# em comum")]
+    top = y + 40
+    for i, (maj, minr, common) in enumerate(pairs):
+        yy = top + i * 96
+        d.rounded_rectangle([MARGIN, yy, W - MARGIN, yy + 82], radius=10, fill=RAISED)
+        d.text((MARGIN + 40, yy + 41), maj, font=font(34, True), fill=ACCENT, anchor="lm")
+        d.text((MARGIN + 180, yy + 41), "<->", font=font(26, True), fill=TXT_DIS, anchor="lm")
+        d.text((MARGIN + 320, yy + 41), minr, font=font(34, True), fill=CYAN, anchor="lm")
+        d.text((MARGIN + 560, yy + 41), common, font=font(21), fill=TXT2, anchor="lm")
+    d.text((W / 2, h - 56), "Duas das tres notas sao iguais: por isso a troca soa suave.",
+           font=font(21, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m5_relativos_campo():
+    h = 620
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Pares de relativos no campo de Do")
+    y = subtitle(d, "Cada acorde maior do campo tem o seu relativo menor dois graus depois.", y)
+    pairs = [("I", "C", "vi", "Am"), ("IV", "F", "ii", "Dm"), ("V", "G", "iii", "Em")]
+    top = y + 60
+    for i, (d1, c1, d2, c2) in enumerate(pairs):
+        yy = top + i * 130
+        d.rounded_rectangle([MARGIN + 60, yy, W - MARGIN - 60, yy + 104], radius=12,
+                            fill=RAISED if i % 2 == 0 else SURFACE)
+        d.text((MARGIN + 160, yy + 52), f"{d1} {c1}", font=font(28, True), fill=ACCENT, anchor="mm")
+        d.text((W / 2, yy + 52), "<->", font=font(26, True), fill=TXT_DIS, anchor="mm")
+        d.text((W - MARGIN - 160, yy + 52), f"{d2} {c2}", font=font(28, True), fill=CYAN, anchor="mm")
+    d.text((W / 2, h - 56), "Trocar um acorde pelo seu relativo muda a cor sem mudar a funcao.",
+           font=font(20, True), fill=GOLD, anchor="mm")
+    return img
+
+
 def d_m5_ciclo_quintas():
     h = 900
     img, d = canvas(h, BG)
@@ -2359,182 +2282,11 @@ def d_m5_harmonizacao_braco():
     d.text((MARGIN, h - 116), "Tonica (Do) em violeta; as demais notas da escala em ciano.",
            font=font(21), fill=TXT2, anchor="la")
     d.text((MARGIN, h - 74), "Sobre cada tonica, monte a triade (1-3-5) para harmonizar.",
-def d_m9_campo_diminuto():
-    h = 700
-    img, d = canvas(h, BG)
-    frame(d, h)
-    y = title(d, "Campos harmonicos das escalas diminutas")
-    y = subtitle(d, "As duas escalas de 8 notas geram campos diferentes ao empilhar tercas.", y)
-    cols = [("Tom - meio - tom (0,2,3,5,6,8,9,11)",
-             ["dois dim7 a um tom", "Cdim7 e Ddim7", "0-3-6-9 / 0-3-6-9"], CYAN),
-            ("Meio - tom - meio (0,1,3,4,6,7,9,10)",
-             ["quatro dominantes", "C7  Eb7  Gb7  A7", "cada um com 7(b9)"], ACCENT)]
-    col_w = (W - 2 * MARGIN) / 2
-    for c, (name, lines, color) in enumerate(cols):
-        x = MARGIN + c * col_w
-        d.rounded_rectangle([x + 10, y + 40, x + col_w - 10, y + 400], radius=12, fill=RAISED)
-        d.text((x + col_w / 2, y + 80), name, font=font(20, True), fill=color, anchor="mm")
-        for i, line in enumerate(lines):
-            d.text((x + col_w / 2, y + 160 + i * 54), line, font=font(23), fill=TXT, anchor="mm")
-    d.text((W / 2, h - 60), "A escala diminuta tem 8 notas e apenas 3 transposicoes distintas.",
-           font=font(20), fill=TXT2, anchor="mm")
-    return img
-
-
-def d_m9_m7s5():
-    h = 700
-    img, d = canvas(h, BG)
-    frame(d, h)
-    y = title(d, "Acorde m7(#5): a quinta aumentada")
-    y = subtitle(d, "0-3-8-10 (tonica, 3a menor, 5a aumentada, 7a menor).", y)
-    chord_box(d, MARGIN + 200, y + 90, 200, 210, [-1, 3, 6, 3, 4, -1], "Cm7(#5)",
-              start_fret=1, caption="Do - Mib - Lab - Sib")
-    items = [("Cm7(#5)", "0-3-8-10", "cor e suspensao"),
-             ("= Ab(add9)/C", "mesmas notas, outro nome", "enarmonia"),
-             ("m7 com 5a justa", "0-3-7-10", "compare e ouça")]
-    top = y + 90
-    for i, (name, desc, feel) in enumerate(items):
-        yy = top + i * 96
-        d.rounded_rectangle([MARGIN + 480, yy, W - MARGIN, yy + 80], radius=10,
-                            fill=RAISED if i % 2 == 0 else SURFACE)
-        d.text((MARGIN + 500, yy + 20), name, font=font(22, True), fill=ACCENT, anchor="la")
-        d.text((MARGIN + 500, yy + 52), desc, font=font(19), fill=TXT, anchor="la")
-        d.text((W - MARGIN - 16, yy + 40), feel, font=font(19, True), fill=CYAN, anchor="rm")
-    d.text((W / 2, h - 54), "A quinta aumentada deixa o acorde suspenso: nem maior, nem menor, nem dominante.",
-           font=font(20), fill=GOLD, anchor="mm")
-    return img
-
-
-def d_m9_policordes():
-    h = 700
-    img, d = canvas(h, BG)
-    frame(d, h)
-    y = title(d, "Policordes: dois acordes empilhados")
-    y = subtitle(d, "Escreve-se o acorde de cima sobre o de baixo; cada camada e uma triade.", y)
-    upper = ["Re", "Fa#", "La"]
-    lower = ["Do", "Mi", "Sol"]
-    for row, (name, notes, color) in enumerate([("Triade superior", upper, CYAN),
-                                                ("Triade inferior", lower, ACCENT)]):
-        yy = y + 60 + row * 190
-        d.text((MARGIN, yy), name, font=font(22, True), fill=color, anchor="la")
-        for k, note in enumerate(notes):
-            cx = MARGIN + 380 + k * 150
-            cy = yy + 50
-            d.ellipse([cx - 44, cy - 44, cx + 44, cy + 44], fill=RAISED, outline=color, width=3)
-            d.text((cx, cy), note, font=font(24, True), fill=TXT, anchor="mm")
-    d.text((W / 2, y + 330), "D sobre C  =  D/C", font=font(30, True), fill=GOLD, anchor="mm")
-    d.text((MARGIN, h - 110), "O baixo (inferior) fixa a harmonia; o superior acrescenta tensao.",
-           font=font(20), fill=TXT2, anchor="la")
-    d.text((MARGIN, h - 70), "Policorde = duas triades; slash chord = um acorde com nota estranha no baixo.",
-           font=font(20), fill=TXT2, anchor="la")
-    return img
-
-
-def d_m9_simetria():
-    h = 700
-    img, d = canvas(h, BG)
-    frame(d, h)
-    y = title(d, "Simetria: escalas que dividem a oitava")
-    y = subtitle(d, "Quando a oitava se divide em partes iguais, a escala se repete no braco.", y)
-    items = [("Diminuta (8 notas)", "0-1-3-4-6-7-9-10: divide em 4 tercas menores", "3 escalas"),
-             ("Tom inteiro (6 notas)", "0-2-4-6-8-10: divide em 6 tons", "2 escalas"),
-             ("Aumentada (6 notas)", "0-3-4-7-8-11: tercas maiores + semitons", "4 escalas"),
-             ("Pentatonica", "nao e simetrica: e uma selecao da escala", "12 escalas")]
-    _rows_panel(d, y, items, row_h=62, label_w=380)
-    d.text((W / 2, h - 54), "A simetria permite deslocar a digitacao sem mudar o desenho do braco.",
-           font=font(20), fill=GOLD, anchor="mm")
-    return img
-
-
-def d_m9_relacoes_campos():
-    h = 760
-    img, d = canvas(h, BG)
-    frame(d, h)
-    y = title(d, "Relacoes entre campos harmonicos")
-    y = subtitle(d, "Campos vizinhos no circulo das quintas compartilham seis das sete notas.", y)
-    cx, cy = W / 2, y + 330
-    _cycle_ring(d, cx, cy, 260, 150,
-                ["C", "G", "D", "A", "E", "B", "F#", "Db", "Ab", "Eb", "Bb", "F"], [])
-    d.text((MARGIN, h - 150), "Um acorde comum aos dois campos e o pivo da modulacao.",
-           font=font(21), fill=TXT2, anchor="la")
-    d.text((MARGIN, h - 112), "Dominantes secundarios e diminutos ligam campos distantes.",
-           font=font(21), fill=TXT2, anchor="la")
-    d.text((MARGIN, h - 74), "O dim7 e o mesmo em quatro campos: e uma ponte entre eles.",
            font=font(21, True), fill=GOLD, anchor="la")
     return img
 
 
 def _score_image_m5(caption, notes):
-def d_m10_reharmonizacao():
-    h = 720
-    img, d = canvas(h, BG)
-    frame(d, h)
-    y = title(d, "Reharmonizar: trocar o acorde sem trocar a melodia")
-    y = subtitle(d, "Para cada acorde original existem caminhos: substituto, emprestimo modal, dominante extra.", y)
-    rows = [["G7", "Db7 (SubV)", "troca o baixo, mesma resolucao"],
-            ["G7", "Bm7b5 - E7 (ii-V do ii)", "adiciona movimento antes de C"],
-            ["C7M", "Cm6 / Cm7 (emprestimo)", "escurece a tonica"],
-            ["C7M", "E7 - Am7 (relativa)", "desvia para o menor"],
-            ["Dm7", "F7M (relativo maior)", "troca a cor, mantem o F"]]
-    _m10_table(d, y + 30, ["Original", "Alternativa", "Efeito"], rows,
-               col_x=[MARGIN + 18, MARGIN + 300, MARGIN + 700], row_h=58)
-    return img
-
-
-def d_m10_harmonia_alvo():
-    h = 640
-    img, d = canvas(h, BG)
-    frame(d, h)
-    y = title(d, "Harmonia-alvo: a chegada que a melodia pede")
-    y = subtitle(d, "Antes de escolher os acordes, defina onde a frase quer chegar (o alvo) e trabalhe de tras para frente.", y)
-    steps = [("1. Melodia", "toque e cante a frase, sem harmonia"),
-             ("2. Alvo", "defina o acorde da chegada (o repouso)"),
-             ("3. Aproximacao", "escolha como chegar: ii-V, SubV, dominante"),
-             ("4. Confirma", "toque a melodia sobre a nova harmonia e escute")]
-    top = y + 50
-    for i, (t, desc) in enumerate(steps):
-        yy = top + i * 92
-        d.rounded_rectangle([MARGIN, yy, W - MARGIN, yy + 76], radius=10, fill=RAISED)
-        d.text((MARGIN + 24, yy + 22), t, font=font(26, True), fill=ACCENT, anchor="la")
-        d.text((MARGIN + 340, yy + 26), desc, font=font(21), fill=TXT, anchor="la")
-        if i < len(steps) - 1:
-            d.text((W / 2, yy + 80), "v", font=font(24, True), fill=TXT_DIS, anchor="mm")
-    return img
-
-
-def d_m10_ferramentas():
-    h = 760
-    img, d = canvas(h, BG)
-    frame(d, h)
-    y = title(d, "Ferramentas de reharmonizacao")
-    y = subtitle(d, "Um conjunto pequeno de recursos cobre quase toda reharmonizacao.", y)
-    rows = [["Substituicao de tritono", "Db7 por G7", "cromatismo no baixo"],
-            ["Dominante secundario", "A7 antes de Dm7", "cria V do ii"],
-            ["Emprestimo modal", "Cm7 no campo de Do", "cor do modo menor"],
-            ["Relativo / paralelo", "Am7 por C7M", "mesma familia de notas"],
-            ["Acorde de passagem", "Bm7b5 entre C e Dm", "movimento por graus"],
-            ["Reharmonizacao melodica", "acorde a partir da nota", "verticalizacao"]]
-    _m10_table(d, y + 30, ["Ferramenta", "Exemplo", "Efeito"], rows,
-               col_x=[MARGIN + 18, MARGIN + 520, MARGIN + 860], row_h=58)
-    return img
-
-
-def d_m10_estilos():
-    h = 720
-    img, d = canvas(h, BG)
-    frame(d, h)
-    y = title(d, "Estilos e sonoridades: a mesma progressao, quatro roupas")
-    y = subtitle(d, "Mudam o ritmo, a densidade e as tensoes; a analise harmonica continua a mesma.", y)
-    rows = [["Bossa nova", "7M e 9, baixo em sincope", "suave, conversado"],
-            ["Jazz", "ii-V-I, SubV, alterados", "denso, resolvido"],
-            ["Blues", "dominantes, 7a menor, blue note", "cru, tenso"],
-            ["Rock / pop", "triades, power chords, IV e V", "direto, aberto"]]
-    _m10_table(d, y + 30, ["Estilo", "Harmonia tipica", "Sensacao"], rows,
-               col_x=[MARGIN + 18, MARGIN + 400, MARGIN + 860], row_h=66)
-    return img
-
-
-def _m10_score(notes, caption):
     h = 420
     img, d = canvas(h, BG)
     frame(d, h)
@@ -2610,6 +2362,13 @@ DIAGRAMS.update({
     "m5_partitura_relativos": d_m5_partitura_relativos,
     "m5_partitura_cadencia": d_m5_partitura_cadencia,
     "m5_partitura_modo": d_m5_partitura_modo,
+})
+
+
+
+
+
+# --------------------------------------------------------------------------
 # Modulo 6 — escalas menores e campos harmonicos.
 # --------------------------------------------------------------------------
 def _m6_scale_image(title_text, subtitle_text, pcs, root_pc, footnote):
@@ -2848,6 +2607,79 @@ DIAGRAMS.update({
     "m6_partitura_subdominante": d_m6_partitura_subdominante,
     "m6_partitura_dorico": d_m6_partitura_dorico,
     "m6_partitura_gregos": d_m6_partitura_gregos,
+})
+
+
+
+
+
+# --------------------------------------------------------------------------
+# Modulo 7 — Empilhamentos, estruturas modais e sonoridades.
+# --------------------------------------------------------------------------
+def _stack_rows(d, top, groups, note_font=None):
+    """Desenha grupos de notas empilhadas; `groups` = [(rotulo, [notas], cor)]."""
+    note_font = note_font or font(24, True)
+    for i, (name, notes, color) in enumerate(groups):
+        yy = top + i * 118
+        d.text((MARGIN, yy + 10), name, font=font(23, True), fill=color, anchor="la")
+        for k, note in enumerate(notes):
+            cx = MARGIN + 60 + k * 128
+            cy = yy + 72
+            d.ellipse([cx - 38, cy - 38, cx + 38, cy + 38], fill=RAISED, outline=color, width=3)
+            d.text((cx, cy), note, font=note_font, fill=TXT, anchor="mm")
+
+
+def d_m7_tercas_empilhadas():
+    h = 720
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Empilhamento de tercas")
+    y = subtitle(d, "Cada nota nova comeca onde a anterior terminou; a mistura de tercas define a qualidade.", y)
+    _stack_rows(d, y + 40, [
+        ("Triade maior 1-3-5 (0,4,7)", ["Do", "Mi", "Sol"], ACCENT),
+        ("Tetrade 7M 1-3-5-7 (0,4,7,11)", ["Do", "Mi", "Sol", "Si"], SUCCESS),
+        ("Dominante 1-3-5-b7 (0,4,7,10)", ["Do", "Mi", "Sol", "Sib"], GOLD),
+        ("Menor 1-b3-5-b7 (0,3,7,10)", ["Do", "Mib", "Sol", "Sib"], CYAN),
+    ])
+    d.text((W / 2, h - 40), "As tercas empilhadas definem maior, menor e dominante.",
+           font=font(20), fill=TXT2, anchor="mm")
+    return img
+
+
+def d_m7_quartais_empilhadas():
+    h = 700
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Empilhamento de quartas (som de So What)")
+    y = subtitle(d, "Quartas justas sobrepostas; sem terca, o acorde e suspenso (nem maior, nem menor).", y)
+    _stack_rows(d, y + 40, [
+        ("Duas quartas: Do-Fa-Sib (0,5,10)", ["Do", "Fa", "Sib"], CYAN),
+        ("Tres quartas: Do-Fa-Sib-Mib (0,5,10,15)", ["Do", "Fa", "Sib", "Mib"], ACCENT),
+        ("So What: quartas + terca no topo (Sol)", ["Do", "Fa", "Sib", "Mib", "Sol"], GOLD),
+    ])
+    d.text((W / 2, h - 60), "O acorde quartal nao tem cara de maior nem de menor: ele suspende.",
+           font=font(20), fill=TXT2, anchor="mm")
+    d.text((W / 2, h - 34), "Mova o mesmo desenho pelo braco para qualquer centro modal.",
+           font=font(19, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m7_outros_empilhamentos():
+    h = 760
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Outros empilhamentos: quintas, segundas e mistos")
+    y = subtitle(d, "Cada distancia entre as notas produz uma cor diferente.", y)
+    _stack_rows(d, y + 34, [
+        ("Quintas: Do-Sol-Re-La (forte, aberto)", ["Do", "Sol", "Re", "La"], ACCENT),
+        ("Segundas: Do-Re-Mi (aglomerado, tenso)", ["Do", "Re", "Mi"], GOLD),
+        ("Misto (quarta + terca): Do-Fa-La", ["Do", "Fa", "La"], CYAN),
+    ])
+    d.text((W / 2, h - 40), "Quintas dao forca; segundas dao tensao; mistos dao cor sob medida.",
+           font=font(20), fill=TXT2, anchor="mm")
+    return img
+
+
 def d_m7_triades_do_meio():
     h = 700
     img, d = canvas(h, BG)
@@ -2968,19 +2800,6 @@ def d_m7_locrio_alterado():
         d.text((MARGIN + 24, yy + 80), formula, font=font(32, True), fill=TXT, anchor="la")
         d.text((MARGIN + 24, yy + 130), "tensao: " + tensao, font=font(21), fill=TXT2, anchor="la")
     d.text((W / 2, h - 44), "O alterado resolve meio-tom abaixo; a tensao existe para resolver.",
-def d_m9_sonoridades():
-    h = 680
-    img, d = canvas(h, BG)
-    frame(d, h)
-    y = title(d, "Sonoridades especiais")
-    y = subtitle(d, "Estruturas que fogem do acorde terca-sobre-terca e criam cores novas.", y)
-    items = [("Quartal (So What)", "empilha quartas em vez de tercas", "aberto"),
-             ("Cluster", "notas vizinhas soando juntas", "denso"),
-             ("Add9 / 6-9", "triade com a nona ou a sexta e a nona", "luminoso"),
-             ("Slash / inversao", "acorde com nota estranha no baixo", "movel"),
-             ("Upper structure", "triade sobre um dominante", "tenso")]
-    _rows_panel(d, y, items, row_h=56, label_w=380)
-    d.text((W / 2, h - 46), "Cada sonoridade tem um uso: cor, tensao, movimento ou repouso.",
            font=font(20), fill=GOLD, anchor="mm")
     return img
 
@@ -3083,6 +2902,147 @@ DIAGRAMS.update({
     "m7_partitura_sus": d_m7_partitura_sus,
     "m7_partitura_alterado": d_m7_partitura_alterado,
     "m7_partitura_vamp_modal": d_m7_partitura_vamp_modal,
+})
+
+
+
+
+
+# --------------------------------------------------------------------------
+# Modulo 8 — dominantes, cadencias e substituicoes harmonicas.
+# --------------------------------------------------------------------------
+def rows_box(d, top, rows, height=52, gap=8, cols=(0, 300, 640, 900),
+             colors=(ACCENT, TXT, CYAN, GOLD), font_size=20):
+    """Lista de linhas de texto alinhadas em colunas."""
+    for i, row in enumerate(rows):
+        yy = top + i * (height + gap)
+        d.rounded_rectangle([MARGIN, yy, W - MARGIN, yy + height], radius=8,
+                            fill=RAISED if i % 2 == 0 else SURFACE)
+        for k, cell in enumerate(row):
+            if k >= len(cols) or not cell:
+                continue
+            d.text((MARGIN + cols[k] + 16, yy + height / 2), cell,
+                   font=font(font_size, k == 0), fill=colors[k % len(colors)],
+                   anchor="lm")
+    return top + len(rows) * (height + gap)
+
+
+def d_m8_dominante_v7():
+    h = 720
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "O dominante V7 e a sua tensao")
+    y = subtitle(d, "O V7 traz a terca e a setima em tritono; elas resolvem por semitom.", y)
+    # Acorde G7 em destaque + notas.
+    chord_box(d, W / 2, y + 90, 320, 240, [-1, -1, -1, 0, 0, 3], "G7 (V7 de Do)",
+              start_fret=1, caption="3a = Si, 7a = Fa: o tritono pede resolucao")
+    notes = [("G", "tonica", "5a da escala"),
+             ("B", "terca maior", "sensivel de Do"),
+             ("D", "quinta justa", "estavel"),
+             ("F", "setima menor", "resolves para Mi")]
+    top = y + 400
+    for i, (n, role, res) in enumerate(notes):
+        yy = top + i * 58
+        d.rounded_rectangle([MARGIN, yy, W - MARGIN, yy + 50], radius=8,
+                            fill=RAISED if i % 2 == 0 else SURFACE)
+        d.text((MARGIN + 18, yy + 25), n, font=font(24, True), fill=ACCENT, anchor="lm")
+        d.text((MARGIN + 120, yy + 25), role, font=font(21), fill=TXT, anchor="lm")
+        d.text((MARGIN + 460, yy + 25), res, font=font(20, True), fill=CYAN, anchor="lm")
+    d.text((W / 2, h - 40), "Fa (7a) desce para Mi; Si (3a) sobe para Do: resolucao V7 -> I.",
+           font=font(20, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m8_dominantes_secundarios():
+    h = 680
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Dominantes secundarios em Do maior")
+    y = subtitle(d, "Qualquer grau vira tonica temporaria com o seu proprio V7.", y)
+    rows = [("V7/ii", "A7", "-> Dm", "La-Do#-Mi-Sol"),
+            ("V7/iii", "B7", "-> Em", "Si-Re#-Fa#-La"),
+            ("V7/IV", "C7", "-> F", "Do-Mi-Sol-Sib"),
+            ("V7/V", "D7", "-> G", "Re-Fa#-La-Do"),
+            ("V7/vi", "E7", "-> Am", "Mi-Sol#-Si-Re")]
+    rows_box(d, y + 40, rows, cols=(0, 180, 480, 720))
+    d.text((W / 2, h - 46), "O acidente (sustenido/bemol) cria a sensivel do novo alvo.",
+           font=font(20, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m8_dominantes_alterados():
+    h = 700
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Dominantes alterados sobre G7")
+    y = subtitle(d, "A alteracao acrescenta tensao e aponta o caminho para Do.", y)
+    rows = [("G7b9", "Ab na ponta", "tensao forte sobre o V"),
+            ("G7#9", "A# (Bb)", "som de blues, 'acorde hendrix'"),
+            ("G7b5", "Db", "substitui a 5a justa"),
+            ("G7#5", "D# (Eb)", "5a aumentada, som suspenso"),
+            ("G7#11", "C#", "cor lidia dominante"),
+            ("G7alt", "todas juntas", "maxima tensao antes do I")]
+    rows_box(d, y + 40, rows, height=56)
+    d.text((W / 2, h - 44), "Quanto mais alteracoes, mais o ouvido espera a resolucao.",
+           font=font(20, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m8_subv7():
+    h = 680
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "SubV7: o dominante substituto")
+    y = subtitle(d, "Db7 toma o lugar de G7: o mesmo tritono, o baixo desce meio-tom.", y)
+    left = W / 2 - 300
+    chord_box(d, left, y + 90, 300, 230, [-1, -1, -1, 1, 2, 1], "G7",
+              start_fret=1, caption="G-B-D-F (tritono B-F)")
+    chord_box(d, W / 2 + 300, y + 90, 300, 230, [-1, -1, -1, 4, 2, 1], "Db7",
+              start_fret=1, caption="Db-F-Ab-Cb (tritono F-Cb=B)")
+    d.text((W / 2, y + 150), "=", font=font(48, True), fill=GOLD, anchor="mm")
+    rows = [("G7", "5a -> 1a: baixo sobe (G -> C)", "resolucao forte"),
+            ("Db7", "5a -> 1a: baixo desce (Db -> C)", "cromatismo"),
+            ("Tritono comum", "B (=Cb) e F nos dois acordes", "ligacao")]
+    rows_box(d, y + 360, rows, cols=(0, 300, 720))
+    d.text((W / 2, h - 44), "SubV7 entra em qualquer lugar onde caberia o V7 do alvo.",
+           font=font(20, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m8_subiim():
+    h = 660
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "SubIIm: o segundo grau menor")
+    y = subtitle(d, "O ii vira meio-diminuto (Dm7b5) e empresta a cor do menor.", y)
+    rows = [("IIm7 (normal)", "Dm7 -> G7 -> C", "Do maior puro"),
+            ("SubIIm", "Dm7b5 -> G7(b9) -> C", "cor menor no ii"),
+            ("iv menor", "Fm7 (emprestado)", "SubIIm na subdominante"),
+            ("Efeito", "G7 ganha b9 (Ab)", "tensao extra")]
+    rows_box(d, y + 50, rows, height=58)
+    d.text((W / 2, h - 44), "SubIIm = o ii do campo menor, usado dentro do maior.",
+           font=font(20, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m8_emprestimos_modais():
+    h = 720
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Emprestimos modais: acordes do Do menor no Do maior")
+    y = subtitle(d, "O modo paralelo (mesma tonica, outra qualidade) doa acordes.", y)
+    rows = [("Cm", "i menor", "Do menor paralelo"),
+            ("Fm7", "iv menor", "subdominante menor"),
+            ("Gm7", "v menor", "dominante enfraquecido"),
+            ("Ab7M", "bVI", "cor dramatica"),
+            ("Bb7", "bVII", "cadencia mixolidia"),
+            ("Eb7M", "bIII", "brilho modal")]
+    rows_box(d, y + 40, rows, height=56)
+    d.text((W / 2, h - 44), "Emprestimo modal = pegar acorde do campo paralelo emprestado.",
+           font=font(20, True), fill=GOLD, anchor="mm")
+    return img
+
+
 def d_m8_dilatacao_maior():
     h = 760
     img, d = canvas(h, BG)
@@ -3265,87 +3225,247 @@ DIAGRAMS.update({
     "m8_partitura_v7_do_v": d_m8_partitura_v7_do_v,
     "m8_partitura_iv_menor": d_m8_partitura_iv_menor,
 })
-def d_m9_partitura_dim7():
-    return _score_image("m9_partitura_dim7", [("C", 4, None), ("E", 4, "b"), ("G", 4, "b"),
-                                              ("A", 4, None), ("C", 5, None)],
-                        "Partitura: arpejo de Cdim7 (Do-Mib-Solb-La-Do)")
 
 
-def d_m9_partitura_domdim():
-    return _score_image("m9_partitura_domdim", [("C", 4, None), ("E", 4, None), ("G", 4, None),
-                                                ("B", 4, "b"), ("D", 5, "b")],
-                        "Partitura: C7(b9) - Do-Mi-Sol-Sib-Reb")
 
 
-def d_m9_partitura_m7s5():
-    return _score_image("m9_partitura_m7s5", [("C", 4, None), ("E", 4, "b"), ("G", 4, "#"),
-                                              ("B", 4, "b"), ("C", 5, None)],
-                        "Partitura: arpejo de Cm7(#5) - Do-Mib-Sol#-Sib")
+
+# --------------------------------------------------------------------------
+# Modulo 10 — analise harmonica, verticalizacao e reharmonizacao.
+# --------------------------------------------------------------------------
+def _m10_table(d, y, headers, rows, col_x, row_h=52, title_color=ACCENT):
+    d.text((col_x[0], y), headers[0], font=font(19, True), fill=title_color, anchor="la")
+    for i, head in enumerate(headers[1:], start=1):
+        d.text((col_x[i], y), head, font=font(19, True), fill=title_color, anchor="la")
+    for r, row in enumerate(rows):
+        yy = y + 30 + r * row_h
+        d.rounded_rectangle([MARGIN, yy, W - MARGIN, yy + row_h - 8], radius=8,
+                            fill=RAISED if r % 2 == 0 else SURFACE)
+        for c, cell in enumerate(row):
+            color = CYAN if c == 0 else TXT
+            d.text((col_x[c], yy + (row_h - 8) / 2), cell, font=font(20, True if c == 0 else False),
+                   fill=color, anchor="lm")
+    return y + 30 + len(rows) * row_h
 
 
-def d_m9_partitura_policorde():
-    return _score_image("m9_partitura_policorde", [("C", 4, None), ("E", 4, None), ("G", 4, None),
-                                                   ("D", 5, None), ("F", 5, "#"), ("A", 5, None)],
-                        "Partitura: policorde D/C - triade de Do (baixo) e de Re (agudo)")
+def d_m10_analise_harmonica():
+    h = 720
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Analise harmonica: grau, funcao e escala de cada acorde")
+    y = subtitle(d, "Primeiro nomeie o grau (I, vi, ii, V); depois a funcao; depois a escala do improviso.", y)
+    _m10_table(
+        d, y + 30,
+        ["Acorde", "Grau", "Funcao", "Escala / cor"],
+        [["C7M", "I", "tonica", "jonio (modo I)"],
+         ["A7", "VI7", "dominante secundario", "mixolidio alterado"],
+         ["Dm7", "ii", "subdominante", "dorico"],
+         ["G7", "V", "dominante", "mixolidio"]],
+        col_x=[MARGIN + 18, MARGIN + 260, MARGIN + 420, MARGIN + 760])
+    d.text((MARGIN, h - 92), "Todo acorde diz tres coisas: de onde vem (grau), o que faz (funcao) e como soa (escala).",
+           font=font(20), fill=TXT2, anchor="la")
+    d.text((MARGIN, h - 54), "O ciclo ii-V-I em Do: Dm7 -> G7 -> C7M. A analise revela o caminho antes de tocar.",
+           font=font(20, True), fill=GOLD, anchor="la")
+    return img
 
 
-DIAGRAMS.update({
-    "m9_diminuto_formacao": d_m9_diminuto_formacao,
-    "m9_diminuto_funcoes": d_m9_diminuto_funcoes,
-    "m9_domdim_escala": d_m9_domdim_escala,
-    "m9_ciclos_diminutos": d_m9_ciclos_diminutos,
-    "m9_campo_diminuto": d_m9_campo_diminuto,
-    "m9_m7s5": d_m9_m7s5,
-    "m9_policordes": d_m9_policordes,
-    "m9_simetria": d_m9_simetria,
-    "m9_relacoes_campos": d_m9_relacoes_campos,
-    "m9_sonoridades": d_m9_sonoridades,
-    "m9_partitura_dim7": d_m9_partitura_dim7,
-    "m9_partitura_domdim": d_m9_partitura_domdim,
-    "m9_partitura_m7s5": d_m9_partitura_m7s5,
-    "m9_partitura_policorde": d_m9_partitura_policorde,
-})
+def d_m10_analise_melodica():
+    h = 700
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Analise melodica: notas do acorde x notas de tensao")
+    y = subtitle(d, "Sobre Dm7, cada nota da melodia tem um papel: repouso (acorde) ou tensao (passagem).", y)
+    notes = [("D", "fundamental", "repouso", SUCCESS), ("F", "3a menor", "repouso", SUCCESS),
+             ("A", "5a justa", "repouso", SUCCESS), ("C", "7a menor", "repouso", SUCCESS),
+             ("E", "9a", "tensao", GOLD), ("B", "13a", "tensao", GOLD),
+             ("G", "11a", "tensao (evitar)", DANGER)]
+    top = y + 40
+    for i, (note, role, feel, color) in enumerate(notes):
+        yy = top + i * 62
+        d.rounded_rectangle([MARGIN, yy, W - MARGIN, yy + 52], radius=8, fill=RAISED)
+        d.ellipse([MARGIN + 30, yy + 10, MARGIN + 72, yy + 42], fill=color)
+        d.text((MARGIN + 51, yy + 26), note, font=font(22, True), fill=BG, anchor="mm")
+        d.text((MARGIN + 110, yy + 26), role, font=font(21, True), fill=TXT, anchor="lm")
+        d.text((MARGIN + 620, yy + 26), feel, font=font(20), fill=color, anchor="lm")
+    d.text((W / 2, h - 50), "Repouso cai no tempo forte; tensao pede resolucao no proximo acorde.",
+           font=font(20, True), fill=CYAN, anchor="mm")
+    return img
 
 
-def _write_score_notes_header(path: str) -> None:
-    """Emit the notes drawn on each score image as a C++ header the tests read.
+def d_m10_escolha_modal():
+    h = 780
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Escolha modal: qual modo sobre cada acorde")
+    y = subtitle(d, "O modo nao vem da escala da musica: vem do acorde que esta soando naquele compasso.", y)
+    rows = [["Cm7 (dorico)", "menor, 6a maior", "jazz modal, funk"],
+            ["Cm7 (eolio)", "menor, 6a menor", "menor natural"],
+            ["Cmaj7 (jonio)", "maior, 7a maior", "tonica classica"],
+            ["Cmaj7 (lidio)", "maior, 4a aumentada", "brilho flutuante"],
+            ["C7 (mixolidio)", "maior, 7a menor", "dominante, blues"],
+            ["C7 (lidio b7)", "maior, #11", "dominante flutuante"],
+            ["Cm7b5 (locrio)", "menor, 5a dim.", "II do menor"]]
+    _m10_table(d, y + 30, ["Acorde / modo", "Cor caracteristica", "Uso tipico"], rows,
+               col_x=[MARGIN + 18, MARGIN + 480, MARGIN + 880], row_h=58)
+    return img
 
-    Keeps the score image and the audio beside it in sync: the test compares the
-    notes of a ContentItem of kind score with the ones recorded here (the same
-    notes the image draws)."""
-    lines = [
-        "#pragma once",
-        "",
-        "// GENERATED by tools/make_diagrams.py - do not edit by hand.",
-        "// Notes drawn on each score image, so the tests can prove a score image",
-        "// and the audio played beside it carry the same notes.",
-        "",
-        "#include <juce_core/juce_core.h>",
-        "",
-        "#include <vector>",
-        "",
-        "namespace cursomusica::content::scoreNotes",
-        "{",
-        "",
-        "struct Entry { const char* stem; std::vector<int> notes; };",
-        "",
-        "inline const std::vector<Entry>& all()",
-        "{",
-        "    static const std::vector<Entry> entries = {",
-    ]
-    for stem in sorted(SCORE_NOTES):
-        notes = ", ".join(str(n) for n in SCORE_NOTES[stem])
-        lines.append(f'        {{ "{stem}", {{ {notes} }} }},')
-    lines += [
-        "    };",
-        "    return entries;",
-        "}",
-        "",
-        "} // namespace cursomusica::content::scoreNotes",
-        "",
-    ]
-    with open(path, "w", encoding="utf-8") as f:
-        f.write("\n".join(lines))
+
+def d_m10_verticalizacao():
+    h = 660
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Verticalizacao: transformar melodia em harmonia")
+    y = subtitle(d, "Pegue cada nota da melodia e empilhe intervalos a partir dela para criar o acorde.", y)
+    melody = ["A", "G", "F", "E"]
+    top = y + 60
+    d.text((MARGIN, top - 10), "Melodia:", font=font(22, True), fill=ACCENT, anchor="la")
+    for i, note in enumerate(melody):
+        cx = MARGIN + 200 + i * 150
+        d.ellipse([cx - 34, top - 44, cx + 34, top + 24], fill=ACCENT)
+        d.text((cx, top - 10), note, font=font(26, True), fill=TXT, anchor="mm")
+    stacks = [("Am7", ["A", "C", "E", "G"]), ("G7", ["G", "B", "D", "F"]),
+              ("F7M", ["F", "A", "C", "E"]), ("Em7", ["E", "G", "B", "D"])]
+    for i, (chord, notes) in enumerate(stacks):
+        cx = MARGIN + 200 + i * 150
+        d.text((cx, top + 70), chord, font=font(22, True), fill=CYAN, anchor="mm")
+        for k, n in enumerate(notes):
+            d.text((cx, top + 110 + k * 34), n, font=font(20), fill=TXT2, anchor="mm")
+    d.text((W / 2, h - 56), "A melodia A-G-F-E vira Am7 - G7 - F7M - Em7: a harmonia nasce das proprias notas.",
+           font=font(20, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m10_conexao_campos():
+    h = 700
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Conexao entre campos harmonicos (acordes-pivo)")
+    y = subtitle(d, "Dois centros se ligam por acordes que existem nos dois campos: os acordes-pivo.", y)
+    left = [("C7M", "I"), ("Am7", "vi"), ("Dm7", "ii"), ("G7", "V")]
+    right = [("F7M", "I"), ("Dm7", "vi"), ("Gm7", "ii"), ("C7", "V")]
+    cx = W / 2
+    d.text((MARGIN + 120, y + 30), "Campo de Do", font=font(24, True), fill=ACCENT, anchor="mm")
+    d.text((W - MARGIN - 120, y + 30), "Campo de Fa", font=font(24, True), fill=CYAN, anchor="mm")
+    for i in range(4):
+        yy = y + 90 + i * 100
+        d.rounded_rectangle([MARGIN + 30, yy, MARGIN + 250, yy + 66], radius=10, fill=RAISED)
+        d.text((MARGIN + 140, yy + 33), left[i][0] + " (" + left[i][1] + ")",
+               font=font(22, True), fill=TXT, anchor="mm")
+        d.rounded_rectangle([W - MARGIN - 250, yy, W - MARGIN - 30, yy + 66], radius=10, fill=RAISED)
+        d.text((W - MARGIN - 140, yy + 33), right[i][0] + " (" + right[i][1] + ")",
+               font=font(22, True), fill=TXT, anchor="mm")
+    for i, j, label in [(2, 0, "Dm7 = vi de Fa"), (3, 3, "G7 -> C7 (V-V)")]:
+        yy = y + 90 + i * 100 + 33
+        y2 = y + 90 + j * 100 + 33
+        d.line([MARGIN + 260, yy, W - MARGIN - 260, y2], fill=GOLD, width=3)
+        d.text((cx, (yy + y2) / 2 - 14), label, font=font(19, True), fill=GOLD, anchor="mm")
+    d.text((W / 2, h - 52), "Dm7 e o pivo: ii de Do, vi de Fa. Ele muda de funcao sem mudar de acorde.",
+           font=font(20, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m10_vozes_internas():
+    h = 640
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Vozes internas: conduzir cada linha com o menor movimento")
+    y = subtitle(d, "Quatro vozes (soprano, contralto, tenor, baixo) andando por graus proximos.", y)
+    chords = [("C7M", ["E", "G", "B", "C"]), ("Am7", ["E", "A", "C", "A"]),
+              ("Dm7", ["F", "A", "C", "D"]), ("G7", ["F", "G", "B", "D"])]
+    top = y + 70
+    labels = ["Soprano", "Contralto", "Tenor", "Baixo"]
+    for v in range(4):
+        d.text((MARGIN, top + v * 60), labels[v], font=font(19, True), fill=ACCENT, anchor="la")
+    for i, (chord, voices) in enumerate(chords):
+        cx = MARGIN + 340 + i * 210
+        d.text((cx, top - 34), chord, font=font(23, True), fill=CYAN, anchor="mm")
+        for v, note in enumerate(voices):
+            d.rounded_rectangle([cx - 40, top + v * 60 - 22, cx + 40, top + v * 60 + 22],
+                                radius=8, fill=RAISED, outline=BORDER)
+            d.text((cx, top + v * 60), note, font=font(22, True), fill=TXT, anchor="mm")
+    d.text((W / 2, h - 56), "O F comum a Dm7 e G7 fica parado: e a nota que amarra os dois acordes.",
+           font=font(20, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m10_reharmonizacao():
+    h = 720
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Reharmonizar: trocar o acorde sem trocar a melodia")
+    y = subtitle(d, "Para cada acorde original existem caminhos: substituto, emprestimo modal, dominante extra.", y)
+    rows = [["G7", "Db7 (SubV)", "troca o baixo, mesma resolucao"],
+            ["G7", "Bm7b5 - E7 (ii-V do ii)", "adiciona movimento antes de C"],
+            ["C7M", "Cm6 / Cm7 (emprestimo)", "escurece a tonica"],
+            ["C7M", "E7 - Am7 (relativa)", "desvia para o menor"],
+            ["Dm7", "F7M (relativo maior)", "troca a cor, mantem o F"]]
+    _m10_table(d, y + 30, ["Original", "Alternativa", "Efeito"], rows,
+               col_x=[MARGIN + 18, MARGIN + 300, MARGIN + 700], row_h=58)
+    return img
+
+
+def d_m10_harmonia_alvo():
+    h = 640
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Harmonia-alvo: a chegada que a melodia pede")
+    y = subtitle(d, "Antes de escolher os acordes, defina onde a frase quer chegar (o alvo) e trabalhe de tras para frente.", y)
+    steps = [("1. Melodia", "toque e cante a frase, sem harmonia"),
+             ("2. Alvo", "defina o acorde da chegada (o repouso)"),
+             ("3. Aproximacao", "escolha como chegar: ii-V, SubV, dominante"),
+             ("4. Confirma", "toque a melodia sobre a nova harmonia e escute")]
+    top = y + 50
+    for i, (t, desc) in enumerate(steps):
+        yy = top + i * 92
+        d.rounded_rectangle([MARGIN, yy, W - MARGIN, yy + 76], radius=10, fill=RAISED)
+        d.text((MARGIN + 24, yy + 22), t, font=font(26, True), fill=ACCENT, anchor="la")
+        d.text((MARGIN + 340, yy + 26), desc, font=font(21), fill=TXT, anchor="la")
+        if i < len(steps) - 1:
+            d.text((W / 2, yy + 80), "v", font=font(24, True), fill=TXT_DIS, anchor="mm")
+    return img
+
+
+def d_m10_ferramentas():
+    h = 760
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Ferramentas de reharmonizacao")
+    y = subtitle(d, "Um conjunto pequeno de recursos cobre quase toda reharmonizacao.", y)
+    rows = [["Substituicao de tritono", "Db7 por G7", "cromatismo no baixo"],
+            ["Dominante secundario", "A7 antes de Dm7", "cria V do ii"],
+            ["Emprestimo modal", "Cm7 no campo de Do", "cor do modo menor"],
+            ["Relativo / paralelo", "Am7 por C7M", "mesma familia de notas"],
+            ["Acorde de passagem", "Bm7b5 entre C e Dm", "movimento por graus"],
+            ["Reharmonizacao melodica", "acorde a partir da nota", "verticalizacao"]]
+    _m10_table(d, y + 30, ["Ferramenta", "Exemplo", "Efeito"], rows,
+               col_x=[MARGIN + 18, MARGIN + 520, MARGIN + 860], row_h=58)
+    return img
+
+
+def d_m10_estilos():
+    h = 720
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Estilos e sonoridades: a mesma progressao, quatro roupas")
+    y = subtitle(d, "Mudam o ritmo, a densidade e as tensoes; a analise harmonica continua a mesma.", y)
+    rows = [["Bossa nova", "7M e 9, baixo em sincope", "suave, conversado"],
+            ["Jazz", "ii-V-I, SubV, alterados", "denso, resolvido"],
+            ["Blues", "dominantes, 7a menor, blue note", "cru, tenso"],
+            ["Rock / pop", "triades, power chords, IV e V", "direto, aberto"]]
+    _m10_table(d, y + 30, ["Estilo", "Harmonia tipica", "Sensacao"], rows,
+               col_x=[MARGIN + 18, MARGIN + 400, MARGIN + 860], row_h=66)
+    return img
+
+
+def _m10_score(notes, caption):
+    h = 420
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, caption)
+    staff(d, MARGIN + 30, y + 40, W - 2 * MARGIN - 60, notes)
+    return img
+
+
 def d_m10_partitura_turnaround():
     return _m10_score([("C", 4, None), ("E", 4, None), ("G", 4, None), ("B", 4, None),
                        ("C", 4, "#"), ("E", 4, None), ("G", 4, None), ("A", 4, None),

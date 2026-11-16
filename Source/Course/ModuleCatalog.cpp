@@ -1114,6 +1114,7 @@ namespace
         return m;
     }
 
+
     // Module 3 — Etapa 3: ritmo, leitura e levadas. The most rhythmic module of
     // the level: the playable exercises are graded on the metronome grid
     // (usesGrid = true) and the rhythmic cell of the topic appears in m.rhythm
@@ -1178,528 +1179,6 @@ namespace
         // and counting) and playable exercises graded on the metronome grid (the
         // app recognises the notes and checks the alignment, REQ-008/REQ-015).
         // Ids follow EX-3.<topico>.<n>, numbered per topic.
-    // Module 4 — Etapa 4: construção de acordes (tríades e tétrades). Following
-    // module 2's pattern: part of the exercises is played on the instrument and
-    // the app recognises the notes (Exercise::chordPitchClasses / Exercise::interval),
-    // so any position on the neck is accepted. Every topic carries images,
-    // tables, audio examples and scores with their audio, and >=5 pages
-    // (content::minTopicChars).
-    CourseModule makeModule4()
-    {
-        CourseModule m;
-        m.number = 4;
-        m.title = juce::String::fromUTF8 ("Construção de acordes: tríades e tétrades");
-        m.objective = juce::String::fromUTF8 (
-            "Compreender a formação dos acordes e suas diferentes possibilidades de "
-            "execução — construindo tríades e tétrades, identificando as notas e "
-            "executando inversões e posições.");
-        m.level = 2;          // MUSIC.md: módulos 3–4 = nível 2 (vamps de 2 acordes)
-        m.targetBpm = 72;     // MUSIC.md, módulo 4
-        m.onGridTarget = 0.78f;
-        m.implemented = true;
-
-        m.lessons = {
-            detail (block ("A", juce::String::fromUTF8 ("Tríades maiores e menores"), {
-                "Tríade é um acorde de três notas: tônica, terça e quinta.",
-                "Maior = 0–4–7; menor = 0–3–7; a diferença está na terça.",
-                "A receita vale em qualquer tônica e posição do braço."
-            }), content::topic4A()),
-            detail (block ("B", juce::String::fromUTF8 ("Tríades aumentadas e diminutas"), {
-                "Aumentada = 0–4–8 (quinta aumentada); diminuta = 0–3–6 (quinta diminuta).",
-                "São sons de tensão: a aumentada flutua, a diminuta pede resolução.",
-                "Na cifra: '+' ou 'aug' para aumentada, 'dim' ou '°' para diminuta."
-            }), content::topic4B()),
-            detail (block ("C", juce::String::fromUTF8 ("Tríades abertas e fechadas"), {
-                "Disposição é a ordem e o espaçamento das notas do acorde.",
-                "Fechada: notas próximas, som compacto; aberta: espalhadas, som amplo.",
-                "As notas não mudam; só a distribuição muda."
-            }), content::topic4C()),
-            detail (block ("D", juce::String::fromUTF8 ("Inversões"), {
-                "Inverter é mudar a nota do baixo, mantendo as mesmas notas.",
-                "Fundamental: tônica no baixo; 1ª inversão: terça; 2ª inversão: quinta.",
-                "Na cifra, a inversão vem depois da barra (C/E, C/G)."
-            }), content::topic4D()),
-            detail (block ("E", juce::String::fromUTF8 ("Tétrades"), {
-                "Tétrade = tríade + sétima: 7M, 7, m7 e m7♭5.",
-                "A sétima maior (11 semitons) repousa; a menor (10) pede resolução.",
-                "Tétrades dão a cor do jazz, da bossa e da MPB."
-            }), content::topic4E()),
-            detail (block ("F", juce::String::fromUTF8 ("Formação de acordes"), {
-                "Formar acorde = empilhar terças sobre a tônica.",
-                "As notas essenciais são a tônica, a terça e a sétima.",
-                "A cifra dá a tônica e a qualidade; a receita de semitons monta o acorde."
-            }), content::topic4F()),
-            detail (block ("G", juce::String::fromUTF8 ("Sistema 5 (CAGED) e famílias de acordes"), {
-                "O CAGED é um mapa de cinco formas que cobrem o braço.",
-                "Cada forma é um molde: serve para maior, menor, sétima e outras.",
-                "As formas se conectam em ciclo: C → A → G → E → D → C."
-            }), content::topic4G()),
-            detail (block ("H", juce::String::fromUTF8 ("As cinco fases das famílias"), {
-                "Cinco fases: forma → transposição → troca → progressão → criação.",
-                "Cada fase dá a base para a seguinte; respeite a ordem.",
-                "As fases valem para qualquer família (maior, menor, dominante…)."
-            }), content::topic4H()),
-            detail (block ("I", juce::String::fromUTF8 ("Acordes clean e distribuição pelo braço"), {
-                "Clean: sem corda abafada, sem zumbido e sem nota errada.",
-                "Dedo junto ao traste, pressão mínima, cordas certas abafadas.",
-                "Distribuir é escolher a região do braço e a nota do baixo."
-            }), content::topic4I()),
-        };
-
-        // Exercises: at least three per topic, mixing verifiable quizzes and
-        // playable exercises. The app recognises the notes of a chord
-        // (chordPitchClasses) or the distance the instrument produced
-        // (intervalExercise), so any position on the neck is accepted. Ids
-        // follow EX-4.<topico>.<n>, numbered per topic.
-    // Module 5 — Etapa 5: campo harmônico maior e funções harmônicas. The student
-    // builds the harmonic field of a key and identifies the function of each
-    // chord (tonic, subdominant, dominant). Part of the exercises is played on
-    // the instrument: the app recognises the notes and checks the chord, the
-    // scale or the progression (Exercise::targets / chordPitchClasses /
-    // chordProgression). Every topic has >=5 pages (content::minTopicChars),
-    // images, tables, audio examples and scores with their audio.
-    CourseModule makeModule5()
-    {
-        CourseModule m;
-        m.number = 5;
-        m.title = juce::String::fromUTF8 ("Campo harmônico maior e funções harmônicas");
-        m.objective = juce::String::fromUTF8 (
-            "Entender como os acordes se relacionam dentro de uma tonalidade: "
-            "construir o campo harmônico maior e identificar a função de cada acorde.");
-        m.level = 3;          // MUSIC.md: módulos 5–7 = nível 3 (II–V–I)
-        m.targetBpm = 76;     // MUSIC.md, módulo 5
-        m.onGridTarget = 0.79f;
-        m.implemented = true;
-
-        m.lessons = {
-            detail (block ("A", juce::String::fromUTF8 ("Escala maior"), {
-                "A escala maior segue o padrão T – T – S – T – T – T – S.",
-                "Os semitons ficam entre os graus 3–4 e 7–8.",
-                "Cada grau tem um número romano; é a matéria-prima da harmonia."
-            }), content::topic5A()),
-            detail (block ("B", juce::String::fromUTF8 ("Campo harmônico maior e graus da escala"), {
-                "Campo harmônico = sete acordes que nascem da escala maior.",
-                "A qualidade segue o padrão I – ii – iii – IV – V – vi – vii°.",
-                "Em Dó maior: C – Dm – Em – F – G – Am – Bdim."
-            }), content::topic5B()),
-            detail (block ("C", juce::String::fromUTF8 ("Função tônica"), {
-                "Função tônica é o repouso da tonalidade.",
-                "Exercida pelo grau I e pelos substitutos iii e vi.",
-                "Soa estável e conclusiva; é o ponto de chegada da frase."
-            }), content::topic5C()),
-            detail (block ("D", juce::String::fromUTF8 ("Função subdominante"), {
-                "Função subdominante é o afastamento da tônica.",
-                "Exercida pelo grau IV e pelo substituto ii.",
-                "Prepara o dominante, sem a tensão forte dele."
-            }), content::topic5D()),
-            detail (block ("E", juce::String::fromUTF8 ("Função dominante"), {
-                "Função dominante é a tensão da tonalidade.",
-                "Exercida pelo grau V (e V7) e pelo substituto vii°.",
-                "Pede resolução na tônica; V → I é a cadência mais forte."
-            }), content::topic5E()),
-            detail (block ("F", juce::String::fromUTF8 ("Acordes relativos"), {
-                "Relativos: par maior/menor com a mesma armadura de clave.",
-                "O relativo menor está três semitons abaixo do maior.",
-                "No campo: I–vi, IV–ii e V–iii; trocar a cor sem mudar a função."
-            }), content::topic5F()),
-            detail (block ("G", juce::String::fromUTF8 ("Armaduras de clave e tonalidades"), {
-                "Armadura de clave é o conjunto de acidentes que define a tonalidade.",
-                "Sustenidos: Fá–Dó–Sol–Ré–Lá–Mi–Si; bemóis, a ordem inversa.",
-                "O ciclo das quintas organiza todas as tonalidades."
-            }), content::topic5G()),
-            detail (block ("H", juce::String::fromUTF8 ("Cadências e progressões harmônicas"), {
-                "Cadência é a pontuação da frase musical.",
-                "Autêntica (V → I), plagal (IV → I), meia cadência (I → V), de engano (V → vi).",
-                "As progressões comuns combinam as três funções."
-            }), content::topic5H()),
-            detail (block ("I", juce::String::fromUTF8 ("Modos gerados pela escala maior"), {
-                "Modo é a escala maior começando em um grau diferente.",
-                "Jônio, dórico, frígio, lídio, mixolídio, eólio e lócrio.",
-                "As notas são as mesmas; muda o centro e o intervalo característico."
-            }), content::topic5I()),
-            detail (block ("J", juce::String::fromUTF8 ("Harmonização da escala maior"), {
-                "Harmonizar é construir um acorde sobre cada grau da escala.",
-                "O empilhamento 1–3–5 produz as tríades do campo.",
-                "A harmonização é a base do acompanhamento e da transposição."
-            }), content::topic5J()),
-        };
-
-        // Exercises: three per topic, mixing verifiable quizzes with playable
-        // exercises the app checks by recognising the notes. Ids follow
-        // EX-5.<topico>.<n>, numbered per topic, as modules 1 and 2.
-    // Module 6 — Etapa 6: escalas menores e campos harmônicos. It follows the
-    // module-2 pattern: >=5 pages per topic with images, tables, audio and
-    // scores (each score with its own audio), 3..5 exercises per topic mixing
-    // verifiable quizzes and playable exercises the app recognises, and a gate
-    // that closes the module on the grid (REQ-009, REQ-015).
-    CourseModule makeModule6()
-    {
-        CourseModule m;
-        m.number = 6;
-        m.title = juce::String::fromUTF8 ("Escalas menores e campos harmônicos");
-        m.objective = juce::String::fromUTF8 (
-            "Ampliar a compreensão harmônica e melódica para as tonalidades menores: "
-            "as três escalas menores, os seus modos e os campos harmônicos menores.");
-        m.level = 3;          // MUSIC.md: módulos 5–7 = nível 3
-        m.targetBpm = 80;     // MUSIC.md, módulo 6
-    CourseModule makeModule7()
-    {
-        CourseModule m;
-        m.number = 7;
-        m.title = juce::String::fromUTF8 ("Empilhamentos, estruturas modais e sonoridades");
-        m.objective = juce::String::fromUTF8 (
-            "Conhecer estruturas harmônicas além das tríades e tétrades "
-            "convencionais: empilhamentos de terças, quartas e outros, estruturas "
-            "modais, tríades do meio, modos estruturais pelo CAGED e as "
-            "sonoridades modais do dórico ao alterado.");
-        m.level = 3;          // MUSIC.md: módulos 5–7 = nível 3 (II–V–I)
-        m.targetBpm = 84;     // MUSIC.md, módulo 7
-        m.onGridTarget = 0.80f;
-        m.implemented = true;
-
-        m.lessons = {
-            detail (block ("A", juce::String::fromUTF8 ("Escala menor natural"), {
-                "Escala menor natural (eólio): 1 2 b3 4 5 b6 b7.",
-                "É a relativa menor de uma escala maior: mesmas notas, outro repouso.",
-                "A terça menor define o caráter melancólico da escala."
-            }), content::topic6A()),
-            detail (block ("B", juce::String::fromUTF8 ("Escala menor harmônica"), {
-                "Escala menor harmônica: 1 2 b3 4 5 b6 7 — a menor natural com o 7º elevado.",
-                "A sensível (7) cria a cadência V7 → i.",
-                "O intervalo de segunda aumentada (b6 → 7) dá o caráter exótico."
-            }), content::topic6B()),
-            detail (block ("C", juce::String::fromUTF8 ("Modos da menor harmônica"), {
-                "A menor harmônica gera sete modos, um por grau.",
-                "O quinto (frígio dominante) é o mais usado; o primeiro e o quarto vêm em seguida.",
-                "Cada modo combina com um tipo de acorde."
-            }), content::topic6C()),
-            detail (block ("D", juce::String::fromUTF8 ("Escala menor melódica"), {
-                "Escala menor melódica: 1 2 b3 4 5 6 7 — o 6º e o 7º elevados.",
-                "Sobe suave a partir do 5º grau; padrão T-S-T-T-T-T-S.",
-                "É a base das sonoridades modernas do jazz e da bossa."
-            }), content::topic6D()),
-            detail (block ("E", juce::String::fromUTF8 ("Modos da menor melódica"), {
-                "A menor melódica gera sete modos, um por grau.",
-                "O quarto (lídio dominante) e o sétimo (escala alterada) são os mais usados no jazz.",
-                "Cada modo combina com um tipo de acorde."
-            }), content::topic6E()),
-            detail (block ("F", juce::String::fromUTF8 ("Campos harmônicos menores e funções dos acordes"), {
-                "Campo harmônico é o conjunto de acordes que nasce da escala.",
-                "Campo menor natural: i, ii, III, iv, v, VI, VII; harmônico troca o v pelo V7.",
-                "Funções: tônica (i, III), subdominante (ii, iv, VI), dominante (v/V, VII)."
-            }), content::topic6F()),
-            detail (block ("G", juce::String::fromUTF8 ("Subdominantes menores"), {
-                "Subdominante menor: acordes do campo menor paralelo usados no campo maior.",
-                "O iv menor é o mais comum: I → IV → iv → I.",
-                "bVI, bVII e bII (napolitano) são empréstimos modais e cromáticos."
-            }), content::topic6G()),
-            detail (block ("H", juce::String::fromUTF8 ("Relações entre os campos maior e menor"), {
-                "Relativa: mesma armadura, outra tônica (Dó maior ↔ Lá menor).",
-                "Paralela: mesma tônica, outra armadura (Dó maior ↔ Dó menor).",
-                "Tonalidades próximas facilitam a modulação."
-            }), content::topic6H()),
-            detail (block ("I", juce::String::fromUTF8 ("Modos dórico, frígio, lídio, mixolídio e lócrio"), {
-                "Os sete modos gregos são a escala maior vista de sete pontos de partida.",
-                "Jônio (maior), dórico, frígio, lídio, mixolídio, eólio (menor) e lócrio.",
-                "Cada acorde do campo tem um modo que combina com ele."
-            }), content::topic6I()),
-        };
-
-        // Exercises: 3..5 per topic, mixing verifiable quizzes and playable
-        // exercises the app recognises (interval or chord). Ids follow
-        // EX-6.<topico>.<n>, numbered per topic, as modules 1 and 2.
-            detail (block ("A", juce::String::fromUTF8 ("Empilhamentos de terças"), {
-                "Empilhar terças é somar intervalos de terça, um sobre o outro.",
-                "A mistura de terças maiores e menores define a qualidade do acorde.",
-                "As tensões 9, 11 e 13 são os graus 2, 4 e 6 uma oitava acima."
-            }), content::topic7A()),
-            detail (block ("B", juce::String::fromUTF8 ("Empilhamentos quartais"), {
-                "Empilhar quartas justas (5 semitons) produz um som suspenso e modal.",
-                "O acorde de So What empilha quartas com uma terça no topo.",
-                "Sem terça, o acorde não é maior nem menor."
-            }), content::topic7B()),
-            detail (block ("C", juce::String::fromUTF8 ("Outros empilhamentos"), {
-                "Quintas dão força e abertura (power chords).",
-                "Segundas dão tensão (clusters); mistos dão cor sob medida.",
-                "O empilhamento escolhido define a sonoridade do acorde."
-            }), content::topic7C()),
-            detail (block ("D", juce::String::fromUTF8 ("Estruturas modais e tríades do meio"), {
-                "Estruturas modais reforçam um modo sem criar resolução.",
-                "Tríades do meio são tríades sobre graus internos da escala.",
-                "Cada tríade do meio acrescenta tensões ao acorde de base."
-            }), content::topic7D()),
-            detail (block ("E", juce::String::fromUTF8 ("Acordes e famílias modais"), {
-                "Cada acorde carrega uma família de modos possíveis.",
-                "Maiores: jônio e lídio. Menores: dórico, eólio, frígio.",
-                "Dominantes: mixolídio, lídio dominante, alterado, sus."
-            }), content::topic7E()),
-            detail (block ("F", juce::String::fromUTF8 ("Modos estruturais pelo CAGED"), {
-                "O CAGED é um mapa do braço, não só um conjunto de acordes.",
-                "Cada forma contém a escala do tom e os seus modos.",
-                "Os modos são a mesma escala vista de graus diferentes."
-            }), content::topic7F()),
-            detail (block ("G", juce::String::fromUTF8 ("Dórico, Lídio e Mixolídio"), {
-                "Dórico: menor com sexta maior (1 2 b3 4 5 6 b7).",
-                "Lídio: maior com quarta aumentada (1 2 3 #4 5 6 7).",
-                "Mixolídio: maior com sétima menor (1 2 3 4 5 6 b7)."
-            }), content::topic7G()),
-            detail (block ("H", juce::String::fromUTF8 ("Mixolídio sus e Mixolídio #4"), {
-                "Mixolídio sus: 1 2 4 5 6 b7 (sem a terça), combina com X7sus4.",
-                "Mixolídio #4: 1 2 3 #4 5 6 b7, combina com X7#11.",
-                "As duas são variações do dominante, com cores diferentes."
-            }), content::topic7H()),
-            detail (block ("I", juce::String::fromUTF8 ("Lócrio 9 e Alterado (Alt.7)"), {
-                "Lócrio 9: 1 2 b3 4 b5 b6 b7 (meio-diminuto com nona natural).",
-                "Alterado: 1 b9 #9 3 b5 #5 b7 (tensão máxima do dominante).",
-                "As duas aparecem juntas no II–V–I menor."
-            }), content::topic7I()),
-            detail (block ("J", juce::String::fromUTF8 ("Aplicações modais no rock e pop-rock"), {
-                "Vamps de um ou dois acordes são o terreno da harmonia modal.",
-                "Cada modo tem um tipo de vamp e uma cor.",
-                "Do modal se chega à harmonia funcional dos próximos módulos."
-            }), content::topic7J()),
-        };
-
-        // Exercises: 3..5 per topic, ids EX-7.<topico>.<n>, mixing verifiable
-        // quizzes with exercises played on the instrument (the app recognises
-        // the notes). Playable exercises are not grid-gated.
-    // A chord-montage exercise (module 8): the student plays a chord and the app
-    // verifies the pitch classes it heard. Not grid-gated: the goal is the
-    // harmony, not the tempo.
-    Exercise chordExercise (const char* id, const char* title, const char* goal,
-                            std::initializer_list<int> pitchClasses)
-    {
-        auto e = exercise (id, juce::String::fromUTF8 (title), juce::String::fromUTF8 (goal),
-                           juce::String::fromUTF8 (
-                               "O app reconhece as notas tocadas e confere se o acorde tem as notas certas."));
-        e.chordPitchClasses.assign (pitchClasses.begin(), pitchClasses.end());
-        e.usesGrid = false;
-        return e;
-    }
-
-    // A chord-progression exercise (module 8): the student plays the progression
-    // chord by chord; the app matches each chord in order. Grid-gated when the
-    // caller keeps `usesGrid` (the gate closes the module on the metronome).
-    Exercise progressionExercise (const char* id, const char* title, const char* goal,
-                                  std::initializer_list<std::initializer_list<int>> chords)
-    {
-        auto e = exercise (id, juce::String::fromUTF8 (title), juce::String::fromUTF8 (goal),
-                           juce::String::fromUTF8 (
-                               "O app reconhece os acordes na ordem e confere se a progressão está correta."));
-        for (const auto& chord : chords)
-            e.chordProgression.push_back (std::vector<int> (chord.begin(), chord.end()));
-        e.usesGrid = false;
-        return e;
-    }
-
-    // Module 8 (Etapa 8 — dominantes, cadências e substituições harmônicas).
-    // Ten topics (A..J); 3..5 exercises per topic, ids EX-8.<topico>.<n>; the gate
-    // closes the module on the grid with a II-V-I maior (REQ-009).
-    CourseModule makeModule8()
-    {
-        CourseModule m;
-        m.number = 8;
-        m.title = juce::String::fromUTF8 ("Dominantes, cadências e substituições harmônicas");
-        m.objective = juce::String::fromUTF8 (
-            "Compreender como criar tensão, resolução e movimentação harmônica: o "
-            "dominante V7, os dominantes secundários e alterados, o SubV7, o SubIIm, "
-            "os empréstimos modais e a progressão II-V-I maior e menor.");
-        m.level = 4;          // MUSIC.md: módulos 8–10 = nível 4 (turnarounds)
-        m.targetBpm = 88;     // MUSIC.md, módulo 8
-    // Module 9 — Etapa 9: harmonia avançada e estruturas especiais. Same shape
-    // as module 2: nine topics (A..I), each with >=5 pages of explanation,
-    // images and tables; the module demonstrates the structures with audio and
-    // scores (every score carries its audio); 3..5 exercises per topic mixing
-    // quizzes and playable exercises (the app recognises the notes). Level, BPM
-    // and alignment come from MUSIC.md (the placeholder values are reused).
-    CourseModule makeModule9()
-    {
-        CourseModule m;
-        m.number = 9;
-        m.title = juce::String::fromUTF8 ("Harmonia avançada e estruturas especiais");
-        m.objective = juce::String::fromUTF8 (
-            "Explorar possibilidades harmônicas mais elaboradas — acordes diminutos, "
-            "dominantes diminutos, campos e estruturas simétricas — e desenvolver uma "
-            "visão ampla das relações entre acordes.");
-        m.level = 4;          // MUSIC.md: módulo 9 = nível 4
-        m.targetBpm = 92;     // MUSIC.md, módulo 9
-        m.onGridTarget = 0.81f;
-        m.implemented = true;
-
-        m.lessons = {
-            detail (block ("A", juce::String::fromUTF8 ("Dominante V7"), {
-                "O quinto grau com sétima menor (0, 4, 7, 10); o trítono entre a terça e a sétima cria a tensão.",
-                "A resolução V7 → I acontece por meio-tom (voice leading).",
-                "No campo maior, o V7 é o único acorde de sétima dominante natural."
-            }), content::topic8A()),
-            detail (block ("B", juce::String::fromUTF8 ("Dominantes secundários"), {
-                "Qualquer grau pode virar tônica temporária com o seu próprio V7 (V7/x).",
-                "Constrói-se subindo uma quinta justa a partir do alvo.",
-                "A nota estranha ao campo aponta o alvo; podem se encadear em quintas."
-            }), content::topic8B()),
-            detail (block ("C", juce::String::fromUTF8 ("Dominantes alterados e resoluções"), {
-                "Alteram-se quinta e extensões (b5, #5, b9, #9, #11), nunca a terça nem a sétima.",
-                "Cada alteração tem uma direção natural de resolução por meio-tom.",
-                "O acorde alterado (alt) é o dominante de tensão máxima."
-            }), content::topic8C()),
-            detail (block ("D", juce::String::fromUTF8 ("SubV7"), {
-                "O dominante substituto fica meio-tom acima do alvo e resolve no mesmo lugar.",
-                "Compartilha o trítono com o V7; o baixo desce um semitom.",
-                "No II-V-I: Dm7 → Db7 → CM7; pode se encadear cromaticamente."
-            }), content::topic8D()),
-            detail (block ("E", juce::String::fromUTF8 ("SubIIm"), {
-                "O ii vira menor com quinta diminuta (Dm7b5): a cor do campo menor dentro do maior.",
-                "Prepara o dominante com nona menor (b9).",
-                "No II-V-I menor é o acorde natural; com o SubV7 dá a resolução mais suave."
-            }), content::topic8E()),
-            detail (block ("F", juce::String::fromUTF8 ("Empréstimos modais"), {
-                "Pegar acordes do modo paralelo (Dó menor dentro do Dó maior).",
-                "Principais: i, iv, bIII, bVI, bVII; o iv menor e o bVII são os mais usados.",
-                "Empréstimo é passageiro; modulação é permanente."
-            }), content::topic8F()),
-            detail (block ("G", juce::String::fromUTF8 ("Dilatação do campo harmônico maior"), {
-                "O campo de sete acordes se amplia com dominantes secundários, substituições e empréstimos.",
-                "Cada acorde novo exerce uma das três funções básicas.",
-                "O mapa dilatado é a base da reharmonização."
-            }), content::topic8G()),
-            detail (block ("H", juce::String::fromUTF8 ("Dilatação do campo harmônico menor"), {
-                "O campo menor é a união das escalas natural, harmônica e melódica.",
-                "A harmônica cria o V7 (dominante); a melódica acrescenta acordes de cor.",
-                "A cadência fundamental é o II-V-I menor: Dm7b5 → G7 → Cm7."
-            }), content::topic8H()),
-            detail (block ("I", juce::String::fromUTF8 ("Progressão II-V-I maior e menor"), {
-                "Reúne as três funções: subdominante (II), dominante (V) e tônica (I).",
-                "Maior: Dm7 → G7 → CM7; menor: Dm7b5 → G7 → Cm7.",
-                "O voice leading conduz as vozes por meio-tom; as notas-guia guiam a cadência."
-            }), content::topic8I()),
-            detail (block ("J", juce::String::fromUTF8 ("Identificação de situações que não são II-V-I"), {
-                "Cadência deceptiva resolve no vi; backdoor usa ivm e bVII, sem o V.",
-                "Vamp modal nunca resolve; meia cadência para no V.",
-                "Pergunte sempre: qual é o alvo e como ele é alcançado?"
-            }), content::topic8J()),
-            detail (block ("A", juce::String::fromUTF8 ("Acordes diminutos e suas funções"), {
-                "O diminuto é um empilhamento de terças menores (0-3-6; dim7 = 0-3-6-9).",
-                "É simétrico: só existem três dim7 diferentes.",
-                "Funções: sensível, ii grau menor, passagem e substituto de dominante."
-            }), content::topic9A()),
-            detail (block ("B", juce::String::fromUTF8 ("Dominantes diminutos (DomDim)"), {
-                "O DomDim é o dominante com nona bemol (e outras tensões).",
-                "Nasce da escala diminuta meio-tom / tom.",
-                "Sem a fundamental, o dominante com nona bemol vira um dim7."
-            }), content::topic9B()),
-            detail (block ("C", juce::String::fromUTF8 ("Ciclos diminutos"), {
-                "O ciclo das terças menores percorre quatro notas e volta ao início.",
-                "Existem apenas três dim7 diferentes no total.",
-                "O ciclo é um mapa de modulação e um recurso de improvisação."
-            }), content::topic9C()),
-            detail (block ("D", juce::String::fromUTF8 ("Campos harmônicos diminutos"), {
-                "As escalas diminutas geram dois campos: tom-meio-tom e meio-tom-tom.",
-                "O campo do DomDim é o da escala meio-tom / tom.",
-                "O campo diminuto se cruza com o campo maior pelo vii grau."
-            }), content::topic9D()),
-            detail (block ("E", juce::String::fromUTF8 ("Acorde m7(#5)"), {
-                "m7(#5) = tônica, terça menor, quinta aumentada e sétima menor.",
-                "Difere do m7 apenas na quinta, mas a cor muda por completo.",
-                "Tem leitura enarmônica: é uma inversão de acorde maior com nona."
-            }), content::topic9E()),
-            detail (block ("F", juce::String::fromUTF8 ("Policordes"), {
-                "Policorde = dois acordes empilhados; o baixo define a harmonia.",
-                "Diferente do slash chord, o baixo é um acorde completo.",
-                "Na guitarra, as camadas se separam por registro."
-            }), content::topic9F()),
-            detail (block ("G", juce::String::fromUTF8 ("Simetria e escalas simétricas"), {
-                "Escala simétrica divide a oitava em partes iguais.",
-                "Tons inteiros: seis notas, duas formas; diminuta: oito notas, três formas.",
-                "Na guitarra, a mesma digitação se desloca pelo braço."
-            }), content::topic9G()),
-            detail (block ("H", juce::String::fromUTF8 ("Relações entre campos harmônicos"), {
-                "Campos vizinhos compartilham seis das sete notas.",
-                "O acorde pivô pertence aos dois campos e prepara a passagem.",
-                "O dominante secundário e o diminuto ligam campos distantes."
-            }), content::topic9H()),
-            detail (block ("I", juce::String::fromUTF8 ("Sonoridades especiais"), {
-                "Quartal, cluster, add9/6-9, inversões e estruturas superiores.",
-                "Cada sonoridade tem um uso: cor, tensão, movimento ou repouso.",
-                "Todas funcionam melhor em contraste com momentos simples."
-            }), content::topic9I()),
-        };
-
-    // Module 10 — Etapa 10: análise harmônica, verticalização e reharmonização.
-    // The student learns to analyse a song (degree, function, scale) and then to
-    // find new ways to harmonise it (substitution, modal borrowing, target
-    // harmony). The explanation carries images, tables, audio examples and
-    // scores with their audio; every topic has >=5 pages (content::minTopicChars)
-    // and part of the exercises is played on the instrument and verified by the
-    // app (chord pitch classes / interval recognition).
-    CourseModule makeModule10()
-    {
-        CourseModule m;
-        m.number = 10;
-        m.title = juce::String::fromUTF8 ("Análise harmônica, verticalização e reharmonização");
-        m.objective = juce::String::fromUTF8 (
-            "Aprender a analisar músicas e descobrir diferentes caminhos para "
-            "modificar suas harmonias — do grau e da função de cada acorde até a "
-            "verticalização e a reharmonização, sempre respeitando a melodia.");
-        m.level = 4;          // MUSIC.md: módulos 8–10 = nível 4
-        m.targetBpm = 96;     // MUSIC.md, módulo 10
-        m.onGridTarget = 0.82f;
-        m.implemented = true;
-
-        m.lessons = {
-            detail (block ("A", juce::String::fromUTF8 ("Análise harmônica"), {
-                "Analisar é responder grau, função e escala para cada acorde.",
-                "O grau vem da escala; a função é tônica, subdominante ou dominante.",
-                "A análise é o mapa que sustenta toda a reharmonização."
-            }), content::topic10A()),
-            detail (block ("B", juce::String::fromUTF8 ("Análise melódica"), {
-                "Cada nota da melodia é repouso (nota do acorde) ou tensão.",
-                "A tensão precisa resolver; no tempo forte, prefira o repouso.",
-                "Converter a melodia em graus revela o desenho da frase."
-            }), content::topic10B()),
-            detail (block ("C", juce::String::fromUTF8 ("Escolha modal"), {
-                "O modo vem do acorde, não da escala da música.",
-                "Cada modo se distingue pela nota característica.",
-                "Escolher o modo é escolher a cor e as tensões."
-            }), content::topic10C()),
-            detail (block ("D", juce::String::fromUTF8 ("Verticalização"), {
-                "Verticalizar é construir acordes a partir das notas da melodia.",
-                "Empilhar terças a partir da nota é o caminho mais direto.",
-                "A melodia deve ser a voz de cima do acorde verticalizado."
-            }), content::topic10D()),
-            detail (block ("E", juce::String::fromUTF8 ("Conexão entre campos harmônicos"), {
-                "Conectar campos é passar de uma tonalidade a outra sem ruptura.",
-                "O acorde-pivo é a dobradiça entre os dois campos.",
-                "A modulação se prepara com o dominante ou o ii–V do novo tom."
-            }), content::topic10E()),
-            detail (block ("F", juce::String::fromUTF8 ("Estudo das vozes internas"), {
-                "Cada nota do acorde é uma voz; conduza cada linha pelo menor movimento.",
-                "Notas comuns ficam paradas; sem nota comum, move-se um grau.",
-                "Na guitarra, acordes de poucas notas facilitam a condução."
-            }), content::topic10F()),
-            detail (block ("G", juce::String::fromUTF8 ("Reharmonização"), {
-                "Reharmonizar é trocar a harmonia mantendo a melodia.",
-                "A melodia manda: as notas fortes precisam caber nos novos acordes.",
-                "Substituição, empréstimo modal e acordes de passagem são as técnicas básicas."
-            }), content::topic10G()),
-            detail (block ("H", juce::String::fromUTF8 ("Harmonia-alvo"), {
-                "Defina o alvo (a chegada) e construa a harmonia de trás para frente.",
-                "O alvo é o acorde de repouso, revelado muitas vezes pela melodia.",
-                "As aproximações (ii–V, subV, cromática) dão cores diferentes à chegada."
-            }), content::topic10H()),
-            detail (block ("I", juce::String::fromUTF8 ("Ferramentas de reharmonização"), {
-                "Reharmonizar é aplicar um conjunto pequeno de ferramentas conhecidas.",
-                "SubV, dominante secundário, empréstimo modal, passagem e verticalização.",
-                "Escolha a ferramenta pelo efeito que você quer."
-            }), content::topic10I()),
-            detail (block ("J", juce::String::fromUTF8 ("Relação entre estilos e sonoridades"), {
-                "A análise é a mesma em todos os estilos; a sonoridade é que muda.",
-                "Bossa: densidade. Jazz: substituições. Blues: dominantes. Rock: tríades.",
-                "Cada estilo tem convenções próprias de reharmonização."
-            }), content::topic10J()),
-        };
-
-        // Exercises: 3..5 per topic, mixing verifiable quizzes and playable
-        // exercises (the app recognises the notes). Ids follow EX-10.<topico>.<n>.
         auto add = [&m] (Exercise e, const char* topic)
         {
             e.lessonId = topic;
@@ -2087,6 +1566,129 @@ namespace
             { 0, 4, 7 },    // C
             { 7, 11, 2 },   // G
             { 0, 4, 7 },    // C
+            { 7, 11, 2 },   // G
+        };
+
+        m.gateChallenge = juce::String::fromUTF8 (
+            "Tocar C – G (vamp de 2 acordes, nível 2) a 68 BPM com ≥90% de acerto "
+            "de acordes e on_grid_ratio ≥ 0,77. Os acordes são tocados na levada "
+            "estudada no módulo, mantendo o pulso firme.");
+
+        // Pattern and link the module must cite (REQ-007, REQ-010).
+        m.practice.patternId = "PTN-R-PALM";
+        m.practice.patternUse = juce::String::fromUTF8 (
+            "Pedal point abafado + power chords: a base rítmica do módulo, com "
+            "palm mute e palhetada alternada. Complemento: PTN-R-BOSSA (polegar "
+            "nos tempos, dedos nas síncopes) para a levada de dedos.");
+        m.practice.guitarists = { "Kiko Loureiro", "Juninho Afram", "John Petrucci" };
+
+        // Counting cells for the metronome (REQ-015); syllables from the
+        // rhythmic reading chapter of the curated apostila (MUSIC.md, block I).
+        m.rhythm = {
+            { juce::String::fromUTF8 ("Semínima"), juce::String::fromUTF8 ("1 tempo (1/4)"),
+              juce::String::fromUTF8 ("TÁ") },
+            { juce::String::fromUTF8 ("Colcheias"), juce::String::fromUTF8 ("2 por tempo (2/8)"),
+              juce::String::fromUTF8 ("TÁ-KI") },
+            { juce::String::fromUTF8 ("Semicolcheias"), juce::String::fromUTF8 ("4 por tempo (4/16)"),
+              juce::String::fromUTF8 ("TA-KI-TA-KI") },
+            { juce::String::fromUTF8 ("Tercinas"), juce::String::fromUTF8 ("3 por tempo (ternário)"),
+              juce::String::fromUTF8 ("TÁ-KI-TA") },
+        };
+
+        // Curated apostilas (REQ-006, CM-012); see docs/MUSIC.md. The rhythm
+        // chapter of fraseado-melodico, the metric chapter of Bohumil Med and
+        // the studies of Mozart Mello back the module.
+        m.sources = {
+            "pdf-fraseado-melodico",
+            "pdf-p-classtruncatedtext-module-lineclamped-85ulhh-style-max-lines5bohumil-med-teoria-da-musica-5-edicao-p",
+            "pdf-mozart-mello-livroestudosdeguitarra4em1",
+            "pdf-teoria-elementar-da-musica-ricordi-osvaldo-lacerda",
+        };
+
+        return m;
+    }
+
+
+    // Module 4 — Etapa 4: construção de acordes (tríades e tétrades). Following
+    // module 2's pattern: part of the exercises is played on the instrument and
+    // the app recognises the notes (Exercise::chordPitchClasses / Exercise::interval),
+    // so any position on the neck is accepted. Every topic carries images,
+    // tables, audio examples and scores with their audio, and >=5 pages
+    // (content::minTopicChars).
+    CourseModule makeModule4()
+    {
+        CourseModule m;
+        m.number = 4;
+        m.title = juce::String::fromUTF8 ("Construção de acordes: tríades e tétrades");
+        m.objective = juce::String::fromUTF8 (
+            "Compreender a formação dos acordes e suas diferentes possibilidades de "
+            "execução — construindo tríades e tétrades, identificando as notas e "
+            "executando inversões e posições.");
+        m.level = 2;          // MUSIC.md: módulos 3–4 = nível 2 (vamps de 2 acordes)
+        m.targetBpm = 72;     // MUSIC.md, módulo 4
+        m.onGridTarget = 0.78f;
+        m.implemented = true;
+
+        m.lessons = {
+            detail (block ("A", juce::String::fromUTF8 ("Tríades maiores e menores"), {
+                "Tríade é um acorde de três notas: tônica, terça e quinta.",
+                "Maior = 0–4–7; menor = 0–3–7; a diferença está na terça.",
+                "A receita vale em qualquer tônica e posição do braço."
+            }), content::topic4A()),
+            detail (block ("B", juce::String::fromUTF8 ("Tríades aumentadas e diminutas"), {
+                "Aumentada = 0–4–8 (quinta aumentada); diminuta = 0–3–6 (quinta diminuta).",
+                "São sons de tensão: a aumentada flutua, a diminuta pede resolução.",
+                "Na cifra: '+' ou 'aug' para aumentada, 'dim' ou '°' para diminuta."
+            }), content::topic4B()),
+            detail (block ("C", juce::String::fromUTF8 ("Tríades abertas e fechadas"), {
+                "Disposição é a ordem e o espaçamento das notas do acorde.",
+                "Fechada: notas próximas, som compacto; aberta: espalhadas, som amplo.",
+                "As notas não mudam; só a distribuição muda."
+            }), content::topic4C()),
+            detail (block ("D", juce::String::fromUTF8 ("Inversões"), {
+                "Inverter é mudar a nota do baixo, mantendo as mesmas notas.",
+                "Fundamental: tônica no baixo; 1ª inversão: terça; 2ª inversão: quinta.",
+                "Na cifra, a inversão vem depois da barra (C/E, C/G)."
+            }), content::topic4D()),
+            detail (block ("E", juce::String::fromUTF8 ("Tétrades"), {
+                "Tétrade = tríade + sétima: 7M, 7, m7 e m7♭5.",
+                "A sétima maior (11 semitons) repousa; a menor (10) pede resolução.",
+                "Tétrades dão a cor do jazz, da bossa e da MPB."
+            }), content::topic4E()),
+            detail (block ("F", juce::String::fromUTF8 ("Formação de acordes"), {
+                "Formar acorde = empilhar terças sobre a tônica.",
+                "As notas essenciais são a tônica, a terça e a sétima.",
+                "A cifra dá a tônica e a qualidade; a receita de semitons monta o acorde."
+            }), content::topic4F()),
+            detail (block ("G", juce::String::fromUTF8 ("Sistema 5 (CAGED) e famílias de acordes"), {
+                "O CAGED é um mapa de cinco formas que cobrem o braço.",
+                "Cada forma é um molde: serve para maior, menor, sétima e outras.",
+                "As formas se conectam em ciclo: C → A → G → E → D → C."
+            }), content::topic4G()),
+            detail (block ("H", juce::String::fromUTF8 ("As cinco fases das famílias"), {
+                "Cinco fases: forma → transposição → troca → progressão → criação.",
+                "Cada fase dá a base para a seguinte; respeite a ordem.",
+                "As fases valem para qualquer família (maior, menor, dominante…)."
+            }), content::topic4H()),
+            detail (block ("I", juce::String::fromUTF8 ("Acordes clean e distribuição pelo braço"), {
+                "Clean: sem corda abafada, sem zumbido e sem nota errada.",
+                "Dedo junto ao traste, pressão mínima, cordas certas abafadas.",
+                "Distribuir é escolher a região do braço e a nota do baixo."
+            }), content::topic4I()),
+        };
+
+        // Exercises: at least three per topic, mixing verifiable quizzes and
+        // playable exercises. The app recognises the notes of a chord
+        // (chordPitchClasses) or the distance the instrument produced
+        // (intervalExercise), so any position on the neck is accepted. Ids
+        // follow EX-4.<topico>.<n>, numbered per topic.
+        auto add = [&m] (Exercise e, const char* topic)
+        {
+            e.lessonId = topic;
+            m.exercises.push_back (std::move (e));
+            return (int) m.exercises.size() - 1;
+        };
+
         // --- Topic A — tríades maiores e menores -----------------------------
         add (exercise ("EX-4.A.1", juce::String::fromUTF8 ("Questionário: tríades"),
                        juce::String::fromUTF8 ("Responder ao questionário de formação das tríades."),
@@ -2439,43 +2041,115 @@ namespace
         };
 
         m.gateChallenge = juce::String::fromUTF8 (
-            "Tocar C – G (vamp de 2 acordes, nível 2) a 68 BPM com ≥90% de acerto "
-            "de acordes e on_grid_ratio ≥ 0,77. Os acordes são tocados na levada "
-            "estudada no módulo, mantendo o pulso firme.");
-
-        // Pattern and link the module must cite (REQ-007, REQ-010).
-        m.practice.patternId = "PTN-R-PALM";
-        m.practice.patternUse = juce::String::fromUTF8 (
-            "Pedal point abafado + power chords: a base rítmica do módulo, com "
-            "palm mute e palhetada alternada. Complemento: PTN-R-BOSSA (polegar "
-            "nos tempos, dedos nas síncopes) para a levada de dedos.");
-        m.practice.guitarists = { "Kiko Loureiro", "Juninho Afram", "John Petrucci" };
-
-        // Counting cells for the metronome (REQ-015); syllables from the
-        // rhythmic reading chapter of the curated apostila (MUSIC.md, block I).
-        m.rhythm = {
-            { juce::String::fromUTF8 ("Semínima"), juce::String::fromUTF8 ("1 tempo (1/4)"),
-              juce::String::fromUTF8 ("TÁ") },
-            { juce::String::fromUTF8 ("Colcheias"), juce::String::fromUTF8 ("2 por tempo (2/8)"),
-              juce::String::fromUTF8 ("TÁ-KI") },
-            { juce::String::fromUTF8 ("Semicolcheias"), juce::String::fromUTF8 ("4 por tempo (4/16)"),
-              juce::String::fromUTF8 ("TA-KI-TA-KI") },
-            { juce::String::fromUTF8 ("Tercinas"), juce::String::fromUTF8 ("3 por tempo (ternário)"),
-              juce::String::fromUTF8 ("TÁ-KI-TA") },
-        };
-
-        // Curated apostilas (REQ-006, CM-012); see docs/MUSIC.md. The rhythm
-        // chapter of fraseado-melodico, the metric chapter of Bohumil Med and
-        // the studies of Mozart Mello back the module.
-        m.sources = {
-            "pdf-fraseado-melodico",
-            "pdf-p-classtruncatedtext-module-lineclamped-85ulhh-style-max-lines5bohumil-med-teoria-da-musica-5-edicao-p",
-            "pdf-mozart-mello-livroestudosdeguitarra4em1",
-            "pdf-teoria-elementar-da-musica-ricordi-osvaldo-lacerda",
             "Tocar C – Am – F – G (quatro acordes; o modelo de improvisação do "
             "nível 2 é o 'vamp de 2 acordes') a 72 BPM com ≥90% de acerto de "
             "acordes e on_grid_ratio ≥ 0,78. Os acordes são tríades construídas "
             "pelos intervalos estudados no módulo.");
+
+        // Pattern and link the module must cite (REQ-007, REQ-010).
+        m.practice.patternId = "PTN-A-TRIAD";
+        m.practice.patternUse = juce::String::fromUTF8 (
+            "Arpejos de tríades em três cordas (varredura e retorno): o aluno ouve "
+            "as três notas do acorde em sequência, ligando a forma à construção. "
+            "Complemento: PTN-A-DROP2 (arpejos de sétima em Drop 2) para as tétrades.");
+        m.practice.guitarists = { "Eric Johnson", "John Petrucci", "Andy Timmons" };
+
+        // Curated apostilas (REQ-006, CM-012); see docs/MUSIC.md §1.1.
+        m.sources = {
+            "pdf-caged-e-derivaoes-de-acordes-marcelo-mello-apostila-de-violao-e-guitarra-vol1",
+            "pdf-desvendando-os-segredos-da-guitarra-fusion",
+            "pdf-teoria-elementar-da-musica-ricordi-osvaldo-lacerda",
+            "pdf-p-classtruncatedtext-module-lineclamped-85ulhh-style-max-lines5bohumil-med-teoria-da-musica-5-edicao-p",
+            "pdf-mozart-mello-livroestudosdeguitarra4em1",
+        };
+
+        return m;
+    }
+
+
+    // Module 5 — Etapa 5: campo harmônico maior e funções harmônicas. The student
+    // builds the harmonic field of a key and identifies the function of each
+    // chord (tonic, subdominant, dominant). Part of the exercises is played on
+    // the instrument: the app recognises the notes and checks the chord, the
+    // scale or the progression (Exercise::targets / chordPitchClasses /
+    // chordProgression). Every topic has >=5 pages (content::minTopicChars),
+    // images, tables, audio examples and scores with their audio.
+    CourseModule makeModule5()
+    {
+        CourseModule m;
+        m.number = 5;
+        m.title = juce::String::fromUTF8 ("Campo harmônico maior e funções harmônicas");
+        m.objective = juce::String::fromUTF8 (
+            "Entender como os acordes se relacionam dentro de uma tonalidade: "
+            "construir o campo harmônico maior e identificar a função de cada acorde.");
+        m.level = 3;          // MUSIC.md: módulos 5–7 = nível 3 (II–V–I)
+        m.targetBpm = 76;     // MUSIC.md, módulo 5
+        m.onGridTarget = 0.79f;
+        m.implemented = true;
+
+        m.lessons = {
+            detail (block ("A", juce::String::fromUTF8 ("Escala maior"), {
+                "A escala maior segue o padrão T – T – S – T – T – T – S.",
+                "Os semitons ficam entre os graus 3–4 e 7–8.",
+                "Cada grau tem um número romano; é a matéria-prima da harmonia."
+            }), content::topic5A()),
+            detail (block ("B", juce::String::fromUTF8 ("Campo harmônico maior e graus da escala"), {
+                "Campo harmônico = sete acordes que nascem da escala maior.",
+                "A qualidade segue o padrão I – ii – iii – IV – V – vi – vii°.",
+                "Em Dó maior: C – Dm – Em – F – G – Am – Bdim."
+            }), content::topic5B()),
+            detail (block ("C", juce::String::fromUTF8 ("Função tônica"), {
+                "Função tônica é o repouso da tonalidade.",
+                "Exercida pelo grau I e pelos substitutos iii e vi.",
+                "Soa estável e conclusiva; é o ponto de chegada da frase."
+            }), content::topic5C()),
+            detail (block ("D", juce::String::fromUTF8 ("Função subdominante"), {
+                "Função subdominante é o afastamento da tônica.",
+                "Exercida pelo grau IV e pelo substituto ii.",
+                "Prepara o dominante, sem a tensão forte dele."
+            }), content::topic5D()),
+            detail (block ("E", juce::String::fromUTF8 ("Função dominante"), {
+                "Função dominante é a tensão da tonalidade.",
+                "Exercida pelo grau V (e V7) e pelo substituto vii°.",
+                "Pede resolução na tônica; V → I é a cadência mais forte."
+            }), content::topic5E()),
+            detail (block ("F", juce::String::fromUTF8 ("Acordes relativos"), {
+                "Relativos: par maior/menor com a mesma armadura de clave.",
+                "O relativo menor está três semitons abaixo do maior.",
+                "No campo: I–vi, IV–ii e V–iii; trocar a cor sem mudar a função."
+            }), content::topic5F()),
+            detail (block ("G", juce::String::fromUTF8 ("Armaduras de clave e tonalidades"), {
+                "Armadura de clave é o conjunto de acidentes que define a tonalidade.",
+                "Sustenidos: Fá–Dó–Sol–Ré–Lá–Mi–Si; bemóis, a ordem inversa.",
+                "O ciclo das quintas organiza todas as tonalidades."
+            }), content::topic5G()),
+            detail (block ("H", juce::String::fromUTF8 ("Cadências e progressões harmônicas"), {
+                "Cadência é a pontuação da frase musical.",
+                "Autêntica (V → I), plagal (IV → I), meia cadência (I → V), de engano (V → vi).",
+                "As progressões comuns combinam as três funções."
+            }), content::topic5H()),
+            detail (block ("I", juce::String::fromUTF8 ("Modos gerados pela escala maior"), {
+                "Modo é a escala maior começando em um grau diferente.",
+                "Jônio, dórico, frígio, lídio, mixolídio, eólio e lócrio.",
+                "As notas são as mesmas; muda o centro e o intervalo característico."
+            }), content::topic5I()),
+            detail (block ("J", juce::String::fromUTF8 ("Harmonização da escala maior"), {
+                "Harmonizar é construir um acorde sobre cada grau da escala.",
+                "O empilhamento 1–3–5 produz as tríades do campo.",
+                "A harmonização é a base do acompanhamento e da transposição."
+            }), content::topic5J()),
+        };
+
+        // Exercises: three per topic, mixing verifiable quizzes with playable
+        // exercises the app checks by recognising the notes. Ids follow
+        // EX-5.<topico>.<n>, numbered per topic, as modules 1 and 2.
+        auto add = [&m] (Exercise e, const char* topic)
+        {
+            e.lessonId = topic;
+            m.exercises.push_back (std::move (e));
+            return (int) m.exercises.size() - 1;
+        };
+
         // Plays a chord whose pitch classes the evaluator checks (the student may
         // use any shape/position on the neck). Identification, not tempo: no grid.
         auto chordExercise = [&add] (const char* id, const char* title, const char* goal,
@@ -2875,18 +2549,6 @@ namespace
         // Pattern and link the module must cite (REQ-007, REQ-010).
         m.practice.patternId = "PTN-A-TRIAD";
         m.practice.patternUse = juce::String::fromUTF8 (
-            "Arpejos de tríades em três cordas (varredura e retorno): o aluno ouve "
-            "as três notas do acorde em sequência, ligando a forma à construção. "
-            "Complemento: PTN-A-DROP2 (arpejos de sétima em Drop 2) para as tétrades.");
-        m.practice.guitarists = { "Eric Johnson", "John Petrucci", "Andy Timmons" };
-
-        // Curated apostilas (REQ-006, CM-012); see docs/MUSIC.md §1.1.
-        m.sources = {
-            "pdf-caged-e-derivaoes-de-acordes-marcelo-mello-apostila-de-violao-e-guitarra-vol1",
-            "pdf-desvendando-os-segredos-da-guitarra-fusion",
-            "pdf-teoria-elementar-da-musica-ricordi-osvaldo-lacerda",
-            "pdf-p-classtruncatedtext-module-lineclamped-85ulhh-style-max-lines5bohumil-med-teoria-da-musica-5-edicao-p",
-            "pdf-mozart-mello-livroestudosdeguitarra4em1",
             "Arpejos de tríade: o padrão PTN-A-TRIAD varre as três notas do acorde "
             "(1–3–5) e faz o aluno ouvir, na mão, as notas que formam cada grau do "
             "campo harmônico. Complemento: PTN-M-3rds (terças) mostra como os "
@@ -2899,6 +2561,88 @@ namespace
             "pdf-teoria-elementar-da-musica-ricordi-osvaldo-lacerda",
             "pdf-p-classtruncatedtext-module-lineclamped-85ulhh-style-max-lines5bohumil-med-teoria-da-musica-5-edicao-p",
             "pdf-caged-e-derivaoes-de-acordes-marcelo-mello-apostila-de-violao-e-guitarra-vol1",
+        };
+
+        return m;
+    }
+
+
+    // Module 6 — Etapa 6: escalas menores e campos harmônicos. It follows the
+    // module-2 pattern: >=5 pages per topic with images, tables, audio and
+    // scores (each score with its own audio), 3..5 exercises per topic mixing
+    // verifiable quizzes and playable exercises the app recognises, and a gate
+    // that closes the module on the grid (REQ-009, REQ-015).
+    CourseModule makeModule6()
+    {
+        CourseModule m;
+        m.number = 6;
+        m.title = juce::String::fromUTF8 ("Escalas menores e campos harmônicos");
+        m.objective = juce::String::fromUTF8 (
+            "Ampliar a compreensão harmônica e melódica para as tonalidades menores: "
+            "as três escalas menores, os seus modos e os campos harmônicos menores.");
+        m.level = 3;          // MUSIC.md: módulos 5–7 = nível 3
+        m.targetBpm = 80;     // MUSIC.md, módulo 6
+        m.onGridTarget = 0.80f;
+        m.implemented = true;
+
+        m.lessons = {
+            detail (block ("A", juce::String::fromUTF8 ("Escala menor natural"), {
+                "Escala menor natural (eólio): 1 2 b3 4 5 b6 b7.",
+                "É a relativa menor de uma escala maior: mesmas notas, outro repouso.",
+                "A terça menor define o caráter melancólico da escala."
+            }), content::topic6A()),
+            detail (block ("B", juce::String::fromUTF8 ("Escala menor harmônica"), {
+                "Escala menor harmônica: 1 2 b3 4 5 b6 7 — a menor natural com o 7º elevado.",
+                "A sensível (7) cria a cadência V7 → i.",
+                "O intervalo de segunda aumentada (b6 → 7) dá o caráter exótico."
+            }), content::topic6B()),
+            detail (block ("C", juce::String::fromUTF8 ("Modos da menor harmônica"), {
+                "A menor harmônica gera sete modos, um por grau.",
+                "O quinto (frígio dominante) é o mais usado; o primeiro e o quarto vêm em seguida.",
+                "Cada modo combina com um tipo de acorde."
+            }), content::topic6C()),
+            detail (block ("D", juce::String::fromUTF8 ("Escala menor melódica"), {
+                "Escala menor melódica: 1 2 b3 4 5 6 7 — o 6º e o 7º elevados.",
+                "Sobe suave a partir do 5º grau; padrão T-S-T-T-T-T-S.",
+                "É a base das sonoridades modernas do jazz e da bossa."
+            }), content::topic6D()),
+            detail (block ("E", juce::String::fromUTF8 ("Modos da menor melódica"), {
+                "A menor melódica gera sete modos, um por grau.",
+                "O quarto (lídio dominante) e o sétimo (escala alterada) são os mais usados no jazz.",
+                "Cada modo combina com um tipo de acorde."
+            }), content::topic6E()),
+            detail (block ("F", juce::String::fromUTF8 ("Campos harmônicos menores e funções dos acordes"), {
+                "Campo harmônico é o conjunto de acordes que nasce da escala.",
+                "Campo menor natural: i, ii, III, iv, v, VI, VII; harmônico troca o v pelo V7.",
+                "Funções: tônica (i, III), subdominante (ii, iv, VI), dominante (v/V, VII)."
+            }), content::topic6F()),
+            detail (block ("G", juce::String::fromUTF8 ("Subdominantes menores"), {
+                "Subdominante menor: acordes do campo menor paralelo usados no campo maior.",
+                "O iv menor é o mais comum: I → IV → iv → I.",
+                "bVI, bVII e bII (napolitano) são empréstimos modais e cromáticos."
+            }), content::topic6G()),
+            detail (block ("H", juce::String::fromUTF8 ("Relações entre os campos maior e menor"), {
+                "Relativa: mesma armadura, outra tônica (Dó maior ↔ Lá menor).",
+                "Paralela: mesma tônica, outra armadura (Dó maior ↔ Dó menor).",
+                "Tonalidades próximas facilitam a modulação."
+            }), content::topic6H()),
+            detail (block ("I", juce::String::fromUTF8 ("Modos dórico, frígio, lídio, mixolídio e lócrio"), {
+                "Os sete modos gregos são a escala maior vista de sete pontos de partida.",
+                "Jônio (maior), dórico, frígio, lídio, mixolídio, eólio (menor) e lócrio.",
+                "Cada acorde do campo tem um modo que combina com ele."
+            }), content::topic6I()),
+        };
+
+        // Exercises: 3..5 per topic, mixing verifiable quizzes and playable
+        // exercises the app recognises (interval or chord). Ids follow
+        // EX-6.<topico>.<n>, numbered per topic, as modules 1 and 2.
+        auto add = [&m] (Exercise e, const char* topic)
+        {
+            e.lessonId = topic;
+            m.exercises.push_back (std::move (e));
+            return (int) m.exercises.size() - 1;
+        };
+
         // --- Topic A — escala menor natural ----------------------------------
         add (exercise ("EX-6.A.1", juce::String::fromUTF8 ("Questionário: escala menor natural"),
                        juce::String::fromUTF8 ("Responder ao questionário da escala menor natural."),
@@ -3262,6 +3006,90 @@ namespace
             "pdf-caged-e-derivaoes-de-acordes-marcelo-mello-apostila-de-violao-e-guitarra-vol1",
             "pdf-mozart-mello-livroestudosdeguitarra4em1",
             "pdf-desvendando-os-segredos-da-guitarra-fusion",
+        };
+
+        return m;
+    }
+
+
+    CourseModule makeModule7()
+    {
+        CourseModule m;
+        m.number = 7;
+        m.title = juce::String::fromUTF8 ("Empilhamentos, estruturas modais e sonoridades");
+        m.objective = juce::String::fromUTF8 (
+            "Conhecer estruturas harmônicas além das tríades e tétrades "
+            "convencionais: empilhamentos de terças, quartas e outros, estruturas "
+            "modais, tríades do meio, modos estruturais pelo CAGED e as "
+            "sonoridades modais do dórico ao alterado.");
+        m.level = 3;          // MUSIC.md: módulos 5–7 = nível 3 (II–V–I)
+        m.targetBpm = 84;     // MUSIC.md, módulo 7
+        m.onGridTarget = 0.80f;
+        m.implemented = true;
+
+        m.lessons = {
+            detail (block ("A", juce::String::fromUTF8 ("Empilhamentos de terças"), {
+                "Empilhar terças é somar intervalos de terça, um sobre o outro.",
+                "A mistura de terças maiores e menores define a qualidade do acorde.",
+                "As tensões 9, 11 e 13 são os graus 2, 4 e 6 uma oitava acima."
+            }), content::topic7A()),
+            detail (block ("B", juce::String::fromUTF8 ("Empilhamentos quartais"), {
+                "Empilhar quartas justas (5 semitons) produz um som suspenso e modal.",
+                "O acorde de So What empilha quartas com uma terça no topo.",
+                "Sem terça, o acorde não é maior nem menor."
+            }), content::topic7B()),
+            detail (block ("C", juce::String::fromUTF8 ("Outros empilhamentos"), {
+                "Quintas dão força e abertura (power chords).",
+                "Segundas dão tensão (clusters); mistos dão cor sob medida.",
+                "O empilhamento escolhido define a sonoridade do acorde."
+            }), content::topic7C()),
+            detail (block ("D", juce::String::fromUTF8 ("Estruturas modais e tríades do meio"), {
+                "Estruturas modais reforçam um modo sem criar resolução.",
+                "Tríades do meio são tríades sobre graus internos da escala.",
+                "Cada tríade do meio acrescenta tensões ao acorde de base."
+            }), content::topic7D()),
+            detail (block ("E", juce::String::fromUTF8 ("Acordes e famílias modais"), {
+                "Cada acorde carrega uma família de modos possíveis.",
+                "Maiores: jônio e lídio. Menores: dórico, eólio, frígio.",
+                "Dominantes: mixolídio, lídio dominante, alterado, sus."
+            }), content::topic7E()),
+            detail (block ("F", juce::String::fromUTF8 ("Modos estruturais pelo CAGED"), {
+                "O CAGED é um mapa do braço, não só um conjunto de acordes.",
+                "Cada forma contém a escala do tom e os seus modos.",
+                "Os modos são a mesma escala vista de graus diferentes."
+            }), content::topic7F()),
+            detail (block ("G", juce::String::fromUTF8 ("Dórico, Lídio e Mixolídio"), {
+                "Dórico: menor com sexta maior (1 2 b3 4 5 6 b7).",
+                "Lídio: maior com quarta aumentada (1 2 3 #4 5 6 7).",
+                "Mixolídio: maior com sétima menor (1 2 3 4 5 6 b7)."
+            }), content::topic7G()),
+            detail (block ("H", juce::String::fromUTF8 ("Mixolídio sus e Mixolídio #4"), {
+                "Mixolídio sus: 1 2 4 5 6 b7 (sem a terça), combina com X7sus4.",
+                "Mixolídio #4: 1 2 3 #4 5 6 b7, combina com X7#11.",
+                "As duas são variações do dominante, com cores diferentes."
+            }), content::topic7H()),
+            detail (block ("I", juce::String::fromUTF8 ("Lócrio 9 e Alterado (Alt.7)"), {
+                "Lócrio 9: 1 2 b3 4 b5 b6 b7 (meio-diminuto com nona natural).",
+                "Alterado: 1 b9 #9 3 b5 #5 b7 (tensão máxima do dominante).",
+                "As duas aparecem juntas no II–V–I menor."
+            }), content::topic7I()),
+            detail (block ("J", juce::String::fromUTF8 ("Aplicações modais no rock e pop-rock"), {
+                "Vamps de um ou dois acordes são o terreno da harmonia modal.",
+                "Cada modo tem um tipo de vamp e uma cor.",
+                "Do modal se chega à harmonia funcional dos próximos módulos."
+            }), content::topic7J()),
+        };
+
+        // Exercises: 3..5 per topic, ids EX-7.<topico>.<n>, mixing verifiable
+        // quizzes with exercises played on the instrument (the app recognises
+        // the notes). Playable exercises are not grid-gated.
+        auto add = [&m] (Exercise e, const char* topic)
+        {
+            e.lessonId = topic;
+            m.exercises.push_back (std::move (e));
+            return (int) m.exercises.size() - 1;
+        };
+
         // --- Topic A — empilhamentos de terças -------------------------------
         add (exercise ("EX-7.A.1", juce::String::fromUTF8 ("Questionário: empilhamento de terças"),
                        juce::String::fromUTF8 ("Responder ao questionário do empilhamento de terças."),
@@ -3682,6 +3510,133 @@ namespace
             "Tocar o II–V–I Dm7 – G7 – C7M – C7M a 84 BPM com ≥90% de acerto de "
             "acordes e on_grid_ratio ≥ 0,80. Os acordes são construídos pelos "
             "empilhamentos e estruturas estudados no módulo.");
+
+        // Pattern and links the module must cite (REQ-007, REQ-010).
+        m.practice.patternId = "PTN-A-DROP2";
+        m.practice.patternUse = juce::String::fromUTF8 (
+            "Drop 2: as tétrades em estruturas de quatro cordas mostram na prática "
+            "os empilhamentos de terça e as tríades do meio. Complemento: "
+            "PTN-M-4ths (quartas) para tocar as estruturas modais.");
+        m.practice.guitarists = { "Joe Satriani", "Steve Vai", "Guthrie Govan" };
+
+        // Curated apostilas (REQ-006, CM-012); see docs/MUSIC.md §7.
+        m.sources = {
+            "pdf-teoria-elementar-da-musica-ricordi-osvaldo-lacerda",
+            "pdf-p-classtruncatedtext-module-lineclamped-85ulhh-style-max-lines5bohumil-med-teoria-da-musica-5-edicao-p",
+            "pdf-mozart-mello-livroestudosdeguitarra4em1",
+            "pdf-caged-e-derivaoes-de-acordes-marcelo-mello-apostila-de-violao-e-guitarra-vol1",
+        };
+
+        return m;
+    }
+
+
+    // A chord-montage exercise (module 8): the student plays a chord and the app
+    // verifies the pitch classes it heard. Not grid-gated: the goal is the
+    // harmony, not the tempo.
+    Exercise chordExercise (const char* id, const char* title, const char* goal,
+                            std::initializer_list<int> pitchClasses)
+    {
+        auto e = exercise (id, juce::String::fromUTF8 (title), juce::String::fromUTF8 (goal),
+                           juce::String::fromUTF8 (
+                               "O app reconhece as notas tocadas e confere se o acorde tem as notas certas."));
+        e.chordPitchClasses.assign (pitchClasses.begin(), pitchClasses.end());
+        e.usesGrid = false;
+        return e;
+    }
+
+    // A chord-progression exercise (module 8): the student plays the progression
+    // chord by chord; the app matches each chord in order. Grid-gated when the
+    // caller keeps `usesGrid` (the gate closes the module on the metronome).
+    Exercise progressionExercise (const char* id, const char* title, const char* goal,
+                                  std::initializer_list<std::initializer_list<int>> chords)
+    {
+        auto e = exercise (id, juce::String::fromUTF8 (title), juce::String::fromUTF8 (goal),
+                           juce::String::fromUTF8 (
+                               "O app reconhece os acordes na ordem e confere se a progressão está correta."));
+        for (const auto& chord : chords)
+            e.chordProgression.push_back (std::vector<int> (chord.begin(), chord.end()));
+        e.usesGrid = false;
+        return e;
+    }
+
+    // Module 8 (Etapa 8 — dominantes, cadências e substituições harmônicas).
+    // Ten topics (A..J); 3..5 exercises per topic, ids EX-8.<topico>.<n>; the gate
+    // closes the module on the grid with a II-V-I maior (REQ-009).
+    CourseModule makeModule8()
+    {
+        CourseModule m;
+        m.number = 8;
+        m.title = juce::String::fromUTF8 ("Dominantes, cadências e substituições harmônicas");
+        m.objective = juce::String::fromUTF8 (
+            "Compreender como criar tensão, resolução e movimentação harmônica: o "
+            "dominante V7, os dominantes secundários e alterados, o SubV7, o SubIIm, "
+            "os empréstimos modais e a progressão II-V-I maior e menor.");
+        m.level = 4;          // MUSIC.md: módulos 8–10 = nível 4 (turnarounds)
+        m.targetBpm = 88;     // MUSIC.md, módulo 8
+        m.onGridTarget = 0.81f;
+        m.implemented = true;
+
+        m.lessons = {
+            detail (block ("A", juce::String::fromUTF8 ("Dominante V7"), {
+                "O quinto grau com sétima menor (0, 4, 7, 10); o trítono entre a terça e a sétima cria a tensão.",
+                "A resolução V7 → I acontece por meio-tom (voice leading).",
+                "No campo maior, o V7 é o único acorde de sétima dominante natural."
+            }), content::topic8A()),
+            detail (block ("B", juce::String::fromUTF8 ("Dominantes secundários"), {
+                "Qualquer grau pode virar tônica temporária com o seu próprio V7 (V7/x).",
+                "Constrói-se subindo uma quinta justa a partir do alvo.",
+                "A nota estranha ao campo aponta o alvo; podem se encadear em quintas."
+            }), content::topic8B()),
+            detail (block ("C", juce::String::fromUTF8 ("Dominantes alterados e resoluções"), {
+                "Alteram-se quinta e extensões (b5, #5, b9, #9, #11), nunca a terça nem a sétima.",
+                "Cada alteração tem uma direção natural de resolução por meio-tom.",
+                "O acorde alterado (alt) é o dominante de tensão máxima."
+            }), content::topic8C()),
+            detail (block ("D", juce::String::fromUTF8 ("SubV7"), {
+                "O dominante substituto fica meio-tom acima do alvo e resolve no mesmo lugar.",
+                "Compartilha o trítono com o V7; o baixo desce um semitom.",
+                "No II-V-I: Dm7 → Db7 → CM7; pode se encadear cromaticamente."
+            }), content::topic8D()),
+            detail (block ("E", juce::String::fromUTF8 ("SubIIm"), {
+                "O ii vira menor com quinta diminuta (Dm7b5): a cor do campo menor dentro do maior.",
+                "Prepara o dominante com nona menor (b9).",
+                "No II-V-I menor é o acorde natural; com o SubV7 dá a resolução mais suave."
+            }), content::topic8E()),
+            detail (block ("F", juce::String::fromUTF8 ("Empréstimos modais"), {
+                "Pegar acordes do modo paralelo (Dó menor dentro do Dó maior).",
+                "Principais: i, iv, bIII, bVI, bVII; o iv menor e o bVII são os mais usados.",
+                "Empréstimo é passageiro; modulação é permanente."
+            }), content::topic8F()),
+            detail (block ("G", juce::String::fromUTF8 ("Dilatação do campo harmônico maior"), {
+                "O campo de sete acordes se amplia com dominantes secundários, substituições e empréstimos.",
+                "Cada acorde novo exerce uma das três funções básicas.",
+                "O mapa dilatado é a base da reharmonização."
+            }), content::topic8G()),
+            detail (block ("H", juce::String::fromUTF8 ("Dilatação do campo harmônico menor"), {
+                "O campo menor é a união das escalas natural, harmônica e melódica.",
+                "A harmônica cria o V7 (dominante); a melódica acrescenta acordes de cor.",
+                "A cadência fundamental é o II-V-I menor: Dm7b5 → G7 → Cm7."
+            }), content::topic8H()),
+            detail (block ("I", juce::String::fromUTF8 ("Progressão II-V-I maior e menor"), {
+                "Reúne as três funções: subdominante (II), dominante (V) e tônica (I).",
+                "Maior: Dm7 → G7 → CM7; menor: Dm7b5 → G7 → Cm7.",
+                "O voice leading conduz as vozes por meio-tom; as notas-guia guiam a cadência."
+            }), content::topic8I()),
+            detail (block ("J", juce::String::fromUTF8 ("Identificação de situações que não são II-V-I"), {
+                "Cadência deceptiva resolve no vi; backdoor usa ivm e bVII, sem o V.",
+                "Vamp modal nunca resolve; meia cadência para no V.",
+                "Pergunte sempre: qual é o alvo e como ele é alcançado?"
+            }), content::topic8J()),
+        };
+
+        auto add = [&m] (Exercise e, const char* topic)
+        {
+            e.lessonId = topic;
+            m.exercises.push_back (std::move (e));
+            return (int) m.exercises.size() - 1;
+        };
+
         // --- Topic A — dominante V7 ------------------------------------------
         add (exercise ("EX-8.A.1", juce::String::fromUTF8 ("Questionário: o dominante V7"),
                        juce::String::fromUTF8 ("Responder ao questionário de introdução ao dominante."),
@@ -4083,6 +4038,104 @@ namespace
             "Tocar Dm7 – G7 – CM7 (II-V-I maior, nível 4) a 88 BPM com ≥90% de "
             "acerto de acordes e on_grid_ratio ≥ 0,81. A cadência usa o dominante "
             "estudado no módulo.");
+
+        // Pattern and links the module must cite (REQ-007, REQ-010).
+        m.practice.patternId = "PTN-A-DROP2";
+        m.practice.patternUse = juce::String::fromUTF8 (
+            "Arpejos de sétima em Drop 2: a digitação fixa 1-3-5-7 aplica-se a "
+            "qualquer acorde do módulo (Dm7, G7, CM7, Db7), de modo que o aluno "
+            "ouve cada nota do dominante e da sua substituição. Complemento: "
+            "PTN-M-4ths (quartas) para ouvir o movimento das quintas.");
+        m.practice.guitarists = { "Joe Pass", "Wes Montgomery", "Pat Metheny" };
+
+        // Curated apostilas (REQ-006, CM-012); see docs/MUSIC.md §8.
+        m.sources = {
+            "pdf-p-classtruncatedtext-module-lineclamped-85ulhh-style-max-lines5bohumil-med-teoria-da-musica-5-edicao-p",
+            "pdf-desvendando-os-segredos-da-guitarra-fusion",
+            "pdf-teoria-elementar-da-musica-ricordi-osvaldo-lacerda",
+            "pdf-mozart-mello-livroestudosdeguitarra4em1",
+            "pdf-caged-e-derivaoes-de-acordes-marcelo-mello-apostila-de-violao-e-guitarra-vol1",
+        };
+
+        return m;
+    }
+
+
+    // Module 9 — Etapa 9: harmonia avançada e estruturas especiais. Same shape
+    // as module 2: nine topics (A..I), each with >=5 pages of explanation,
+    // images and tables; the module demonstrates the structures with audio and
+    // scores (every score carries its audio); 3..5 exercises per topic mixing
+    // quizzes and playable exercises (the app recognises the notes). Level, BPM
+    // and alignment come from MUSIC.md (the placeholder values are reused).
+    CourseModule makeModule9()
+    {
+        CourseModule m;
+        m.number = 9;
+        m.title = juce::String::fromUTF8 ("Harmonia avançada e estruturas especiais");
+        m.objective = juce::String::fromUTF8 (
+            "Explorar possibilidades harmônicas mais elaboradas — acordes diminutos, "
+            "dominantes diminutos, campos e estruturas simétricas — e desenvolver uma "
+            "visão ampla das relações entre acordes.");
+        m.level = 4;          // MUSIC.md: módulo 9 = nível 4
+        m.targetBpm = 92;     // MUSIC.md, módulo 9
+        m.onGridTarget = 0.81f;
+        m.implemented = true;
+
+        m.lessons = {
+            detail (block ("A", juce::String::fromUTF8 ("Acordes diminutos e suas funções"), {
+                "O diminuto é um empilhamento de terças menores (0-3-6; dim7 = 0-3-6-9).",
+                "É simétrico: só existem três dim7 diferentes.",
+                "Funções: sensível, ii grau menor, passagem e substituto de dominante."
+            }), content::topic9A()),
+            detail (block ("B", juce::String::fromUTF8 ("Dominantes diminutos (DomDim)"), {
+                "O DomDim é o dominante com nona bemol (e outras tensões).",
+                "Nasce da escala diminuta meio-tom / tom.",
+                "Sem a fundamental, o dominante com nona bemol vira um dim7."
+            }), content::topic9B()),
+            detail (block ("C", juce::String::fromUTF8 ("Ciclos diminutos"), {
+                "O ciclo das terças menores percorre quatro notas e volta ao início.",
+                "Existem apenas três dim7 diferentes no total.",
+                "O ciclo é um mapa de modulação e um recurso de improvisação."
+            }), content::topic9C()),
+            detail (block ("D", juce::String::fromUTF8 ("Campos harmônicos diminutos"), {
+                "As escalas diminutas geram dois campos: tom-meio-tom e meio-tom-tom.",
+                "O campo do DomDim é o da escala meio-tom / tom.",
+                "O campo diminuto se cruza com o campo maior pelo vii grau."
+            }), content::topic9D()),
+            detail (block ("E", juce::String::fromUTF8 ("Acorde m7(#5)"), {
+                "m7(#5) = tônica, terça menor, quinta aumentada e sétima menor.",
+                "Difere do m7 apenas na quinta, mas a cor muda por completo.",
+                "Tem leitura enarmônica: é uma inversão de acorde maior com nona."
+            }), content::topic9E()),
+            detail (block ("F", juce::String::fromUTF8 ("Policordes"), {
+                "Policorde = dois acordes empilhados; o baixo define a harmonia.",
+                "Diferente do slash chord, o baixo é um acorde completo.",
+                "Na guitarra, as camadas se separam por registro."
+            }), content::topic9F()),
+            detail (block ("G", juce::String::fromUTF8 ("Simetria e escalas simétricas"), {
+                "Escala simétrica divide a oitava em partes iguais.",
+                "Tons inteiros: seis notas, duas formas; diminuta: oito notas, três formas.",
+                "Na guitarra, a mesma digitação se desloca pelo braço."
+            }), content::topic9G()),
+            detail (block ("H", juce::String::fromUTF8 ("Relações entre campos harmônicos"), {
+                "Campos vizinhos compartilham seis das sete notas.",
+                "O acorde pivô pertence aos dois campos e prepara a passagem.",
+                "O dominante secundário e o diminuto ligam campos distantes."
+            }), content::topic9H()),
+            detail (block ("I", juce::String::fromUTF8 ("Sonoridades especiais"), {
+                "Quartal, cluster, add9/6-9, inversões e estruturas superiores.",
+                "Cada sonoridade tem um uso: cor, tensão, movimento ou repouso.",
+                "Todas funcionam melhor em contraste com momentos simples."
+            }), content::topic9I()),
+        };
+
+        auto add = [&m] (Exercise e, const char* topic)
+        {
+            e.lessonId = topic;
+            m.exercises.push_back (std::move (e));
+            return (int) m.exercises.size() - 1;
+        };
+
         // --- Topic A — acordes diminutos e suas funções -----------------------
         add (exercise ("EX-9.A.1", juce::String::fromUTF8 ("Questionário: acordes diminutos"),
                        juce::String::fromUTF8 ("Responder ao questionário sobre o acorde diminuto."),
@@ -4409,33 +4462,107 @@ namespace
         // Pattern and links the module must cite (REQ-007, REQ-010).
         m.practice.patternId = "PTN-A-DROP2";
         m.practice.patternUse = juce::String::fromUTF8 (
-            "Drop 2: as tétrades em estruturas de quatro cordas mostram na prática "
-            "os empilhamentos de terça e as tríades do meio. Complemento: "
-            "PTN-M-4ths (quartas) para tocar as estruturas modais.");
-        m.practice.guitarists = { "Joe Satriani", "Steve Vai", "Guthrie Govan" };
-
-        // Curated apostilas (REQ-006, CM-012); see docs/MUSIC.md §7.
-        m.sources = {
-            "pdf-teoria-elementar-da-musica-ricordi-osvaldo-lacerda",
-            "pdf-p-classtruncatedtext-module-lineclamped-85ulhh-style-max-lines5bohumil-med-teoria-da-musica-5-edicao-p",
-            "Arpejos de sétima em Drop 2: a digitação fixa 1-3-5-7 aplica-se a "
-            "qualquer acorde do módulo (Dm7, G7, CM7, Db7), de modo que o aluno "
-            "ouve cada nota do dominante e da sua substituição. Complemento: "
-            "PTN-M-4ths (quartas) para ouvir o movimento das quintas.");
-        m.practice.guitarists = { "Joe Pass", "Wes Montgomery", "Pat Metheny" };
-
-        // Curated apostilas (REQ-006, CM-012); see docs/MUSIC.md §8.
-        m.sources = {
-            "pdf-p-classtruncatedtext-module-lineclamped-85ulhh-style-max-lines5bohumil-med-teoria-da-musica-5-edicao-p",
-            "pdf-desvendando-os-segredos-da-guitarra-fusion",
-            "pdf-teoria-elementar-da-musica-ricordi-osvaldo-lacerda",
-            "pdf-mozart-mello-livroestudosdeguitarra4em1",
-            "pdf-caged-e-derivaoes-de-acordes-marcelo-mello-apostila-de-violao-e-guitarra-vol1",
             "Arpejos de sétima em Drop 2: a digitação 1-3-5-7 cobre as tétrades "
             "estudadas (dim7, m7(b5), m7(#5), dominante com nona bemol) e permite "
             "tocar as sonoridades do módulo em qualquer posição. Complemento: "
             "PTN-M-4ths (quartas) para os acordes quartais.");
         m.practice.guitarists = { "Greg Howe", "Guthrie Govan", "Joe Satriani" };
+
+        // Curated apostilas (REQ-006, CM-012); see docs/MUSIC.md.
+        m.sources = {
+            "pdf-teoria-elementar-da-musica-ricordi-osvaldo-lacerda",
+            "pdf-p-classtruncatedtext-module-lineclamped-85ulhh-style-max-lines5bohumil-med-teoria-da-musica-5-edicao-p",
+            "pdf-mozart-mello-livroestudosdeguitarra4em1",
+            "pdf-desvendando-os-segredos-da-guitarra-fusion",
+        };
+
+        return m;
+    }
+
+
+    // Module 10 — Etapa 10: análise harmônica, verticalização e reharmonização.
+    // The student learns to analyse a song (degree, function, scale) and then to
+    // find new ways to harmonise it (substitution, modal borrowing, target
+    // harmony). The explanation carries images, tables, audio examples and
+    // scores with their audio; every topic has >=5 pages (content::minTopicChars)
+    // and part of the exercises is played on the instrument and verified by the
+    // app (chord pitch classes / interval recognition).
+    CourseModule makeModule10()
+    {
+        CourseModule m;
+        m.number = 10;
+        m.title = juce::String::fromUTF8 ("Análise harmônica, verticalização e reharmonização");
+        m.objective = juce::String::fromUTF8 (
+            "Aprender a analisar músicas e descobrir diferentes caminhos para "
+            "modificar suas harmonias — do grau e da função de cada acorde até a "
+            "verticalização e a reharmonização, sempre respeitando a melodia.");
+        m.level = 4;          // MUSIC.md: módulos 8–10 = nível 4
+        m.targetBpm = 96;     // MUSIC.md, módulo 10
+        m.onGridTarget = 0.82f;
+        m.implemented = true;
+
+        m.lessons = {
+            detail (block ("A", juce::String::fromUTF8 ("Análise harmônica"), {
+                "Analisar é responder grau, função e escala para cada acorde.",
+                "O grau vem da escala; a função é tônica, subdominante ou dominante.",
+                "A análise é o mapa que sustenta toda a reharmonização."
+            }), content::topic10A()),
+            detail (block ("B", juce::String::fromUTF8 ("Análise melódica"), {
+                "Cada nota da melodia é repouso (nota do acorde) ou tensão.",
+                "A tensão precisa resolver; no tempo forte, prefira o repouso.",
+                "Converter a melodia em graus revela o desenho da frase."
+            }), content::topic10B()),
+            detail (block ("C", juce::String::fromUTF8 ("Escolha modal"), {
+                "O modo vem do acorde, não da escala da música.",
+                "Cada modo se distingue pela nota característica.",
+                "Escolher o modo é escolher a cor e as tensões."
+            }), content::topic10C()),
+            detail (block ("D", juce::String::fromUTF8 ("Verticalização"), {
+                "Verticalizar é construir acordes a partir das notas da melodia.",
+                "Empilhar terças a partir da nota é o caminho mais direto.",
+                "A melodia deve ser a voz de cima do acorde verticalizado."
+            }), content::topic10D()),
+            detail (block ("E", juce::String::fromUTF8 ("Conexão entre campos harmônicos"), {
+                "Conectar campos é passar de uma tonalidade a outra sem ruptura.",
+                "O acorde-pivo é a dobradiça entre os dois campos.",
+                "A modulação se prepara com o dominante ou o ii–V do novo tom."
+            }), content::topic10E()),
+            detail (block ("F", juce::String::fromUTF8 ("Estudo das vozes internas"), {
+                "Cada nota do acorde é uma voz; conduza cada linha pelo menor movimento.",
+                "Notas comuns ficam paradas; sem nota comum, move-se um grau.",
+                "Na guitarra, acordes de poucas notas facilitam a condução."
+            }), content::topic10F()),
+            detail (block ("G", juce::String::fromUTF8 ("Reharmonização"), {
+                "Reharmonizar é trocar a harmonia mantendo a melodia.",
+                "A melodia manda: as notas fortes precisam caber nos novos acordes.",
+                "Substituição, empréstimo modal e acordes de passagem são as técnicas básicas."
+            }), content::topic10G()),
+            detail (block ("H", juce::String::fromUTF8 ("Harmonia-alvo"), {
+                "Defina o alvo (a chegada) e construa a harmonia de trás para frente.",
+                "O alvo é o acorde de repouso, revelado muitas vezes pela melodia.",
+                "As aproximações (ii–V, subV, cromática) dão cores diferentes à chegada."
+            }), content::topic10H()),
+            detail (block ("I", juce::String::fromUTF8 ("Ferramentas de reharmonização"), {
+                "Reharmonizar é aplicar um conjunto pequeno de ferramentas conhecidas.",
+                "SubV, dominante secundário, empréstimo modal, passagem e verticalização.",
+                "Escolha a ferramenta pelo efeito que você quer."
+            }), content::topic10I()),
+            detail (block ("J", juce::String::fromUTF8 ("Relação entre estilos e sonoridades"), {
+                "A análise é a mesma em todos os estilos; a sonoridade é que muda.",
+                "Bossa: densidade. Jazz: substituições. Blues: dominantes. Rock: tríades.",
+                "Cada estilo tem convenções próprias de reharmonização."
+            }), content::topic10J()),
+        };
+
+        // Exercises: 3..5 per topic, mixing verifiable quizzes and playable
+        // exercises (the app recognises the notes). Ids follow EX-10.<topico>.<n>.
+        auto add = [&m] (Exercise e, const char* topic)
+        {
+            e.lessonId = topic;
+            m.exercises.push_back (std::move (e));
+            return (int) m.exercises.size() - 1;
+        };
+
         // --- Topic A — análise harmônica -------------------------------------
         add (exercise ("EX-10.A.1", juce::String::fromUTF8 ("Questionário: analisar a harmonia"),
                        juce::String::fromUTF8 ("Responder ao questionário de análise harmônica."),
@@ -4995,8 +5122,6 @@ namespace
         m.sources = {
             "pdf-teoria-elementar-da-musica-ricordi-osvaldo-lacerda",
             "pdf-p-classtruncatedtext-module-lineclamped-85ulhh-style-max-lines5bohumil-med-teoria-da-musica-5-edicao-p",
-            "pdf-mozart-mello-livroestudosdeguitarra4em1",
-            "pdf-desvendando-os-segredos-da-guitarra-fusion",
             "pdf-desvendando-os-segredos-da-guitarra-fusion",
             "pdf-caged-e-derivaoes-de-acordes-marcelo-mello-apostila-de-violao-e-guitarra-vol1",
         };
@@ -5004,8 +5129,7 @@ namespace
         return m;
     }
 
-    // Modules 4..20 exist as placeholders so the list is honest about what is
-    // Modules 3..20 exist as placeholders so the list is honest about what is
+    // Modules 11..20 exist as placeholders so the list is honest about what is
     // coming (ADR 0005): level, target BPM and alignment come from MUSIC.md.
     CourseModule makePlaceholder (int number, const char* title, int level,
                                   int targetBpm, float onGridTarget)
@@ -5030,20 +5154,12 @@ const std::vector<CourseModule>& ModuleCatalog::getModules()
         makeModule1(),
         makeModule2(),
         makeModule3(),
-        makePlaceholder (4,  "Vamps de 2 acordes (aplicação)",      2,  72,  0.78f),
-        makePlaceholder (3,  "Vamps de 2 acordes",                  2,  68,  0.77f),
         makeModule4(),
-        makePlaceholder (5,  "II–V–I",                              3,  76,  0.79f),
         makeModule5(),
-        makePlaceholder (6,  "II–V–I (menor)",                      3,  80,  0.80f),
         makeModule6(),
-        makePlaceholder (7,  "II–V–I (aplicação)",                  3,  84,  0.80f),
         makeModule7(),
-        makePlaceholder (8,  "Turnarounds",                         4,  88,  0.81f),
         makeModule8(),
-        makePlaceholder (9,  "Turnarounds (variações)",             4,  92,  0.81f),
         makeModule9(),
-        makePlaceholder (10, "Turnarounds (aplicação)",             4,  96,  0.82f),
         makeModule10(),
         makePlaceholder (11, "Blues de 12 compassos",               5, 100,  0.82f),
         makePlaceholder (12, "Blues menor",                         5, 104,  0.82f),

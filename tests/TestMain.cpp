@@ -11,8 +11,8 @@
 #include "Audio/AudioPortClassifier.h"
 #include "Audio/PluginSearchPaths.h"
 #include "Course/Content/Diagrams.h"
-#include "Course/Content/ScoreNotes.h"
 #include "Course/Content/Topics.h"
+#include "Course/Content/ScoreNotes.h"
 #include "Course/ExerciseEvaluator.h"
 #include "Course/Intervals.h"
 #include "Course/ModuleCatalog.h"
@@ -334,43 +334,6 @@ void checkModuleCatalogShape (const std::vector<cursomusica::CourseModule>& modu
     check (first != nullptr && first->implemented, "module 1 is implemented (anchor)");
 
     // (c) an implemented module carries content and exercises, and is found.
-// The catalogue grows one Etapa at a time, and the Etapa branches are built in
-// parallel: a single branch implements one module on top of the base (e.g. only
-// module 9 on top of 1 and 2), so the old rule "modules 3..20 are placeholders"
-// no longer holds and a strict "contiguous from 1" rule would fail on every
-// in-progress branch. The invariants that must always hold, whatever set of
-// Etapas is merged, are: every module number is unique (no leftover placeholder
-// duplicating an implemented number), module 1 and module 2 are implemented, an
-// implemented module is a real module (it has topics), and findModule returns
-// the module that owns each number.
-void checkModuleRegistryShape (const std::vector<cursomusica::CourseModule>& modules)
-{
-    using namespace cursomusica;
-
-    std::vector<int> numbers;
-    std::vector<int> implemented;
-    for (const auto& m : modules)
-    {
-        numbers.push_back (m.number);
-        if (m.implemented)
-            implemented.push_back (m.number);
-    }
-
-    // Unique numbers, so a module is never listed twice (no leftover placeholder
-    // beside the implemented module of the same number).
-    auto sorted = numbers;
-    std::sort (sorted.begin(), sorted.end());
-    check (std::adjacent_find (sorted.begin(), sorted.end()) == sorted.end(),
-           "every module number is unique in getModules()");
-
-    // The base is always implemented (the course starts at module 1).
-    check (std::find (implemented.begin(), implemented.end(), 1) != implemented.end(),
-           "module 1 is implemented");
-    check (std::find (implemented.begin(), implemented.end(), 2) != implemented.end(),
-           "module 2 is implemented");
-
-    // An implemented module is a real module: it has topics, an objective and a
-    // positive level. This catches a module left half-wired.
     for (const auto& m : modules)
         if (m.implemented)
         {
@@ -383,20 +346,6 @@ void checkModuleRegistryShape (const std::vector<cursomusica::CourseModule>& mod
                    juce::String ("findModule(") + juce::String (m.number)
                        + ") returns the implemented module");
         }
-                   juce::String ("implemented module ") + juce::String (m.number) + " has topics");
-            check (m.objective.isNotEmpty(),
-                   juce::String ("implemented module ") + juce::String (m.number) + " has an objective");
-            check (m.level > 0,
-                   juce::String ("implemented module ") + juce::String (m.number) + " has a level");
-        }
-
-    // findModule returns the module that owns each number, with the matching flag.
-    for (const auto& m : modules)
-    {
-        const auto* found = ModuleCatalog::findModule (m.number);
-        check (found != nullptr && found->number == m.number && found->implemented == m.implemented,
-               juce::String ("findModule(") + juce::String (m.number) + ") returns its module");
-    }
 }
 
 void testModuleCatalog()
@@ -543,91 +492,10 @@ void testModuleCatalog()
         if (m.number > 1)
             check (m.usesTempo, "modules 2..20 still use a BPM target");
 
-    // The catalog lists each number once and the implemented modules are
-    // contiguous from 1; the placeholder set shrinks as modules land, so the
-    // test states the generic rule instead of a fixed list (AGENTS.md §4.1).
-    juce::StringArray catalogNumbers;
-    bool catalogPlaceholder = false;
-    for (const auto& m : modules)
-    {
-        check (! catalogNumbers.contains (juce::String (m.number)),
-               "module " + juce::String (m.number) + " is listed once in the catalog");
-        catalogNumbers.add (juce::String (m.number));
-
-        if (m.implemented)
-            check (! catalogPlaceholder,
-                   "implemented modules are contiguous from 1 (module "
-                       + juce::String (m.number) + ")");
-        else
-            catalogPlaceholder = true;
-    // Modules are implemented in parallel branches (this module 4; modules 3..10
-    // elsewhere), so the old "3..20 are placeholders" rule no longer holds and a
-    // strict "contiguous from 1" rule would fail whenever a higher module lands
-    // before a lower one. The generic invariants are: every number appears once,
-    // module 1 (and 2) is implemented, module 4 is implemented, and every module
-    // that is not implemented is an honest placeholder (no lessons, no flag).
-    {
-        juce::Array<int> numbers;
-        for (const auto& m : modules)
-        {
-            check (! numbers.contains (m.number),
-                   juce::String ("module number ") + juce::String (m.number) + " is unique");
-            numbers.add (m.number);
-            if (! m.implemented)
-                check (m.lessons.empty(),
-                       juce::String ("module ") + juce::String (m.number)
-                           + " is an honest placeholder (no lessons)");
-        }
-
-        const auto* first = ModuleCatalog::findModule (1);
-        check (first != nullptr && first->implemented, "module 1 is implemented");
-
-        const auto* fourth = ModuleCatalog::findModule (4);
-        check (fourth != nullptr && fourth->implemented,
-               "module 4 is implemented (this branch)");
-    }
-    // The catalog must stay coherent as modules are implemented in parallel
-    // branches (one Etapa per branch): every module number appears exactly once,
-    // and a module marked implemented really carries content. This replaces the
-    // old "modules 3..20 are placeholders" assertion, which stopped being true
-    // as soon as a later module landed and would conflict between branches.
+    // The catalog shape is checked generically (see checkModuleCatalogShape):
+    // it holds for any set of implemented Etapas, so the parallel module
+    // branches do not conflict (AGENTS.md §4.1).
     checkModuleCatalogShape (modules);
-    // Modules are implemented in parallel branches, so the set of implemented
-    // modules cannot be fixed here. The invariant that holds for any set: every
-    // number is unique and every implemented module is findable by its number.
-    for (const auto& m : modules)
-        if (m.implemented)
-            check (ModuleCatalog::findModule (m.number) != nullptr
-                       && ModuleCatalog::findModule (m.number)->implemented,
-                   "implemented module " + juce::String (m.number) + " is findable by number");
-    // The catalogue lists each module number exactly once (generic rule: a
-    // module branch replaces its own placeholder with an implemented module, so
-    // the set of implemented modules grows without duplicating a number).
-    for (std::size_t i = 0; i < modules.size(); ++i)
-        for (std::size_t j = i + 1; j < modules.size(); ++j)
-            check (modules[i].number != modules[j].number,
-                   "catalogue lists each module number once");
-    // The registry shape must hold as modules are implemented one by one (the
-    // old "3..20 are placeholders" rule no longer applies once any of them
-    // exists). See checkModuleRegistryShape.
-    checkModuleRegistryShape (modules);
-    // Every module number is unique, and every implemented module is findable by
-    // its number with implemented == true. This generic rule holds for any set
-    // of implemented modules, so the parallel module branches (3..10) do not
-    // conflict with one another (see AGENTS.md §4.1).
-    juce::Array<int> moduleNumbers;
-    for (const auto& m : modules)
-    {
-        check (! moduleNumbers.contains (m.number),
-               "module number " + juce::String (m.number) + " is unique");
-        moduleNumbers.add (m.number);
-        if (m.implemented)
-        {
-            const auto* found = ModuleCatalog::findModule (m.number);
-            check (found != nullptr && found->implemented,
-                   "implemented module " + juce::String (m.number) + " is findable");
-        }
-    }
 
     // The client asked the graphical material (fretboard, CAGED shapes, rhythm
     // figures) to be shown as images instead of text art. Every diagram named by
@@ -821,8 +689,6 @@ void testExerciseFilter()
     // The scenario from the client: a module without content has no exercises,
     // so filtering another module's topic against it returns nothing. Filtering
     // the same topic against module 1 must list its exercises. The placeholder
-    // module is picked dynamically so this stays valid as modules land in
-    // parallel (AGENTS.md §4.1).
     // is found dynamically so the parallel module branches do not conflict.
     const CourseModule* placeholder = nullptr;
     for (const auto& m : ModuleCatalog::getModules())
@@ -831,17 +697,12 @@ void testExerciseFilter()
             placeholder = &m;
             break;
         }
-    check (placeholder != nullptr, "the catalog still has a placeholder module");
 
     const juce::String topicC = "C";
     const auto inM1 = exercisesForTopic (*m1, topicC);
 
     check (! inM1.empty(), "module 1's topic C has exercises");
     if (placeholder != nullptr)
-    {
-        const auto inPlaceholder = exercisesForTopic (*placeholder, topicC);
-        check (inPlaceholder.empty(), "a placeholder module has no exercises for topic C");
-    }
         check (exercisesForTopic (*placeholder, topicC).empty(),
                "a placeholder module has no exercises for topic C");
 
@@ -1245,26 +1106,10 @@ void testModule2()
         }
     check (hasGate, "module 2 has a gate exercise");
 
-    // The implemented modules are contiguous from 1 (no gaps) and each number is
-    // unique in the catalog. This replaces a fixed "3..20 are placeholders"
-    // assertion so the parallel module branches do not conflict (AGENTS.md §4.1);
-    // the assertions specific to module 3 live in testModule3().
-    const auto& modules = ModuleCatalog::getModules();
-    juce::StringArray seenNumbers;
-    bool seenPlaceholder = false;
-    for (const auto& m : modules)
-    {
-        check (! seenNumbers.contains (juce::String (m.number)),
-               "module " + juce::String (m.number) + " appears only once");
-        seenNumbers.add (juce::String (m.number));
-
-        if (m.implemented)
-            check (! seenPlaceholder,
-                   "implemented modules are contiguous from 1 (module "
-                       + juce::String (m.number) + " comes after a placeholder)");
-        else
-            seenPlaceholder = true;
-    }
+    // The catalog shape is asserted generically by checkModuleCatalogShape(),
+    // called from testModuleCatalog(), so this test does not pin which later
+    // modules exist (AGENTS.md §4.1).
+    checkModuleCatalogShape (ModuleCatalog::getModules());
 }
 
 // Module 3 — Etapa 3: ritmo, leitura e levadas. It must follow the same shape as
@@ -1296,10 +1141,155 @@ void testModule3()
     {
         int count = 0;
         for (const auto& e : m3->exercises)
-    // Modules 3..20 used to be asserted as placeholders here. That rule no
-    // longer holds once other modules exist (this branch adds module 4; parallel
-    // branches add 3..10), so the generic catalogue invariants live in
-    // testModuleCatalog() and are not repeated per module.
+            if (e.lessonId == topic.id)
+                ++count;
+        check (count >= 3, juce::String ("topic ") + topic.id + " has at least three exercises");
+        check (count <= 5, juce::String ("topic ") + topic.id + " has at most five exercises");
+    }
+
+    // Every exercise is tied to a topic and its id follows EX-3.<topico>.<n>.
+    for (const auto& e : m3->exercises)
+    {
+        check (e.lessonId.isNotEmpty(), "exercise " + e.id + " is tied to a topic");
+        if (! e.isGate)
+            check (e.id.startsWith ("EX-3."), "exercise " + e.id + " follows EX-3.<topico>.<n>");
+    }
+
+    // Part of the exercises is played on the instrument and verified by the
+    // detector (client request): every topic needs at least one exercise that is
+    // really played — a quiz alone does not satisfy this. A separate check below
+    // covers the broader "has a playable exercise" notion.
+    juce::StringArray playedTopics;
+    juce::StringArray playableTopics;
+    for (const auto& e : m3->exercises)
+    {
+        if (e.lessonId.isEmpty())
+            continue;
+
+        const bool played = ! e.targets.empty() || ! e.chordPitchClasses.empty()
+                                || ! e.chordProgression.empty();
+        if (played && ! playedTopics.contains (e.lessonId))
+            playedTopics.add (e.lessonId);
+
+        const bool playable = played || e.isQuiz();
+        if (playable && ! playableTopics.contains (e.lessonId))
+            playableTopics.add (e.lessonId);
+    }
+    for (const auto& topic : { "A", "B", "C", "D", "E", "F", "G", "H" })
+    {
+        check (playedTopics.contains (topic),
+               juce::String ("topic ") + topic + " has an exercise played on the instrument");
+        check (playableTopics.contains (topic),
+               juce::String ("topic ") + topic + " has a playable exercise");
+    }
+
+    // The rhythmic module grades its playable exercises on the grid (REQ-015):
+    // every playable non-quiz exercise keeps usesGrid = true, and carries a spec
+    // the evaluator understands (targets, a chord or a chord progression).
+    int gridExercises = 0;
+    for (const auto& e : m3->exercises)
+    {
+        if (e.isQuiz() || e.isGate)
+            continue;
+
+        const bool playable = ! e.targets.empty() || ! e.chordPitchClasses.empty()
+                                || ! e.chordProgression.empty();
+        if (! playable)
+            continue;
+
+        check (e.usesGrid, "playable exercise " + e.id + " is graded on the grid");
+        ++gridExercises;
+    }
+    check (gridExercises >= 8, "module 3 has several grid-graded playable exercises");
+
+    // Every quiz question has a valid answer key.
+    for (const auto& e : m3->exercises)
+        for (const auto& q : e.quiz)
+            check (q.correctIndex >= 0 && q.correctIndex < q.options.size(),
+                   "quiz question of " + e.id + " has a valid answer key");
+
+    // Explanation: >=5 pages per topic, at least one table and one image, and
+    // the media the client asked for (images, audio, scores with audio).
+    auto detailChars = [] (const LessonBlock& topic)
+    {
+        int total = 0;
+        for (const auto& item : topic.detail)
+        {
+            total += item.text.length();
+            for (const auto& cell : item.columns)
+                total += cell.length();
+            for (const auto& row : item.rows)
+                for (const auto& cell : row)
+                    total += cell.length();
+        }
+        return total;
+    };
+
+    bool anyAudio = false;
+    bool anyScore = false;
+    for (const auto& topic : m3->lessons)
+    {
+        const int chars = detailChars (topic);
+        check (chars >= content::minTopicChars,
+               juce::String ("topic ") + topic.id + " has at least "
+                   + juce::String (content::minPages) + " pages (" + juce::String (chars) + " chars)");
+
+        int images = 0, tables = 0, audios = 0, scores = 0;
+        for (const auto& item : topic.detail)
+        {
+            if (item.kind == ContentKind::image) ++images;
+            else if (item.kind == ContentKind::table) ++tables;
+            else if (item.kind == ContentKind::audio) ++audios;
+            else if (item.kind == ContentKind::score) ++scores;
+        }
+        check (images >= 1, juce::String ("topic ") + topic.id + " has at least one image");
+        check (tables >= 1, juce::String ("topic ") + topic.id + " has at least one table");
+        anyAudio = anyAudio || audios > 0;
+        anyScore = anyScore || scores > 0;
+    }
+    check (anyAudio, "module 3 demonstrates the rhythm with audio (REQ-004)");
+    check (anyScore, "module 3 has scores with their audio (REQ-004)");
+
+    // Every diagram and score named by the content is embedded in the binary,
+    // and every audio/score item actually carries notes to play.
+    for (const auto& topic : m3->lessons)
+        for (const auto& item : topic.detail)
+        {
+            if (item.kind == ContentKind::image || item.kind == ContentKind::score)
+                check (content::diagramExists (item.imageName),
+                       juce::String ("topic ") + topic.id + " references the image '"
+                           + item.imageName + "'");
+            if (item.kind == ContentKind::audio || item.kind == ContentKind::score)
+            {
+                check (! item.notes.empty(),
+                       juce::String ("topic ") + topic.id + " has a playable example");
+                for (const int midi : item.notes)
+                    check (midi >= 0 && midi <= 127,
+                           juce::String ("topic ") + topic.id + " example uses a valid MIDI note");
+            }
+        }
+
+    // The rhythmic cells the metronome shows (REQ-015): the counting syllables.
+    check (m3->rhythm.size() >= 3, "module 3 teaches the counting cells (REQ-015)");
+    check (m3->rhythm.front().syllable == juce::String::fromUTF8 ("TÁ"),
+           "module 3 quarter-note cell is counted TÁ");
+
+    // The module cites >=1 pattern and >=1 guitarist (REQ-007, REQ-010).
+    check (m3->practice.patternId.isNotEmpty(), "module 3 cites a pattern");
+    check (! m3->practice.guitarists.isEmpty(), "module 3 cites at least one guitarist");
+    check (m3->sources.size() >= 1, "module 3 cites its curated apostilas (REQ-006)");
+
+    // The gate closes the module as a two-chord vamp on the grid (REQ-009).
+    bool hasGate = false;
+    for (const auto& e : m3->exercises)
+        if (e.isGate)
+        {
+            hasGate = true;
+            check (e.chordProgression.size() == 4, "module 3 gate has four chords");
+            check (e.chordProgression.front() == std::vector<int> ({ 0, 4, 7 }),
+                   "module 3 gate opens on C major");
+        }
+    check (hasGate, "module 3 has a gate exercise");
 }
 
 void testModule4()
@@ -1328,10 +1318,179 @@ void testModule4()
     {
         int count = 0;
         for (const auto& e : m4->exercises)
-    // The catalog shape (unique numbers, contiguous implementations, content in
-    // every implemented module) is asserted generically by
-    // checkModuleCatalogShape(), called from testModuleCatalog(), so this test
-    // does not pin which later modules exist. See the note there.
+            if (e.lessonId == topic.id)
+                ++count;
+        check (count >= 3, juce::String ("topic ") + topic.id + " has at least three exercises");
+        check (count <= 5, juce::String ("topic ") + topic.id + " has at most five exercises");
+    }
+
+    // Every exercise is tied to a topic and its id follows EX-4.<topico>.<n>,
+    // numbered in order per topic.
+    for (const auto& e : m4->exercises)
+    {
+        check (e.lessonId.isNotEmpty(), "exercise " + e.id + " is tied to a topic");
+        if (! e.isGate)
+            check (e.id.startsWith ("EX-4."), "exercise " + e.id + " follows EX-4.<topico>.<n>");
+    }
+    for (const auto& topic : m4->lessons)
+    {
+        const auto prefix = juce::String ("EX-4.") + topic.id + ".";
+        int expected = 0;
+        for (const auto& e : m4->exercises)
+            if (e.lessonId == topic.id && ! e.isGate)
+            {
+                ++expected;
+                check (e.id == prefix + juce::String (expected),
+                       juce::String ("exercise ids of topic ") + topic.id
+                           + " are numbered in order (" + e.id + ")");
+            }
+    }
+
+    // Part of the exercises is played on the instrument and verified by the
+    // detector: every topic owns at least one playable exercise (a chord the app
+    // recognises by pitch classes, an interval it measures, or a quiz).
+    for (const auto& topic : m4->lessons)
+    {
+        bool playable = false;
+        for (const auto& e : m4->exercises)
+            if (e.lessonId == topic.id)
+                playable = playable || e.isQuiz() || ! e.chordPitchClasses.empty()
+                            || e.interval.semitones > 0 || ! e.targets.empty()
+                            || ! e.chordProgression.empty();
+        check (playable, juce::String ("topic ") + topic.id + " has at least one executable exercise");
+    }
+
+    // At least one chord exercise per topic is verified by the detector (the app
+    // recognises the notes of the chord, accepting any position on the neck).
+    juce::StringArray chordTopics;
+    for (const auto& e : m4->exercises)
+        if (! e.chordPitchClasses.empty() && e.lessonId.isNotEmpty())
+            chordTopics.addIfNotAlreadyThere (e.lessonId);
+    for (const auto& topic : { "A", "B", "C", "D", "E", "F", "G", "H", "I" })
+        check (chordTopics.contains (topic),
+               juce::String ("topic ") + topic + " has a chord exercise recognised by the app");
+
+    // A chord exercise must not gate on the grid, and its pitch classes are valid.
+    for (const auto& e : m4->exercises)
+        if (! e.chordPitchClasses.empty())
+        {
+            check (! e.usesGrid, "chord exercise " + e.id + " is not grid-gated");
+            check (e.chordPitchClasses.size() >= 3,
+                   "chord exercise " + e.id + " asks for at least three notes");
+            for (const int pc : e.chordPitchClasses)
+                check (pc >= 0 && pc <= 11,
+                       "chord exercise " + e.id + " uses a valid pitch class");
+        }
+
+    // An interval exercise must not gate on the grid and must be valid.
+    for (const auto& e : m4->exercises)
+        if (e.interval.semitones > 0)
+        {
+            check (! e.usesGrid, "interval exercise " + e.id + " is not grid-gated");
+            check (e.interval.repeats >= 1, "interval exercise " + e.id + " asks for at least one repeat");
+            check (e.interval.semitones >= 1 && e.interval.semitones <= 12,
+                   "interval exercise " + e.id + " has a valid semitone distance");
+        }
+
+    // Explanation: >=5 pages per topic, at least one table and one image, and the
+    // media the client asked for (images, audio, scores with audio).
+    auto detailChars = [] (const LessonBlock& topic)
+    {
+        int total = 0;
+        for (const auto& item : topic.detail)
+        {
+            total += item.text.length();
+            for (const auto& cell : item.columns)
+                total += cell.length();
+            for (const auto& row : item.rows)
+                for (const auto& cell : row)
+                    total += cell.length();
+        }
+        return total;
+    };
+
+    bool anyAudio = false;
+    bool anyScore = false;
+    for (const auto& topic : m4->lessons)
+    {
+        const int chars = detailChars (topic);
+        check (chars >= content::minTopicChars,
+               juce::String ("topic ") + topic.id + " has at least "
+                   + juce::String (content::minPages) + " pages (" + juce::String (chars) + " chars)");
+
+        int images = 0, tables = 0, audios = 0, scores = 0;
+        for (const auto& item : topic.detail)
+        {
+            if (item.kind == ContentKind::image) ++images;
+            else if (item.kind == ContentKind::table) ++tables;
+            else if (item.kind == ContentKind::audio) ++audios;
+            else if (item.kind == ContentKind::score) ++scores;
+        }
+        check (images >= 1, juce::String ("topic ") + topic.id + " has at least one image");
+        check (tables >= 1, juce::String ("topic ") + topic.id + " has at least one table");
+        anyAudio = anyAudio || audios > 0;
+        anyScore = anyScore || scores > 0;
+    }
+    check (anyAudio, "module 4 demonstrates chords with audio (REQ-004)");
+    check (anyScore, "module 4 has scores with their audio (REQ-004)");
+
+    // Every diagram and score named by the content is embedded in the binary,
+    // and every audio/score item actually carries notes to play (a score without
+    // its audio is a defect).
+    for (const auto& topic : m4->lessons)
+        for (const auto& item : topic.detail)
+        {
+            if (item.kind == ContentKind::image || item.kind == ContentKind::score)
+                check (content::diagramExists (item.imageName),
+                       juce::String ("topic ") + topic.id + " references the image '"
+                           + item.imageName + "'");
+            if (item.kind == ContentKind::audio || item.kind == ContentKind::score)
+            {
+                check (! item.notes.empty(),
+                       juce::String ("topic ") + topic.id + " has a playable example");
+                for (const int midi : item.notes)
+                    check (midi >= 0 && midi <= 127,
+                           juce::String ("topic ") + topic.id + " example uses a valid MIDI note");
+            }
+        }
+
+    // The module cites >=1 pattern and >=1 guitarist (REQ-007, REQ-010) and the
+    // curated apostilas (REQ-006).
+    check (m4->practice.patternId.isNotEmpty(), "module 4 cites a pattern");
+    check (! m4->practice.guitarists.isEmpty(), "module 4 cites at least one guitarist");
+    check (m4->sources.size() >= 3, "module 4 cites its curated apostilas");
+
+    // The gate closes the module as a I–vi–IV–V vamp on the grid (REQ-009).
+    bool hasGate = false;
+    for (const auto& e : m4->exercises)
+        if (e.isGate)
+        {
+            hasGate = true;
+            check (e.chordProgression.size() == 4, "module 4 gate has four chords");
+            check (e.chordProgression.front() == std::vector<int> ({ 0, 4, 7 }),
+                   "module 4 gate opens on C major");
+            check (e.chordProgression[1] == std::vector<int> ({ 9, 0, 4 }),
+                   "module 4 gate moves to A minor");
+        }
+    check (hasGate, "module 4 has a gate exercise");
+
+    // The score `m4_partitura_familia` shows the major triad and then the two
+    // notes that move down to turn it into the diminished triad (Dó–Mi–Sol →
+    // Dó–Mi♭–Sol♭). Its audio must match the image note for note: pitch classes
+    // 0, 4, 7 (major) then 3, 6 (the diminished third and fifth). The visual
+    // side is guaranteed by the single definition of the score in
+    // tools/make_diagrams.py, which draws exactly these notes; this check
+    // guards the audio that the app actually plays against that definition.
+    for (const auto& topic : m4->lessons)
+        for (const auto& item : topic.detail)
+            if (item.kind == ContentKind::score && item.imageName == "m4_partitura_familia")
+            {
+                std::vector<int> pcs;
+                for (const int m : item.notes)
+                    pcs.push_back (m % 12);
+                check (pcs == std::vector<int> ({ 0, 4, 7, 3, 6 }),
+                       "family score audio matches the image (Dó–Mi–Sol → Mi♭–Sol♭)");
+            }
 }
 
 // Module 5 — Etapa 5: campo harmônico maior e funções harmônicas. It must follow
@@ -1365,21 +1524,182 @@ void testModule5()
     {
         int count = 0;
         for (const auto& e : m5->exercises)
-    // Modules are implemented in parallel branches, so the set of implemented
-    // modules cannot be fixed here. The invariants that hold for any set: the
-    // catalogue still lists 20 modules, every number is unique, and every
-    // implemented module is findable by its number.
-    const auto& modules = ModuleCatalog::getModules();
-    check (modules.size() == 20, "the catalogue still lists 20 modules");
-    juce::Array<int> numbers;
-    for (const auto& m : modules)
-    {
-        check (! numbers.contains (m.number), "module number " + juce::String (m.number) + " is unique");
-        numbers.add (m.number);
-        if (m.implemented)
-            check (ModuleCatalog::findModule (m.number) != nullptr,
-                   "implemented module " + juce::String (m.number) + " is findable by number");
+            if (e.lessonId == topic.id)
+                ++count;
+        check (count >= 3, juce::String ("topic ") + topic.id + " has at least three exercises");
+        check (count <= 5, juce::String ("topic ") + topic.id + " has at most five exercises");
     }
+
+    // Every exercise is tied to a topic and its id follows EX-5.<topico>.<n>.
+    for (const auto& e : m5->exercises)
+    {
+        check (e.lessonId.isNotEmpty(), "exercise " + e.id + " is tied to a topic");
+        if (! e.isGate)
+            check (e.id.startsWith ("EX-5."), "exercise " + e.id + " follows EX-5.<topico>.<n>");
+    }
+
+    // Part of the exercises is played on the instrument and verified by the
+    // detector: at least one playable exercise per topic (client request).
+    juce::StringArray playableTopics;
+    for (const auto& e : m5->exercises)
+    {
+        const bool playable = e.isQuiz() || ! e.targets.empty() || ! e.chordPitchClasses.empty()
+                                || ! e.chordProgression.empty();
+        if (playable && e.lessonId.isNotEmpty() && ! playableTopics.contains (e.lessonId))
+            playableTopics.add (e.lessonId);
+    }
+    for (const auto& topic : m5->lessons)
+        check (playableTopics.contains (topic.id),
+               juce::String ("topic ") + topic.id + " has a playable exercise");
+
+    // At least one exercise per topic is played on the instrument (chords, notes
+    // or a progression the app recognises) — not only a quiz.
+    juce::StringArray instrumentTopics;
+    for (const auto& e : m5->exercises)
+        if (! e.targets.empty() || ! e.chordPitchClasses.empty() || ! e.chordProgression.empty())
+            instrumentTopics.addIfNotAlreadyThere (e.lessonId);
+    for (const auto& topic : { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J" })
+        check (instrumentTopics.contains (topic),
+               juce::String ("topic ") + topic + " has an instrument-played exercise");
+
+    // The playable identification exercises must not gate on the grid, and the
+    // app must be able to verify them (chord/notes in a valid MIDI range).
+    for (const auto& e : m5->exercises)
+    {
+        if (! e.targets.empty() || ! e.chordPitchClasses.empty())
+        {
+            check (! e.usesGrid, "identification exercise " + e.id + " is not grid-gated");
+            for (const auto& t : e.targets)
+                check (t.midi >= 0 && t.midi <= 127,
+                       "exercise " + e.id + " uses a valid MIDI note");
+            for (const int pc : e.chordPitchClasses)
+                check (pc >= 0 && pc <= 11,
+                       "exercise " + e.id + " uses a valid pitch class");
+        }
+        if (! e.chordProgression.empty())
+        {
+            // The gate is played on the metronome grid; the identification
+            // progression exercises (EX-5.H.2/EX-5.J.2) are not.
+            check (e.usesGrid == e.isGate,
+                   "progression exercise " + e.id + " grid flag matches its gate role");
+            for (const auto& chord : e.chordProgression)
+                check (chord.size() >= 3, "exercise " + e.id + " chords have at least three notes");
+        }
+    }
+
+    // Explanation: >=5 pages per topic, at least one table and one image, and
+    // the media the client asked for (images, audio, scores with audio).
+    auto detailChars = [] (const LessonBlock& topic)
+    {
+        int total = 0;
+        for (const auto& item : topic.detail)
+        {
+            total += item.text.length();
+            for (const auto& cell : item.columns)
+                total += cell.length();
+            for (const auto& row : item.rows)
+                for (const auto& cell : row)
+                    total += cell.length();
+        }
+        return total;
+    };
+
+    bool anyAudio = false;
+    bool anyScore = false;
+    for (const auto& topic : m5->lessons)
+    {
+        const int chars = detailChars (topic);
+        check (chars >= content::minTopicChars,
+               juce::String ("topic ") + topic.id + " has at least "
+                   + juce::String (content::minPages) + " pages (" + juce::String (chars) + " chars)");
+
+        int images = 0, tables = 0, audios = 0, scores = 0;
+        for (const auto& item : topic.detail)
+        {
+            if (item.kind == ContentKind::image) ++images;
+            else if (item.kind == ContentKind::table) ++tables;
+            else if (item.kind == ContentKind::audio) ++audios;
+            else if (item.kind == ContentKind::score) ++scores;
+        }
+        check (images >= 1, juce::String ("topic ") + topic.id + " has at least one image");
+        check (tables >= 1, juce::String ("topic ") + topic.id + " has at least one table");
+        anyAudio = anyAudio || audios > 0;
+        anyScore = anyScore || scores > 0;
+    }
+    check (anyAudio, "module 5 demonstrates the field with audio (REQ-004)");
+    check (anyScore, "module 5 has scores with their audio (REQ-004)");
+
+    // Every diagram and score named by the content is embedded in the binary,
+    // and every audio/score item actually carries notes to play.
+    for (const auto& topic : m5->lessons)
+        for (const auto& item : topic.detail)
+        {
+            if (item.kind == ContentKind::image || item.kind == ContentKind::score)
+                check (content::diagramExists (item.imageName),
+                       juce::String ("topic ") + topic.id + " references the image '"
+                           + item.imageName + "'");
+            if (item.kind == ContentKind::audio || item.kind == ContentKind::score)
+            {
+                check (! item.notes.empty(),
+                       juce::String ("topic ") + topic.id + " has a playable example");
+                for (const int midi : item.notes)
+                    check (midi >= 0 && midi <= 127,
+                           juce::String ("topic ") + topic.id + " example uses a valid MIDI note");
+            }
+        }
+
+    // The module cites >=1 pattern and >=1 guitarist (REQ-007, REQ-010).
+    check (m5->practice.patternId.isNotEmpty(), "module 5 cites a pattern");
+    check (! m5->practice.guitarists.isEmpty(), "module 5 cites at least one guitarist");
+    check (! m5->sources.isEmpty(), "module 5 cites its curated apostilas");
+
+    // The quiz answers must not all sit on the same option, otherwise the
+    // exercise could be passed by always ticking the first alternative and the
+    // 90% gate would not measure learning (client request). Every answer index
+    // used by any question must appear, and none may dominate the set.
+    {
+        std::map<int, int> answerCounts;
+        int totalQuestions = 0;
+        for (const auto& e : m5->exercises)
+            for (const auto& q : e.quiz)
+            {
+                check (q.correctIndex >= 0 && q.correctIndex < q.options.size(),
+                       "question '" + q.prompt.substring (0, 32) + "…' has a valid correct index");
+                ++answerCounts[q.correctIndex];
+                ++totalQuestions;
+            }
+
+        check (totalQuestions >= 50, "module 5 has a substantial question set");
+        check (answerCounts.size() >= 3,
+               "module 5 quiz answers are spread over at least three options");
+        for (const auto& entry : answerCounts)
+            check (entry.second < totalQuestions,
+                   "no single option holds every answer of module 5");
+        // The correct option must not always be the first one.
+        const int firstOptionAnswers = answerCounts.count (0) > 0 ? answerCounts.at (0) : 0;
+        check (firstOptionAnswers < totalQuestions,
+               "module 5 does not put every answer on the first option");
+    }
+
+    // The gate closes the module as a I–IV–V–I progression of the harmonic field
+    // on the grid (REQ-009).
+    bool hasGate = false;
+    for (const auto& e : m5->exercises)
+        if (e.isGate)
+        {
+            hasGate = true;
+            check (e.usesGrid, "module 5 gate is played on the metronome grid");
+            check (e.chordProgression.size() == 4, "module 5 gate has four chords");
+            check (e.chordProgression.front() == std::vector<int> ({ 0, 4, 7 }),
+                   "module 5 gate opens on the tonic (C major)");
+            check (e.chordProgression.back() == std::vector<int> ({ 0, 4, 7 }),
+                   "module 5 gate closes on the tonic (C major)");
+        }
+    check (hasGate, "module 5 has a gate exercise");
+
+    // The catalog shape (unique numbers, contiguous implementations, content in
+    // every implemented module) is asserted generically by
+    // checkModuleCatalogShape(), called from testModuleCatalog().
 }
 
 // A playable example is coherent when its notes really are what its caption
@@ -1544,177 +1864,12 @@ void testModule6()
     {
         int count = 0;
         for (const auto& e : m6->exercises)
-    // The registry keeps growing one Etapa at a time (in parallel branches), so
-    // the old "3..20 are placeholders" rule is replaced by the registry shape.
-    checkModuleRegistryShape (ModuleCatalog::getModules());
-}
-
-// Module 9 — Etapa 9: harmonia avançada e estruturas especiais. Mirrors
-// testModule2: topics, 3..5 exercises per topic, id shape, >=5 pages, media
-// (images, tables, audio and scores with audio), playable exercises the app
-// verifies by recognising notes, and the gate on the grid.
-void testModule9()
-{
-    std::cout << "Module9\n";
-    using namespace cursomusica;
-
-    const auto* m9 = ModuleCatalog::findModule (9);
-    check (m9 != nullptr, "module 9 exists");
-    if (m9 == nullptr)
-        return;
-
-    check (m9->implemented, "module 9 is implemented");
-    check (m9->number == 9, "module 9 has number 9");
-    check (m9->usesTempo, "module 9 uses a BPM target");
-    check (m9->targetBpm == 92, "module 9 target BPM is 92 (MUSIC.md)");
-    check (m9->level == 4, "module 9 is level 4 (MUSIC.md)");
-    check (m9->lessons.size() == 9, "module 9 has nine topics (A..I)");
-    check (m9->lessons.front().id == "A" && m9->lessons.back().id == "I",
-           "module 9 topics run A..I in order");
-    check (m9->exercises.size() >= 27, "module 9 lists a full exercise set");
-
-    // Every topic A..I has 3..5 exercises (client: "de 3 a 5 exercícios por tópico").
-    for (const auto& topic : m9->lessons)
-    {
-        int count = 0;
-        for (const auto& e : m9->exercises)
-    // Every module number is unique, every implemented module is findable by its
-    // number with implemented == true, and the modules left as placeholders do
-    // not carry content. This rule holds for any set of implemented modules, so
-    // the parallel module branches (3..10) do not conflict (see AGENTS.md §4.1).
-    const auto& modules = ModuleCatalog::getModules();
-    juce::Array<int> seenNumbers;
-    for (const auto& m : modules)
-    {
-        check (! seenNumbers.contains (m.number),
-               "module number " + juce::String (m.number) + " appears once");
-        seenNumbers.add (m.number);
-        if (m.implemented)
-        {
-            const auto* found = ModuleCatalog::findModule (m.number);
-            check (found != nullptr && found->implemented,
-                   "implemented module " + juce::String (m.number) + " is findable");
-        }
-        else
-        {
-            check (m.exercises.empty() && m.lessons.empty(),
-                   "placeholder module " + juce::String (m.number) + " carries no content");
-        }
-    }
-}
-
-// Module 10 — Etapa 10 (análise harmônica, verticalização e reharmonização).
-// Same shape as module 2: >=5 pages per topic with images, tables, audio and
-// scores, 3..5 exercises per topic, and part of the exercises played on the
-// instrument and verified by the app.
-void testModule10()
-{
-    std::cout << "Module10\n";
-    using namespace cursomusica;
-
-    const auto* m10 = ModuleCatalog::findModule (10);
-    check (m10 != nullptr, "module 10 exists");
-    if (m10 == nullptr)
-        return;
-
-    check (m10->implemented, "module 10 is implemented");
-    check (m10->number == 10, "module 10 has number 10");
-    check (m10->usesTempo, "module 10 uses a BPM target");
-    check (m10->targetBpm == 96, "module 10 target BPM is 96 (MUSIC.md)");
-    check (m10->onGridTarget > 0.81f && m10->onGridTarget < 0.83f,
-           "module 10 on_grid_ratio target is 0.82 (MUSIC.md)");
-    check (m10->lessons.size() == 10, "module 10 has ten topics (A..J)");
-    check (m10->lessons.front().id == "A" && m10->lessons.back().id == "J",
-           "module 10 topics run A..J in order");
-    check (m10->exercises.size() >= 30, "module 10 lists a full exercise set");
-
-    // Every topic A..J has 3..5 exercises (client: "de 3 a 5 exercícios por tópico").
-    for (const auto& topic : m10->lessons)
-    {
-        int count = 0;
-        for (const auto& e : m10->exercises)
             if (e.lessonId == topic.id)
                 ++count;
         check (count >= 3, juce::String ("topic ") + topic.id + " has at least three exercises");
         check (count <= 5, juce::String ("topic ") + topic.id + " has at most five exercises");
     }
 
-    // Every exercise is tied to a topic and its id follows EX-3.<topico>.<n>.
-    for (const auto& e : m3->exercises)
-    {
-        check (e.lessonId.isNotEmpty(), "exercise " + e.id + " is tied to a topic");
-        if (! e.isGate)
-            check (e.id.startsWith ("EX-3."), "exercise " + e.id + " follows EX-3.<topico>.<n>");
-    }
-
-    // Part of the exercises is played on the instrument and verified by the
-    // detector (client request): every topic needs at least one exercise that is
-    // really played — a quiz alone does not satisfy this. A separate check below
-    // covers the broader "has a playable exercise" notion.
-    juce::StringArray playedTopics;
-    juce::StringArray playableTopics;
-    for (const auto& e : m3->exercises)
-    {
-        if (e.lessonId.isEmpty())
-            continue;
-
-        const bool played = ! e.targets.empty() || ! e.chordPitchClasses.empty()
-                                || ! e.chordProgression.empty();
-        if (played && ! playedTopics.contains (e.lessonId))
-            playedTopics.add (e.lessonId);
-
-        const bool playable = played || e.isQuiz();
-        if (playable && ! playableTopics.contains (e.lessonId))
-            playableTopics.add (e.lessonId);
-    }
-    for (const auto& topic : { "A", "B", "C", "D", "E", "F", "G", "H" })
-    {
-        check (playedTopics.contains (topic),
-               juce::String ("topic ") + topic + " has an exercise played on the instrument");
-        check (playableTopics.contains (topic),
-               juce::String ("topic ") + topic + " has a playable exercise");
-    }
-
-    // The rhythmic module grades its playable exercises on the grid (REQ-015):
-    // every playable non-quiz exercise keeps usesGrid = true, and carries a spec
-    // the evaluator understands (targets, a chord or a chord progression).
-    int gridExercises = 0;
-    for (const auto& e : m3->exercises)
-    {
-        if (e.isQuiz() || e.isGate)
-            continue;
-
-        const bool playable = ! e.targets.empty() || ! e.chordPitchClasses.empty()
-                                || ! e.chordProgression.empty();
-        if (! playable)
-            continue;
-
-        check (e.usesGrid, "playable exercise " + e.id + " is graded on the grid");
-        ++gridExercises;
-    }
-    check (gridExercises >= 8, "module 3 has several grid-graded playable exercises");
-
-    // Every quiz question has a valid answer key.
-    for (const auto& e : m3->exercises)
-        for (const auto& q : e.quiz)
-            check (q.correctIndex >= 0 && q.correctIndex < q.options.size(),
-                   "quiz question of " + e.id + " has a valid answer key");
-
-    // Explanation: >=5 pages per topic, at least one table and one image, and
-    // the media the client asked for (images, audio, scores with audio).
-    // Every exercise is tied to a topic and its id follows EX-4.<topico>.<n>,
-    // numbered in order per topic.
-    for (const auto& e : m4->exercises)
-    {
-        check (e.lessonId.isNotEmpty(), "exercise " + e.id + " is tied to a topic");
-        if (! e.isGate)
-            check (e.id.startsWith ("EX-4."), "exercise " + e.id + " follows EX-4.<topico>.<n>");
-    }
-    for (const auto& topic : m4->lessons)
-    {
-        const auto prefix = juce::String ("EX-4.") + topic.id + ".";
-        int expected = 0;
-        for (const auto& e : m4->exercises)
     // Every exercise is tied to a topic and its id follows EX-6.<topico>.<n>.
     for (const auto& e : m6->exercises)
     {
@@ -1739,43 +1894,6 @@ void testModule10()
     }
 
     // Part of the exercises is played on the instrument and verified by the
-    // detector: every topic owns at least one playable exercise (a chord the app
-    // recognises by pitch classes, an interval it measures, or a quiz).
-    for (const auto& topic : m4->lessons)
-    {
-        bool playable = false;
-        for (const auto& e : m4->exercises)
-            if (e.lessonId == topic.id)
-                playable = playable || e.isQuiz() || ! e.chordPitchClasses.empty()
-                            || e.interval.semitones > 0 || ! e.targets.empty()
-                            || ! e.chordProgression.empty();
-        check (playable, juce::String ("topic ") + topic.id + " has at least one executable exercise");
-    }
-
-    // At least one chord exercise per topic is verified by the detector (the app
-    // recognises the notes of the chord, accepting any position on the neck).
-    juce::StringArray chordTopics;
-    for (const auto& e : m4->exercises)
-        if (! e.chordPitchClasses.empty() && e.lessonId.isNotEmpty())
-            chordTopics.addIfNotAlreadyThere (e.lessonId);
-    for (const auto& topic : { "A", "B", "C", "D", "E", "F", "G", "H", "I" })
-        check (chordTopics.contains (topic),
-               juce::String ("topic ") + topic + " has a chord exercise recognised by the app");
-
-    // A chord exercise must not gate on the grid, and its pitch classes are valid.
-    for (const auto& e : m4->exercises)
-        if (! e.chordPitchClasses.empty())
-        {
-            check (! e.usesGrid, "chord exercise " + e.id + " is not grid-gated");
-            check (e.chordPitchClasses.size() >= 3,
-                   "chord exercise " + e.id + " asks for at least three notes");
-            for (const int pc : e.chordPitchClasses)
-                check (pc >= 0 && pc <= 11,
-                       "chord exercise " + e.id + " uses a valid pitch class");
-        }
-
-    // An interval exercise must not gate on the grid and must be valid.
-    for (const auto& e : m4->exercises)
     // detector: at least one playable exercise per topic (quiz, interval or
     // chord), as module 1 and 2 require (client request).
     juce::StringArray playableTopics;
@@ -1784,22 +1902,6 @@ void testModule10()
         const bool playable = e.isQuiz() || e.interval.semitones > 0
                                 || ! e.targets.empty() || ! e.chordPitchClasses.empty()
                                 || ! e.chordProgression.empty();
-    // Every exercise is tied to a topic and its id follows EX-9.<topico>.<n>.
-    for (const auto& e : m9->exercises)
-    {
-        check (e.lessonId.isNotEmpty(), "exercise " + e.id + " is tied to a topic");
-        if (! e.isGate)
-            check (e.id.startsWith ("EX-9."), "exercise " + e.id + " follows EX-9.<topico>.<n>");
-    }
-
-    // Part of the exercises is played on the instrument and verified by the
-    // detector: every topic owns at least one playable exercise (quiz, chord,
-    // progression or interval the evaluator understands).
-    juce::StringArray playableTopics;
-    for (const auto& e : m9->exercises)
-    {
-        const bool playable = e.isQuiz() || ! e.targets.empty() || ! e.chordPitchClasses.empty()
-                                || ! e.chordProgression.empty() || e.interval.semitones > 0;
         if (playable && e.lessonId.isNotEmpty())
             playableTopics.addIfNotAlreadyThere (e.lessonId);
     }
@@ -1820,10 +1922,6 @@ void testModule10()
     // An interval exercise must not gate on the grid, and the app must be able
     // to verify it.
     for (const auto& e : m6->exercises)
-               juce::String ("topic ") + topic + " has a verifiable exercise");
-
-    // An interval exercise must not gate on the grid, and its distance is valid.
-    for (const auto& e : m9->exercises)
         if (e.interval.semitones > 0)
         {
             check (! e.usesGrid, "interval exercise " + e.id + " is not grid-gated");
@@ -1832,97 +1930,8 @@ void testModule10()
                    "interval exercise " + e.id + " has a valid semitone distance");
         }
 
-    // Explanation: >=5 pages per topic, at least one table and one image, and the
-    // media the client asked for (images, audio, scores with audio).
-    // Every exercise is tied to a topic and its id follows EX-5.<topico>.<n>.
-    for (const auto& e : m5->exercises)
-    {
-        check (e.lessonId.isNotEmpty(), "exercise " + e.id + " is tied to a topic");
-        if (! e.isGate)
-            check (e.id.startsWith ("EX-5."), "exercise " + e.id + " follows EX-5.<topico>.<n>");
-    }
-
-    // Part of the exercises is played on the instrument and verified by the
-    // detector: at least one playable exercise per topic (client request).
-    juce::StringArray playableTopics;
-    for (const auto& e : m5->exercises)
-    {
-        const bool playable = e.isQuiz() || ! e.targets.empty() || ! e.chordPitchClasses.empty()
-                                || ! e.chordProgression.empty();
-        if (playable && e.lessonId.isNotEmpty() && ! playableTopics.contains (e.lessonId))
-            playableTopics.add (e.lessonId);
-    }
-    for (const auto& topic : m5->lessons)
-        check (playableTopics.contains (topic.id),
-               juce::String ("topic ") + topic.id + " has a playable exercise");
-
-    // At least one exercise per topic is played on the instrument (chords, notes
-    // or a progression the app recognises) — not only a quiz.
-    juce::StringArray instrumentTopics;
-    for (const auto& e : m5->exercises)
-        if (! e.targets.empty() || ! e.chordPitchClasses.empty() || ! e.chordProgression.empty())
-            instrumentTopics.addIfNotAlreadyThere (e.lessonId);
-    for (const auto& topic : { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J" })
-        check (instrumentTopics.contains (topic),
-               juce::String ("topic ") + topic + " has an instrument-played exercise");
-
-    // The playable identification exercises must not gate on the grid, and the
-    // app must be able to verify them (chord/notes in a valid MIDI range).
-    for (const auto& e : m5->exercises)
-    {
-        if (! e.targets.empty() || ! e.chordPitchClasses.empty())
-        {
-            check (! e.usesGrid, "identification exercise " + e.id + " is not grid-gated");
-            for (const auto& t : e.targets)
-                check (t.midi >= 0 && t.midi <= 127,
-                       "exercise " + e.id + " uses a valid MIDI note");
-            for (const int pc : e.chordPitchClasses)
-                check (pc >= 0 && pc <= 11,
-                       "exercise " + e.id + " uses a valid pitch class");
-        }
-        if (! e.chordProgression.empty())
-        {
-            // The gate is played on the metronome grid; the identification
-            // progression exercises (EX-5.H.2/EX-5.J.2) are not.
-            check (e.usesGrid == e.isGate,
-                   "progression exercise " + e.id + " grid flag matches its gate role");
-            for (const auto& chord : e.chordProgression)
-                check (chord.size() >= 3, "exercise " + e.id + " chords have at least three notes");
-        }
-    }
-
     // Explanation: >=5 pages per topic, at least one table and one image, and
     // the media the client asked for (images, audio, scores with audio).
-    // Every exercise is tied to a topic and its id follows EX-10.<topico>.<n>.
-    for (const auto& e : m10->exercises)
-    {
-        check (e.lessonId.isNotEmpty(), "exercise " + e.id + " is tied to a topic");
-        if (! e.isGate)
-            check (e.id.startsWith ("EX-10."), "exercise " + e.id + " follows EX-10.<topico>.<n>");
-    }
-
-    // Part of the exercises is played on the instrument and verified by the app:
-    // every topic must own a playable exercise (quiz, chord spec or target).
-    juce::StringArray playableTopics;
-    for (const auto& e : m10->exercises)
-    {
-        const bool playable = e.isQuiz() || ! e.targets.empty() || ! e.chordPitchClasses.empty()
-                                || ! e.chordProgression.empty();
-        if (playable && e.lessonId.isNotEmpty() && ! playableTopics.contains (e.lessonId))
-            playableTopics.add (e.lessonId);
-    }
-    for (const auto& topic : { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J" })
-        check (playableTopics.contains (topic),
-               juce::String ("topic ") + topic + " has an executable exercise");
-
-    // Chord-based exercises must not gate on the grid (they are about harmony,
-    // not tempo), except the gate itself.
-    for (const auto& e : m10->exercises)
-        if ((! e.chordProgression.empty() || ! e.chordPitchClasses.empty()) && ! e.isGate)
-            check (! e.usesGrid, "chord exercise " + e.id + " is not grid-gated");
-
-    // Explanation: >=5 pages per topic, at least one table and one image, and the
-    // media the client asked for (images, audio, scores with audio).
     auto detailChars = [] (const LessonBlock& topic)
     {
         int total = 0;
@@ -1940,11 +1949,7 @@ void testModule10()
 
     bool anyAudio = false;
     bool anyScore = false;
-    for (const auto& topic : m3->lessons)
-    for (const auto& topic : m4->lessons)
-    for (const auto& topic : m5->lessons)
     for (const auto& topic : m6->lessons)
-    for (const auto& topic : m10->lessons)
     {
         const int chars = detailChars (topic);
         check (chars >= content::minTopicChars,
@@ -1964,37 +1969,12 @@ void testModule10()
         anyAudio = anyAudio || audios > 0;
         anyScore = anyScore || scores > 0;
     }
-    check (anyAudio, "module 3 demonstrates the rhythm with audio (REQ-004)");
-    check (anyScore, "module 3 has scores with their audio (REQ-004)");
-
-    // Every diagram and score named by the content is embedded in the binary,
-    // and every audio/score item actually carries notes to play.
-    for (const auto& topic : m3->lessons)
-    check (anyAudio, "module 4 demonstrates chords with audio (REQ-004)");
-    check (anyScore, "module 4 has scores with their audio (REQ-004)");
-
-    // Every diagram and score named by the content is embedded in the binary,
-    // and every audio/score item actually carries notes to play (a score without
-    // its audio is a defect).
-    for (const auto& topic : m4->lessons)
-    check (anyAudio, "module 5 demonstrates the field with audio (REQ-004)");
-    check (anyScore, "module 5 has scores with their audio (REQ-004)");
-
-    // Every diagram and score named by the content is embedded in the binary,
-    // and every audio/score item actually carries notes to play.
-    for (const auto& topic : m5->lessons)
     check (anyAudio, "module 6 demonstrates the minor scales with audio (REQ-004)");
     check (anyScore, "module 6 has scores with their audio (REQ-004)");
 
     // Every diagram and score named by the content is embedded in the binary,
     // and every audio/score item actually carries notes to play.
     for (const auto& topic : m6->lessons)
-    check (anyAudio, "module 10 demonstrates harmony with audio (REQ-004)");
-    check (anyScore, "module 10 has scores with their audio (REQ-004)");
-
-    // Every diagram and score named by the content is embedded in the binary,
-    // and every audio/score item actually carries notes to play.
-    for (const auto& topic : m10->lessons)
         for (const auto& item : topic.detail)
         {
             if (item.kind == ContentKind::image || item.kind == ContentKind::score)
@@ -2008,119 +1988,6 @@ void testModule10()
                 for (const int midi : item.notes)
                     check (midi >= 0 && midi <= 127,
                            juce::String ("topic ") + topic.id + " example uses a valid MIDI note");
-            }
-        }
-
-    // The rhythmic cells the metronome shows (REQ-015): the counting syllables.
-    check (m3->rhythm.size() >= 3, "module 3 teaches the counting cells (REQ-015)");
-    check (m3->rhythm.front().syllable == juce::String::fromUTF8 ("TÁ"),
-           "module 3 quarter-note cell is counted TÁ");
-
-    // The module cites >=1 pattern and >=1 guitarist (REQ-007, REQ-010).
-    check (m3->practice.patternId.isNotEmpty(), "module 3 cites a pattern");
-    check (! m3->practice.guitarists.isEmpty(), "module 3 cites at least one guitarist");
-    check (m3->sources.size() >= 1, "module 3 cites its curated apostilas (REQ-006)");
-
-    // The gate closes the module as a two-chord vamp on the grid (REQ-009).
-    bool hasGate = false;
-    for (const auto& e : m3->exercises)
-        if (e.isGate)
-        {
-            hasGate = true;
-            check (e.chordProgression.size() == 4, "module 3 gate has four chords");
-            check (e.chordProgression.front() == std::vector<int> ({ 0, 4, 7 }),
-                   "module 3 gate opens on C major");
-        }
-    check (hasGate, "module 3 has a gate exercise");
-    // The module cites >=1 pattern and >=1 guitarist (REQ-007, REQ-010) and the
-    // curated apostilas (REQ-006).
-    check (m4->practice.patternId.isNotEmpty(), "module 4 cites a pattern");
-    check (! m4->practice.guitarists.isEmpty(), "module 4 cites at least one guitarist");
-    check (m4->sources.size() >= 3, "module 4 cites its curated apostilas");
-
-    // The gate closes the module as a I–vi–IV–V vamp on the grid (REQ-009).
-    bool hasGate = false;
-    for (const auto& e : m4->exercises)
-        if (e.isGate)
-        {
-            hasGate = true;
-            check (e.chordProgression.size() == 4, "module 4 gate has four chords");
-            check (e.chordProgression.front() == std::vector<int> ({ 0, 4, 7 }),
-                   "module 4 gate opens on C major");
-            check (e.chordProgression[1] == std::vector<int> ({ 9, 0, 4 }),
-                   "module 4 gate moves to A minor");
-        }
-    check (hasGate, "module 4 has a gate exercise");
-
-    // The score `m4_partitura_familia` shows the major triad and then the two
-    // notes that move down to turn it into the diminished triad (Dó–Mi–Sol →
-    // Dó–Mi♭–Sol♭). Its audio must match the image note for note: pitch classes
-    // 0, 4, 7 (major) then 3, 6 (the diminished third and fifth). The visual
-    // side is guaranteed by the single definition of the score in
-    // tools/make_diagrams.py, which draws exactly these notes; this check
-    // guards the audio that the app actually plays against that definition.
-    for (const auto& topic : m4->lessons)
-        for (const auto& item : topic.detail)
-            if (item.kind == ContentKind::score && item.imageName == "m4_partitura_familia")
-            {
-                std::vector<int> pcs;
-                for (const int m : item.notes)
-                    pcs.push_back (m % 12);
-                check (pcs == std::vector<int> ({ 0, 4, 7, 3, 6 }),
-                       "family score audio matches the image (Dó–Mi–Sol → Mi♭–Sol♭)");
-            }
-    // The module cites >=1 pattern and >=1 guitarist (REQ-007, REQ-010).
-    check (m5->practice.patternId.isNotEmpty(), "module 5 cites a pattern");
-    check (! m5->practice.guitarists.isEmpty(), "module 5 cites at least one guitarist");
-    check (! m5->sources.isEmpty(), "module 5 cites its curated apostilas");
-
-    // The quiz answers must not all sit on the same option, otherwise the
-    // exercise could be passed by always ticking the first alternative and the
-    // 90% gate would not measure learning (client request). Every answer index
-    // used by any question must appear, and none may dominate the set.
-    {
-        std::map<int, int> answerCounts;
-        int totalQuestions = 0;
-        for (const auto& e : m5->exercises)
-            for (const auto& q : e.quiz)
-            {
-                check (q.correctIndex >= 0 && q.correctIndex < q.options.size(),
-                       "question '" + q.prompt.substring (0, 32) + "…' has a valid correct index");
-                ++answerCounts[q.correctIndex];
-                ++totalQuestions;
-            }
-
-        check (totalQuestions >= 50, "module 5 has a substantial question set");
-        check (answerCounts.size() >= 3,
-               "module 5 quiz answers are spread over at least three options");
-        for (const auto& entry : answerCounts)
-            check (entry.second < totalQuestions,
-                   "no single option holds every answer of module 5");
-        // The correct option must not always be the first one.
-        const int firstOptionAnswers = answerCounts.count (0) > 0 ? answerCounts.at (0) : 0;
-        check (firstOptionAnswers < totalQuestions,
-               "module 5 does not put every answer on the first option");
-    }
-
-    // The gate closes the module as a I–IV–V–I progression of the harmonic field
-    // on the grid (REQ-009).
-    bool hasGate = false;
-    for (const auto& e : m5->exercises)
-        if (e.isGate)
-        {
-            hasGate = true;
-            check (e.usesGrid, "module 5 gate is played on the metronome grid");
-            check (e.chordProgression.size() == 4, "module 5 gate has four chords");
-            check (e.chordProgression.front() == std::vector<int> ({ 0, 4, 7 }),
-                   "module 5 gate opens on the tonic (C major)");
-            check (e.chordProgression.back() == std::vector<int> ({ 0, 4, 7 }),
-                   "module 5 gate closes on the tonic (C major)");
-        }
-    check (hasGate, "module 5 has a gate exercise");
-
-    // The catalog shape (unique numbers, contiguous implementations, content in
-    // every implemented module) is asserted generically by
-    // checkModuleCatalogShape(), called from testModuleCatalog().
 
                 // Coherence (QA): the audio must really be what the caption says.
                 // A score/audio whose caption names a chord or a scale has to
@@ -2187,35 +2054,6 @@ void testModule10()
             check (e.usesGrid, "module 6 gate is grid-gated");
         }
     check (hasGate, "module 6 has a gate exercise");
-    // Generic rule for the implemented modules (so parallel module branches do
-    // not conflict): every implemented module has a unique number in the
-    // catalogue, and findModule returns each implemented module. A branch
-    // implements only its own module, so the set of implemented modules is not
-    // necessarily contiguous until every module branch has merged; the rule
-    // therefore does not assert contiguity (that would fail on a single-module
-    // branch), it asserts uniqueness and reachability.
-    const auto& modules = ModuleCatalog::getModules();
-
-    for (std::size_t i = 0; i < modules.size(); ++i)
-        for (std::size_t j = i + 1; j < modules.size(); ++j)
-            check (modules[i].number != modules[j].number,
-                   "catalogue lists each module number once");
-
-    int implemented = 0;
-    for (const auto& m : modules)
-        if (m.implemented)
-        {
-            ++implemented;
-            const auto* found = ModuleCatalog::findModule (m.number);
-            check (found != nullptr && found->implemented,
-                   juce::String ("findModule returns implemented module ")
-                       + juce::String (m.number));
-        }
-    check (implemented >= 2, "modules 1 and 2 are implemented");
-    check (ModuleCatalog::findModule (1) != nullptr && ModuleCatalog::findModule (1)->implemented,
-           "findModule(1) returns an implemented module");
-    check (ModuleCatalog::findModule (2) != nullptr && ModuleCatalog::findModule (2)->implemented,
-           "findModule(2) returns an implemented module");
 }
 
 // Module 7 — Etapa 7 (empilhamentos, estruturas modais e sonoridades). Same
@@ -2282,17 +2120,6 @@ void testModule7()
                 check (! e.usesGrid, "playable exercise " + e.id + " is not grid-gated");
             check (e.interval.semitones >= 0 && e.interval.semitones <= 12,
                    "exercise " + e.id + " has a valid semitone distance");
-    // Chord / progression exercises must not gate on the grid either (they are
-    // recognition exercises), and they carry a spec the evaluator understands.
-    for (const auto& e : m9->exercises)
-        if (! e.isGate && (! e.chordPitchClasses.empty() || ! e.chordProgression.empty()))
-        {
-            check (! e.usesGrid, "recognition exercise " + e.id + " is not grid-gated");
-            for (const int pc : e.chordPitchClasses)
-                check (pc >= 0 && pc < 12, "chord exercise " + e.id + " uses a valid pitch class");
-            for (const auto& chord : e.chordProgression)
-                for (const int pc : chord)
-                    check (pc >= 0 && pc < 12, "progression " + e.id + " uses a valid pitch class");
         }
 
     // Explanation: >=5 pages per topic, at least one table and one image, and
@@ -2315,7 +2142,6 @@ void testModule7()
     bool anyAudio = false;
     bool anyScore = false;
     for (const auto& topic : m7->lessons)
-    for (const auto& topic : m9->lessons)
     {
         const int chars = detailChars (topic);
         check (chars >= content::minTopicChars,
@@ -2342,15 +2168,6 @@ void testModule7()
     // Every diagram and score named by the content is embedded in the binary,
     // and every audio/score item actually carries notes to play.
     for (const auto& topic : m7->lessons)
-        anyAudio = anyAudio || audios > 0;
-        anyScore = anyScore || scores > 0;
-    }
-    check (anyAudio, "module 9 demonstrates the structures with audio (REQ-004)");
-    check (anyScore, "module 9 has scores with their audio (REQ-004)");
-
-    // Every diagram and score named by the content is embedded in the binary,
-    // and every audio/score item actually carries notes to play.
-    for (const auto& topic : m9->lessons)
         for (const auto& item : topic.detail)
         {
             if (item.kind == ContentKind::image || item.kind == ContentKind::score)
@@ -2482,25 +2299,6 @@ void testModule7()
         if (m.number == 7)
             ++seen7;
     check (seen7 == 1, "module 7 appears exactly once in the catalogue");
-    // The modules form a single, contiguous, unique sequence from 1: each
-    // module's number is unique, the catalog covers 1..N without gaps, and
-    // findModule(N) returns the module with that number. This replaces the old
-    // "3..20 are placeholders" assertion so the parallel module branches
-    // (Etapas 3..10) do not conflict (AGENTS.md §4.1). Individual modules are
-    // implemented by their own branch, so the set of implemented modules is not
-    // required to be contiguous here.
-    const auto& modules = ModuleCatalog::getModules();
-    check (! modules.empty(), "the catalog lists modules");
-    for (size_t i = 0; i < modules.size(); ++i)
-    {
-        check (modules[i].number == (int) i + 1,
-               "module at index " + juce::String (i) + " has number " + juce::String (i + 1));
-        check (ModuleCatalog::findModule (modules[i].number) == &modules[i],
-               "findModule returns the module with number " + juce::String (modules[i].number));
-    }
-
-    check (ModuleCatalog::findModule (8) != nullptr && ModuleCatalog::findModule (8)->implemented,
-           "module 8 is implemented");
 }
 
 // Module 8 — Etapa 8 (dominantes, cadências e substituições harmônicas). It must
@@ -2844,6 +2642,148 @@ void testModule8()
             check (state.passed, "module 8 gate passes the II-V-I maior on the grid");
         }
     }
+}
+
+// Module 9 — Etapa 9: harmonia avançada e estruturas especiais. Mirrors
+// testModule2: topics, 3..5 exercises per topic, id shape, >=5 pages, media
+// (images, tables, audio and scores with audio), playable exercises the app
+// verifies by recognising notes, and the gate on the grid.
+void testModule9()
+{
+    std::cout << "Module9\n";
+    using namespace cursomusica;
+
+    const auto* m9 = ModuleCatalog::findModule (9);
+    check (m9 != nullptr, "module 9 exists");
+    if (m9 == nullptr)
+        return;
+
+    check (m9->implemented, "module 9 is implemented");
+    check (m9->number == 9, "module 9 has number 9");
+    check (m9->usesTempo, "module 9 uses a BPM target");
+    check (m9->targetBpm == 92, "module 9 target BPM is 92 (MUSIC.md)");
+    check (m9->level == 4, "module 9 is level 4 (MUSIC.md)");
+    check (m9->lessons.size() == 9, "module 9 has nine topics (A..I)");
+    check (m9->lessons.front().id == "A" && m9->lessons.back().id == "I",
+           "module 9 topics run A..I in order");
+    check (m9->exercises.size() >= 27, "module 9 lists a full exercise set");
+
+    // Every topic A..I has 3..5 exercises (client: "de 3 a 5 exercícios por tópico").
+    for (const auto& topic : m9->lessons)
+    {
+        int count = 0;
+        for (const auto& e : m9->exercises)
+            if (e.lessonId == topic.id)
+                ++count;
+        check (count >= 3, juce::String ("topic ") + topic.id + " has at least three exercises");
+        check (count <= 5, juce::String ("topic ") + topic.id + " has at most five exercises");
+    }
+
+    // Every exercise is tied to a topic and its id follows EX-9.<topico>.<n>.
+    for (const auto& e : m9->exercises)
+    {
+        check (e.lessonId.isNotEmpty(), "exercise " + e.id + " is tied to a topic");
+        if (! e.isGate)
+            check (e.id.startsWith ("EX-9."), "exercise " + e.id + " follows EX-9.<topico>.<n>");
+    }
+
+    // Part of the exercises is played on the instrument and verified by the
+    // detector: every topic owns at least one playable exercise (quiz, chord,
+    // progression or interval the evaluator understands).
+    juce::StringArray playableTopics;
+    for (const auto& e : m9->exercises)
+    {
+        const bool playable = e.isQuiz() || ! e.targets.empty() || ! e.chordPitchClasses.empty()
+                                || ! e.chordProgression.empty() || e.interval.semitones > 0;
+        if (playable && e.lessonId.isNotEmpty())
+            playableTopics.addIfNotAlreadyThere (e.lessonId);
+    }
+    for (const auto& topic : { "A", "B", "C", "D", "E", "F", "G", "H", "I" })
+        check (playableTopics.contains (topic),
+               juce::String ("topic ") + topic + " has a verifiable exercise");
+
+    // An interval exercise must not gate on the grid, and its distance is valid.
+    for (const auto& e : m9->exercises)
+        if (e.interval.semitones > 0)
+        {
+            check (! e.usesGrid, "interval exercise " + e.id + " is not grid-gated");
+            check (e.interval.repeats >= 1, "interval exercise " + e.id + " asks for at least one repeat");
+            check (e.interval.semitones >= 1 && e.interval.semitones <= 12,
+                   "interval exercise " + e.id + " has a valid semitone distance");
+        }
+
+    // Chord / progression exercises must not gate on the grid either (they are
+    // recognition exercises), and they carry a spec the evaluator understands.
+    for (const auto& e : m9->exercises)
+        if (! e.isGate && (! e.chordPitchClasses.empty() || ! e.chordProgression.empty()))
+        {
+            check (! e.usesGrid, "recognition exercise " + e.id + " is not grid-gated");
+            for (const int pc : e.chordPitchClasses)
+                check (pc >= 0 && pc < 12, "chord exercise " + e.id + " uses a valid pitch class");
+            for (const auto& chord : e.chordProgression)
+                for (const int pc : chord)
+                    check (pc >= 0 && pc < 12, "progression " + e.id + " uses a valid pitch class");
+        }
+
+    // Explanation: >=5 pages per topic, at least one table and one image, and
+    // the media the client asked for (images, audio, scores with audio).
+    auto detailChars = [] (const LessonBlock& topic)
+    {
+        int total = 0;
+        for (const auto& item : topic.detail)
+        {
+            total += item.text.length();
+            for (const auto& cell : item.columns)
+                total += cell.length();
+            for (const auto& row : item.rows)
+                for (const auto& cell : row)
+                    total += cell.length();
+        }
+        return total;
+    };
+
+    bool anyAudio = false;
+    bool anyScore = false;
+    for (const auto& topic : m9->lessons)
+    {
+        const int chars = detailChars (topic);
+        check (chars >= content::minTopicChars,
+               juce::String ("topic ") + topic.id + " has at least "
+                   + juce::String (content::minPages) + " pages (" + juce::String (chars) + " chars)");
+
+        int images = 0, tables = 0, audios = 0, scores = 0;
+        for (const auto& item : topic.detail)
+        {
+            if (item.kind == ContentKind::image) ++images;
+            else if (item.kind == ContentKind::table) ++tables;
+            else if (item.kind == ContentKind::audio) ++audios;
+            else if (item.kind == ContentKind::score) ++scores;
+        }
+        check (images >= 1, juce::String ("topic ") + topic.id + " has at least one image");
+        check (tables >= 1, juce::String ("topic ") + topic.id + " has at least one table");
+        anyAudio = anyAudio || audios > 0;
+        anyScore = anyScore || scores > 0;
+    }
+    check (anyAudio, "module 9 demonstrates the structures with audio (REQ-004)");
+    check (anyScore, "module 9 has scores with their audio (REQ-004)");
+
+    // Every diagram and score named by the content is embedded in the binary,
+    // and every audio/score item actually carries notes to play.
+    for (const auto& topic : m9->lessons)
+        for (const auto& item : topic.detail)
+        {
+            if (item.kind == ContentKind::image || item.kind == ContentKind::score)
+                check (content::diagramExists (item.imageName),
+                       juce::String ("topic ") + topic.id + " references the image '"
+                           + item.imageName + "'");
+            if (item.kind == ContentKind::audio || item.kind == ContentKind::score)
+            {
+                check (! item.notes.empty(),
+                       juce::String ("topic ") + topic.id + " has a playable example");
+                for (const int midi : item.notes)
+                    check (midi >= 0 && midi <= 127,
+                           juce::String ("topic ") + topic.id + " example uses a valid MIDI note");
+            }
 
             // A score must play exactly what its image draws (REQ-004): the notes
             // of the score item are compared with the notes the diagram tool
@@ -2903,7 +2843,134 @@ void testModule8()
     check (hasGate, "module 9 has a gate exercise");
 
     // The registry shape holds with module 9 implemented.
-    checkModuleRegistryShape (ModuleCatalog::getModules());
+    checkModuleCatalogShape (ModuleCatalog::getModules());
+}
+
+// Module 10 — Etapa 10 (análise harmônica, verticalização e reharmonização).
+// Same shape as module 2: >=5 pages per topic with images, tables, audio and
+// scores, 3..5 exercises per topic, and part of the exercises played on the
+// instrument and verified by the app.
+void testModule10()
+{
+    std::cout << "Module10\n";
+    using namespace cursomusica;
+
+    const auto* m10 = ModuleCatalog::findModule (10);
+    check (m10 != nullptr, "module 10 exists");
+    if (m10 == nullptr)
+        return;
+
+    check (m10->implemented, "module 10 is implemented");
+    check (m10->number == 10, "module 10 has number 10");
+    check (m10->usesTempo, "module 10 uses a BPM target");
+    check (m10->targetBpm == 96, "module 10 target BPM is 96 (MUSIC.md)");
+    check (m10->onGridTarget > 0.81f && m10->onGridTarget < 0.83f,
+           "module 10 on_grid_ratio target is 0.82 (MUSIC.md)");
+    check (m10->lessons.size() == 10, "module 10 has ten topics (A..J)");
+    check (m10->lessons.front().id == "A" && m10->lessons.back().id == "J",
+           "module 10 topics run A..J in order");
+    check (m10->exercises.size() >= 30, "module 10 lists a full exercise set");
+
+    // Every topic A..J has 3..5 exercises (client: "de 3 a 5 exercícios por tópico").
+    for (const auto& topic : m10->lessons)
+    {
+        int count = 0;
+        for (const auto& e : m10->exercises)
+            if (e.lessonId == topic.id)
+                ++count;
+        check (count >= 3, juce::String ("topic ") + topic.id + " has at least three exercises");
+        check (count <= 5, juce::String ("topic ") + topic.id + " has at most five exercises");
+    }
+
+    // Every exercise is tied to a topic and its id follows EX-10.<topico>.<n>.
+    for (const auto& e : m10->exercises)
+    {
+        check (e.lessonId.isNotEmpty(), "exercise " + e.id + " is tied to a topic");
+        if (! e.isGate)
+            check (e.id.startsWith ("EX-10."), "exercise " + e.id + " follows EX-10.<topico>.<n>");
+    }
+
+    // Part of the exercises is played on the instrument and verified by the app:
+    // every topic must own a playable exercise (quiz, chord spec or target).
+    juce::StringArray playableTopics;
+    for (const auto& e : m10->exercises)
+    {
+        const bool playable = e.isQuiz() || ! e.targets.empty() || ! e.chordPitchClasses.empty()
+                                || ! e.chordProgression.empty();
+        if (playable && e.lessonId.isNotEmpty() && ! playableTopics.contains (e.lessonId))
+            playableTopics.add (e.lessonId);
+    }
+    for (const auto& topic : { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J" })
+        check (playableTopics.contains (topic),
+               juce::String ("topic ") + topic + " has an executable exercise");
+
+    // Chord-based exercises must not gate on the grid (they are about harmony,
+    // not tempo), except the gate itself.
+    for (const auto& e : m10->exercises)
+        if ((! e.chordProgression.empty() || ! e.chordPitchClasses.empty()) && ! e.isGate)
+            check (! e.usesGrid, "chord exercise " + e.id + " is not grid-gated");
+
+    // Explanation: >=5 pages per topic, at least one table and one image, and the
+    // media the client asked for (images, audio, scores with audio).
+    auto detailChars = [] (const LessonBlock& topic)
+    {
+        int total = 0;
+        for (const auto& item : topic.detail)
+        {
+            total += item.text.length();
+            for (const auto& cell : item.columns)
+                total += cell.length();
+            for (const auto& row : item.rows)
+                for (const auto& cell : row)
+                    total += cell.length();
+        }
+        return total;
+    };
+
+    bool anyAudio = false;
+    bool anyScore = false;
+    for (const auto& topic : m10->lessons)
+    {
+        const int chars = detailChars (topic);
+        check (chars >= content::minTopicChars,
+               juce::String ("topic ") + topic.id + " has at least "
+                   + juce::String (content::minPages) + " pages (" + juce::String (chars) + " chars)");
+
+        int images = 0, tables = 0, audios = 0, scores = 0;
+        for (const auto& item : topic.detail)
+        {
+            if (item.kind == ContentKind::image) ++images;
+            else if (item.kind == ContentKind::table) ++tables;
+            else if (item.kind == ContentKind::audio) ++audios;
+            else if (item.kind == ContentKind::score) ++scores;
+        }
+        check (images >= 1, juce::String ("topic ") + topic.id + " has at least one image");
+        check (tables >= 1, juce::String ("topic ") + topic.id + " has at least one table");
+        anyAudio = anyAudio || audios > 0;
+        anyScore = anyScore || scores > 0;
+    }
+    check (anyAudio, "module 10 demonstrates harmony with audio (REQ-004)");
+    check (anyScore, "module 10 has scores with their audio (REQ-004)");
+
+    // Every diagram and score named by the content is embedded in the binary,
+    // and every audio/score item actually carries notes to play.
+    for (const auto& topic : m10->lessons)
+        for (const auto& item : topic.detail)
+        {
+            if (item.kind == ContentKind::image || item.kind == ContentKind::score)
+                check (content::diagramExists (item.imageName),
+                       juce::String ("topic ") + topic.id + " references the image '"
+                           + item.imageName + "'");
+            if (item.kind == ContentKind::audio || item.kind == ContentKind::score)
+            {
+                check (! item.notes.empty(),
+                       juce::String ("topic ") + topic.id + " has a playable example");
+                for (const int midi : item.notes)
+                    check (midi >= 0 && midi <= 127,
+                           juce::String ("topic ") + topic.id + " example uses a valid MIDI note");
+            }
+        }
+
     // The turnaround score must spell A7, not Am7: its audio has to contain the
     // C# (the major third of A7). Without it the printed score would teach the
     // wrong note (panel finding R2-1).
