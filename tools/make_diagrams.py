@@ -1090,6 +1090,112 @@ def d_m3_acentuacoes():
     d.text((MARGIN, h - 96), "No samba e no funk o acento cai no contratempo (o 'e' do tempo).",
            font=font(21), fill=TXT2, anchor="la")
     d.text((MARGIN, h - 52), "Acentuar sem perder o pulso: o detalhe que faz a levada soar viva.",
+# Modulo 5 — campo harmonico maior e funcoes harmonicas.
+# --------------------------------------------------------------------------
+def _table(d, y, headers, rows, col_x, row_h=46, header_color=ACCENT):
+    """Tabela simples: `col_x` = posicoes x de cada coluna."""
+    d.text((MARGIN, y), headers[0], font=font(19, True), fill=header_color, anchor="la")
+    for i, head in enumerate(headers[1:], start=1):
+        d.text((col_x[i], y), head, font=font(19, True), fill=header_color, anchor="la")
+    for r, row in enumerate(rows):
+        yy = y + 32 + r * row_h
+        fill = RAISED if r % 2 == 0 else SURFACE
+        d.rounded_rectangle([MARGIN, yy, W - MARGIN, yy + row_h - 6], radius=8, fill=fill)
+        for c, cell in enumerate(row):
+            color = TXT if c == 0 else TXT2
+            d.text((col_x[c] if c else MARGIN + 14, yy + (row_h - 6) / 2), cell,
+                   font=font(20, True if c == 0 else False), fill=color, anchor="lm")
+    return y + 32 + len(rows) * row_h
+
+
+def d_m5_escala_maior_graus():
+    h = 700
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "A escala maior: graus, tons e semitons")
+    y = subtitle(d, "Padrao T - T - S - T - T - T - S. Os semitons ficam entre 3-4 e 7-8.", y)
+    piano(d, MARGIN + 30, y + 30, W - 2 * MARGIN - 60, 230)
+    steps = ["T", "T", "S", "T", "T", "T", "S"]
+    kw = (W - 2 * MARGIN - 60) / 8
+    for i, s in enumerate(steps):
+        d.text((MARGIN + 30 + (i + 1) * kw, y + 300), s, font=font(24, True),
+               fill=GOLD if s == "S" else CYAN, anchor="mm")
+    notes = ["Do", "Re", "Mi", "Fa", "Sol", "La", "Si", "Do"]
+    for i, n in enumerate(notes):
+        d.text((MARGIN + 30 + i * kw, y + 350), n, font=font(22, True), fill=TXT, anchor="mm")
+        d.text((MARGIN + 30 + i * kw, y + 386), str(i + 1), font=font(20, True),
+               fill=ACCENT, anchor="mm")
+    d.text((MARGIN, y + 450), "Os graus (1..8) numeram as notas da escala; a tonica e o grau 1.",
+           font=font(21), fill=TXT2, anchor="la")
+    d.text((MARGIN, y + 492), "O mesmo padrao vale em qualquer tonica: muda a nota, nao o desenho.",
+           font=font(21, True), fill=GOLD, anchor="la")
+    d.text((MARGIN, y + 534), "Graus 1, 3 e 5 formam a triade de tonica daquele tom.",
+           font=font(21), fill=CYAN, anchor="la")
+    return img
+
+
+def d_m5_graus_romanos():
+    h = 680
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Os graus em algarismo romano")
+    y = subtitle(d, "Maiusculo = acorde maior; minusculo = menor; circulo = diminuto.", y)
+    items = [("I", "C", "maior", ACCENT), ("ii", "Dm", "menor", CYAN),
+             ("iii", "Em", "menor", CYAN), ("IV", "F", "maior", ACCENT),
+             ("V", "G", "maior", ACCENT), ("vi", "Am", "menor", CYAN),
+             ("vii", "Bdim", "diminuto", GOLD)]
+    top = y + 40
+    for i, (deg, chord, quality, color) in enumerate(items):
+        yy = top + i * 66
+        d.rounded_rectangle([MARGIN, yy, W - MARGIN, yy + 56], radius=8,
+                            fill=RAISED if i % 2 == 0 else SURFACE)
+        d.text((MARGIN + 24, yy + 28), deg + ("o" if quality == "diminuto" else ""),
+               font=font(24, True), fill=color, anchor="lm")
+        d.text((MARGIN + 220, yy + 28), chord, font=font(22, True), fill=TXT, anchor="lm")
+        d.text((MARGIN + 520, yy + 28), quality, font=font(21), fill=TXT2, anchor="lm")
+        d.text((MARGIN + 820, yy + 28),
+               "repouso" if deg in ("I", "iii", "vi") else
+               ("afastamento" if deg in ("IV", "ii") else "tensao"),
+               font=font(20, True), fill=CYAN, anchor="lm")
+    return img
+
+
+def d_m5_campo_harmonico_maior():
+    h = 700
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Campo harmonico maior (de Do)")
+    y = subtitle(d, "I ii iii IV V vi vii - os sete acordes que nascem da escala maior.", y)
+    chords = [("C", "I"), ("Dm", "ii"), ("Em", "iii"), ("F", "IV"),
+              ("G", "V"), ("Am", "vi"), ("Bdim", "vii")]
+    bw = (W - 2 * MARGIN) / 4
+    for i, (name, deg) in enumerate(chords):
+        cx = MARGIN + bw * (i % 4 + 0.5)
+        cy = y + 60 + (i // 4) * 220
+        d.rounded_rectangle([cx - bw / 2 + 20, cy, cx + bw / 2 - 20, cy + 150],
+                            radius=12, fill=RAISED, outline=BORDER, width=2)
+        d.text((cx, cy + 40), deg + ("o" if deg == "vii" else ""), font=font(30, True),
+               fill=ACCENT, anchor="mm")
+        d.text((cx, cy + 90), name, font=font(26, True), fill=TXT, anchor="mm")
+        quality = "maior" if deg in ("I", "IV", "V") else ("menor" if deg != "vii" else "diminuto")
+        d.text((cx, cy + 126), quality, font=font(19), fill=CYAN, anchor="mm")
+    d.text((W / 2, h - 52), "Padrao fixo: I ii iii IV V vi vii. Vale em qualquer tonalidade.",
+           font=font(21, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m5_campo_harmonico_braco():
+    h = 720
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Campo harmonico de Do no braco")
+    y = subtitle(d, "Tonica (Do) em violeta, terceira em ciano, quinta em dourado.", y)
+    string_labels(d, MARGIN + 30, y + 60, 6 * 58)
+    fretboard(d, MARGIN + 50, y + 60, W - 2 * MARGIN - 50, 6 * 58,
+              highlight={0, 4, 7}, root_pc=0)
+    d.text((MARGIN, h - 116), "As tríades do campo se montam sobre as notas destacadas.",
+           font=font(21), fill=TXT2, anchor="la")
+    d.text((MARGIN, h - 74), "Ache a tonica (Do) e conte os graus para achar cada acorde.",
            font=font(21, True), fill=GOLD, anchor="la")
     return img
 
@@ -1187,6 +1293,68 @@ def d_m3_levadas_dedos():
             color = TXT_DIS if s == "-" else (ACCENT if s == "p" else CYAN)
             d.text((cx, yy + 30), s, font=font(30, True), fill=color, anchor="mm")
     d.text((W / 2, h - 46), "Separar grave e agudo e o que da independencia a mao direita.",
+def d_m5_funcoes_tres():
+    h = 700
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "As tres funcoes harmonicas")
+    y = subtitle(d, "Tonica (repouso), subdominante (afastamento) e dominante (tensao).", y)
+    cols = [("TONICA", "repouso", ["I (C)", "iii (Em)", "vi (Am)"], ACCENT, "em casa"),
+            ("SUBDOMINANTE", "afastamento", ["IV (F)", "ii (Dm)"], CYAN, "sai de casa"),
+            ("DOMINANTE", "tensao", ["V (G)", "V7 (G7)", "vii (Bdim)"], GOLD, "pede voltar")]
+    col_w = (W - 2 * MARGIN) / 3
+    for c, (name, role, chords, color, feel) in enumerate(cols):
+        x = MARGIN + c * col_w
+        d.rounded_rectangle([x + 12, y + 30, x + col_w - 12, y + 30 + 380],
+                            radius=12, fill=RAISED, outline=color, width=3)
+        d.text((x + col_w / 2, y + 70), name, font=font(26, True), fill=color, anchor="mm")
+        d.text((x + col_w / 2, y + 112), role, font=font(21), fill=TXT2, anchor="mm")
+        for i, ch in enumerate(chords):
+            d.text((x + col_w / 2, y + 170 + i * 52), ch, font=font(23, True),
+                   fill=TXT, anchor="mm")
+        d.text((x + col_w / 2, y + 30 + 350), feel, font=font(20, True), fill=color, anchor="mm")
+    d.text((W / 2, h - 60), "I - IV - V - I percorre as tres funcoes e volta ao repouso.",
+           font=font(21, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m5_relativos():
+    h = 640
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Acordes relativos: mesma armadura, cores diferentes")
+    y = subtitle(d, "O relativo menor esta 3 semitons abaixo do acorde maior.", y)
+    pairs = [("C", "Am", "Do e Mi em comum"), ("G", "Em", "Sol e Si em comum"),
+             ("F", "Dm", "Fa e La em comum"), ("D", "Bm", "Re e Fa# em comum")]
+    top = y + 40
+    for i, (maj, minr, common) in enumerate(pairs):
+        yy = top + i * 96
+        d.rounded_rectangle([MARGIN, yy, W - MARGIN, yy + 82], radius=10, fill=RAISED)
+        d.text((MARGIN + 40, yy + 41), maj, font=font(34, True), fill=ACCENT, anchor="lm")
+        d.text((MARGIN + 180, yy + 41), "<->", font=font(26, True), fill=TXT_DIS, anchor="lm")
+        d.text((MARGIN + 320, yy + 41), minr, font=font(34, True), fill=CYAN, anchor="lm")
+        d.text((MARGIN + 560, yy + 41), common, font=font(21), fill=TXT2, anchor="lm")
+    d.text((W / 2, h - 56), "Duas das tres notas sao iguais: por isso a troca soa suave.",
+           font=font(21, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m5_relativos_campo():
+    h = 620
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Pares de relativos no campo de Do")
+    y = subtitle(d, "Cada acorde maior do campo tem o seu relativo menor dois graus depois.", y)
+    pairs = [("I", "C", "vi", "Am"), ("IV", "F", "ii", "Dm"), ("V", "G", "iii", "Em")]
+    top = y + 60
+    for i, (d1, c1, d2, c2) in enumerate(pairs):
+        yy = top + i * 130
+        d.rounded_rectangle([MARGIN + 60, yy, W - MARGIN - 60, yy + 104], radius=12,
+                            fill=RAISED if i % 2 == 0 else SURFACE)
+        d.text((MARGIN + 160, yy + 52), f"{d1} {c1}", font=font(28, True), fill=ACCENT, anchor="mm")
+        d.text((W / 2, yy + 52), "<->", font=font(26, True), fill=TXT_DIS, anchor="mm")
+        d.text((W - MARGIN - 160, yy + 52), f"{d2} {c2}", font=font(28, True), fill=CYAN, anchor="mm")
+    d.text((W / 2, h - 56), "Trocar um acorde pelo seu relativo muda a cor sem mudar a funcao.",
            font=font(20, True), fill=GOLD, anchor="mm")
     return img
 
@@ -1604,6 +1772,212 @@ DIAGRAMS.update({
     "m4_partitura_tetrade": d_m4_partitura_tetrade,
     "m4_partitura_familia": d_m4_partitura_familia,
     "m4_partitura_progressao": d_m4_partitura_progressao,
+def d_m5_ciclo_quintas():
+    h = 900
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Ciclo das quintas: sustenidos e bemois")
+    y = subtitle(d, "Subir de quinta acrescenta um sustenido; descer, um bemol.", y)
+    cx, cy = W / 2, y + 380
+    r_out, r_in = 300, 210
+    majors = ["C", "G", "D", "A", "E", "B", "F#", "C#", "Ab", "Eb", "Bb", "F"]
+    accs = ["0", "1#", "2#", "3#", "4#", "5#", "6#", "7#", "4b", "3b", "2b", "1b"]
+    for i in range(12):
+        d.pieslice([cx - r_out, cy - r_out, cx + r_out, cy + r_out],
+                   start=-90 + i * 30 - 15, end=-90 + i * 30 + 15,
+                   fill=RAISED if i % 2 == 0 else SURFACE, outline=BORDER)
+        am = math.radians(-90 + i * 30)
+        d.text((cx + (r_out - 52) * math.cos(am), cy + (r_out - 52) * math.sin(am)),
+               majors[i], font=font(26, True), fill=TXT, anchor="mm")
+        d.text((cx + (r_in - 46) * math.cos(am), cy + (r_in - 46) * math.sin(am)),
+               accs[i], font=font(17), fill=CYAN, anchor="mm")
+    d.ellipse([cx - 120, cy - 120, cx + 120, cy + 120], fill=ACCENT_MUTED, outline=BORDER, width=2)
+    d.text((cx, cy - 14), "CICLO DAS", font=font(22, True), fill=TXT, anchor="mm")
+    d.text((cx, cy + 18), "QUINTAS", font=font(22, True), fill=TXT, anchor="mm")
+    d.text((MARGIN, h - 100), "Anel externo: tonalidade maior.  Anel interno: numero de acidentes.",
+           font=font(20), fill=TXT2, anchor="la")
+    d.text((MARGIN, h - 62), "Sentido horario (quintas) = sustenidos; anti-horario (quartas) = bemois.",
+           font=font(20, True), fill=GOLD, anchor="la")
+    return img
+
+
+def d_m5_cadencias():
+    h = 720
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "As principais cadencias")
+    y = subtitle(d, "Cada cadencia tem um efeito: conclusao, suavidade, suspensao ou surpresa.", y)
+    items = [("Autentica", "V - I", "conclusao forte (ponto final)", ACCENT),
+             ("Plagal", "IV - I", "conclusao suave (amen)", CYAN),
+             ("Meia cadencia", "I - V", "suspensao (virgula)", GOLD),
+             ("De engano", "V - vi", "surpresa (adia a conclusao)", DANGER)]
+    top = y + 50
+    for i, (name, degrees, effect, color) in enumerate(items):
+        yy = top + i * 110
+        d.rounded_rectangle([MARGIN, yy, W - MARGIN, yy + 92], radius=10,
+                            fill=RAISED if i % 2 == 0 else SURFACE)
+        d.text((MARGIN + 30, yy + 30), name, font=font(26, True), fill=color, anchor="la")
+        d.text((MARGIN + 30, yy + 66), degrees, font=font(22), fill=TXT, anchor="la")
+        d.text((MARGIN + 460, yy + 46), effect, font=font(21), fill=TXT2, anchor="lm")
+    d.text((W / 2, h - 56), "As cadencias sao a pontuacao da frase musical.",
+           font=font(21, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m5_progressao_padrao():
+    h = 700
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Progressao I - IV - V - I no braco")
+    y = subtitle(d, "Cada acorde do campo aparece na sua regiao, com a funcao marcada.", y)
+    steps = [("I", "C", "tonica", [0, 3, 2, 0, 1, 0], 1),
+             ("IV", "F", "subdominante", [1, 3, 3, 2, 1, 1], 1),
+             ("V", "G", "dominante", [3, 2, 0, 0, 0, 3], 1),
+             ("I", "C", "tonica", [0, 3, 2, 0, 1, 0], 1)]
+    bw = (W - 2 * MARGIN) / 4
+    for i, (deg, name, func, frets, start) in enumerate(steps):
+        cx = MARGIN + bw * (i + 0.5)
+        chord_box(d, cx, y + 70, 150, 170, frets, f"{name} ({deg})", start_fret=start,
+                  caption=func, note_font=font(12, True))
+    d.text((W / 2, h - 56), "Repouso - afastamento - tensao - repouso: o ciclo completo.",
+           font=font(21, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m5_modos_escala():
+    h = 760
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Os sete modos da escala maior")
+    y = subtitle(d, "As mesmas notas de Do maior, cada modo comecando em um grau diferente.", y)
+    modes = [("I", "Jonio", "Do", "maior"), ("II", "Dorico", "Re", "menor com brilho"),
+             ("III", "Frigio", "Mi", "sombrio"), ("IV", "Lidio", "Fa", "brilhante"),
+             ("V", "Mixolidio", "Sol", "maior com blues"), ("VI", "Eolio", "La", "menor natural"),
+             ("VII", "Locrio", "Si", "instavel")]
+    top = y + 30
+    for i, (deg, name, start, feel) in enumerate(modes):
+        yy = top + i * 84
+        d.rounded_rectangle([MARGIN, yy, W - MARGIN, yy + 70], radius=8,
+                            fill=RAISED if i % 2 == 0 else SURFACE)
+        d.text((MARGIN + 24, yy + 35), deg, font=font(22, True), fill=ACCENT, anchor="lm")
+        d.text((MARGIN + 130, yy + 35), name, font=font(24, True), fill=TXT, anchor="lm")
+        d.text((MARGIN + 440, yy + 35), f"comeca em {start}", font=font(20), fill=CYAN, anchor="lm")
+        d.text((MARGIN + 720, yy + 35), feel, font=font(20, True), fill=GOLD, anchor="lm")
+    return img
+
+
+def d_m5_harmonizacao():
+    h = 700
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Harmonizando a escala maior")
+    y = subtitle(d, "Sobre cada grau, empilha-se 1 - 3 - 5 (as notas da propria escala).", y)
+    rows = [("1 - 3 - 5", "Do - Mi - Sol", "C", "maior"),
+            ("2 - 4 - 6", "Re - Fa - La", "Dm", "menor"),
+            ("3 - 5 - 7", "Mi - Sol - Si", "Em", "menor"),
+            ("4 - 6 - 8", "Fa - La - Do", "F", "maior"),
+            ("5 - 7 - 9", "Sol - Si - Re", "G", "maior"),
+            ("6 - 8 - 10", "La - Do - Mi", "Am", "menor"),
+            ("7 - 9 - 11", "Si - Re - Fa", "Bdim", "diminuto")]
+    col_x = [0, MARGIN + 260, MARGIN + 560, MARGIN + 780]
+    _table(d, y + 30, ["Empilhamento", "Notas", "Acorde", "Qualidade"], rows, col_x, row_h=54)
+    d.text((W / 2, h - 52), "O empilhamento de tercas transforma a escala em campo harmonico.",
+           font=font(21, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m5_harmonizacao_braco():
+    h = 700
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Escala harmonizada no braco (Do maior)")
+    y = subtitle(d, "As notas da escala de Do maior nas 12 primeiras casas.", y)
+    string_labels(d, MARGIN + 30, y + 60, 6 * 58)
+    fretboard(d, MARGIN + 50, y + 60, W - 2 * MARGIN - 50, 6 * 58,
+              highlight={0, 2, 4, 5, 7, 9, 11}, root_pc=0)
+    d.text((MARGIN, h - 116), "Tonica (Do) em violeta; as demais notas da escala em ciano.",
+           font=font(21), fill=TXT2, anchor="la")
+    d.text((MARGIN, h - 74), "Sobre cada tonica, monte a triade (1-3-5) para harmonizar.",
+           font=font(21, True), fill=GOLD, anchor="la")
+    return img
+
+
+def _score_image_m5(caption, notes):
+    h = 420
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, caption)
+    staff(d, MARGIN + 30, y + 40, W - 2 * MARGIN - 60, notes)
+    return img
+
+
+def d_m5_partitura_escala():
+    return _score_image_m5("Partitura: escala de Do maior",
+                           [("C", 4, None), ("D", 4, None), ("E", 4, None), ("F", 4, None),
+                            ("G", 4, None), ("A", 4, None), ("B", 4, None), ("C", 5, None)])
+
+
+def d_m5_partitura_campo():
+    return _score_image_m5("Partitura: campo harmonico de Do (C - Dm - Em)",
+                           [("C", 4, None), ("E", 4, None), ("G", 4, None),
+                            ("D", 4, None), ("F", 4, None), ("A", 4, None),
+                            ("E", 4, None), ("G", 4, None), ("B", 4, None)])
+
+
+def d_m5_partitura_triade_tonica():
+    return _score_image_m5("Partitura: triade de tonica (Do maior)",
+                           [("C", 4, None), ("E", 4, None), ("G", 4, None)])
+
+
+def d_m5_partitura_iv_v_i():
+    return _score_image_m5("Partitura: IV - V - I em Do (F - G - C)",
+                           [("F", 4, None), ("A", 4, None), ("C", 5, None),
+                            ("G", 4, None), ("B", 4, None), ("D", 5, None),
+                            ("C", 5, None), ("E", 5, None), ("G", 5, None)])
+
+
+def d_m5_partitura_relativos():
+    return _score_image_m5("Partitura: vi - IV - V - vi (Am - F - G - Am)",
+                           [("A", 3, None), ("C", 4, None), ("E", 4, None),
+                            ("F", 4, None), ("A", 4, None), ("C", 5, None),
+                            ("G", 4, None), ("B", 4, None), ("D", 5, None),
+                            ("A", 3, None), ("C", 4, None), ("E", 4, None)])
+
+
+def d_m5_partitura_cadencia():
+    return _score_image_m5("Partitura: cadencia autentica I - V - I (C - G - C)",
+                           [("C", 4, None), ("E", 4, None), ("G", 4, None),
+                            ("G", 4, None), ("B", 4, None), ("D", 5, None),
+                            ("C", 5, None), ("E", 5, None), ("G", 5, None)])
+
+
+def d_m5_partitura_modo():
+    return _score_image_m5("Partitura: modo dorico (as notas de Do maior a partir de Re)",
+                           [("D", 4, None), ("E", 4, None), ("F", 4, None), ("G", 4, None),
+                            ("A", 4, None), ("B", 4, None), ("C", 5, None), ("D", 5, None)])
+
+
+DIAGRAMS.update({
+    "m5_escala_maior_graus": d_m5_escala_maior_graus,
+    "m5_graus_romanos": d_m5_graus_romanos,
+    "m5_campo_harmonico_maior": d_m5_campo_harmonico_maior,
+    "m5_campo_harmonico_braco": d_m5_campo_harmonico_braco,
+    "m5_funcoes_tres": d_m5_funcoes_tres,
+    "m5_relativos": d_m5_relativos,
+    "m5_relativos_campo": d_m5_relativos_campo,
+    "m5_ciclo_quintas": d_m5_ciclo_quintas,
+    "m5_cadencias": d_m5_cadencias,
+    "m5_progressao_padrao": d_m5_progressao_padrao,
+    "m5_modos_escala": d_m5_modos_escala,
+    "m5_harmonizacao": d_m5_harmonizacao,
+    "m5_harmonizacao_braco": d_m5_harmonizacao_braco,
+    "m5_partitura_escala": d_m5_partitura_escala,
+    "m5_partitura_campo": d_m5_partitura_campo,
+    "m5_partitura_triade_tonica": d_m5_partitura_triade_tonica,
+    "m5_partitura_iv_v_i": d_m5_partitura_iv_v_i,
+    "m5_partitura_relativos": d_m5_partitura_relativos,
+    "m5_partitura_cadencia": d_m5_partitura_cadencia,
+    "m5_partitura_modo": d_m5_partitura_modo,
 })
 
 

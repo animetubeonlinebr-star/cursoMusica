@@ -89,5 +89,16 @@ std::vector<ContentItem> topic4F();  // Formação de acordes
 std::vector<ContentItem> topic4G();  // Sistema 5 (CAGED) e famílias de acordes
 std::vector<ContentItem> topic4H();  // As cinco fases das famílias
 std::vector<ContentItem> topic4I();  // Acordes clean e distribuição pelo braço
+// Module 5 (Etapa 5 — campo harmônico maior e funções harmônicas).
+std::vector<ContentItem> topic5A();  // Escala maior
+std::vector<ContentItem> topic5B();  // Campo harmônico maior e graus da escala
+std::vector<ContentItem> topic5C();  // Função tônica
+std::vector<ContentItem> topic5D();  // Função subdominante
+std::vector<ContentItem> topic5E();  // Função dominante
+std::vector<ContentItem> topic5F();  // Acordes relativos
+std::vector<ContentItem> topic5G();  // Armaduras de clave e tonalidades
+std::vector<ContentItem> topic5H();  // Cadências e progressões harmônicas
+std::vector<ContentItem> topic5I();  // Modos gerados pela escala maior
+std::vector<ContentItem> topic5J();  // Harmonização da escala maior
 
 } // namespace cursomusica::content

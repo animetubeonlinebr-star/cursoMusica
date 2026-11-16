@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <iostream>
+#include <map>
 #include <vector>
 
 #include "Audio/AudioPortClassifier.h"
@@ -295,6 +296,54 @@ void testAudioPortClassifier()
            "ordinary hardware is not a virtual mixer port");
 }
 
+// Generic catalog-shape rule, valid for any set of implemented modules. The
+// Etapas (3..10) are implemented in parallel branches, each from `test`, so a
+// branch that lands module 5 while 3 and 4 are still placeholders must not
+// break — and must not conflict with the branches for 3 and 4. The rule is
+// therefore invariant under any implemented subset:
+//   (a) every number 1..20 appears exactly once in getModules();
+//   (b) the anchor of "from 1" holds: module 1 is implemented;
+//   (c) every module marked implemented really carries lessons and exercises,
+//       and findModule() returns it.
+// This replaces the old "modules 3..20 are placeholders" assertion, which
+// stopped being true as soon as a later module landed. Strict contiguity from 1
+// is deliberately NOT asserted: with one Etapa per branch, a branch delivering
+// module 5 alone (3 and 4 pending) would fail it, and so would the branch for 4.
+void checkModuleCatalogShape (const std::vector<cursomusica::CourseModule>& modules)
+{
+    using namespace cursomusica;
+    std::cout << "ModuleCatalogShape\n";
+
+    // (a) unique numbers, covering 1..20.
+    for (int number = 1; number <= 20; ++number)
+    {
+        int occurrences = 0;
+        for (const auto& m : modules)
+            if (m.number == number)
+                ++occurrences;
+        check (occurrences == 1,
+               juce::String ("module ") + juce::String (number) + " is listed exactly once");
+    }
+
+    // (b) the "from 1" anchor.
+    const auto* first = ModuleCatalog::findModule (1);
+    check (first != nullptr && first->implemented, "module 1 is implemented (anchor)");
+
+    // (c) an implemented module carries content and exercises, and is found.
+    for (const auto& m : modules)
+        if (m.implemented)
+        {
+            check (! m.lessons.empty(),
+                   juce::String ("implemented module ") + juce::String (m.number) + " has lessons");
+            check (! m.exercises.empty(),
+                   juce::String ("implemented module ") + juce::String (m.number) + " has exercises");
+            const auto* found = ModuleCatalog::findModule (m.number);
+            check (found != nullptr && found->implemented,
+                   juce::String ("findModule(") + juce::String (m.number)
+                       + ") returns the implemented module");
+        }
+}
+
 void testModuleCatalog()
 {
     using namespace cursomusica;
@@ -482,6 +531,12 @@ void testModuleCatalog()
         check (fourth != nullptr && fourth->implemented,
                "module 4 is implemented (this branch)");
     }
+    // The catalog must stay coherent as modules are implemented in parallel
+    // branches (one Etapa per branch): every module number appears exactly once,
+    // and a module marked implemented really carries content. This replaces the
+    // old "modules 3..20 are placeholders" assertion, which stopped being true
+    // as soon as a later module landed and would conflict between branches.
+    checkModuleCatalogShape (modules);
 
     // The client asked the graphical material (fretboard, CAGED shapes, rhythm
     // figures) to be shown as images instead of text art. Every diagram named by
@@ -1179,6 +1234,43 @@ void testModule4()
     {
         int count = 0;
         for (const auto& e : m4->exercises)
+    // The catalog shape (unique numbers, contiguous implementations, content in
+    // every implemented module) is asserted generically by
+    // checkModuleCatalogShape(), called from testModuleCatalog(), so this test
+    // does not pin which later modules exist. See the note there.
+}
+
+// Module 5 — Etapa 5: campo harmônico maior e funções harmônicas. It must follow
+// the same shape as module 2: explanation (>=5 pages per topic) with images,
+// audio and scores, 3..5 exercises per topic, and part of the exercises played
+// on the instrument and verified by the app (chords, scale notes or a
+// progression).
+void testModule5()
+{
+    std::cout << "Module5\n";
+    using namespace cursomusica;
+
+    const auto* m5 = ModuleCatalog::findModule (5);
+    check (m5 != nullptr, "module 5 exists");
+    if (m5 == nullptr)
+        return;
+
+    check (m5->implemented, "module 5 is implemented");
+    check (m5->number == 5, "module 5 has number 5");
+    check (m5->usesTempo, "module 5 uses a BPM target");
+    check (m5->level == 3, "module 5 is level 3 (MUSIC.md)");
+    check (m5->targetBpm == 76, "module 5 target BPM is 76 (MUSIC.md)");
+    checkClose (m5->onGridTarget, 0.79, 1e-6, "module 5 on-grid target is 0.79 (MUSIC.md)");
+    check (m5->lessons.size() == 10, "module 5 has ten topics (A..J)");
+    check (m5->lessons.front().id == "A" && m5->lessons.back().id == "J",
+           "module 5 topics run A..J in order");
+    check (m5->exercises.size() >= 30, "module 5 lists a full exercise set");
+
+    // Every topic A..J has 3..5 exercises (client: "de 3 a 5 exercícios por tópico").
+    for (const auto& topic : m5->lessons)
+    {
+        int count = 0;
+        for (const auto& e : m5->exercises)
             if (e.lessonId == topic.id)
                 ++count;
         check (count >= 3, juce::String ("topic ") + topic.id + " has at least three exercises");
@@ -1318,6 +1410,65 @@ void testModule4()
 
     // Explanation: >=5 pages per topic, at least one table and one image, and the
     // media the client asked for (images, audio, scores with audio).
+    // Every exercise is tied to a topic and its id follows EX-5.<topico>.<n>.
+    for (const auto& e : m5->exercises)
+    {
+        check (e.lessonId.isNotEmpty(), "exercise " + e.id + " is tied to a topic");
+        if (! e.isGate)
+            check (e.id.startsWith ("EX-5."), "exercise " + e.id + " follows EX-5.<topico>.<n>");
+    }
+
+    // Part of the exercises is played on the instrument and verified by the
+    // detector: at least one playable exercise per topic (client request).
+    juce::StringArray playableTopics;
+    for (const auto& e : m5->exercises)
+    {
+        const bool playable = e.isQuiz() || ! e.targets.empty() || ! e.chordPitchClasses.empty()
+                                || ! e.chordProgression.empty();
+        if (playable && e.lessonId.isNotEmpty() && ! playableTopics.contains (e.lessonId))
+            playableTopics.add (e.lessonId);
+    }
+    for (const auto& topic : m5->lessons)
+        check (playableTopics.contains (topic.id),
+               juce::String ("topic ") + topic.id + " has a playable exercise");
+
+    // At least one exercise per topic is played on the instrument (chords, notes
+    // or a progression the app recognises) — not only a quiz.
+    juce::StringArray instrumentTopics;
+    for (const auto& e : m5->exercises)
+        if (! e.targets.empty() || ! e.chordPitchClasses.empty() || ! e.chordProgression.empty())
+            instrumentTopics.addIfNotAlreadyThere (e.lessonId);
+    for (const auto& topic : { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J" })
+        check (instrumentTopics.contains (topic),
+               juce::String ("topic ") + topic + " has an instrument-played exercise");
+
+    // The playable identification exercises must not gate on the grid, and the
+    // app must be able to verify them (chord/notes in a valid MIDI range).
+    for (const auto& e : m5->exercises)
+    {
+        if (! e.targets.empty() || ! e.chordPitchClasses.empty())
+        {
+            check (! e.usesGrid, "identification exercise " + e.id + " is not grid-gated");
+            for (const auto& t : e.targets)
+                check (t.midi >= 0 && t.midi <= 127,
+                       "exercise " + e.id + " uses a valid MIDI note");
+            for (const int pc : e.chordPitchClasses)
+                check (pc >= 0 && pc <= 11,
+                       "exercise " + e.id + " uses a valid pitch class");
+        }
+        if (! e.chordProgression.empty())
+        {
+            // The gate is played on the metronome grid; the identification
+            // progression exercises (EX-5.H.2/EX-5.J.2) are not.
+            check (e.usesGrid == e.isGate,
+                   "progression exercise " + e.id + " grid flag matches its gate role");
+            for (const auto& chord : e.chordProgression)
+                check (chord.size() >= 3, "exercise " + e.id + " chords have at least three notes");
+        }
+    }
+
+    // Explanation: >=5 pages per topic, at least one table and one image, and
+    // the media the client asked for (images, audio, scores with audio).
     auto detailChars = [] (const LessonBlock& topic)
     {
         int total = 0;
@@ -1337,6 +1488,7 @@ void testModule4()
     bool anyScore = false;
     for (const auto& topic : m3->lessons)
     for (const auto& topic : m4->lessons)
+    for (const auto& topic : m5->lessons)
     {
         const int chars = detailChars (topic);
         check (chars >= content::minTopicChars,
@@ -1369,6 +1521,12 @@ void testModule4()
     // and every audio/score item actually carries notes to play (a score without
     // its audio is a defect).
     for (const auto& topic : m4->lessons)
+    check (anyAudio, "module 5 demonstrates the field with audio (REQ-004)");
+    check (anyScore, "module 5 has scores with their audio (REQ-004)");
+
+    // Every diagram and score named by the content is embedded in the binary,
+    // and every audio/score item actually carries notes to play.
+    for (const auto& topic : m5->lessons)
         for (const auto& item : topic.detail)
         {
             if (item.kind == ContentKind::image || item.kind == ContentKind::score)
@@ -1443,6 +1601,58 @@ void testModule4()
                 check (pcs == std::vector<int> ({ 0, 4, 7, 3, 6 }),
                        "family score audio matches the image (Dó–Mi–Sol → Mi♭–Sol♭)");
             }
+    // The module cites >=1 pattern and >=1 guitarist (REQ-007, REQ-010).
+    check (m5->practice.patternId.isNotEmpty(), "module 5 cites a pattern");
+    check (! m5->practice.guitarists.isEmpty(), "module 5 cites at least one guitarist");
+    check (! m5->sources.isEmpty(), "module 5 cites its curated apostilas");
+
+    // The quiz answers must not all sit on the same option, otherwise the
+    // exercise could be passed by always ticking the first alternative and the
+    // 90% gate would not measure learning (client request). Every answer index
+    // used by any question must appear, and none may dominate the set.
+    {
+        std::map<int, int> answerCounts;
+        int totalQuestions = 0;
+        for (const auto& e : m5->exercises)
+            for (const auto& q : e.quiz)
+            {
+                check (q.correctIndex >= 0 && q.correctIndex < q.options.size(),
+                       "question '" + q.prompt.substring (0, 32) + "…' has a valid correct index");
+                ++answerCounts[q.correctIndex];
+                ++totalQuestions;
+            }
+
+        check (totalQuestions >= 50, "module 5 has a substantial question set");
+        check (answerCounts.size() >= 3,
+               "module 5 quiz answers are spread over at least three options");
+        for (const auto& entry : answerCounts)
+            check (entry.second < totalQuestions,
+                   "no single option holds every answer of module 5");
+        // The correct option must not always be the first one.
+        const int firstOptionAnswers = answerCounts.count (0) > 0 ? answerCounts.at (0) : 0;
+        check (firstOptionAnswers < totalQuestions,
+               "module 5 does not put every answer on the first option");
+    }
+
+    // The gate closes the module as a I–IV–V–I progression of the harmonic field
+    // on the grid (REQ-009).
+    bool hasGate = false;
+    for (const auto& e : m5->exercises)
+        if (e.isGate)
+        {
+            hasGate = true;
+            check (e.usesGrid, "module 5 gate is played on the metronome grid");
+            check (e.chordProgression.size() == 4, "module 5 gate has four chords");
+            check (e.chordProgression.front() == std::vector<int> ({ 0, 4, 7 }),
+                   "module 5 gate opens on the tonic (C major)");
+            check (e.chordProgression.back() == std::vector<int> ({ 0, 4, 7 }),
+                   "module 5 gate closes on the tonic (C major)");
+        }
+    check (hasGate, "module 5 has a gate exercise");
+
+    // The catalog shape (unique numbers, contiguous implementations, content in
+    // every implemented module) is asserted generically by
+    // checkModuleCatalogShape(), called from testModuleCatalog().
 }
 
 int main()
@@ -1461,6 +1671,7 @@ int main()
     testModule2();
     testModule3();
     testModule4();
+    testModule5();
     testProgressDatabase();
     testProgressStore();
     testSharedSettings();
