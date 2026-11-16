@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <iostream>
+#include <map>
 #include <vector>
 
 #include "Audio/AudioPortClassifier.h"
@@ -1203,6 +1204,57 @@ void testModule8()
                            juce::String ("topic ") + topic.id + " example uses a valid MIDI note");
             }
         }
+
+    // QA: every score must sound what it writes. The diagram is a fixed image, so
+    // the only way to keep the image and the audio in sync is to pin the notes
+    // each score image is allowed to carry; if the audio diverges from the
+    // written score, this fails (the review caught a score whose image was a
+    // II-V-I menor while the audio played FM7 -> Fm7 -> C). Pitch classes are
+    // compared, not absolute octaves, because guitar music is notated an octave
+    // above the sounding pitch.
+    {
+        auto pitchClasses = [] (const std::vector<int>& midis)
+        {
+            std::vector<int> pcs;
+            for (const int midi : midis)
+                pcs.push_back (music::pitchClassOf (midi));
+            return pcs;
+        };
+
+        const std::map<juce::String, std::vector<int>> expected = {
+            // arpejo de G7 (V7 de Do): G-B-D-F
+            { "m8_partitura_v7",           { 7, 11, 2, 5 } },
+            // arpejo de D7 (V7/V de Do): D-F#-A-C
+            { "m8_partitura_v7_do_v",      { 2, 6, 9, 0 } },
+            // G7 alterado (b5 e b9): G-B-Db-F-Ab
+            { "m8_partitura_alterado",     { 7, 11, 1, 5, 8 } },
+            // arpejo de Db7 (SubV7 de Do): Db-F-Ab-Cb(=B)
+            { "m8_partitura_subv7",        { 1, 5, 8, 11 } },
+            // II-V-I maior (Dm7 - G7 - CM7): D-F-A-C / G-B-D-F / C-E-G
+            { "m8_partitura_ii_v_i",       { 2, 5, 9, 0, 7, 11, 2, 5, 0, 4, 7 } },
+            // II-V-I menor (Dm7b5 - G7 - Cm7): D-F-Ab-C / G-B-D-F / C-Eb-G
+            { "m8_partitura_ii_v_i_menor", { 2, 5, 8, 0, 7, 11, 2, 5, 0, 3, 7 } },
+            // FM7 - Fm7 - C (iv menor emprestado): F-A-C-E / F-Ab-C-Eb / C-E-G
+            { "m8_partitura_iv_menor",     { 5, 9, 0, 4, 5, 8, 0, 3, 0, 4, 7 } },
+        };
+
+        int scoresChecked = 0;
+        for (const auto& topic : m8->lessons)
+            for (const auto& item : topic.detail)
+                if (item.kind == ContentKind::score)
+                {
+                    ++scoresChecked;
+                    const auto it = expected.find (item.imageName);
+                    check (it != expected.end(),
+                           juce::String ("topic ") + topic.id + " score '"
+                               + item.imageName + "' has a pinned expected audio");
+                    if (it != expected.end())
+                        check (pitchClasses (item.notes) == it->second,
+                               juce::String ("topic ") + topic.id + " score '"
+                                   + item.imageName + "' plays exactly what the score writes");
+                }
+        check (scoresChecked >= 10, "module 8 has at least one score per topic with audio");
+    }
 
     // The module cites >=1 pattern and >=1 guitarist (REQ-007, REQ-010).
     check (m8->practice.patternId.isNotEmpty(), "module 8 cites a pattern");

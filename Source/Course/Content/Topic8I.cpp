@@ -1,7 +1,7 @@
 #include "Course/Content/Topics.h"
 
 // Topic 8I — Progressão II-V-I maior e menor (Módulo 8, Etapa 8).
-// Fonte de verdade do texto: docs/MUSIC.md §8 (bloco I).
+// Fonte de verdade do texto: .agents/agents/mc-modulo-8.md (Etapa 8, tópico I).
 namespace cursomusica::content
 {
 
@@ -63,7 +63,7 @@ std::vector<ContentItem> topic8I()
         b ("Com SubV7: Dm7 → Db7 → CM7."),
         b ("Com SubIIm: Dm7b5 → G7b9 → CM7."),
         b ("Com os dois: Dm7b5 → Db7 → CM7."),
-        img ("m8_ii_v_i", "O II-V-I e as suas substituições: o baixo pode subir em quartas ou descer em semitons."),
+        img ("m8_ii_v_i_substituicoes", "O II-V-I e as suas substituições: o baixo pode subir em quartas ou descer em semitons."),
 
         h ("O II-V-I como célula de frases"),
         p (

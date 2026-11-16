@@ -1,7 +1,7 @@
 #include "Course/Content/Topics.h"
 
 // Topic 8F — Empréstimos modais (Módulo 8, Etapa 8).
-// Fonte de verdade do texto: docs/MUSIC.md §8 (bloco F).
+// Fonte de verdade do texto: .agents/agents/mc-modulo-8.md (Etapa 8, tópico F).
 namespace cursomusica::content
 {
 
@@ -99,7 +99,7 @@ std::vector<ContentItem> topic8F()
         b ("Toque C → FM7 → Fm7 → C (iv menor)."),
         b ("Toque C → Ab7M → Bb7 → C (bVI + bVII)."),
         b ("Compare o efeito de cada empréstimo."),
-        part ("m8_partitura_ii_v_i_menor",
+        part ("m8_partitura_iv_menor",
               { "F3", "A3", "C4", "E4", "F3", "G#3", "C4", "D#4", "C3", "E3", "G3" },
               "Partitura de FM7 → Fm7 → C: o iv menor como empréstimo modal. Ouça a cor melancólica."),
 

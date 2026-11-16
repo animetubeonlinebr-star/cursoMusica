@@ -1,7 +1,7 @@
 #include "Course/Content/Topics.h"
 
 // Topic 8B — Dominantes secundários (Módulo 8, Etapa 8).
-// Fonte de verdade do texto: docs/MUSIC.md §8 (bloco B).
+// Fonte de verdade do texto: .agents/agents/mc-modulo-8.md (Etapa 8, tópico B).
 namespace cursomusica::content
 {
 
@@ -59,10 +59,10 @@ std::vector<ContentItem> topic8B()
         b ("Cada seta é uma resolução de dominante."),
         b ("A cadeia dá sensação de aceleração e chegada."),
         tbl ({ "Passo", "Acorde", "Função" }, {
-            { "1", "E7", "V7/ii" },
-            { "2", "A7", "V7/ii de Dm, mas aqui aponta para D7" },
-            { "3", "D7", "V7/V" },
-            { "4", "G7", "V7" },
+            { "1", "E7", "V7/vi (dominante de Lá menor)" },
+            { "2", "A7", "V7/ii (dominante de Ré menor)" },
+            { "3", "D7", "V7/V (dominante de Sol)" },
+            { "4", "G7", "V7 (dominante de Dó)" },
             { "5", "C", "tônica (I)" },
         }),
 
@@ -102,15 +102,15 @@ std::vector<ContentItem> topic8B()
 
         h ("Dominantes secundários em outras tonalidades"),
         p (
-            "Os dominantes secundários existem em qualquer tonalidade. Em Sol maior, o ii é Am, o V7/ii é E7; o V7/V é A7; o V7/vi é B7. Em Fá maior, o ii é Gm, o V7/ii é D7; o V7/V é C7. O processo é sempre o mesmo: identificar o alvo e subir uma quinta justa para achar a fundamental do dominante. Uma vez entendido o padrão, você o aplica em qualquer tom."),
+            "Os dominantes secundários existem em qualquer tonalidade. Em Sol maior, o ii é Am, o V7/ii é E7; o V7/V é A7; o V7/vi é B7. Em Fá maior, o ii é Gm, o V7/ii é D7; o V7/V é G7. O processo é sempre o mesmo: identificar o alvo e subir uma quinta justa para achar a fundamental do dominante. Uma vez entendido o padrão, você o aplica em qualquer tom."),
         b ("Em Dó maior: A7, B7, C7, D7, E7."),
         b ("Em Sol maior: E7, F#7, G7, A7, B7."),
         b ("Em Fá maior: D7, E7, F7, G7, A7."),
         tbl ({ "Tonalidade", "V7/ii", "V7/V", "V7/vi" }, {
             { "Dó maior", "A7", "D7", "E7" },
             { "Sol maior", "E7", "A7", "B7" },
-            { "Fá maior", "D7", "C7", "A7" },
-            { "Si bemol maior", "C7", "F7", "G7" },
+            { "Fá maior", "D7", "G7", "A7" },
+            { "Si bemol maior", "G7", "C7", "D7" },
         }),
 
         h ("Dominantes secundários na guitarra"),

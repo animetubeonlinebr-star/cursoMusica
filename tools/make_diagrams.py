@@ -1124,6 +1124,46 @@ def d_m8_dilatacao_menor():
     return img
 
 
+def d_m8_alteracoes_tensao():
+    h = 700
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Da tensao simples a maxima tensao")
+    y = subtitle(d, "Cada nota alterada acrescenta tensao e aponta a resolucao.", y)
+    # Escada de tensao: do dominante simples ao alterado.
+    steps = [("G7", "G-B-D-F", "tensao basica"),
+             ("G7b9", "G-B-D-F-Ab", "nona menor"),
+             ("G7b9#11", "G-B-D-F-Ab-C#", "quarta aumentada"),
+             ("G7alt", "G-B-D#-F-Ab", "todas juntas")]
+    for i, (name, notes, desc) in enumerate(steps):
+        yy = y + 60 + i * 110
+        width = 300 + i * 130
+        d.rounded_rectangle([MARGIN, yy, MARGIN + width, yy + 88], radius=10,
+                            fill=RAISED, outline=ACCENT if i == len(steps) - 1 else CYAN, width=3)
+        d.text((MARGIN + 24, yy + 44), name, font=font(28, True), fill=GOLD, anchor="lm")
+        d.text((MARGIN + 180, yy + 44), notes, font=font(22), fill=TXT, anchor="lm")
+        d.text((MARGIN + width + 24, yy + 44), desc, font=font(20), fill=TXT2, anchor="lm")
+    d.text((W / 2, h - 40), "Quanto mais alto na escada, mais o ouvido espera a resolucao.",
+           font=font(20, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m8_ii_v_i_substituicoes():
+    h = 720
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "O II-V-I e as suas substituicoes")
+    y = subtitle(d, "O mesmo alvo alcancado por caminhos diferentes.", y)
+    rows = [("Tradicional", "Dm7 -> G7 -> CM7", "baixo sobe em quartas"),
+            ("Com SubV7", "Dm7 -> Db7 -> CM7", "baixo desce em semitons"),
+            ("Com SubIIm", "Dm7b5 -> G7b9 -> CM7", "cor do menor no ii"),
+            ("Com os dois", "Dm7b5 -> Db7 -> CM7", "cromatismo total")]
+    rows_box(d, y + 50, rows, height=70, cols=(0, 200, 560, 900))
+    d.text((W / 2, h - 44), "O alvo nao muda: muda o caminho ate ele.",
+           font=font(20, True), fill=GOLD, anchor="mm")
+    return img
+
+
 def d_m8_ii_v_i():
     h = 720
     img, d = canvas(h, BG)
@@ -1195,16 +1235,26 @@ def d_m8_partitura_v7_do_v():
                         "Partitura: arpejo de D7 (V7/V de Do)")
 
 
+def d_m8_partitura_iv_menor():
+    return _score_image("iv_menor",
+                        [("F", 3, None), ("A", 3, None), ("C", 4, None), ("E", 4, None),
+                         ("F", 3, None), ("A", 3, "b"), ("C", 4, None), ("E", 4, "b"),
+                         ("C", 3, None), ("E", 3, None), ("G", 3, None)],
+                        "Partitura: FM7 - Fm7 - C (iv menor emprestado)")
+
+
 DIAGRAMS.update({
     "m8_dominante_v7": d_m8_dominante_v7,
     "m8_dominantes_secundarios": d_m8_dominantes_secundarios,
     "m8_dominantes_alterados": d_m8_dominantes_alterados,
+    "m8_alteracoes_tensao": d_m8_alteracoes_tensao,
     "m8_subv7": d_m8_subv7,
     "m8_subiim": d_m8_subiim,
     "m8_emprestimos_modais": d_m8_emprestimos_modais,
     "m8_dilatacao_maior": d_m8_dilatacao_maior,
     "m8_dilatacao_menor": d_m8_dilatacao_menor,
     "m8_ii_v_i": d_m8_ii_v_i,
+    "m8_ii_v_i_substituicoes": d_m8_ii_v_i_substituicoes,
     "m8_nao_ii_v_i": d_m8_nao_ii_v_i,
     "m8_partitura_v7": d_m8_partitura_v7,
     "m8_partitura_alterado": d_m8_partitura_alterado,
@@ -1212,6 +1262,7 @@ DIAGRAMS.update({
     "m8_partitura_ii_v_i": d_m8_partitura_ii_v_i,
     "m8_partitura_ii_v_i_menor": d_m8_partitura_ii_v_i_menor,
     "m8_partitura_v7_do_v": d_m8_partitura_v7_do_v,
+    "m8_partitura_iv_menor": d_m8_partitura_iv_menor,
 })
 
 

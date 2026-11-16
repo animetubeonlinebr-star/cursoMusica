@@ -1,7 +1,7 @@
 #include "Course/Content/Topics.h"
 
 // Topic 8E — SubIIm (Módulo 8, Etapa 8).
-// Fonte de verdade do texto: docs/MUSIC.md §8 (bloco E).
+// Fonte de verdade do texto: .agents/agents/mc-modulo-8.md (Etapa 8, tópico E).
 namespace cursomusica::content
 {
 

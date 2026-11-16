@@ -1,7 +1,7 @@
 #include "Course/Content/Topics.h"
 
 // Topic 8G — Dilatação do campo harmônico maior (Módulo 8, Etapa 8).
-// Fonte de verdade do texto: docs/MUSIC.md §8 (bloco G).
+// Fonte de verdade do texto: .agents/agents/mc-modulo-8.md (Etapa 8, tópico G).
 namespace cursomusica::content
 {
 

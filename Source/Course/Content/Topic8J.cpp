@@ -1,7 +1,7 @@
 #include "Course/Content/Topics.h"
 
 // Topic 8J — Identificação de situações que não são II-V-I (Módulo 8, Etapa 8).
-// Fonte de verdade do texto: docs/MUSIC.md §8 (bloco J).
+// Fonte de verdade do texto: .agents/agents/mc-modulo-8.md (Etapa 8, tópico J).
 namespace cursomusica::content
 {
 

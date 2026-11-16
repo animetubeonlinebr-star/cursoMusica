@@ -1,7 +1,7 @@
 #include "Course/Content/Topics.h"
 
 // Topic 8D — SubV7 (Módulo 8, Etapa 8).
-// Fonte de verdade do texto: docs/MUSIC.md §8 (bloco D).
+// Fonte de verdade do texto: .agents/agents/mc-modulo-8.md (Etapa 8, tópico D).
 namespace cursomusica::content
 {
 
@@ -129,8 +129,8 @@ std::vector<ContentItem> topic8D()
 
         h ("SubV7 e a relação com o V7"),
         p (
-            "É útil pensar no SubV7 como uma inversão do V7. Se você tocar um V7 e, em seguida, mover cada nota meio-tom para baixo, obtém o SubV7. Essa relação visual e auditiva ajuda a lembrar a substituição: o SubV7 é o V7 \"de cabeça para baixo\". Do ponto de vista do trítono, os dois acordes são idênticos, apenas com as notas rearranjadas."),
-        b ("V7 → SubV7: cada nota desce meio-tom."),
+            "É útil pensar no SubV7 como uma inversão do V7. Tome a fundamental do V7 e desça um trítono (seis semitons): de Sol chega a Ré bemol, a fundamental do SubV7. As notas se reorganizam — a terça do V7 (Si) passa a ser a sétima do SubV7 (Dó bemol) e a sétima do V7 (Fá) passa a ser a terça do SubV7. Essa relação visual e auditiva ajuda a lembrar a substituição: o SubV7 é o V7 \"de cabeça para baixo\". Do ponto de vista do trítono, os dois acordes são idênticos, apenas com as notas rearranjadas."),
+        b ("V7 → SubV7: a fundamental desce um trítono (seis semitons)."),
         b ("G7 (G, B, D, F) → Db7 (Db, F, Ab, Cb)."),
         b ("O trítono permanece: B–F vira F–Cb (mesmo som)."),
         c (

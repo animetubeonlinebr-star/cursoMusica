@@ -1,7 +1,7 @@
 #include "Course/Content/Topics.h"
 
 // Topic 8C — Dominantes alterados e resoluções (Módulo 8, Etapa 8).
-// Fonte de verdade do texto: docs/MUSIC.md §8 (bloco C).
+// Fonte de verdade do texto: .agents/agents/mc-modulo-8.md (Etapa 8, tópico C).
 namespace cursomusica::content
 {
 
@@ -70,7 +70,7 @@ std::vector<ContentItem> topic8C()
         b ("Regular: G7 → C (a tônica esperada)."),
         b ("Irregular (deceptiva): G7 → Am (resolve no vi)."),
         b ("O tipo de resolução muda a sensação: a regular fecha, a deceptiva surpreende."),
-        img ("m8_dominantes_alterados", "Do dominante simples ao alterado: mais notas alteradas, mais tensão, mais expectativa de resolução."),
+        img ("m8_alteracoes_tensao", "Do dominante simples ao alterado: mais notas alteradas, mais tensão, mais expectativa de resolução."),
 
         h ("A resolução do dominante alterado"),
         p (

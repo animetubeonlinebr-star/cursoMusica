@@ -1,7 +1,7 @@
 #include "Course/Content/Topics.h"
 
 // Topic 8H — Dilatação do campo harmônico menor (Módulo 8, Etapa 8).
-// Fonte de verdade do texto: docs/MUSIC.md §8 (bloco H).
+// Fonte de verdade do texto: .agents/agents/mc-modulo-8.md (Etapa 8, tópico H).
 namespace cursomusica::content
 {
 
@@ -129,7 +129,7 @@ std::vector<ContentItem> topic8H()
         b ("Varie a tônica: Cm7, Cm6, Cm7M."),
         b ("Varie o dominante: G7, G7b9, G7alt."),
         b ("Pratique o II-V-I menor em várias tonalidades."),
-        aud ({ "C3", "Eb3", "G3", "A3", "C3", "Eb3", "G3", "B3", "C3", "Eb3", "G3", "A3", "G3", "Eb3", "C3" },
+        aud ({ "C3", "Eb3", "G3", "A3", "C3", "Eb3", "G3", "B3", "C3", "Eb3", "G3", "Bb3", "G3", "Eb3", "C3" },
              "Cm6, Cm7M e Cm7: as variações da tônica menor. Ouça as diferentes cores."),
 
         h ("A escala para improvisar no menor"),

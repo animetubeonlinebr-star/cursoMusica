@@ -1,7 +1,7 @@
 #include "Course/Content/Topics.h"
 
 // Topic 8A — Dominante V7 (Módulo 8, Etapa 8).
-// Fonte de verdade do texto: docs/MUSIC.md §8 (bloco A).
+// Fonte de verdade do texto: .agents/agents/mc-modulo-8.md (Etapa 8, tópico A).
 namespace cursomusica::content
 {
 
@@ -82,7 +82,7 @@ std::vector<ContentItem> topic8A()
         b ("Ouça o acorde e pergunte: para onde ele quer ir?"),
         b ("Cante a nota de chegada antes de tocar o acorde seguinte."),
         b ("Confira tocando a resolução e perceba o alívio."),
-        aud ({ "G3", "F4" }, "Só o trítono (Sol–Fá) do G7: ouça a tensão pedindo resolução."),
+        aud ({ "B3", "F4" }, "Só o trítono (Si–Fá) do G7: ouça a tensão pedindo resolução."),
         aud ({ "G3", "B3", "D4", "F4", "C4", "E4", "G4" }, "G7 resolvendo em C: a tensão se transforma em repouso."),
 
         h ("Erros comuns ao estudar o dominante"),
