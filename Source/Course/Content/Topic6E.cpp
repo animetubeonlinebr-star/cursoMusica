@@ -45,7 +45,7 @@ std::vector<ContentItem> topic6E()
         b ("Fórmula: 1 2 3 #4 #5 6 7."),
         b ("Som: flutuante, etéreo, com quinta aumentada."),
         b ("Uso: sobre acordes maj7(#5)."),
-        aud ({ "E4", "F#4", "G#4", "A#4", "C5", "D#5", "E5" },
+        aud ({ "E4", "F#4", "G#4", "A#4", "C5", "C#5", "D#5", "E5" },
              "Lídio aumentado a partir de Mi: som etéreo, com a quinta aumentada."),
 
         h ("Modo 4 — lídio dominante (1 2 3 #4 5 6 b7)"),

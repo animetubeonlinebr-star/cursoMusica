@@ -1394,6 +1394,17 @@ void testModule6()
                     check (inScale,
                            juce::String ("topic ") + topic.id + " plays the scale named in its caption ("
                                + scale->first + ")");
+
+                    // Completeness (QA): the caption names the whole scale, so the
+                    // example must sound every degree of it — an example that
+                    // omits a degree (or, as a side effect, skips a step) is not
+                    // the scale the caption declares.
+                    bool complete = true;
+                    for (const int pc : allowed)
+                        complete = complete && played.count (pc) > 0;
+                    check (complete,
+                           juce::String ("topic ") + topic.id + " plays every degree of the scale named in its caption ("
+                               + scale->first + ")");
                 }
             }
         }

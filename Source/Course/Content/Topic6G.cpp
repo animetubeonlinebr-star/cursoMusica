@@ -46,7 +46,7 @@ std::vector<ContentItem> topic6G()
         b ("O iv também prepara o V7: iv → V7 → i é a cadência menor por excelência."),
         aud ({ "C4", "E4", "G4", "B4", "F4", "A4", "C5", "E5", "F4", "Ab4", "C5", "Eb5" },
              "I → IV → iv em Dó: C7M, F7M, Fm7 — o subdominante menor escurecendo a harmonia."),
-        part ("m6_partitura_subdominante", { "C4", "E4", "G4", "B4", "F4", "Ab4", "C5", "Eb5", "C4", "E4", "G4" },
+        part ("m6_partitura_subdominante", { "C4", "E4", "G4", "B4", "F4", "Ab4", "C5", "Eb5", "C4", "E4", "G4", "B4" },
               "Partitura de I - iv - I em Dó (C7M / Fm7 / C7M). Ouça o efeito do subdominante menor."),
 
         h ("O ii meio-diminuto"),

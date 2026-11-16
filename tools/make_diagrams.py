@@ -1150,7 +1150,8 @@ def d_m6_partitura_subdominante():
     return _score_image("subdominante", [("C", 4, None), ("E", 4, None), ("G", 4, None),
                                          ("B", 4, None), ("F", 4, None), ("A", 4, "b"),
                                          ("C", 5, None), ("E", 5, "b"),
-                                         ("C", 4, None), ("E", 4, None), ("G", 4, None)],
+                                         ("C", 4, None), ("E", 4, None), ("G", 4, None),
+                                         ("B", 4, None)],
                         "Partitura: I - iv - I em Do (C7M / Fm7 / C7M)")
 
 
