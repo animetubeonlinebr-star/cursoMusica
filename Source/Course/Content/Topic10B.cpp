@@ -150,7 +150,7 @@ std::vector<ContentItem> topic10B()
         b ("Converter a melodia em graus revela o desenho da frase."),
         b ("A melodia define o que a harmonia pode fazer; ela aponta os acordes possíveis."),
         b ("Improvisar é alternar repouso e tensão com intenção (REQ-011, REQ-012)."),
-        part ("m10_partitura_modal", { "D4", "F4", "A4", "C5", "D5", "C5", "A4", "F4" },
+        part ("m10_partitura_modal", { "D4", "F4", "A4", "B4", "C5", "A4", "F4", "D4" },
               "Partitura de uma frase dórica sobre Dm7: repouso nas notas do acorde e tensão resolvida. Ouça o equilíbrio."),
     };
 }

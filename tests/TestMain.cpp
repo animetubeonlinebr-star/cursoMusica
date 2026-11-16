@@ -1215,19 +1215,40 @@ void testModule10()
     check (! m10->sources.isEmpty(), "module 10 cites its curated apostilas (REQ-006)");
 
     // The gate closes the module as a reharmonised ii–V–I on the grid (REQ-009).
+    // Every chord is checked, not just the first and last: the tritone
+    // substitution (Db7) must carry Cb (= 11), not C (= 0), or a student who
+    // plays the correct chord would be failed (panel finding F1).
+    const std::vector<std::vector<int>> gateChords {
+        { 2, 5, 9, 0 },    // Dm7
+        { 9, 1, 4, 7 },    // A7 (dominante secundário)
+        { 2, 5, 9, 0 },    // Dm7
+        { 1, 5, 8, 11 },   // Db7 (subV: Db–F–Ab–Cb)
+        { 0, 4, 7, 11 },   // C7M (alvo)
+    };
     bool hasGate = false;
     for (const auto& e : m10->exercises)
         if (e.isGate)
         {
             hasGate = true;
-            check (e.chordProgression.size() == 5, "module 10 gate has five chords");
-            check (e.chordProgression.front() == std::vector<int> ({ 2, 5, 9, 0 }),
-                   "module 10 gate opens on Dm7 (the ii)");
-            check (e.chordProgression.back() == std::vector<int> ({ 0, 4, 7, 11 }),
-                   "module 10 gate resolves on C7M (the target)");
+            check (e.chordProgression == gateChords, "module 10 gate spells every chord correctly");
             check (e.usesGrid, "module 10 gate is graded against the grid");
         }
     check (hasGate, "module 10 has a gate exercise");
+
+    // The tritone-substitution exercises must spell Db7 with Cb (= 11). A wrong
+    // spelling here would fail a student who plays the chord correctly (F1).
+    int subVCount = 0;
+    for (const auto& e : m10->exercises)
+        for (const auto& chord : e.chordProgression)
+            if (chord == std::vector<int> ({ 1, 5, 8, 11 }))
+                ++subVCount;
+    check (subVCount >= 4, "the Db7 (subV) is spelled correctly in every exercise");
+
+    // No exercise may contain the mis-spelled Db7M (C instead of Cb).
+    for (const auto& e : m10->exercises)
+        for (const auto& chord : e.chordProgression)
+            check (chord != std::vector<int> ({ 1, 5, 8, 0 }),
+                   "no exercise spells Db7 as Db7M (" + e.id + ")");
 }
 
 int main()

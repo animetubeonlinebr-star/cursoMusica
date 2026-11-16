@@ -1531,7 +1531,7 @@ namespace
                        juce::String::fromUTF8 ("O app reconhece as notas e confere a progressão com o subV.")), "G");
         m.exercises.back().chordProgression = {
             { 2, 5, 9, 0 },    // Dm7
-            { 1, 5, 8, 0 },    // Db7
+            { 1, 5, 8, 11 },   // Db7
             { 0, 4, 7, 11 },   // C7M
         };
         m.exercises.back().usesGrid = false;
@@ -1604,7 +1604,7 @@ namespace
                        juce::String::fromUTF8 ("O app reconhece as notas e confere a chegada ao alvo por subV.")), "H");
         m.exercises.back().chordProgression = {
             { 2, 5, 9, 0 },    // Dm7
-            { 1, 5, 8, 0 },    // Db7
+            { 1, 5, 8, 11 },   // Db7
             { 0, 4, 7, 11 },   // C7M
         };
         m.exercises.back().usesGrid = false;
@@ -1645,7 +1645,7 @@ namespace
             { 0, 4, 7, 11 },   // C7M
             { 9, 1, 4, 7 },    // A7
             { 2, 5, 9, 0 },    // Dm7
-            { 1, 5, 8, 0 },    // Db7
+            { 1, 5, 8, 11 },   // Db7
             { 0, 4, 7, 11 },   // C7M
         };
         m.exercises.back().usesGrid = false;
@@ -1733,7 +1733,7 @@ namespace
             { 2, 5, 9, 0 },    // Dm7
             { 9, 1, 4, 7 },    // A7 (dominante secundário)
             { 2, 5, 9, 0 },    // Dm7
-            { 1, 5, 8, 0 },    // Db7 (subV)
+            { 1, 5, 8, 11 },   // Db7 (subV)
             { 0, 4, 7, 11 },   // C7M (alvo)
         };
 

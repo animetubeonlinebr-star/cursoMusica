@@ -112,7 +112,7 @@ std::vector<ContentItem> topic10D()
         b ("Escolha um acorde por nota e toque a melodia por cima."),
         b ("Ajuste pela condução de vozes (tópico F)."),
         part ("m10_partitura_verticalizacao", { "A4", "G4", "F4", "E4" },
-              "Partitura da melodia verticalizada: a mesma linha, agora harmonizada acorde a acorde."),
+              "Partitura da melodia verticalizada: a mesma linha A–G–F–E, que os acordes do tópico harmonizam acorde a acorde."),
 
         h ("Onde a verticalização se aplica"),
         p (

@@ -88,7 +88,7 @@ std::vector<ContentItem> topic10C()
         b ("Mudar o modo de um acorde muda a sonoridade sem trocar o acorde."),
         b ("A escolha modal justifica substituições de escala (lídio b7, alterada)."),
         b ("A cor é uma decisão de análise, não um acidente."),
-        part ("m10_partitura_modal", { "D4", "F4", "A4", "C5", "D5", "C5", "A4", "F4" },
+        part ("m10_partitura_modal", { "D4", "F4", "A4", "B4", "C5", "A4", "F4", "D4" },
               "Partitura: uma frase dórica sobre Dm7, destacando a sexta maior. Ouça a escolha modal em ação."),
 
         h ("Modos e a escala da tonalidade: o que muda"),

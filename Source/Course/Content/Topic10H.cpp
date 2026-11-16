@@ -127,7 +127,7 @@ std::vector<ContentItem> topic10H()
         b ("Continue para trás (A7, Em7b5) até onde quiser começar."),
         aud ({ "E3", "G3", "A#3", "D4", "A3", "C#4", "E4", "G4", "D4", "F4", "A4", "C5", "G3", "B3", "D4", "F4", "C4", "E4", "G4", "B4" },
              "Uma cadência longa construída de trás para frente: Em7b5 – A7 – Dm7 – G7 – C7M. Ouça a direção."),
-        part ("m10_partitura_turnaround", { "C4", "E4", "G4", "A4", "D5", "F5", "G5", "B4" },
+        part ("m10_partitura_turnaround", { "C4", "E4", "G4", "B4", "C#4", "E4", "G4", "A4", "D4", "F4", "A4", "C5", "G3", "B3", "D4", "F4" },
               "Partitura de uma progressão construída em direção ao alvo. Ouça a chegada."),
 
         h ("Alvo e improvisação"),

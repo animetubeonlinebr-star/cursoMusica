@@ -72,7 +72,7 @@ std::vector<ContentItem> topic10J()
         b ("A roupa vem das tensões, da densidade e do ritmo."),
         b ("Reconhecer a estrutura é o que permite vesti-la de várias formas."),
         aud ({ "D4", "F4", "A4", "C5", "E5" }, "O ii com nona (bossa): ouça a suavidade."),
-        aud ({ "C3", "G3", "D4", "A4" }, "O ii como power chord (rock): ouça a diferença de peso."),
+        aud ({ "D3", "A3", "D4", "A4" }, "O ii como power chord (rock): só fundamental e quinta (D–A). Ouça a diferença de peso."),
         img ("m10_estilos", "Do mesmo ii–V–I nascem quatro sonoridades. O estilo é a roupa; a análise é o corpo."),
 
         h ("Estilo e reharmonização"),
@@ -91,7 +91,7 @@ std::vector<ContentItem> topic10J()
         b ("Só Danço Samba / Equinox: ii–V–I, dominantes secundários e blues."),
         b ("Incompatibilidade de Gênios: empréstimo modal, síncope e acordes de passagem."),
         b ("500 Miles High / Spain: modulação, áreas distantes e reharmonização."),
-        part ("m10_partitura_turnaround", { "C4", "E4", "G4", "A4", "D5", "F5", "G5", "B4" },
+        part ("m10_partitura_turnaround", { "C4", "E4", "G4", "B4", "C#4", "E4", "G4", "A4", "D4", "F4", "A4", "C5", "G3", "B3", "D4", "F4" },
               "Partitura de um turnaround de repertório: a harmonia em contexto, pronta para ser vestida em qualquer estilo."),
 
         h ("Erros comuns na relação entre estilo e sonoridade"),

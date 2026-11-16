@@ -1184,8 +1184,10 @@ def _m10_score(notes, caption):
 
 
 def d_m10_partitura_turnaround():
-    return _m10_score([("C", 4, None), ("E", 4, None), ("G", 4, None), ("A", 4, None),
-                       ("D", 5, None), ("F", 5, None), ("G", 5, None), ("B", 4, None)],
+    return _m10_score([("C", 4, None), ("E", 4, None), ("G", 4, None), ("B", 4, None),
+                       ("C#", 4, None), ("E", 4, None), ("G", 4, None), ("A", 4, None),
+                       ("D", 4, None), ("F", 4, None), ("A", 4, None), ("C", 5, None),
+                       ("G", 3, None), ("B", 3, None), ("D", 4, None), ("F", 4, None)],
                       "Partitura: turnaround C7M - A7 - Dm7 - G7 (arpejos)")
 
 
@@ -1207,9 +1209,9 @@ def d_m10_partitura_verticalizacao():
 
 
 def d_m10_partitura_modal():
-    return _m10_score([("D", 4, None), ("F", 4, None), ("A", 4, None), ("C", 5, None),
-                       ("D", 5, None), ("C", 5, None), ("A", 4, None), ("F", 4, None)],
-                      "Partitura: frase dorica sobre Dm7 (repouso e tensao)")
+    return _m10_score([("D", 4, None), ("F", 4, None), ("A", 4, None), ("B", 4, None),
+                       ("C", 5, None), ("A", 4, None), ("F", 4, None), ("D", 4, None)],
+                      "Partitura: frase dorica sobre Dm7 (destaca a sexta maior, B)")
 
 
 DIAGRAMS.update({

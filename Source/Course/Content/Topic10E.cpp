@@ -54,7 +54,7 @@ std::vector<ContentItem> topic10E()
         }),
         c (
             "O ii–V–I é a ferramenta de modulação mais poderosa: para ir a qualquer tom, toque o ii e o V daquele tom antes de chegar nele. É assim que os standards modulam por toda parte."),
-        part ("m10_partitura_turnaround", { "C4", "E4", "G4", "A4", "D5", "F5", "G5", "B4" },
+        part ("m10_partitura_turnaround", { "C4", "E4", "G4", "B4", "C#4", "E4", "G4", "A4", "D4", "F4", "A4", "C5", "G3", "B3", "D4", "F4" },
               "Partitura de um turnaround que conecta áreas: ouça como a harmonia prepara a volta ao centro."),
 
         h ("Modulação no repertório curado"),
@@ -63,7 +63,7 @@ std::vector<ContentItem> topic10E()
         b ("500 Miles High: duas áreas ligadas por cromatismo (movimento por graus conjuntos)."),
         b ("Spain: modulação explícita, com seção C que muda de centro e retorna."),
         b ("Incompatibilidade de Gênios: empréstimo modal e baixos pedalizados, sem modular de fato."),
-        aud ({ "E4", "G4", "B4", "D5", "F4", "A4", "C5", "E5" },
+        aud ({ "E4", "G4", "B4", "D5", "F4", "G#4", "C5", "D#4" },
              "Duas áreas tonais ligadas: de Em para Fm. Ouça o movimento cromático que conecta os centros."),
 
         h ("Empréstimo modal: a modulação sem sair de casa"),
@@ -78,7 +78,7 @@ std::vector<ContentItem> topic10E()
         b ("Empréstimo modal não modula: a tonalidade continua a mesma."),
         b ("Ele pega a cor do campo menor paralelo sem mudar o centro."),
         b ("É uma das ferramentas mais usadas na reharmonização."),
-        aud ({ "F3", "A#3", "C4", "D#4" }, "Fm7 emprestado do campo menor paralelo: ouça o escurecimento dentro de Dó maior."),
+        aud ({ "F3", "G#3", "C4", "D#4" }, "Fm7 emprestado do campo menor paralelo: ouça o escurecimento dentro de Dó maior."),
 
         h ("Como praticar a conexão entre campos"),
         p (

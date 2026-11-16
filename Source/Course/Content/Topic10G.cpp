@@ -36,7 +36,7 @@ std::vector<ContentItem> topic10G()
         }),
         c (
             "A substituição de trítono é a mais famosa: o dominante que está a um trítono de distância do V tem o mesmo trítono interno e pode tomar o seu lugar. G7 e Db7 resolvem ambos para C."),
-        aud ({ "G3", "B3", "D4", "F4", "D#4", "G4", "A#4", "C#5" },
+        aud ({ "G3", "B3", "D4", "F4", "C#4", "F4", "G#4", "B4" },
              "G7 e Db7 em sequência: os dois resolvem para C. Ouça como o baixo desce de cromatismo."),
         aud ({ "D4", "F4", "A4", "C5", "F3", "A3", "C4", "E4" },
              "Dm7 e F7M: o substituto mantém F, A e C. Ouça a cor mudar sem mudar o caminho."),

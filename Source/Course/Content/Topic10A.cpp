@@ -54,7 +54,7 @@ std::vector<ContentItem> topic10A()
         aud ({ "G3", "B3", "D4", "F4" }, "Dominante: o acorde de tensão (Sol com sétima). Ouça o pedido de resolução."),
         p (
             "O ciclo mais importante da música tonal é o ii–V–I: subdominante, dominante e tônica em sequência. Ele aparece em quase todo standard de jazz e em boa parte da MPB. Analisar uma música é, muitas vezes, encontrar os ii–V–I escondidos e ver como eles se encadeiam."),
-        part ("m10_partitura_turnaround", { "C4", "E4", "G4", "A4", "D5", "F5", "G5", "B4" },
+        part ("m10_partitura_turnaround", { "C4", "E4", "G4", "B4", "C#4", "E4", "G4", "A4", "D4", "F4", "A4", "C5", "G3", "B3", "D4", "F4" },
               "Partitura: os arpejos de um turnaround C7M – A7 – Dm7 – G7. Ouça como a harmonia caminha grau por grau."),
 
         h ("Escala: como o acorde soa"),
