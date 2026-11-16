@@ -1132,8 +1132,8 @@ def d_m5_ciclo_quintas():
     y = subtitle(d, "Subir de quinta acrescenta um sustenido; descer, um bemol.", y)
     cx, cy = W / 2, y + 380
     r_out, r_in = 300, 210
-    majors = ["C", "G", "D", "A", "E", "B", "F#", "C#", "G#", "D#", "A#", "F"]
-    accs = ["0", "1#", "2#", "3#", "4#", "5#", "6#", "7#", "6b", "5b", "4b", "1b"]
+    majors = ["C", "G", "D", "A", "E", "B", "F#", "C#", "Ab", "Eb", "Bb", "F"]
+    accs = ["0", "1#", "2#", "3#", "4#", "5#", "6#", "7#", "4b", "3b", "2b", "1b"]
     for i in range(12):
         d.pieslice([cx - r_out, cy - r_out, cx + r_out, cy + r_out],
                    start=-90 + i * 30 - 15, end=-90 + i * 30 + 15,

@@ -1,7 +1,7 @@
 #include "Course/Content/Topics.h"
 
 // Topic 5G — Armaduras de clave e tonalidades com sustenidos e bemóis (Módulo 5, Etapa 5).
-// Fonte de verdade do texto: docs/MUSIC.md (Etapa 5, bloco G).
+// Fonte de verdade do texto: .agents/agents/mc-modulo-5.md (Etapa 5, topico G); dados fixados em docs/MUSIC.md (nivel 3, BPM 76, on_grid 0,79).
 namespace cursomusica::content
 {
 

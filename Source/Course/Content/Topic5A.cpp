@@ -1,7 +1,7 @@
 #include "Course/Content/Topics.h"
 
 // Topic 5A — Escala maior (Módulo 5, Etapa 5).
-// Fonte de verdade do texto: docs/MUSIC.md (Etapa 5, bloco A).
+// Fonte de verdade do texto: .agents/agents/mc-modulo-5.md (Etapa 5, topico A); dados fixados em docs/MUSIC.md (nivel 3, BPM 76, on_grid 0,79).
 namespace cursomusica::content
 {
 

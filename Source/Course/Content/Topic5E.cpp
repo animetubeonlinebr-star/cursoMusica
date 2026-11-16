@@ -1,7 +1,7 @@
 #include "Course/Content/Topics.h"
 
 // Topic 5E — Função dominante (Módulo 5, Etapa 5).
-// Fonte de verdade do texto: docs/MUSIC.md (Etapa 5, bloco E).
+// Fonte de verdade do texto: .agents/agents/mc-modulo-5.md (Etapa 5, topico E); dados fixados em docs/MUSIC.md (nivel 3, BPM 76, on_grid 0,79).
 namespace cursomusica::content
 {
 
@@ -74,7 +74,7 @@ std::vector<ContentItem> topic5E()
 
         h ("A dominante na guitarra"),
         p (
-            "No braço, o dominante está a uma quinta acima da tônica — a mesma relação que a subdominante tem, mas no sentido oposto. Em Dó maior, o G está na 6ª corda, casa 3, ou na 5ª corda, casa 10. Toque o acorde de dominante com a sétima (G7) para sentir a tensão máxima, e resolva na tônica logo em seguida."),
+            "No braço, o dominante está a uma quinta justa acima da tônica — a relação inversa da subdominante, que fica a uma quarta justa acima (uma quinta justa abaixo). Em Dó maior, o G está na 6ª corda, casa 3, ou na 5ª corda, casa 10. Toque o acorde de dominante com a sétima (G7) para sentir a tensão máxima, e resolva na tônica logo em seguida."),
         p (
             "Os exercícios deste tópico pedem que você toque o acorde de dominante e o resolva na tônica, e o app confere as notas reconhecidas. É a forma mais direta de internalizar a função: tocar a tensão e sentir a resolução acontecer na ponta dos dedos."),
         b ("O dominante fica a uma quinta acima da tônica."),

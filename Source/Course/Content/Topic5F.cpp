@@ -1,7 +1,7 @@
 #include "Course/Content/Topics.h"
 
 // Topic 5F — Acordes relativos (Módulo 5, Etapa 5).
-// Fonte de verdade do texto: docs/MUSIC.md (Etapa 5, bloco F).
+// Fonte de verdade do texto: .agents/agents/mc-modulo-5.md (Etapa 5, topico F); dados fixados em docs/MUSIC.md (nivel 3, BPM 76, on_grid 0,79).
 namespace cursomusica::content
 {
 

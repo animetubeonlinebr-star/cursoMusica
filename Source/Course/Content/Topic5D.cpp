@@ -1,7 +1,7 @@
 #include "Course/Content/Topics.h"
 
 // Topic 5D — Função subdominante (Módulo 5, Etapa 5).
-// Fonte de verdade do texto: docs/MUSIC.md (Etapa 5, bloco D).
+// Fonte de verdade do texto: .agents/agents/mc-modulo-5.md (Etapa 5, topico D); dados fixados em docs/MUSIC.md (nivel 3, BPM 76, on_grid 0,79).
 namespace cursomusica::content
 {
 
@@ -72,10 +72,10 @@ std::vector<ContentItem> topic5D()
 
         h ("A subdominante na guitarra"),
         p (
-            "No braço, a subdominante está a uma quinta acima da tônica (ou a uma quarta abaixo, dependendo de como você conta). Em Dó maior, o F está na 6ª corda, casa 1, ou na 5ª corda, casa 8. Localizar a subdominante a partir da tônica é um dos gestos mais úteis do acompanhamento, porque é ela que abre o movimento das progressões."),
+            "No braço, a subdominante está a uma quarta justa acima da tônica (ou a uma quinta justa abaixo, dependendo de como você conta). Em Dó maior, o F está na 6ª corda, casa 1, ou na 5ª corda, casa 8. Localizar a subdominante a partir da tônica é um dos gestos mais úteis do acompanhamento, porque é ela que abre o movimento das progressões."),
         p (
             "Os exercícios deste tópico pedem que você toque a tríade de subdominante e seu substituto, e o app confere as notas. Isso confirma que você está tocando o acorde certo do campo, com a qualidade certa — e não uma forma vizinha que pertence a outro grau."),
-        b ("A subdominante fica a uma quinta acima da tônica."),
+        b ("A subdominante fica a uma quarta justa acima da tônica (uma quinta justa abaixo)."),
         b ("Monte a tríade (fundamental, terça, quinta) sobre o grau IV."),
         b ("Confirme no app se as notas formam o acorde de IV ou de ii."),
 
@@ -119,7 +119,7 @@ std::vector<ContentItem> topic5D()
 
         h ("Subdominante em diferentes tonalidades"),
         p (
-            "Como o padrão é sempre o mesmo, a subdominante de qualquer tonalidade está a uma quinta acima da tônica. Em Sol maior, o IV é Dó maior; em Fá maior, o IV é Si bemol maior; em Ré maior, o IV é Sol maior. Saber isso permite achar a subdominante de qualquer tom rapidamente, sem precisar montar o campo harmônico inteiro."),
+            "Como o padrão é sempre o mesmo, a subdominante de qualquer tonalidade está a uma quarta justa acima da tônica (a uma quinta justa abaixo). Em Sol maior, o IV é Dó maior; em Fá maior, o IV é Si bemol maior; em Ré maior, o IV é Sol maior. Saber isso permite achar a subdominante de qualquer tom rapidamente, sem precisar montar o campo harmônico inteiro."),
         p (
             "Esse é um exemplo prático de como os graus facilitam a vida do músico. Em vez de memorizar 'em Dó é F, em Sol é C, em Fá é Bb', você memoriza apenas 'a subdominante é o IV'. A regra é uma só, e vale para todos os tons — o que economiza muita memorização e reduz a chance de erro."),
         b ("A subdominante é sempre o grau IV da tonalidade."),

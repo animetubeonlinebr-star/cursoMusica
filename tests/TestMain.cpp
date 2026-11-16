@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <iostream>
+#include <map>
 #include <vector>
 
 #include "Audio/AudioPortClassifier.h"
@@ -1186,8 +1187,14 @@ void testModule5()
                        "exercise " + e.id + " uses a valid pitch class");
         }
         if (! e.chordProgression.empty())
+        {
+            // The gate is played on the metronome grid; the identification
+            // progression exercises (EX-5.H.2/EX-5.J.2) are not.
+            check (e.usesGrid == e.isGate,
+                   "progression exercise " + e.id + " grid flag matches its gate role");
             for (const auto& chord : e.chordProgression)
                 check (chord.size() >= 3, "exercise " + e.id + " chords have at least three notes");
+        }
     }
 
     // Explanation: >=5 pages per topic, at least one table and one image, and
@@ -1256,6 +1263,34 @@ void testModule5()
     check (! m5->practice.guitarists.isEmpty(), "module 5 cites at least one guitarist");
     check (! m5->sources.isEmpty(), "module 5 cites its curated apostilas");
 
+    // The quiz answers must not all sit on the same option, otherwise the
+    // exercise could be passed by always ticking the first alternative and the
+    // 90% gate would not measure learning (client request). Every answer index
+    // used by any question must appear, and none may dominate the set.
+    {
+        std::map<int, int> answerCounts;
+        int totalQuestions = 0;
+        for (const auto& e : m5->exercises)
+            for (const auto& q : e.quiz)
+            {
+                check (q.correctIndex >= 0 && q.correctIndex < q.options.size(),
+                       "question '" + q.prompt.substring (0, 32) + "…' has a valid correct index");
+                ++answerCounts[q.correctIndex];
+                ++totalQuestions;
+            }
+
+        check (totalQuestions >= 50, "module 5 has a substantial question set");
+        check (answerCounts.size() >= 3,
+               "module 5 quiz answers are spread over at least three options");
+        for (const auto& entry : answerCounts)
+            check (entry.second < totalQuestions,
+                   "no single option holds every answer of module 5");
+        // The correct option must not always be the first one.
+        const int firstOptionAnswers = answerCounts.count (0) > 0 ? answerCounts.at (0) : 0;
+        check (firstOptionAnswers < totalQuestions,
+               "module 5 does not put every answer on the first option");
+    }
+
     // The gate closes the module as a I–IV–V–I progression of the harmonic field
     // on the grid (REQ-009).
     bool hasGate = false;
@@ -1263,6 +1298,7 @@ void testModule5()
         if (e.isGate)
         {
             hasGate = true;
+            check (e.usesGrid, "module 5 gate is played on the metronome grid");
             check (e.chordProgression.size() == 4, "module 5 gate has four chords");
             check (e.chordProgression.front() == std::vector<int> ({ 0, 4, 7 }),
                    "module 5 gate opens on the tonic (C major)");
