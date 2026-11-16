@@ -1342,6 +1342,18 @@ namespace
             "as três escalas menores, os seus modos e os campos harmônicos menores.");
         m.level = 3;          // MUSIC.md: módulos 5–7 = nível 3
         m.targetBpm = 80;     // MUSIC.md, módulo 6
+    CourseModule makeModule7()
+    {
+        CourseModule m;
+        m.number = 7;
+        m.title = juce::String::fromUTF8 ("Empilhamentos, estruturas modais e sonoridades");
+        m.objective = juce::String::fromUTF8 (
+            "Conhecer estruturas harmônicas além das tríades e tétrades "
+            "convencionais: empilhamentos de terças, quartas e outros, estruturas "
+            "modais, tríades do meio, modos estruturais pelo CAGED e as "
+            "sonoridades modais do dórico ao alterado.");
+        m.level = 3;          // MUSIC.md: módulos 5–7 = nível 3 (II–V–I)
+        m.targetBpm = 84;     // MUSIC.md, módulo 7
         m.onGridTarget = 0.80f;
         m.implemented = true;
 
@@ -1396,6 +1408,61 @@ namespace
         // Exercises: 3..5 per topic, mixing verifiable quizzes and playable
         // exercises the app recognises (interval or chord). Ids follow
         // EX-6.<topico>.<n>, numbered per topic, as modules 1 and 2.
+            detail (block ("A", juce::String::fromUTF8 ("Empilhamentos de terças"), {
+                "Empilhar terças é somar intervalos de terça, um sobre o outro.",
+                "A mistura de terças maiores e menores define a qualidade do acorde.",
+                "As tensões 9, 11 e 13 são os graus 2, 4 e 6 uma oitava acima."
+            }), content::topic7A()),
+            detail (block ("B", juce::String::fromUTF8 ("Empilhamentos quartais"), {
+                "Empilhar quartas justas (5 semitons) produz um som suspenso e modal.",
+                "O acorde de So What empilha quartas com uma terça no topo.",
+                "Sem terça, o acorde não é maior nem menor."
+            }), content::topic7B()),
+            detail (block ("C", juce::String::fromUTF8 ("Outros empilhamentos"), {
+                "Quintas dão força e abertura (power chords).",
+                "Segundas dão tensão (clusters); mistos dão cor sob medida.",
+                "O empilhamento escolhido define a sonoridade do acorde."
+            }), content::topic7C()),
+            detail (block ("D", juce::String::fromUTF8 ("Estruturas modais e tríades do meio"), {
+                "Estruturas modais reforçam um modo sem criar resolução.",
+                "Tríades do meio são tríades sobre graus internos da escala.",
+                "Cada tríade do meio acrescenta tensões ao acorde de base."
+            }), content::topic7D()),
+            detail (block ("E", juce::String::fromUTF8 ("Acordes e famílias modais"), {
+                "Cada acorde carrega uma família de modos possíveis.",
+                "Maiores: jônio e lídio. Menores: dórico, eólio, frígio.",
+                "Dominantes: mixolídio, lídio dominante, alterado, sus."
+            }), content::topic7E()),
+            detail (block ("F", juce::String::fromUTF8 ("Modos estruturais pelo CAGED"), {
+                "O CAGED é um mapa do braço, não só um conjunto de acordes.",
+                "Cada forma contém a escala do tom e os seus modos.",
+                "Os modos são a mesma escala vista de graus diferentes."
+            }), content::topic7F()),
+            detail (block ("G", juce::String::fromUTF8 ("Dórico, Lídio e Mixolídio"), {
+                "Dórico: menor com sexta maior (1 2 b3 4 5 6 b7).",
+                "Lídio: maior com quarta aumentada (1 2 3 #4 5 6 7).",
+                "Mixolídio: maior com sétima menor (1 2 3 4 5 6 b7)."
+            }), content::topic7G()),
+            detail (block ("H", juce::String::fromUTF8 ("Mixolídio sus e Mixolídio #4"), {
+                "Mixolídio sus: 1 2 4 5 6 b7 (sem a terça), combina com X7sus4.",
+                "Mixolídio #4: 1 2 3 #4 5 6 b7, combina com X7#11.",
+                "As duas são variações do dominante, com cores diferentes."
+            }), content::topic7H()),
+            detail (block ("I", juce::String::fromUTF8 ("Lócrio 9 e Alterado (Alt.7)"), {
+                "Lócrio 9: 1 2 b3 4 b5 b6 b7 (meio-diminuto com nona natural).",
+                "Alterado: 1 b9 #9 3 b5 #5 b7 (tensão máxima do dominante).",
+                "As duas aparecem juntas no II–V–I menor."
+            }), content::topic7I()),
+            detail (block ("J", juce::String::fromUTF8 ("Aplicações modais no rock e pop-rock"), {
+                "Vamps de um ou dois acordes são o terreno da harmonia modal.",
+                "Cada modo tem um tipo de vamp e uma cor.",
+                "Do modal se chega à harmonia funcional dos próximos módulos."
+            }), content::topic7J()),
+        };
+
+        // Exercises: 3..5 per topic, ids EX-7.<topico>.<n>, mixing verifiable
+        // quizzes with exercises played on the instrument (the app recognises
+        // the notes). Playable exercises are not grid-gated.
         auto add = [&m] (Exercise e, const char* topic)
         {
             e.lessonId = topic;
@@ -2958,6 +3025,441 @@ namespace
             "pdf-caged-e-derivaoes-de-acordes-marcelo-mello-apostila-de-violao-e-guitarra-vol1",
             "pdf-mozart-mello-livroestudosdeguitarra4em1",
             "pdf-desvendando-os-segredos-da-guitarra-fusion",
+        // --- Topic A — empilhamentos de terças -------------------------------
+        add (exercise ("EX-7.A.1", juce::String::fromUTF8 ("Questionário: empilhamento de terças"),
+                       juce::String::fromUTF8 ("Responder ao questionário do empilhamento de terças."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões de empilhamento.")), "A");
+        m.exercises.back().quiz = {
+            question ("Empilhar terças é somar:",
+                      { "intervalos de terça, um sobre o outro",
+                        "intervalos de quinta", "notas fora da escala", "apenas duas notas" }, 0),
+            question ("O que define a qualidade de um acorde no empilhamento de terças?",
+                      { "a mistura de terças maiores e menores",
+                        "o volume", "a corda usada", "a posição do braço" }, 0),
+            question ("A nona (9) é qual grau uma oitava acima?",
+                      { "a segunda", "a terça", "a quarta", "a sexta" }, 0),
+            question ("Quantas notas tem uma tétrade?",
+                      { "três", "quatro", "cinco", "sete" }, 1),
+            question ("Qual grau nunca deve sair ao simplificar um acorde?",
+                      { "a quinta", "a terça", "a nona", "a décima terceira" }, 1),
+        };
+        add (exercise ("EX-7.A.2", juce::String::fromUTF8 ("Tocar a tríade maior"),
+                       juce::String::fromUTF8 ("Tocar uma tríade maior (tônica, terça maior e quinta justa)."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere os intervalos 0-4-7.")), "A");
+        m.exercises.back().chordPitchClasses = { 0, 4, 7 };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-7.A.3", juce::String::fromUTF8 ("Tocar a tríade menor"),
+                       juce::String::fromUTF8 ("Tocar uma tríade menor (tônica, terça menor e quinta justa)."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere os intervalos 0-3-7.")), "A");
+        m.exercises.back().chordPitchClasses = { 0, 3, 7 };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-7.A.4", juce::String::fromUTF8 ("Questionário: da tríade à tétrade"),
+                       juce::String::fromUTF8 ("Identificar a sétima que transforma a tríade em cada tétrade."),
+                       juce::String::fromUTF8 ("Acerto ≥90% no questionário de tétrades.")), "A");
+        m.exercises.back().quiz = {
+            question ("C7M usa qual sétima?",
+                      { "11 semitons (sétima maior)", "10 semitons (sétima menor)",
+                        "9 semitons", "12 semitons" }, 0),
+            question ("C7 (dominante) usa qual sétima?",
+                      { "11 semitons", "10 semitons", "6 semitons", "7 semitons" }, 1),
+            question ("Cm7b5 (meio-diminuto) tem os intervalos:",
+                      { "0, 3, 6, 10", "0, 4, 7, 11", "0, 3, 7, 10", "0, 4, 8, 11" }, 0),
+            question ("Empilhar terças acima da sétima gera:",
+                      { "as tensões 9, 11 e 13", "as tríades", "as quintas", "nada" }, 0),
+        };
+
+        // --- Topic B — empilhamentos quartais --------------------------------
+        add (exercise ("EX-7.B.1", juce::String::fromUTF8 ("Questionário: empilhamento quartal"),
+                       juce::String::fromUTF8 ("Responder ao questionário do empilhamento quartal."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "B");
+        m.exercises.back().quiz = {
+            question ("A quarta justa tem quantos semitons?",
+                      { "4", "5", "6", "7" }, 1),
+            question ("Um acorde quartal é:",
+                      { "suspenso, nem maior nem menor",
+                        "sempre maior", "sempre menor", "sempre diminuto" }, 0),
+            question ("O acorde de So What empilha:",
+                      { "quartas com uma terça no topo",
+                        "apenas terças", "apenas quintas", "segundas" }, 0),
+            question ("Por que o acorde quartal não resolve?",
+                      { "porque não tem função dominante",
+                        "porque não tem notas", "porque é muito grave", "porque é rápido" }, 0),
+        };
+        add (exercise ("EX-7.B.2", juce::String::fromUTF8 ("Tocar o acorde quartal"),
+                       juce::String::fromUTF8 ("Tocar um empilhamento quartal (tônica, quarta e sétima menor)."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere os intervalos 0-5-10.")), "B");
+        m.exercises.back().chordPitchClasses = { 0, 5, 10 };
+        m.exercises.back().usesGrid = false;
+        add (intervalExercise ("EX-7.B.3", "Tocar a quarta justa",
+                               "Tocar uma quarta justa (5 semitons) em qualquer posição, três vezes.",
+                               5, 3), "B");
+        add (exercise ("EX-7.B.4", juce::String::fromUTF8 ("Questionário: quartal na prática"),
+                       juce::String::fromUTF8 ("Relacionar o empilhamento quartal aos seus usos."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "B");
+        m.exercises.back().quiz = {
+            question ("A quarta aumentada tem quantos semitons?",
+                      { "5", "6", "7", "8" }, 1),
+            question ("O empilhamento quartal é típico de:",
+                      { "jazz modal e vamps", "marchas", "valsas clássicas", "nada" }, 0),
+            question ("Dó-Fá-Sib pode ser lido como:",
+                      { "Sib com quarta e nona", "Dó maior", "Dó menor", "Dó diminuto" }, 0),
+        };
+
+        // --- Topic C — outros empilhamentos ----------------------------------
+        add (exercise ("EX-7.C.1", juce::String::fromUTF8 ("Questionário: outros empilhamentos"),
+                       juce::String::fromUTF8 ("Responder ao questionário dos outros empilhamentos."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "C");
+        m.exercises.back().quiz = {
+            question ("O empilhamento de quintas é a base de:",
+                      { "power chords", "acordes diminutos", "clusters", "nada" }, 0),
+            question ("O empilhamento de segundas produz:",
+                      { "um som denso e tenso", "um som estável", "um som vazio", "um som igual à quinta" }, 0),
+            question ("Empilhamentos mistos:",
+                      { "combinam intervalos diferentes", "usam só terças",
+                        "usam só quintas", "não existem" }, 0),
+            question ("Clusters de segundas funcionam melhor:",
+                      { "nas regiões médias e agudas", "no grave profundo",
+                        "apenas no piano", "apenas com distorção" }, 0),
+        };
+        add (exercise ("EX-7.C.2", juce::String::fromUTF8 ("Tocar o power chord"),
+                       juce::String::fromUTF8 ("Tocar um empilhamento de quintas (tônica, quinta e oitava)."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere o conjunto tônica-quinta.")), "C");
+        m.exercises.back().chordPitchClasses = { 0, 7 };
+        m.exercises.back().usesGrid = false;
+        add (intervalExercise ("EX-7.C.3", "Tocar a quinta justa",
+                               "Tocar uma quinta justa (7 semitons) em qualquer posição, três vezes.",
+                               7, 3), "C");
+        add (exercise ("EX-7.C.4", juce::String::fromUTF8 ("Questionário: empilhamentos e estilo"),
+                       juce::String::fromUTF8 ("Relacionar cada empilhamento ao seu estilo."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "C");
+        m.exercises.back().quiz = {
+            question ("Qual empilhamento dá força e abertura?",
+                      { "quintas", "segundas", "sétimas", "quartas" }, 0),
+            question ("Qual empilhamento dá tensão?",
+                      { "segundas", "quintas", "quartas", "terças" }, 0),
+            question ("No jazz, predominam:",
+                      { "terças e quartas", "apenas quintas", "apenas segundas", "apenas oitavas" }, 0),
+        };
+
+        // --- Topic D — estruturas modais e tríades do meio --------------------
+        add (exercise ("EX-7.D.1", juce::String::fromUTF8 ("Questionário: estruturas modais"),
+                       juce::String::fromUTF8 ("Responder ao questionário das estruturas modais."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "D");
+        m.exercises.back().quiz = {
+            question ("Uma estrutura modal:",
+                      { "reforça um modo sem criar resolução",
+                        "resolve sempre para a tônica", "usa só duas notas", "não tem função" }, 0),
+            question ("Tríades do meio são tríades construídas:",
+                      { "sobre graus internos da escala", "só sobre a tônica",
+                        "fora da escala", "com quatro notas" }, 0),
+            question ("A tríade de Sol sobre Dó produz:",
+                      { "Dó com nona (Cmaj9)", "Dó menor", "Dó diminuto", "Dó sus" }, 0),
+            question ("Na harmonia modal, os acordes:",
+                      { "permanecem; não conduzem", "sempre resolvem",
+                        "não têm centro", "são sempre menores" }, 0),
+        };
+        add (exercise ("EX-7.D.2", juce::String::fromUTF8 ("Tocar uma estrutura com nona"),
+                       juce::String::fromUTF8 ("Tocar um acorde maior com a nona (tríade do meio sobre a tônica)."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere o conjunto 0-4-7-11-2.")), "D");
+        m.exercises.back().chordPitchClasses = { 0, 4, 7, 11, 2 };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-7.D.3", juce::String::fromUTF8 ("Tocar uma estrutura menor com nona"),
+                       juce::String::fromUTF8 ("Tocar um acorde menor com a nona (cor dórica)."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere o conjunto 0-3-7-10-2.")), "D");
+        m.exercises.back().chordPitchClasses = { 0, 3, 7, 10, 2 };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-7.D.4", juce::String::fromUTF8 ("Questionário: tríades do meio"),
+                       juce::String::fromUTF8 ("Identificar a cor que cada tríade do meio acrescenta."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "D");
+        m.exercises.back().quiz = {
+            question ("Sobre Cmaj7, a tríade de Ré maior dá:",
+                      { "a #11 (cor lídia)", "a nona apenas", "a sétima menor", "nada" }, 0),
+            question ("Sobre Cm7, a tríade de Sol menor dá:",
+                      { "a cor dórica (9)", "a cor lídia", "a cor frígia", "nada" }, 0),
+            question ("Para a cor do modo aparecer, é preciso:",
+                      { "afirmar o centro no baixo", "tocar rápido",
+                        "tocar todas as notas", "usar distorção" }, 0),
+        };
+
+        // --- Topic E — acordes e famílias modais ------------------------------
+        add (exercise ("EX-7.E.1", juce::String::fromUTF8 ("Questionário: famílias modais"),
+                       juce::String::fromUTF8 ("Responder ao questionário das famílias modais."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "E");
+        m.exercises.back().quiz = {
+            question ("Cmaj7 combina principalmente com:",
+                      { "jônio e lídio", "dórico e eólio", "lócrio", "alterado" }, 0),
+            question ("Cm7 combina principalmente com:",
+                      { "dórico e eólio", "jônio e lídio", "mixolídio", "alterado" }, 0),
+            question ("C7 (dominante) combina com:",
+                      { "mixolídio, lídio dominante e alterado", "jônio e lídio",
+                        "dórico e eólio", "lócrio" }, 0),
+            question ("Cm7b5 (meio-diminuto) combina com:",
+                      { "lócrio", "jônio", "lídio", "mixolídio" }, 0),
+            question ("A sétima do acorde serve para:",
+                      { "restringir as opções de modo", "definir o volume",
+                        "definir a corda", "nada" }, 0),
+        };
+        add (exercise ("EX-7.E.2", juce::String::fromUTF8 ("Tocar um acorde dominante"),
+                       juce::String::fromUTF8 ("Tocar um acorde dominante (tônica, terça maior, quinta e sétima menor)."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere o conjunto 0-4-7-10.")), "E");
+        m.exercises.back().chordPitchClasses = { 0, 4, 7, 10 };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-7.E.3", juce::String::fromUTF8 ("Tocar um acorde meio-diminuto"),
+                       juce::String::fromUTF8 ("Tocar um acorde meio-diminuto (tônica, terça menor, quinta diminuta e sétima menor)."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere o conjunto 0-3-6-10.")), "E");
+        m.exercises.back().chordPitchClasses = { 0, 3, 6, 10 };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-7.E.4", juce::String::fromUTF8 ("Questionário: nota de evitação"),
+                       juce::String::fromUTF8 ("Reconhecer as notas de evitação de cada família."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "E");
+        m.exercises.back().quiz = {
+            question ("Sobre um acorde maior, a décima primeira natural (11) é:",
+                      { "nota de evitação; use a #11", "a nota principal",
+                        "igual à terça", "a tônica" }, 0),
+            question ("Sobre Cm7 (dórico), a sexta maior:",
+                      { "é aceita e dá a cor do modo", "é proibida",
+                        "é a tônica", "é a quinta" }, 0),
+            question ("Escolher a escala pelo acorde é a base de:",
+                      { "improvisar com intenção", "afinar", "tocar rápido", "nada" }, 0),
+        };
+
+        // --- Topic F — modos estruturais pelo CAGED ---------------------------
+        add (exercise ("EX-7.F.1", juce::String::fromUTF8 ("Questionário: modos pelo CAGED"),
+                       juce::String::fromUTF8 ("Responder ao questionário dos modos pelo CAGED."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "F");
+        m.exercises.back().quiz = {
+            question ("O CAGED, como mapa, serve para:",
+                      { "enxergar a escala e os modos no braço", "afinar",
+                        "medir o volume", "trocar cordas" }, 0),
+            question ("Os modos são:",
+                      { "a mesma escala vista de graus diferentes", "sete escalas sem relação",
+                        "acordes de três notas", "figuras rítmicas" }, 0),
+            question ("Para o ouvido perceber o modo, é preciso:",
+                      { "afirmar o centro no baixo", "tocar mais rápido",
+                        "usar só notas agudas", "nada" }, 0),
+            question ("As cinco formas do CAGED:",
+                      { "cobrem o braço inteiro e se conectam", "são isoladas",
+                        "servem só para Dó", "não têm escala" }, 0),
+        };
+        add (exercise ("EX-7.F.2", juce::String::fromUTF8 ("Tocar a escala do tom"),
+                       juce::String::fromUTF8 ("Tocar a escala de Dó maior (a base de todos os modos)."),
+                       juce::String::fromUTF8 ("O app reconhece a sequência de notas da escala de Dó maior.")), "F");
+        m.exercises.back().targets = notes ({ "C4", "D4", "E4", "F4", "G4", "A4", "B4", "C5" });
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-7.F.3", juce::String::fromUTF8 ("Tocar a escala a partir da segunda"),
+                       juce::String::fromUTF8 ("Tocar a mesma escala começando em Ré (o dórico dentro do tom)."),
+                       juce::String::fromUTF8 ("O app reconhece a sequência a partir de Ré.")), "F");
+        m.exercises.back().targets = notes ({ "D4", "E4", "F4", "G4", "A4", "B4", "C5", "D5" });
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-7.F.4", juce::String::fromUTF8 ("Questionário: âncora da frase"),
+                       juce::String::fromUTF8 ("Identificar o modo pela âncora da frase."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "F");
+        m.exercises.back().quiz = {
+            question ("Se a frase começa e termina na segunda do tom, o modo é:",
+                      { "dórico", "jônio", "mixolídio", "lócrio" }, 0),
+            question ("Se a frase ancora na quinta do tom, o modo é:",
+                      { "mixolídio", "dórico", "lídio", "frígio" }, 0),
+            question ("A conexão entre as formas do CAGED permite:",
+                      { "percorrer o braço sem perder a escala", "afinar de ouvido",
+                        "medir o volume", "trocar a afinação" }, 0),
+        };
+
+        // --- Topic G — dórico, lídio e mixolídio ------------------------------
+        add (exercise ("EX-7.G.1", juce::String::fromUTF8 ("Questionário: os três modos"),
+                       juce::String::fromUTF8 ("Responder ao questionário do dórico, lídio e mixolídio."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "G");
+        m.exercises.back().quiz = {
+            question ("O dórico é o menor com:",
+                      { "sexta maior", "sexta menor", "sétima maior", "quarta aumentada" }, 0),
+            question ("O lídio é o maior com:",
+                      { "quarta aumentada (#11)", "sétima menor", "sexta menor", "segunda menor" }, 0),
+            question ("O mixolídio é o maior com:",
+                      { "sétima menor", "sétima maior", "#11", "b2" }, 0),
+            question ("A nota característica do dórico é:",
+                      { "a sexta maior", "a sétima maior", "a quarta justa", "a segunda menor" }, 0),
+            question ("A nota característica do mixolídio é:",
+                      { "a sétima menor (b7)", "a sexta maior", "a #11", "a b2" }, 0),
+        };
+        add (exercise ("EX-7.G.2", juce::String::fromUTF8 ("Tocar a escala dórica"),
+                       juce::String::fromUTF8 ("Tocar a escala dórica em Dó (menor com a sexta maior)."),
+                       juce::String::fromUTF8 ("O app reconhece a sequência da escala dórica em Dó.")), "G");
+        m.exercises.back().targets = notes ({ "C4", "D4", "D#4", "F4", "G4", "A4", "A#4", "C5" });
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-7.G.3", juce::String::fromUTF8 ("Tocar a escala lídia"),
+                       juce::String::fromUTF8 ("Tocar a escala lídia em Dó (maior com a quarta aumentada)."),
+                       juce::String::fromUTF8 ("O app reconhece a sequência da escala lídia em Dó.")), "G");
+        m.exercises.back().targets = notes ({ "C4", "D4", "E4", "F#4", "G4", "A4", "B4", "C5" });
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-7.G.4", juce::String::fromUTF8 ("Questionário: notas de repouso"),
+                       juce::String::fromUTF8 ("Identificar as notas de repouso de cada modo."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "G");
+        m.exercises.back().quiz = {
+            question ("As notas de repouso do dórico são:",
+                      { "1, b3, 5, 6", "1, 3, 5, 7", "1, 3, #4, 7", "1, 3, 5, b7" }, 0),
+            question ("As notas de repouso do lídio são:",
+                      { "1, 3, #4, 7", "1, b3, 5, 6", "1, 3, 5, b7", "1, b2, b3, b5" }, 0),
+            question ("As notas de repouso do mixolídio são:",
+                      { "1, 3, 5, b7", "1, 3, 5, 7", "1, b3, 5, 6", "1, b2, b3, b5" }, 0),
+        };
+
+        // --- Topic H — mixolídio sus e mixolídio #4 ---------------------------
+        add (exercise ("EX-7.H.1", juce::String::fromUTF8 ("Questionário: mixolídio sus e #4"),
+                       juce::String::fromUTF8 ("Responder ao questionário das variações do mixolídio."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "H");
+        m.exercises.back().quiz = {
+            question ("O mixolídio sus tem a fórmula:",
+                      { "1 2 4 5 6 b7 (sem a terça)", "1 2 3 4 5 6 b7",
+                        "1 2 3 #4 5 6 b7", "1 b2 b3 4 b5 b6 b7" }, 0),
+            question ("O mixolídio #4 tem a fórmula:",
+                      { "1 2 3 #4 5 6 b7", "1 2 4 5 6 b7", "1 2 3 4 5 6 b7", "1 2 3 4 5 6 7" }, 0),
+            question ("O acorde sus combina com:",
+                      { "mixolídio sus", "jônio", "lócrio", "eólio" }, 0),
+            question ("O acorde com #11 combina com:",
+                      { "mixolídio #4 (lídio dominante)", "dórico", "eólio", "lócrio" }, 0),
+            question ("Sobre um acorde sus4, você NÃO deve tocar:",
+                      { "a terça", "a quarta", "a quinta", "a sétima menor" }, 0),
+        };
+        add (exercise ("EX-7.H.2", juce::String::fromUTF8 ("Tocar o acorde sus"),
+                       juce::String::fromUTF8 ("Tocar um acorde dominante suspenso (tônica, quarta, quinta e sétima menor)."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere o conjunto 0-5-7-10.")), "H");
+        m.exercises.back().chordPitchClasses = { 0, 5, 7, 10 };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-7.H.3", juce::String::fromUTF8 ("Tocar o acorde com #11"),
+                       juce::String::fromUTF8 ("Tocar um acorde dominante com a quarta aumentada (#11)."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere o conjunto 0-4-6-10.")), "H");
+        m.exercises.back().chordPitchClasses = { 0, 4, 6, 10 };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-7.H.4", juce::String::fromUTF8 ("Questionário: escolha da cor"),
+                       juce::String::fromUTF8 ("Escolher a variação do mixolídio pela tensão do acorde."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "H");
+        m.exercises.back().quiz = {
+            question ("Se o acorde tem quarta sem terça (sus4), use:",
+                      { "mixolídio sus", "mixolídio natural", "mixolídio #4", "jônio" }, 0),
+            question ("Se o acorde tem terça e #11, use:",
+                      { "mixolídio #4", "mixolídio sus", "dórico", "eólio" }, 0),
+            question ("O acorde sus cria:",
+                      { "expectativa, sem definir maior ou menor", "resolução imediata",
+                        "uma cadência", "nada" }, 0),
+        };
+
+        // --- Topic I — lócrio 9 e alterado ------------------------------------
+        add (exercise ("EX-7.I.1", juce::String::fromUTF8 ("Questionário: lócrio 9 e alterado"),
+                       juce::String::fromUTF8 ("Responder ao questionário das escalas de tensão."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "I");
+        m.exercises.back().quiz = {
+            question ("O lócrio 9 é o meio-diminuto com:",
+                      { "a nona natural (a segunda maior)", "a b2",
+                        "a sétima maior", "a quarta aumentada" }, 0),
+            question ("O alterado tem quantas quintas e quantas nonas alteradas?",
+                      { "duas quintas e duas nonas", "uma quinta e uma nona",
+                        "três quintas", "nenhuma" }, 0),
+            question ("O alterado resolve:",
+                      { "meio-tom abaixo (ou uma quinta abaixo)", "uma oitava acima",
+                        "na mesma nota", "nunca resolve" }, 0),
+            question ("O lócrio 9 combina com:",
+                      { "Xm7b5 (II grau de II–V–I menor)", "Xmaj7", "X7sus4", "nada" }, 0),
+            question ("O alterado combina com:",
+                      { "X7alt (V grau)", "Xmaj7", "Xm7", "Xm7b5" }, 0),
+        };
+        add (exercise ("EX-7.I.2", juce::String::fromUTF8 ("Tocar o acorde meio-diminuto"),
+                       juce::String::fromUTF8 ("Tocar um acorde meio-diminuto (tônica, terça menor, quinta diminuta e sétima menor)."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere o conjunto 0-3-6-10.")), "I");
+        m.exercises.back().chordPitchClasses = { 0, 3, 6, 10 };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-7.I.3", juce::String::fromUTF8 ("Tocar o acorde alterado"),
+                       juce::String::fromUTF8 ("Tocar um acorde dominante com a quinta aumentada (uma das tensões do alterado)."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere o conjunto 0-4-8-10.")), "I");
+        m.exercises.back().chordPitchClasses = { 0, 4, 8, 10 };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-7.I.4", juce::String::fromUTF8 ("Questionário: II–V–I menor"),
+                       juce::String::fromUTF8 ("Identificar as escalas do II–V–I menor."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "I");
+        m.exercises.back().quiz = {
+            question ("No II–V–I menor, o II grau (Xm7b5) usa:",
+                      { "lócrio 9", "alterado", "jônio", "lídio" }, 0),
+            question ("No II–V–I menor, o V grau (X7alt) usa:",
+                      { "alterado", "lócrio 9", "dórico", "eólio" }, 0),
+            question ("O alterado resolve meio-tom abaixo para:",
+                      { "um acorde maior", "um acorde sus", "a mesma nota", "nada" }, 0),
+        };
+
+        // --- Topic J — aplicações modais no rock e pop-rock -------------------
+        add (exercise ("EX-7.J.1", juce::String::fromUTF8 ("Questionário: aplicações modais"),
+                       juce::String::fromUTF8 ("Responder ao questionário das aplicações modais no rock."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "J");
+        m.exercises.back().quiz = {
+            question ("O modo mais usado no rock, sobre acordes dominantes, é:",
+                      { "mixolídio", "jônio", "lócrio", "lídio" }, 0),
+            question ("O dórico dá ao rock um som:",
+                      { "menor aberto, com energia", "menor triste e fechado",
+                        "maior brilhante", "suspenso" }, 0),
+            question ("O lídio aparece principalmente em:",
+                      { "rock progressivo e música instrumental", "marchas",
+                        "valsas", "blues de 12" }, 0),
+            question ("Uma progressão de dois acordes é típica de:",
+                      { "harmonia modal", "harmonia clássica", "atonalismo", "nada" }, 0),
+            question ("Sobre um vamp modal, a improvisação:",
+                      { "habita a cor, sem resolver", "resolve sempre",
+                        "usa só a tônica", "não existe" }, 0),
+        };
+        add (exercise ("EX-7.J.2", juce::String::fromUTF8 ("Tocar um vamp dórico"),
+                       juce::String::fromUTF8 ("Tocar um acorde menor com sétima (a cor do dórico)."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere o conjunto 0-3-7-10.")), "J");
+        m.exercises.back().chordPitchClasses = { 0, 3, 7, 10 };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-7.J.3", juce::String::fromUTF8 ("Tocar um vamp mixolídio"),
+                       juce::String::fromUTF8 ("Tocar um acorde dominante (a cor do mixolídio)."),
+                       juce::String::fromUTF8 ("O app reconhece as notas e confere o conjunto 0-4-7-10.")), "J");
+        m.exercises.back().chordPitchClasses = { 0, 4, 7, 10 };
+        m.exercises.back().usesGrid = false;
+        add (exercise ("EX-7.J.4", juce::String::fromUTF8 ("Questionário: do modal ao funcional"),
+                       juce::String::fromUTF8 ("Distinguir harmonia modal de harmonia funcional."),
+                       juce::String::fromUTF8 ("Acerto ≥90% nas questões.")), "J");
+        m.exercises.back().quiz = {
+            question ("A harmonia modal:",
+                      { "permanece (um centro, uma cor)", "conduz e resolve",
+                        "não tem centro", "usa só tríades" }, 0),
+            question ("A harmonia funcional:",
+                      { "conduz e resolve (funções)", "só permanece",
+                        "não tem função", "usa só clusters" }, 0),
+            question ("O riff menor com sexta maior está usando:",
+                      { "dórico", "eólio", "lócrio", "jônio" }, 0),
+        };
+
+        // The gate closes the module: a II–V–I on the grid, built from the
+        // module's material (the structures and chords studied). REQ-009/REQ-015.
+        auto& gate = m.exercises.emplace_back (exercise (
+            "GATE-7", juce::String::fromUTF8 ("Desafio de gate — II–V–I (Dm7–G7–C7M–C7M)"),
+            juce::String::fromUTF8 ("Tocar Dm7 – G7 – C7M – C7M a 84 BPM, na grade do metrônomo."),
+            juce::String::fromUTF8 ("Acordes reconhecidos e alinhados à grade (≥ 0,80).")));
+        gate.isGate = true;
+        gate.lessonId = "J";
+        gate.chordProgression = {
+            { 2, 5, 9, 0 },   // Dm7
+            { 7, 11, 2, 5 },  // G7
+            { 0, 4, 7, 11 },  // C7M
+            { 0, 4, 7, 11 },  // C7M
+        };
+
+        m.gateChallenge = juce::String::fromUTF8 (
+            "Tocar o II–V–I Dm7 – G7 – C7M – C7M a 84 BPM com ≥90% de acerto de "
+            "acordes e on_grid_ratio ≥ 0,80. Os acordes são construídos pelos "
+            "empilhamentos e estruturas estudados no módulo.");
+
+        // Pattern and links the module must cite (REQ-007, REQ-010).
+        m.practice.patternId = "PTN-A-DROP2";
+        m.practice.patternUse = juce::String::fromUTF8 (
+            "Drop 2: as tétrades em estruturas de quatro cordas mostram na prática "
+            "os empilhamentos de terça e as tríades do meio. Complemento: "
+            "PTN-M-4ths (quartas) para tocar as estruturas modais.");
+        m.practice.guitarists = { "Joe Satriani", "Steve Vai", "Guthrie Govan" };
+
+        // Curated apostilas (REQ-006, CM-012); see docs/MUSIC.md §7.
+        m.sources = {
+            "pdf-teoria-elementar-da-musica-ricordi-osvaldo-lacerda",
+            "pdf-p-classtruncatedtext-module-lineclamped-85ulhh-style-max-lines5bohumil-med-teoria-da-musica-5-edicao-p",
+            "pdf-mozart-mello-livroestudosdeguitarra4em1",
+            "pdf-caged-e-derivaoes-de-acordes-marcelo-mello-apostila-de-violao-e-guitarra-vol1",
         };
 
         return m;
@@ -2997,6 +3499,7 @@ const std::vector<CourseModule>& ModuleCatalog::getModules()
         makePlaceholder (6,  "II–V–I (menor)",                      3,  80,  0.80f),
         makeModule6(),
         makePlaceholder (7,  "II–V–I (aplicação)",                  3,  84,  0.80f),
+        makeModule7(),
         makePlaceholder (8,  "Turnarounds",                         4,  88,  0.81f),
         makePlaceholder (9,  "Turnarounds (variações)",             4,  92,  0.81f),
         makePlaceholder (10, "Turnarounds (aplicação)",             4,  96,  0.82f),

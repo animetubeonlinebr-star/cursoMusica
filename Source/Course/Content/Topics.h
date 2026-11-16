@@ -110,5 +110,16 @@ std::vector<ContentItem> topic6F();  // Campos harmônicos menores e funções
 std::vector<ContentItem> topic6G();  // Subdominantes menores
 std::vector<ContentItem> topic6H();  // Relações entre os campos maior e menor
 std::vector<ContentItem> topic6I();  // Modos dórico, frígio, lídio, mixolídio e lócrio
+// Module 7 (Etapa 7 — empilhamentos, estruturas modais e sonoridades).
+std::vector<ContentItem> topic7A();  // Empilhamentos de terças
+std::vector<ContentItem> topic7B();  // Empilhamentos quartais
+std::vector<ContentItem> topic7C();  // Outros empilhamentos
+std::vector<ContentItem> topic7D();  // Estruturas modais e tríades do meio
+std::vector<ContentItem> topic7E();  // Acordes e famílias modais
+std::vector<ContentItem> topic7F();  // Modos estruturais pelo CAGED
+std::vector<ContentItem> topic7G();  // Dórico, Lídio e Mixolídio
+std::vector<ContentItem> topic7H();  // Mixolídio sus e Mixolídio #4
+std::vector<ContentItem> topic7I();  // Lócrio 9 e Alterado (Alt.7)
+std::vector<ContentItem> topic7J();  // Aplicações modais no rock e pop-rock
 
 } // namespace cursomusica::content

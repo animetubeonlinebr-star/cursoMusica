@@ -1520,6 +1520,68 @@ def d_m4_formacao_acordes():
             d.ellipse([cx - 36, cy - 36, cx + 36, cy + 36], fill=RAISED, outline=color, width=3)
             d.text((cx, cy), note, font=font(22, True), fill=TXT, anchor="mm")
     d.text((W / 2, h - 44), "Empilhe tercas a partir da tonica e voce nomeia qualquer acorde.",
+# Modulo 7 — Empilhamentos, estruturas modais e sonoridades.
+# --------------------------------------------------------------------------
+def _stack_rows(d, top, groups, note_font=None):
+    """Desenha grupos de notas empilhadas; `groups` = [(rotulo, [notas], cor)]."""
+    note_font = note_font or font(24, True)
+    for i, (name, notes, color) in enumerate(groups):
+        yy = top + i * 118
+        d.text((MARGIN, yy + 10), name, font=font(23, True), fill=color, anchor="la")
+        for k, note in enumerate(notes):
+            cx = MARGIN + 60 + k * 128
+            cy = yy + 72
+            d.ellipse([cx - 38, cy - 38, cx + 38, cy + 38], fill=RAISED, outline=color, width=3)
+            d.text((cx, cy), note, font=note_font, fill=TXT, anchor="mm")
+
+
+def d_m7_tercas_empilhadas():
+    h = 720
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Empilhamento de tercas")
+    y = subtitle(d, "Cada nota nova comeca onde a anterior terminou; a mistura de tercas define a qualidade.", y)
+    _stack_rows(d, y + 40, [
+        ("Triade maior 1-3-5 (0,4,7)", ["Do", "Mi", "Sol"], ACCENT),
+        ("Tetrade 7M 1-3-5-7 (0,4,7,11)", ["Do", "Mi", "Sol", "Si"], SUCCESS),
+        ("Dominante 1-3-5-b7 (0,4,7,10)", ["Do", "Mi", "Sol", "Sib"], GOLD),
+        ("Menor 1-b3-5-b7 (0,3,7,10)", ["Do", "Mib", "Sol", "Sib"], CYAN),
+    ])
+    d.text((W / 2, h - 40), "As tercas empilhadas definem maior, menor e dominante.",
+           font=font(20), fill=TXT2, anchor="mm")
+    return img
+
+
+def d_m7_quartais_empilhadas():
+    h = 700
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Empilhamento de quartas (som de So What)")
+    y = subtitle(d, "Quartas justas sobrepostas; sem terca, o acorde e suspenso (nem maior, nem menor).", y)
+    _stack_rows(d, y + 40, [
+        ("Duas quartas: Do-Fa-Sib (0,5,10)", ["Do", "Fa", "Sib"], CYAN),
+        ("Tres quartas: Do-Fa-Sib-Mib (0,5,10,15)", ["Do", "Fa", "Sib", "Mib"], ACCENT),
+        ("So What: quartas + terca no topo (Sol)", ["Do", "Fa", "Sib", "Mib", "Sol"], GOLD),
+    ])
+    d.text((W / 2, h - 60), "O acorde quartal nao tem cara de maior nem de menor: ele suspende.",
+           font=font(20), fill=TXT2, anchor="mm")
+    d.text((W / 2, h - 34), "Mova o mesmo desenho pelo braco para qualquer centro modal.",
+           font=font(19, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m7_outros_empilhamentos():
+    h = 760
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Outros empilhamentos: quintas, segundas e mistos")
+    y = subtitle(d, "Cada distancia entre as notas produz uma cor diferente.", y)
+    _stack_rows(d, y + 34, [
+        ("Quintas: Do-Sol-Re-La (forte, aberto)", ["Do", "Sol", "Re", "La"], ACCENT),
+        ("Segundas: Do-Re-Mi (aglomerado, tenso)", ["Do", "Re", "Mi"], GOLD),
+        ("Misto (quarta + terca): Do-Fa-La", ["Do", "Fa", "La"], CYAN),
+    ])
+    d.text((W / 2, h - 40), "Quintas dao forca; segundas dao tensao; mistos dao cor sob medida.",
            font=font(20), fill=TXT2, anchor="mm")
     return img
 
@@ -2216,6 +2278,228 @@ DIAGRAMS.update({
     "m6_partitura_subdominante": d_m6_partitura_subdominante,
     "m6_partitura_dorico": d_m6_partitura_dorico,
     "m6_partitura_gregos": d_m6_partitura_gregos,
+def d_m7_triades_do_meio():
+    h = 700
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Triades do meio sobre Do")
+    y = subtitle(d, "Cada triade interna colore o acorde de base sem mudar o centro.", y)
+    rows = [("Sol maior (Sol-Si-Re)", "5, 7, 9", "Do com nona"),
+            ("La menor (La-Do-Mi)", "13, 1, 3", "Do com sexta"),
+            ("Re menor (Re-Fa-La)", "9, 11, 13", "Do com nona e 11"),
+            ("Fa maior (Fa-La-Do)", "11, 13, 1", "Do com 11")]
+    top = y + 40
+    for i, (triade, graus, cor) in enumerate(rows):
+        yy = top + i * 92
+        d.rounded_rectangle([MARGIN, yy, W - MARGIN, yy + 78], radius=10,
+                            fill=RAISED if i % 2 == 0 else SURFACE)
+        d.text((MARGIN + 20, yy + 22), triade, font=font(24, True), fill=ACCENT, anchor="la")
+        d.text((MARGIN + 20, yy + 52), "graus acrescentados: " + graus, font=font(18), fill=TXT2, anchor="la")
+        d.text((W - MARGIN - 20, yy + 38), cor, font=font(22, True), fill=CYAN, anchor="ra")
+    d.text((W / 2, h - 36), "Afirme o centro no baixo e use a triade do meio para colorir.",
+           font=font(20), fill=TXT2, anchor="mm")
+    return img
+
+
+def d_m7_familias_modais():
+    h = 720
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Familias modais por acorde")
+    y = subtitle(d, "Cada acorde carrega um leque de modos; escolha a cor pela intencao.", y)
+    rows = [("Maior (Xmaj7)", "jonio, lidio", ACCENT),
+            ("Maior #11 (Xmaj7#11)", "lidio", ACCENT),
+            ("Menor (Xm7)", "dorico, eolio", CYAN),
+            ("Menor b5 (Xm7b5)", "locrio", GOLD),
+            ("Dominante (X7)", "mixolidio, lidio dominante, alterado", GOLD),
+            ("Sus (X7sus4)", "mixolidio sus", SUCCESS)]
+    top = y + 36
+    for i, (acorde, modos, color) in enumerate(rows):
+        yy = top + i * 88
+        d.rounded_rectangle([MARGIN, yy, W - MARGIN, yy + 74], radius=10,
+                            fill=RAISED if i % 2 == 0 else SURFACE)
+        d.text((MARGIN + 20, yy + 20), acorde, font=font(23, True), fill=color, anchor="la")
+        d.text((MARGIN + 20, yy + 50), modos, font=font(19), fill=TXT, anchor="la")
+    d.text((W / 2, h - 34), "A setima do acorde restringe as opcoes; as tensoes definem a cor.",
+           font=font(19), fill=TXT2, anchor="mm")
+    return img
+
+
+def d_m7_caged_modos():
+    h = 760
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "O CAGED como mapa dos modos (escala de Do)")
+    y = subtitle(d, "As cinco formas cobrem o braco; cada modo e a escala vista de um grau.", y)
+    fretboard(d, MARGIN + 40, y + 40, W - 2 * MARGIN - 80, 300,
+              n_frets=12, start_fret=0, show_notes=True,
+              highlight={0, 2, 4, 5, 7, 9, 11}, root_pc=0)
+    string_labels(d, MARGIN + 10, y + 40, 300)
+    d.text((MARGIN, h - 120), "Destaques: as notas da escala de Do maior (tonica em roxo).",
+           font=font(20), fill=TXT2, anchor="la")
+    d.text((MARGIN, h - 84), "A ancora da frase (o grau onde voce comeca e termina) define o modo.",
+           font=font(20, True), fill=GOLD, anchor="la")
+    d.text((MARGIN, h - 48), "Jonion na tonica; dorico na 2a; frigio na 3a; lidio na 4a; mixolidio na 5a.",
+           font=font(19), fill=CYAN, anchor="la")
+    return img
+
+
+def d_m7_modos_tres():
+    h = 700
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Dorico, Lidio e Mixolidio")
+    y = subtitle(d, "A mesma escala maior vista de tres graus: cada ancora, uma cor.", y)
+    rows = [("Dorico (menor, 6a maior)", "1 2 b3 4 5 6 b7", "aberto, jazz", CYAN),
+            ("Lidio (maior, #4)", "1 2 3 #4 5 6 7", "brilhante, flutuante", ACCENT),
+            ("Mixolidio (maior, b7)", "1 2 3 4 5 6 b7", "dominante, blues", GOLD)]
+    top = y + 50
+    for i, (nome, formula, cor, color) in enumerate(rows):
+        yy = top + i * 160
+        d.rounded_rectangle([MARGIN, yy, W - MARGIN, yy + 140], radius=12, fill=RAISED)
+        d.text((MARGIN + 24, yy + 24), nome, font=font(26, True), fill=color, anchor="la")
+        d.text((MARGIN + 24, yy + 70), formula, font=font(30, True), fill=TXT, anchor="la")
+        d.text((MARGIN + 24, yy + 108), "som: " + cor, font=font(20), fill=TXT2, anchor="la")
+    return img
+
+
+def d_m7_modos_sus_alt():
+    h = 720
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Variacoes do dominante: sus e #4")
+    y = subtitle(d, "Uma nota alterada muda a cor do acorde dominante.", y)
+    rows = [("Mixolidio natural (X7)", "1 2 3 4 5 6 b7", "terca presente", GOLD),
+            ("Mixolidio sus (X7sus4)", "1 2 4 5 6 b7", "terca -> quarta", CYAN),
+            ("Mixolidio #4 (X7#11)", "1 2 3 #4 5 6 b7", "quarta -> #4", ACCENT)]
+    top = y + 50
+    for i, (nome, formula, nota, color) in enumerate(rows):
+        yy = top + i * 160
+        d.rounded_rectangle([MARGIN, yy, W - MARGIN, yy + 140], radius=12, fill=RAISED)
+        d.text((MARGIN + 24, yy + 24), nome, font=font(26, True), fill=color, anchor="la")
+        d.text((MARGIN + 24, yy + 70), formula, font=font(30, True), fill=TXT, anchor="la")
+        d.text((MARGIN + 24, yy + 108), "o que muda: " + nota, font=font(20), fill=TXT2, anchor="la")
+    return img
+
+
+def d_m7_locrio_alterado():
+    h = 700
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Locrio 9 e Alterado (Alt.7)")
+    y = subtitle(d, "As duas escalas de tensao do modulo: uma estavel, outra no limite.", y)
+    rows = [("Locrio 9 (Xm7b5)", "1 2 b3 4 b5 b6 b7", "tensao moderada", CYAN),
+            ("Alterado (X7alt)", "1 b9 #9 3 b5 #5 b7", "tensao maxima", GOLD)]
+    top = y + 60
+    for i, (nome, formula, tensao, color) in enumerate(rows):
+        yy = top + i * 200
+        d.rounded_rectangle([MARGIN, yy, W - MARGIN, yy + 170], radius=12, fill=RAISED)
+        d.text((MARGIN + 24, yy + 26), nome, font=font(28, True), fill=color, anchor="la")
+        d.text((MARGIN + 24, yy + 80), formula, font=font(32, True), fill=TXT, anchor="la")
+        d.text((MARGIN + 24, yy + 130), "tensao: " + tensao, font=font(21), fill=TXT2, anchor="la")
+    d.text((W / 2, h - 44), "O alterado resolve meio-tom abaixo; a tensao existe para resolver.",
+           font=font(20), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m7_aplicacoes_rock():
+    h = 720
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Aplicacoes modais no rock e no pop-rock")
+    y = subtitle(d, "Cada modo, um tipo de vamp e uma cor.", y)
+    rows = [("Dorico", "Xm7", "rock menor com energia", CYAN),
+            ("Frigio", "Xm7 (b2)", "metal, som espanhol", GOLD),
+            ("Lidio", "Xmaj7#11", "prog, passagens etéreas", ACCENT),
+            ("Mixolidio", "X7", "rock, blues-rock, vamps", GOLD),
+            ("Eolio", "Xm7", "rock/metal menores", CYAN),
+            ("Locrio 9", "Xm7b5", "II grau de II-V-I menor", SUCCESS)]
+    top = y + 34
+    for i, (modo, acorde, uso, color) in enumerate(rows):
+        yy = top + i * 84
+        d.rounded_rectangle([MARGIN, yy, W - MARGIN, yy + 70], radius=10,
+                            fill=RAISED if i % 2 == 0 else SURFACE)
+        d.text((MARGIN + 20, yy + 22), modo, font=font(24, True), fill=color, anchor="la")
+        d.text((MARGIN + 320, yy + 24), acorde, font=font(21, True), fill=TXT, anchor="la")
+        d.text((MARGIN + 620, yy + 24), uso, font=font(20), fill=TXT2, anchor="la")
+    return img
+
+
+def d_m7_partitura_tercas():
+    return _score_image("tercas", [("C", 4, None), ("E", 4, None), ("G", 4, None), ("B", 4, None)],
+                        "Partitura: Cmaj7 (empilhamento de tercas)")
+
+
+def d_m7_partitura_quartal():
+    return _score_image("quartal", [("C", 4, None), ("F", 4, None), ("B", 4, "b"), ("E", 5, "b"), ("G", 5, None)],
+                        "Partitura: acorde quartal (estilo So What)")
+
+
+def d_m7_partitura_outros():
+    return _score_image("outros", [("C", 3, None), ("G", 3, None), ("D", 4, None), ("A", 4, None)],
+                        "Partitura: empilhamento de quintas")
+
+
+def d_m7_partitura_triade_meio():
+    return _score_image("triade_meio", [("C", 3, None), ("G", 3, None), ("B", 3, None), ("D", 4, None)],
+                        "Partitura: Do com a triade de Sol por cima (Cmaj9)")
+
+
+def d_m7_partitura_familias():
+    return _score_image("familias", [("D", 3, None), ("F", 3, None), ("A", 3, None), ("C", 4, None), ("E", 4, None)],
+                        "Partitura: Dm9 (dorico)")
+
+
+def d_m7_partitura_caged():
+    return _score_image("caged", [("C", 4, None), ("D", 4, None), ("E", 4, None), ("F", 4, None),
+                                  ("G", 4, None), ("A", 4, None), ("B", 4, None), ("C", 5, None)],
+                        "Partitura: escala de Do maior (base dos modos)")
+
+
+def d_m7_partitura_dorico():
+    return _score_image("dorico", [("C", 4, None), ("D", 4, None), ("E", 4, "b"), ("F", 4, None),
+                                   ("G", 4, None), ("A", 4, None), ("B", 4, "b"), ("C", 5, None)],
+                        "Partitura: escala dorica em Do")
+
+
+def d_m7_partitura_sus():
+    return _score_image("sus", [("C", 4, None), ("F", 4, None), ("G", 4, None), ("B", 4, "b")],
+                        "Partitura: acorde sus de Do (C7sus4)")
+
+
+def d_m7_partitura_alterado():
+    return _score_image("alterado", [("C", 4, None), ("D", 4, "b"), ("D", 4, "#"), ("E", 4, None),
+                                     ("G", 4, "b"), ("A", 4, "b"), ("B", 4, "b")],
+                        "Partitura: escala alterada em Do (Alt.7)")
+
+
+def d_m7_partitura_vamp_modal():
+    return _score_image("vamp_modal", [("C", 4, None), ("D", 4, None), ("E", 4, "b"), ("F", 4, None),
+                                       ("G", 4, None), ("A", 4, None), ("B", 4, "b"), ("C", 5, None)],
+                        "Partitura: vamp modal em Do dorico")
+
+
+DIAGRAMS.update({
+    "m7_tercas_empilhadas": d_m7_tercas_empilhadas,
+    "m7_quartais_empilhadas": d_m7_quartais_empilhadas,
+    "m7_outros_empilhamentos": d_m7_outros_empilhamentos,
+    "m7_triades_do_meio": d_m7_triades_do_meio,
+    "m7_familias_modais": d_m7_familias_modais,
+    "m7_caged_modos": d_m7_caged_modos,
+    "m7_modos_tres": d_m7_modos_tres,
+    "m7_modos_sus_alt": d_m7_modos_sus_alt,
+    "m7_locrio_alterado": d_m7_locrio_alterado,
+    "m7_aplicacoes_rock": d_m7_aplicacoes_rock,
+    "m7_partitura_tercas": d_m7_partitura_tercas,
+    "m7_partitura_quartal": d_m7_partitura_quartal,
+    "m7_partitura_outros": d_m7_partitura_outros,
+    "m7_partitura_triade_meio": d_m7_partitura_triade_meio,
+    "m7_partitura_familias": d_m7_partitura_familias,
+    "m7_partitura_caged": d_m7_partitura_caged,
+    "m7_partitura_dorico": d_m7_partitura_dorico,
+    "m7_partitura_sus": d_m7_partitura_sus,
+    "m7_partitura_alterado": d_m7_partitura_alterado,
+    "m7_partitura_vamp_modal": d_m7_partitura_vamp_modal,
 })
 
 
