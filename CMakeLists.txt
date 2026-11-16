@@ -454,6 +454,7 @@ target_sources(CursoMusicaTests PRIVATE
     Source/Course/Content/Topic10I.cpp
     Source/Course/Content/Topic10J.cpp
     Source/Audio/AudioPortClassifier.cpp
+    Source/Audio/PitchDetector.cpp
     Source/Audio/PluginSearchPaths.cpp)
 
 target_include_directories(CursoMusicaTests PRIVATE Source)

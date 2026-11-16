@@ -20,9 +20,8 @@ namespace
         return nullptr;
     }
 
-    // Default VST3 locations plus the user's folders, de-duplicated by path.
-    juce::FileSearchPath buildSearchPath (juce::AudioPluginFormatManager& manager,
-                                          const juce::FileSearchPath& userFolders)
+    // Default VST3 locations, used only when the user configured no folder.
+    juce::FileSearchPath defaultSearchPaths (juce::AudioPluginFormatManager& manager)
     {
         juce::FileSearchPath result;
 
@@ -33,10 +32,17 @@ namespace
                 result.addIfNotAlreadyThere (defaults[i]);
         }
 
-        for (int i = 0; i < userFolders.getNumPaths(); ++i)
-            result.addIfNotAlreadyThere (userFolders[i]);
-
         return result;
+    }
+
+    // The folders the scan must search. The client asked the scan to stay inside
+    // the selected folders instead of walking the whole computer, so the user's
+    // folders replace the defaults as soon as one exists (see
+    // PluginSearchPaths::resolveScanFolders).
+    juce::FileSearchPath buildSearchPath (juce::AudioPluginFormatManager& manager,
+                                          const PluginSearchPaths& userPaths)
+    {
+        return userPaths.resolveScanFolders (defaultSearchPaths (manager));
     }
 }
 
@@ -163,19 +169,16 @@ void PluginHost::saveSearchPaths()
 
 void PluginHost::prunePluginsOutsideSearchPaths()
 {
-    // Default locations are always searched, so only the user's folders can make
-    // a previously known plugin unreachable.
-    auto* format = findVst3Format (formatManager);
-    if (format == nullptr)
-        return;
-
-    const auto defaults = format->getDefaultLocationsToSearch();
-    const auto userFolders = searchPaths.resolveExisting();
+    // The cache must match what the next scan will find, so the same rule that
+    // builds the search path decides what to drop: once the user configured a
+    // folder, a plugin living outside it (including the format's own default
+    // locations) is no longer reachable and leaves the list.
+    const auto scanFolders = buildSearchPath (formatManager, searchPaths);
 
     auto isInside = [] (const juce::File& file, const juce::FileSearchPath& folders)
     {
         for (int i = 0; i < folders.getNumPaths(); ++i)
-            if (file.isAChildOf (folders[i]))
+            if (file.isAChildOf (folders[i]) || file == folders[i])
                 return true;
 
         return false;
@@ -187,7 +190,7 @@ void PluginHost::prunePluginsOutsideSearchPaths()
         if (! file.exists())
             continue; // non-file formats (e.g. AudioUnit ids) are left alone
 
-        if (! isInside (file, defaults) && ! isInside (file, userFolders))
+        if (! isInside (file, scanFolders))
             knownList.removeType (type);
     }
 }
@@ -205,7 +208,7 @@ void PluginHost::scanForPlugins (std::function<void (float, const juce::String&)
     }
 
     scanJob = std::make_unique<ScanJob> (formatManager, knownList,
-                                         buildSearchPath (formatManager, searchPaths.resolveExisting()),
+                                         buildSearchPath (formatManager, searchPaths),
                                          std::move (onProgress),
                                          [this, finished = std::move (onFinished)]
                                          {

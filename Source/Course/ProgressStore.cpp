@@ -14,7 +14,7 @@ namespace
     // or the accuracy of an exercise attempt.
     struct QueueItem
     {
-        enum class Kind { gate, exercise } kind = Kind::gate;
+        enum class Kind { gate, exercise, wipe } kind = Kind::gate;
         int moduleNumber = 0;
         bool passed = false;
         juce::String exerciseId;
@@ -78,6 +78,20 @@ public:
         wake.signal();
     }
 
+    // Queues the deletion of this student's rows in the database, so a reset
+    // erases the mirror too and the next reconcile cannot restore it.
+    void enqueueWipe()
+    {
+        {
+            const juce::ScopedLock lock (queueLock);
+            QueueItem item;
+            item.kind = QueueItem::Kind::wipe;
+            queue.push_back (std::move (item));
+        }
+
+        wake.signal();
+    }
+
     bool isConnected() const noexcept { return connected.load(); }
 
 private:
@@ -124,11 +138,30 @@ private:
         if (! connected.load())
             connectAndPrepare();
 
-        if (connected.load())
-            for (const auto& item : pending)
-                pushItem (item);
+        if (! connected.load())
+        {
+            requeueFront (pending);
+            return false;
+        }
+
+        for (size_t i = 0; i < pending.size(); ++i)
+        {
+            // A failure keeps this item and the rest for a later retry, in the
+            // same order: a wipe followed by a new gate must not be reordered.
+            if (! pushItem (pending[i]))
+            {
+                requeueFront (std::vector<QueueItem> (pending.begin() + (long) i, pending.end()));
+                return false;
+            }
+        }
 
         return true;
+    }
+
+    void requeueFront (std::vector<QueueItem> items)
+    {
+        const juce::ScopedLock lock (queueLock);
+        queue.insert (queue.begin(), items.begin(), items.end());
     }
 
     bool connectAndPrepare()
@@ -152,6 +185,12 @@ private:
         // Reconcile: the higher of the two records wins, and the winner is
         // pushed back so both sides converge. The local value is only raised,
         // never lowered, so a failed read (returns -1) cannot lose progress.
+        //
+        // The database calls stay outside recordLock (the UI thread may call
+        // reset() and must never wait on the network), but the local raise runs
+        // under it and re-checks remoteWipePending: a reset that has not yet
+        // reached the database must not have its record restored from the stale
+        // remote row.
         const int remote = database.loadHighestPassedModule();
         const int local = owner.highestPassedModule.load();
 
@@ -162,44 +201,86 @@ private:
         if (merged > remote)
             database.saveHighestPassedModule (merged);
 
-        if (merged > local)
-            owner.highestPassedModule.store (merged);
+        {
+            const juce::ScopedLock lock (owner.recordLock);
+
+            if (owner.remoteWipePending.load())
+                return true;
+
+            if (merged > owner.highestPassedModule.load())
+                owner.highestPassedModule.store (merged);
+        }
 
         // Per-exercise results: the local record of this profile wins (it is the
         // most recent attempt on this machine); the database fills in the ones
         // this profile has never seen, so progress made elsewhere reappears.
-        for (const auto& [exerciseId, accuracy] : database.loadExerciseResults())
-        {
-            const juce::ScopedLock lock (owner.exerciseLock);
+        const auto remoteExercises = database.loadExerciseResults();
 
-            if (owner.exerciseAccuracy.find (exerciseId) == owner.exerciseAccuracy.end())
+        {
+            const juce::ScopedLock lock (owner.recordLock);
+
+            if (owner.remoteWipePending.load())
+                return true;
+
+            for (const auto& [exerciseId, accuracy] : remoteExercises)
             {
-                owner.exerciseAccuracy[exerciseId] = accuracy;
-                owner.properties.setValue (ProgressStore::exerciseKey (exerciseId), accuracy);
+                const juce::ScopedLock exerciseGuard (owner.exerciseLock);
+
+                if (owner.exerciseAccuracy.find (exerciseId) == owner.exerciseAccuracy.end())
+                {
+                    owner.exerciseAccuracy[exerciseId] = accuracy;
+                    owner.properties.setValue (ProgressStore::exerciseKey (exerciseId), accuracy);
+                }
             }
         }
 
         return true;
     }
 
-    void pushItem (const QueueItem& item)
+    // Pushes one queued item. Returns false on a database error, so the caller
+    // can keep it for a retry.
+    bool pushItem (const QueueItem& item)
     {
         if (item.kind == QueueItem::Kind::gate)
-            pushResult (item.moduleNumber, item.passed);
-        else if (! database.saveExerciseResult (item.exerciseId, item.accuracyPercent))
+            return pushResult (item.moduleNumber, item.passed);
+
+        if (item.kind == QueueItem::Kind::wipe)
+        {
+            if (! database.clearProgress())
+            {
+                connected.store (false);
+                return false;
+            }
+
+            // The mirror is gone: the reconcile may safely run again.
+            owner.remoteWipePending.store (false);
+            return true;
+        }
+
+        if (! database.saveExerciseResult (item.exerciseId, item.accuracyPercent))
+        {
             connected.store (false);
+            return false;
+        }
+
+        return true;
     }
 
-    void pushResult (int moduleNumber, bool passed)
+    bool pushResult (int moduleNumber, bool passed)
     {
         if (! database.recordModuleResult (moduleNumber, passed))
         {
             connected.store (false);
-            return;
+            return false;
         }
 
         if (passed && ! database.saveHighestPassedModule (moduleNumber))
+        {
             connected.store (false);
+            return false;
+        }
+
+        return true;
     }
 
     ProgressStore& owner;
@@ -353,7 +434,14 @@ void ProgressStore::save() const
 
 void ProgressStore::reset()
 {
-    highestPassedModule.store (0);
+    // Set the flag before clearing the local record, under recordLock, so the
+    // background reconcile cannot raise highestPassedModule back from the still
+    // stale remote row in between.
+    {
+        const juce::ScopedLock lock (recordLock);
+        remoteWipePending.store (remoteConfigured);
+        highestPassedModule.store (0);
+    }
 
     {
         const juce::ScopedLock lock (exerciseLock);
@@ -366,6 +454,15 @@ void ProgressStore::reset()
 
     save();
     properties.saveIfNeeded();
+
+    if (remoteConfigured)
+        enqueueRemoteWipe();
+}
+
+void ProgressStore::enqueueRemoteWipe()
+{
+    if (sync != nullptr)
+        sync->enqueueWipe();
 }
 
 } // namespace cursomusica::course

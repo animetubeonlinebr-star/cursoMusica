@@ -99,6 +99,12 @@ public:
     // Loaded once when the connection opens, so the UI thread never queries.
     std::vector<std::pair<juce::String, int>> loadExerciseResults();
 
+    // Erases every row of this student: the progress record, the gate history
+    // and the per-exercise percentages. The student asked to wipe their data
+    // (docs/DATA.md), so both the local file and the mirror must be cleared;
+    // otherwise the next reconcile would bring the old record back.
+    bool clearProgress();
+
     // Last error text, for logs and diagnostics. Never contains the password.
     const juce::String& lastError() const noexcept { return error; }
 

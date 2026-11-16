@@ -4,6 +4,7 @@
 #include "Course/QuizSession.h"
 #include "Course/Content/Diagrams.h"
 #include "UI/Design/Theme.h"
+#include "UI/PairedSlots.h"
 #include "UI/PracticePanel.h"
 
 #include <functional>
@@ -628,8 +629,10 @@ private:
         g.drawText (juce::String::fromUTF8 ("\u25B6  Ouvir exemplo"),
                     button.reduced (10, 0), juce::Justification::centredLeft, false);
 
-        while ((int) audioButtonBounds.size() <= index)
-            audioButtonBounds.push_back ({});
+        // Both vectors are grown together: audioNotes was indexed past its end
+        // when the first button was laid out, corrupting the heap and closing
+        // the app as soon as a topic with audio or a score was opened.
+        ui::ensurePairedSlots (audioButtonBounds, audioNotes, (std::size_t) index);
         audioButtonBounds[(size_t) index] = button;
         audioNotes[(size_t) index] = notes;
     }

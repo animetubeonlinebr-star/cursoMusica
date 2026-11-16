@@ -536,4 +536,57 @@ std::vector<std::pair<juce::String, int>> ProgressDatabase::loadExerciseResults(
    #endif
 }
 
+bool ProgressDatabase::clearProgress()
+{
+   #ifndef CURSOMUSICA_HAS_POSTGRES
+    error = "built without libpq";
+    return false;
+   #else
+    if (connection == nullptr)
+    {
+        error = "not connected";
+        return false;
+    }
+
+    char* escapedSchema = PQescapeIdentifier (static_cast<PGconn*> (connection),
+                                              config.schema.toRawUTF8(),
+                                              (size_t) config.schema.getNumBytesAsUTF8());
+    if (escapedSchema == nullptr)
+    {
+        error = "invalid schema name";
+        return false;
+    }
+
+    const juce::String schema (escapedSchema);
+    PQfreemem (escapedSchema);
+
+    // PQexecParams runs a single statement (extended protocol), so the three
+    // deletes are issued one by one. Order matters only for clarity: the history
+    // and the percentages go first, the record last.
+    const char* tables[] = { "module_result", "exercise_result", "progress" };
+    const char* values[] = { config.student.toRawUTF8() };
+
+    for (const auto* table : tables)
+    {
+        const juce::String sql = "DELETE FROM " + schema + "." + table + " WHERE student_id = $1;";
+
+        PGresult* result = PQexecParams (static_cast<PGconn*> (connection), sql.toRawUTF8(),
+                                         1, nullptr, values, nullptr, nullptr, 0);
+        const auto status = PQresultStatus (result);
+        const bool ok = status == PGRES_COMMAND_OK;
+
+        if (! ok)
+        {
+            error = PQresultErrorMessage (result);
+            PQclear (result);
+            return false;
+        }
+
+        PQclear (result);
+    }
+
+    return true;
+   #endif
+}
+
 } // namespace cursomusica::data
