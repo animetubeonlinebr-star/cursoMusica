@@ -70,4 +70,14 @@ std::vector<ContentItem> topic2F();  // Relação entre intervalos e construçã
 std::vector<ContentItem> topic2G();  // Cantar e tocar os intervalos
 std::vector<ContentItem> topic2H();  // Identificar intervalos no instrumento e de ouvido
 
+// Module 3 (Etapa 3 — ritmo, leitura e levadas).
+std::vector<ContentItem> topic3A();  // Leitura rítmica e convenções de escrita
+std::vector<ContentItem> topic3B();  // Pulsação e subdivisão
+std::vector<ContentItem> topic3C();  // Cifrado com divisão
+std::vector<ContentItem> topic3D();  // Células rítmicas e acentuações
+std::vector<ContentItem> topic3E();  // Levadas com palheta
+std::vector<ContentItem> topic3F();  // Levadas com os dedos e mapa da mão direita
+std::vector<ContentItem> topic3G();  // Compassos simples, compostos e fórmulas incomuns
+std::vector<ContentItem> topic3H();  // Sílabas rítmicas (Konokol), percussões e efeito sanfona
+
 } // namespace cursomusica::content

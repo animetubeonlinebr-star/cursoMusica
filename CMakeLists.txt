@@ -109,6 +109,14 @@ target_sources(CursoMusica PRIVATE
     Source/Course/Content/Topic2F.cpp
     Source/Course/Content/Topic2G.cpp
     Source/Course/Content/Topic2H.cpp
+    Source/Course/Content/Topic3A.cpp
+    Source/Course/Content/Topic3B.cpp
+    Source/Course/Content/Topic3C.cpp
+    Source/Course/Content/Topic3D.cpp
+    Source/Course/Content/Topic3E.cpp
+    Source/Course/Content/Topic3F.cpp
+    Source/Course/Content/Topic3G.cpp
+    Source/Course/Content/Topic3H.cpp
     Source/UI/Design/LookAndFeel.cpp
     Source/UI/Design/Panel.cpp
     Source/UI/LevelMeter.cpp
@@ -303,6 +311,14 @@ target_sources(CursoMusicaTests PRIVATE
     Source/Course/Content/Topic2F.cpp
     Source/Course/Content/Topic2G.cpp
     Source/Course/Content/Topic2H.cpp
+    Source/Course/Content/Topic3A.cpp
+    Source/Course/Content/Topic3B.cpp
+    Source/Course/Content/Topic3C.cpp
+    Source/Course/Content/Topic3D.cpp
+    Source/Course/Content/Topic3E.cpp
+    Source/Course/Content/Topic3F.cpp
+    Source/Course/Content/Topic3G.cpp
+    Source/Course/Content/Topic3H.cpp
     Source/Audio/AudioPortClassifier.cpp
     Source/Audio/PluginSearchPaths.cpp)
 
