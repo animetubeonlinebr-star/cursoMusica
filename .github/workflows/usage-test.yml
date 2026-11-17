@@ -117,7 +117,10 @@ jobs:
           if (-not $bin) { Write-Error "PostgreSQL server binaries not found"; exit 1 }
           echo $bin >> $env:GITHUB_PATH
           # The parent of bin\ is the PostgreSQL root CMake needs for libpq.
-          echo "PGROOT=$((Get-Item $bin).Parent.FullName)" >> $env:GITHUB_ENV
+          # Forward slashes: they are valid on Windows and survive being written
+          # into the generated staging script (backslashes would break its parser).
+          $root = (Get-Item $bin).Parent.FullName -replace '\\', '/'
+          echo "PGROOT=$root" >> $env:GITHUB_ENV
 
           $data = Join-Path $env:RUNNER_TEMP "pgdata"
           $log  = Join-Path $env:RUNNER_TEMP "postgres.log"

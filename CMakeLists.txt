@@ -285,6 +285,11 @@ if(PostgreSQL_FOUND)
             list(APPEND _pg_hint_dirs "${PostgreSQL_ROOT}/bin" "${PostgreSQL_ROOT}/lib")
         endif()
         list(REMOVE_DUPLICATES _pg_hint_dirs)
+        # Backslashes in a Windows path (e.g. a -DPostgreSQL_ROOT with "\")
+        # would be written verbatim into the generated script and break CMake's
+        # parser ("Invalid character escape '\P'"). Forward slashes are valid on
+        # Windows and safe inside the quoted string.
+        string(REPLACE "\\" "/" _pg_hint_dirs "${_pg_hint_dirs}")
         # Written to a generated script instead of -D arguments: the PostgreSQL
         # path contains spaces ("Program Files") and Ninja hands the command to
         # cmd.exe, which splits it ("'C:' is not recognized as an internal or
