@@ -204,18 +204,28 @@ namespace
 
     // ---- Step 3: audio devices and tuner ----------------------------------
 
-    // Pushes `frequencyHz` through AudioEngine's real callback for `seconds`,
-    // then returns the frequency the tuner last published.
-    float pushTone (cursomusica::AudioEngine& engine, double frequencyHz, double seconds)
+    // Pushes `frequencyHz` through AudioEngine's real callback until the
+    // analysis thread publishes a reading within `toleranceHz` of the target (or
+    // `maxSeconds` elapse), then returns the last reading.
+    //
+    // The analysis thread drains the lock-free FIFO in 512-sample windows, so a
+    // fixed push followed by an immediate read races it: the last window to be
+    // analysed can still be a mix of the previous tone and the new one, which
+    // YIN rejects (0 Hz). Polling until the published value matches makes the
+    // check independent of how fast the analysis thread catches up.
+    float pushTone (cursomusica::AudioEngine& engine, double frequencyHz,
+                    double toleranceHz, double maxSeconds)
     {
         const double sr = engine.getCurrentSampleRate() > 0.0 ? engine.getCurrentSampleRate() : 48000.0;
         const int block = 512;
-        const int blocks = (int) std::ceil (seconds * sr / block);
+        const int maxBlocks = (int) std::ceil (maxSeconds * sr / block);
 
         std::vector<float> buffer ((size_t) block);
         const float* inputs[1] = { buffer.data() };
 
-        for (int b = 0; b < blocks; ++b)
+        float detected = engine.getDetectedFrequencyHz();
+
+        for (int b = 0; b < maxBlocks; ++b)
         {
             for (int i = 0; i < block; ++i)
             {
@@ -226,9 +236,13 @@ namespace
             juce::AudioIODeviceCallbackContext context;
             engine.audioDeviceIOCallbackWithContext (inputs, 1, nullptr, 0, block, context);
             juce::Thread::sleep (2);
+
+            detected = engine.getDetectedFrequencyHz();
+            if (std::abs (detected - (float) frequencyHz) <= (float) toleranceHz)
+                break;
         }
 
-        return engine.getDetectedFrequencyHz();
+        return detected;
     }
 
     void runAudioStep()
@@ -259,7 +273,7 @@ namespace
 
         for (int i = 0; i < 3; ++i)
         {
-            const float detected = pushTone (engine, notes[i], 0.35);
+            const float detected = pushTone (engine, notes[i], 3.0, 1.5);
             const bool ok = std::abs (detected - notes[i]) < 3.0f;
             check (ok, juce::String ("afinador reconheceu ") + names[i]
                           + " (" + juce::String (notes[i], 2) + " Hz) -> "
@@ -267,7 +281,7 @@ namespace
         }
 
         // Silence must read as empty, not as a stale value (docs/QA.md).
-        const float silence = pushTone (engine, 0.0, 0.3);
+        const float silence = pushTone (engine, 0.0, 0.5, 1.5);
         check (std::abs (silence) < 0.5f, "silencio -> estado vazio (0 Hz), nao valor falso");
 
         engine.shutdown();
