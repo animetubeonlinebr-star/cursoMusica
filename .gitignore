@@ -1,5 +1,6 @@
 build/
 build-usage/
+usage-test.log
 External/JUCE/
 External/asio/
 .agent_tmp/
