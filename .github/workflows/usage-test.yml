@@ -62,7 +62,7 @@ jobs:
       - name: Build (app, test plugin and usage test)
         run: cmake --build build-usage
 
-      - name: Start JACK (dummy: a real audio device, no hardware)
+      - name: "Start JACK (dummy driver: a real audio device, no hardware)"
         run: |
           export JACK_NO_AUDIO_RESERVATION=1
           jackd -d dummy -r 48000 -p 512 >/tmp/jackd.log 2>&1 &
@@ -87,8 +87,11 @@ jobs:
     name: Windows (instalacao limpa)
     # The client's clean Windows machine. Gated like the Windows build in
     # ci.yml: Windows minutes are limited (see AGENTS.md), so it runs on the
-    # test/main branches and on demand, not on every PR.
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    # test/main branches and on demand, not on every PR or feature push.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'push' &&
+       (github.ref == 'refs/heads/test' || github.ref == 'refs/heads/main'))
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
