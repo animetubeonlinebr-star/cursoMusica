@@ -3,10 +3,13 @@
 #include <juce_audio_utils/juce_audio_utils.h>
 
 #include "Audio/AudioEngine.h"
+#include "Audio/PluginChainModel.h"
 #include "Audio/PluginHost.h"
 #include "UI/AudioPortsPanel.h"
 #include "UI/Design/Panel.h"
 #include "UI/PluginPathsComponent.h"
+
+#include <vector>
 
 namespace cursomusica
 {
@@ -36,6 +39,10 @@ private:
     void openSearchPathsWindow();
     void closeSearchPathsWindow();
     void searchPathsChanged();
+
+    // Indices into the known-plugin list that are not yet in the input chain, so
+    // the upper panel only offers plugins the student can still add.
+    std::vector<int> selectableIndices() const;
 
     // Opens the PostgreSQL progress-database window (ADR 0006).
     void openDatabaseWindow();

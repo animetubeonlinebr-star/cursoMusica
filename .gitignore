@@ -1,4 +1,5 @@
 build/
+build-usage/
 External/JUCE/
 External/asio/
 .agent_tmp/

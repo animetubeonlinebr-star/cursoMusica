@@ -481,3 +481,109 @@ target_link_libraries(CursoMusicaTests
         juce::juce_recommended_warning_flags)
 
 add_test(NAME course_logic COMMAND CursoMusicaTests)
+
+# ---------------------------------------------------------------------------
+# Usage test (end-to-end acceptance, REQ-024 flow + tuner + modules).
+#
+# A separate console target that drives the real engine, plugin host, database
+# and course objects — the same code the GUI uses — in the order the client's
+# script describes. It is built only when asked (-DCURSOMUSICA_USAGE_TEST=ON),
+# so a normal build and the Windows installer build are unaffected; the usage
+# runner (tools/usage-test.sh) and the CI job turn it on.
+#
+# It links juce_audio_devices/processors so the audio path and the VST3 scan are
+# the real ones, and the real libpq when available, like the GUI app.
+# ---------------------------------------------------------------------------
+option(CURSOMUSICA_USAGE_TEST "Build the end-to-end usage test" OFF)
+
+if(CURSOMUSICA_USAGE_TEST)
+    # A real VST3 bundle the usage test can scan and insert into the input chain.
+    # JUCE ships the VST3 SDK headers, so this is a genuine plugin, not a stub.
+    juce_add_plugin(CursoMusicaTestPlugin
+        PRODUCT_NAME "CursoMusica Test Plugin"
+        COMPANY_NAME "CursoMusica"
+        PLUGIN_MANUFACTURER_CODE Cmus
+        PLUGIN_CODE Ctst
+        FORMATS VST3
+        IS_SYNTH FALSE
+        NEEDS_MIDI_INPUT FALSE
+        NEEDS_MIDI_OUTPUT FALSE
+        IS_MIDI_EFFECT FALSE
+        EDITOR_WANTS_KEYBOARD_FOCUS FALSE
+        COPY_PLUGIN_AFTER_BUILD FALSE)
+    target_sources(CursoMusicaTestPlugin PRIVATE tests/usage/TestPlugin.cpp)
+    target_compile_definitions(CursoMusicaTestPlugin PRIVATE
+        JUCE_USE_CURL=0
+        JUCE_WEB_BROWSER=0
+        JUCE_MODAL_LOOPS_PERMITTED=1)
+
+    juce_add_console_app(CursoMusicaUsageTest
+        PRODUCT_NAME "CursoMusicaUsageTest")
+
+    target_sources(CursoMusicaUsageTest PRIVATE
+        tests/usage/UsageTest.cpp
+        Source/Audio/AudioEngine.cpp
+        Source/Audio/PitchDetector.cpp
+        Source/Audio/PluginHost.cpp
+        Source/Audio/PluginChain.cpp
+        Source/Audio/PluginSearchPaths.cpp
+        Source/Audio/Metronome.cpp
+        Source/Audio/TonePlayer.cpp
+        Source/Course/NoteMath.cpp
+        Source/Course/Intervals.cpp
+        Source/Course/ExerciseEvaluator.cpp
+        Source/Course/TempoGrid.cpp
+        Source/Course/PracticeSession.cpp
+        Source/Course/QuizSession.cpp
+        Source/Course/ProgressStore.cpp
+        Source/Course/ModuleCatalog.cpp
+        Source/Data/ProgressDatabase.cpp
+        Source/Data/AppSettings.cpp
+        Source/Course/Content/Topics.cpp
+        Source/Course/Content/Diagrams.cpp)
+
+    # Every topic file, so the catalogue is the same one the app ships.
+    file(GLOB _usage_topic_files CONFIGURE_DEPENDS
+         "${CMAKE_CURRENT_SOURCE_DIR}/Source/Course/Content/Topic*.cpp")
+    target_sources(CursoMusicaUsageTest PRIVATE ${_usage_topic_files})
+
+    target_include_directories(CursoMusicaUsageTest PRIVATE Source)
+
+    target_compile_definitions(CursoMusicaUsageTest PRIVATE
+        JUCE_USE_CURL=0
+        JUCE_WEB_BROWSER=0
+        JUCE_MODAL_LOOPS_PERMITTED=1
+        JUCE_PLUGINHOST_VST3=1
+        JUCE_PLUGINHOST_VST=0
+        JUCE_PLUGINHOST_AU=0
+        $<$<PLATFORM_ID:Windows>:JUCE_WASAPI=1>
+        $<$<PLATFORM_ID:Windows>:JUCE_WASAPI_EXCLUSIVE=1>
+        $<$<PLATFORM_ID:Windows>:JUCE_DIRECTSOUND=1>
+        $<$<PLATFORM_ID:Linux>:JUCE_ALSA=1>
+        $<$<PLATFORM_ID:Linux>:JUCE_JACK=1>)
+
+    if(PostgreSQL_FOUND)
+        target_include_directories(CursoMusicaUsageTest PRIVATE ${PostgreSQL_INCLUDE_DIRS})
+        target_link_libraries(CursoMusicaUsageTest PRIVATE PostgreSQL::PostgreSQL)
+        target_compile_definitions(CursoMusicaUsageTest PRIVATE CURSOMUSICA_HAS_POSTGRES=1)
+    endif()
+
+    target_link_libraries(CursoMusicaUsageTest
+        PRIVATE
+            CursoMusicaDiagrams
+            juce::juce_audio_utils
+            juce::juce_audio_processors
+            juce::juce_dsp
+        PUBLIC
+            juce::juce_recommended_config_flags
+            juce::juce_recommended_warning_flags)
+
+    # JACK is not linked by JUCE automatically (unlike ALSA, which is dlopened);
+    # when the backend is on, the library must be on the link line.
+    if(UNIX AND NOT APPLE)
+        find_library(JACK_LIBRARY jack)
+        if(JACK_LIBRARY)
+            target_link_libraries(CursoMusicaUsageTest PRIVATE ${JACK_LIBRARY})
+        endif()
+    endif()
+endif()

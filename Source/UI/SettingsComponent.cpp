@@ -44,7 +44,7 @@ public:
     int getNumRows() override
     {
         if (kind == Kind::available)
-            return owner.pluginHost.getKnownPluginList().getNumTypes();
+            return (int) owner.selectableIndices().size();
 
         return owner.audioEngine.getPluginChain().getNumPlugins();
     }
@@ -61,8 +61,13 @@ public:
         if (kind == Kind::available)
         {
             const auto types = owner.pluginHost.getKnownPluginList().getTypes();
-            if (row < types.size())
-                text = types[row].name + "  (" + types[row].manufacturerName + ")";
+            const auto selectable = owner.selectableIndices();
+            if (row >= 0 && row < (int) selectable.size())
+            {
+                const int typeIndex = selectable[(size_t) row];
+                if (typeIndex < types.size())
+                    text = types[typeIndex].name + "  (" + types[typeIndex].manufacturerName + ")";
+            }
         }
         else if (auto* plugin = owner.audioEngine.getPluginChain().getPlugin (row))
         {
@@ -197,6 +202,29 @@ void SettingsComponent::refreshPluginList()
     availableList.repaint();
 }
 
+std::vector<int> SettingsComponent::selectableIndices() const
+{
+    const auto types = pluginHost.getKnownPluginList().getTypes();
+
+    std::vector<juce::String> available, chained;
+    available.reserve ((size_t) types.size());
+    for (const auto& type : types)
+        available.push_back (audio::pluginchain::stableKey (type.pluginFormatName, type.name,
+                                                            type.uniqueId, type.deprecatedUid));
+
+    const int chainCount = audioEngine.getPluginChain().getNumPlugins();
+    chained.reserve ((size_t) chainCount);
+    for (int i = 0; i < chainCount; ++i)
+        if (auto* plugin = audioEngine.getPluginChain().getPlugin (i))
+        {
+            const auto d = plugin->getPluginDescription();
+            chained.push_back (audio::pluginchain::stableKey (d.pluginFormatName, d.name,
+                                                              d.uniqueId, d.deprecatedUid));
+        }
+
+    return audio::pluginchain::selectableIndices (available, chained);
+}
+
 void SettingsComponent::refreshChainList()
 {
     chainList.updateContent();
@@ -206,13 +234,18 @@ void SettingsComponent::refreshChainList()
 void SettingsComponent::addSelectedPluginToChain()
 {
     const int row = availableList.getSelectedRow();
-    const auto types = pluginHost.getKnownPluginList().getTypes();
+    const auto selectable = selectableIndices();
 
-    if (row < 0 || row >= types.size())
+    if (row < 0 || row >= (int) selectable.size())
+        return;
+
+    const auto types = pluginHost.getKnownPluginList().getTypes();
+    const int typeIndex = selectable[(size_t) row];
+    if (typeIndex >= types.size())
         return;
 
     juce::String error;
-    auto instance = pluginHost.createInstance (types[row],
+    auto instance = pluginHost.createInstance (types[typeIndex],
                                               audioEngine.getCurrentSampleRate(),
                                               audioEngine.getCurrentBlockSize(),
                                               error);
@@ -225,7 +258,10 @@ void SettingsComponent::addSelectedPluginToChain()
 
     audioEngine.getPluginChain().addPlugin (std::move (instance));
     audioEngine.preparePluginChain();
+
+    // The plugin now lives in the chain: it must leave the upper panel (REQ-024).
     refreshChainList();
+    refreshPluginList();
 }
 
 void SettingsComponent::removeSelectedChainPlugin()
@@ -235,7 +271,10 @@ void SettingsComponent::removeSelectedChainPlugin()
         return;
 
     audioEngine.getPluginChain().removePlugin (row);
+
+    // Back to the upper panel: it can be added again.
     refreshChainList();
+    refreshPluginList();
 }
 
 void SettingsComponent::openEditorForSelectedChainPlugin()
