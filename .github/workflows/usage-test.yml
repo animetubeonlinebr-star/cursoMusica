@@ -1,0 +1,146 @@
+name: Usage test (aceitacao ponta a ponta)
+
+# The client's acceptance script, run as an executable gate:
+#   install → open → Configurações → pasta de VST3 → Scan → Add input chain,
+#   plus the "curso-musica" database on PostgreSQL 5432, the tuner on the
+#   configured input device, and the module exercises.
+#
+# The Linux job proves the logic on every PR (JACK dummy gives a real audio
+# device without hardware). The Windows job is the client's "clean Windows
+# installation": a fresh windows-latest runner with its own PostgreSQL, which is
+# where the .exe actually ships.
+
+on:
+  pull_request:
+  push:
+    branches: [test, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: usage-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  linux-usage:
+    name: Linux (logica ponta a ponta)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: cursomusica
+          POSTGRES_PASSWORD: cursomusica
+          POSTGRES_DB: curso-musica
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U cursomusica -d curso-musica"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install toolchain (incl. JACK and GTK for the test plugin editor)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build pkg-config \
+            libasound2-dev libfreetype6-dev libfontconfig1-dev \
+            libx11-dev libxcomposite-dev libxcursor-dev libxinerama-dev \
+            libxrandr-dev libxrender-dev libglu1-mesa-dev \
+            libjack-jackd2-dev jackd2 libgtk-3-dev libpq-dev
+
+      - name: Clone JUCE (pinned)
+        run: git clone --depth 1 --branch 8.0.4 https://github.com/juce-framework/JUCE.git External/JUCE
+
+      - name: Configure (usage test on)
+        run: cmake -B build-usage -G Ninja -DCMAKE_BUILD_TYPE=Release -DCURSOMUSICA_USAGE_TEST=ON
+
+      - name: Build (app, test plugin and usage test)
+        run: cmake --build build-usage
+
+      - name: "Start JACK (dummy driver: a real audio device, no hardware)"
+        run: |
+          export JACK_NO_AUDIO_RESERVATION=1
+          jackd -d dummy -r 48000 -p 512 >/tmp/jackd.log 2>&1 &
+          sleep 5
+
+      - name: Run usage test
+        env:
+          PGHOST: localhost
+          PGPORT: "5432"
+          PGUSER: cursomusica
+          PGPASSWORD: cursomusica
+          PGDATABASE: curso-musica
+          CURSOMUSICA_PG_SCHEMA: curso-musica
+          JACK_NO_AUDIO_RESERVATION: "1"
+        run: |
+          plugin_dir="$(mktemp -d)"
+          cp -r "build-usage/CursoMusicaTestPlugin_artefacts/Release/VST3/CursoMusica Test Plugin.vst3" "$plugin_dir/"
+          ./build-usage/CursoMusicaUsageTest_artefacts/Release/CursoMusicaUsageTest \
+            --vst3-folder="$plugin_dir"
+
+  windows-usage:
+    name: Windows (instalacao limpa)
+    # The client's clean Windows machine. Gated like the Windows build in
+    # ci.yml: Windows minutes are limited (see AGENTS.md), so it runs on the
+    # test/main branches and on demand, not on every PR or feature push.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'push' &&
+       (github.ref == 'refs/heads/test' || github.ref == 'refs/heads/main'))
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install PostgreSQL 17
+        shell: pwsh
+        run: |
+          choco install postgresql17 --params '/Password:cursomusica' -y --no-progress
+          # The service starts on 5432; make psql visible to this process.
+          $bin = "C:\Program Files\PostgreSQL\17\bin"
+          echo "$bin" >> $env:GITHUB_PATH
+          Start-Sleep -Seconds 5
+          & "$bin\pg_isready.exe" -h localhost -p 5432
+
+      - name: Create role, database and schema
+        shell: pwsh
+        env:
+          PGPASSWORD: cursomusica
+        run: |
+          $psql = "C:\Program Files\PostgreSQL\17\bin\psql.exe"
+          & $psql -h localhost -U postgres -c "CREATE ROLE cursomusica LOGIN PASSWORD 'cursomusica';"
+          & $psql -h localhost -U postgres -c "CREATE DATABASE \"curso-musica\" OWNER cursomusica;"
+
+      - name: Clone JUCE (pinned)
+        run: git clone --depth 1 --branch 8.0.4 https://github.com/juce-framework/JUCE.git External/JUCE
+
+      - name: Set up MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Configure (usage test on)
+        run: cmake -B build-usage -G Ninja -DCMAKE_BUILD_TYPE=Release -DCURSOMUSICA_USAGE_TEST=ON
+
+      - name: Build (app, test plugin and usage test)
+        run: cmake --build build-usage
+
+      - name: Run usage test
+        shell: pwsh
+        env:
+          PGHOST: localhost
+          PGPORT: "5432"
+          PGUSER: cursomusica
+          PGPASSWORD: cursomusica
+          PGDATABASE: curso-musica
+          CURSOMUSICA_PG_SCHEMA: curso-musica
+        run: |
+          $plugin = Get-ChildItem -Recurse -Directory -Filter "CursoMusica Test Plugin.vst3" build-usage |
+            Select-Object -First 1
+          if (-not $plugin) { Write-Error "Test plugin bundle not found"; exit 1 }
+          $dir = Split-Path $plugin.FullName -Parent
+          & "build-usage/CursoMusicaUsageTest_artefacts/Release/CursoMusicaUsageTest.exe" --vst3-folder="$dir"

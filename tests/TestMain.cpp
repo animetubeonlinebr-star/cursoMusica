@@ -10,6 +10,7 @@
 
 #include "Audio/AudioPortClassifier.h"
 #include "Audio/PitchDetector.h"
+#include "Audio/PluginChainModel.h"
 #include "Audio/PluginSearchPaths.h"
 #include "UI/PairedSlots.h"
 #include "Course/Content/Diagrams.h"
@@ -908,6 +909,47 @@ void testPluginSearchPaths()
     mixed.add (existingFolder.getFullPathName());
     check (mixed.resolveScanFolders (defaults).getNumPaths() == 1,
            "only the folders that exist are searched");
+}
+
+// The upper panel must stop offering a plugin once it is in the input chain
+// (client bug 2026-11-16: "Add input chain" left the plugin in both panels).
+// The scan stores the .vst3 bundle path while the running instance reports the
+// inner binary path, so createIdentifierString() differs between the two; the
+// stable key (format + name + unique id) is what makes the two agree.
+void testPluginChainModel()
+{
+    std::cout << "PluginChainModel\n";
+    using cursomusica::audio::pluginchain::selectableIndices;
+    using cursomusica::audio::pluginchain::stableKey;
+
+    // Same plugin, two paths: scanned description vs running instance.
+    const auto scannedKey = stableKey ("VST3", "CursoMusica Test Plugin", 96035362, 0);
+    const auto instanceKey = stableKey ("VST3", "CursoMusica Test Plugin", 96035362, 0);
+    check (scannedKey == instanceKey,
+           "the stable key ignores the path, so scan and instance agree");
+
+    const std::vector<juce::String> available {
+        stableKey ("VST3", "Amp", 111, 0),
+        stableKey ("VST3", "CursoMusica Test Plugin", 96035362, 0),
+        stableKey ("VST3", "Reverb", 222, 0),
+    };
+
+    // Nothing chained: every plugin is offered.
+    check (selectableIndices (available, {}).size() == 3,
+           "with an empty chain every plugin is selectable");
+
+    // One chained: it leaves the upper panel, the others stay, order preserved.
+    const auto afterAdd = selectableIndices (available, { instanceKey });
+    check (afterAdd.size() == 2, "the chained plugin leaves the upper panel");
+    check (afterAdd[0] == 0 && afterAdd[1] == 2, "the remaining plugins keep their order");
+
+    // Removing it puts it back.
+    check (selectableIndices (available, {}).size() == 3,
+           "removing the plugin from the chain offers it again");
+
+    // Blank keys (a description with no identity) are never offered.
+    check (selectableIndices ({ "", "x" }, {}).size() == 1,
+           "a blank key is not selectable");
 }
 
 // Regression for the crash that closed the app when any topic of modules 2..10
@@ -3176,6 +3218,7 @@ int main()
     testProgression();
     testAudioPortClassifier();
     testPluginSearchPaths();
+    testPluginChainModel();
     testPairedSlots();
     testPitchDetector();
     testIntervals();
