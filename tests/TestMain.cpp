@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "Audio/AudioPortClassifier.h"
+#include "Audio/DeviceSettings.h"
 #include "Audio/PitchDetector.h"
 #include "Audio/PluginChainModel.h"
 #include "Audio/PluginSearchPaths.h"
@@ -911,8 +912,59 @@ void testPluginSearchPaths()
            "only the folders that exist are searched");
 }
 
-// The upper panel must stop offering a plugin once it is in the input chain
-// (client bug 2026-11-16: "Add input chain" left the plugin in both panels).
+// The device chosen in Settings must survive a restart, or the tuner listens to
+// the wrong input (client bug 2026-11-17).
+void testDeviceSettings()
+{
+    std::cout << "DeviceSettings\n";
+    using namespace cursomusica::audio;
+
+    // A full selection survives a round trip.
+    DeviceSelection original;
+    original.deviceType = "Windows Audio";
+    original.inputDeviceName = "Microfone USB";
+    original.outputDeviceName = "Alto-falantes";
+    original.sampleRate = 48000.0;
+    original.bufferSize = 128;
+
+    const auto restored = parseDeviceSelection (serialiseDeviceSelection (original));
+    check (restored.deviceType == original.deviceType, "the device type survives the round trip");
+    check (restored.inputDeviceName == original.inputDeviceName, "the input device survives");
+    check (restored.outputDeviceName == original.outputDeviceName, "the output device survives");
+    check (std::abs (restored.sampleRate - original.sampleRate) < 1.0e-6, "the sample rate survives");
+    check (restored.bufferSize == original.bufferSize, "the buffer size survives");
+
+    // The Settings→tuner bug: with nothing saved the engine must fall back to a
+    // scan instead of silently reopening the wrong device.
+    check (parseDeviceSelection ({}).isEmpty(), "empty text yields an empty selection");
+    check (parseDeviceSelection ("not xml at all").isEmpty(), "corrupt text yields an empty selection");
+    check (parseDeviceSelection ("<OTHER/>").isEmpty(), "a foreign root element is rejected");
+    check (serialiseDeviceSelection ({}).isNotEmpty(), "even an empty selection serialises");
+
+    // Availability: the saved device must still be offered by the backend.
+    const juce::StringArray ins { "Microfone USB", "Linha" };
+    const juce::StringArray outs { "Alto-falantes", "Fones" };
+
+    check (deviceSelectionIsAvailable (original, "Windows Audio", ins, outs),
+           "a device the backend still offers is available");
+    check (! deviceSelectionIsAvailable (original, "ASIO", ins, outs),
+           "the same device under another backend is not available");
+    check (! deviceSelectionIsAvailable (original, "Windows Audio", ins, { "Fones" }),
+           "an unplugged output makes the saved selection unavailable");
+    check (! deviceSelectionIsAvailable ({}, "Windows Audio", ins, outs),
+           "an empty selection is never available");
+
+    DeviceSelection caseInsensitive = original;
+    caseInsensitive.inputDeviceName = "microfone usb";
+    check (deviceSelectionIsAvailable (caseInsensitive, "Windows Audio", ins, outs),
+           "device names are matched case-insensitively");
+
+    DeviceSelection inputOnly = original;
+    inputOnly.outputDeviceName.clear();
+    check (deviceSelectionIsAvailable (inputOnly, "Windows Audio", ins, {}),
+           "an input-only selection does not need an output");
+}
+
 // The scan stores the .vst3 bundle path while the running instance reports the
 // inner binary path, so createIdentifierString() differs between the two; the
 // stable key (format + name + unique id) is what makes the two agree.
@@ -3236,6 +3288,7 @@ int main()
     testProgressDatabase();
     testProgressStore();
     testSharedSettings();
+    testDeviceSettings();
     testExerciseFilter();
     testDatabaseConfigPersistence();
 

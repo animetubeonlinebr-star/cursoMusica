@@ -1,5 +1,8 @@
 #include "Audio/AudioEngine.h"
 
+#include "Audio/DeviceSettings.h"
+#include "Data/AppSettings.h"
+
 namespace cursomusica
 {
 
@@ -11,31 +14,38 @@ namespace
     {
         return { "ASIO", "Windows Audio (Exclusive Mode)", "Windows Audio", "ALSA", "JACK", "CoreAudio" };
     }
+
+    constexpr const char* deviceSelectionKey = "audio/deviceSelection";
 }
 
 AudioEngine::AudioEngine()
     : juce::Thread ("CursoMusica analysis")
 {
+    // Every device change made in Settings lands here, so the chosen device is
+    // remembered and the next launch reopens it (see restoreSavedDevice()).
+    deviceManager.addChangeListener (this);
 }
 
 AudioEngine::~AudioEngine()
 {
     shutdown();
+    deviceManager.removeChangeListener (this);
 }
 
 void AudioEngine::initialise()
 {
-    // Ask for input only; 2 outputs keeps the callback path symmetric without extra cost.
-    deviceManager.initialiseWithDefaultDevices (1, 2);
     levelSmoothingCoefficient = 0.3f;
 
-    // Opening the device is not enough: without a registered callback the audio
-    // never reaches the engine, so the tuner and the level meter sat forever at
-    // "no signal" even with the ports configured. openBestInputDevice() opens the
-    // best backend and registers `this`; the fallback keeps the callback even
-    // when no preferred backend is available, so the engine is never silent by
-    // accident.
-    openBestInputDevice();
+    // Prefer the device the student configured in Settings. Only when there is no
+    // usable saved choice (first run, or the device was unplugged) fall back to a
+    // fresh scan. Opening the device is not enough on its own: without a
+    // registered callback the audio never reaches the engine, so the tuner and
+    // the level meter would sit forever at "no signal".
+    if (! restoreSavedDevice())
+    {
+        deviceManager.initialiseWithDefaultDevices (1, 2);
+        openBestInputDevice();
+    }
 
     if (! running.load())
     {
@@ -48,6 +58,10 @@ void AudioEngine::initialise()
 
 void AudioEngine::shutdown()
 {
+    // Record the device while it is still open; closing it below would leave
+    // nothing to remember.
+    saveCurrentDevice();
+
     if (running.load())
     {
         deviceManager.removeAudioCallback (this);
@@ -131,7 +145,95 @@ juce::String AudioEngine::openBestInputDevice()
         running.store (true);
     }
 
+    saveCurrentDevice();
     return {};
+}
+
+bool AudioEngine::restoreSavedDevice()
+{
+    const auto saved = audio::parseDeviceSelection (
+        data::AppSettings::get().getValue (deviceSelectionKey));
+
+    if (saved.isEmpty())
+        return false;
+
+    // The saved backend may be gone (ASIO uninstalled, WASAPI unavailable).
+    auto& types = deviceManager.getAvailableDeviceTypes();
+
+    juce::AudioIODeviceType* type = nullptr;
+    for (auto* candidate : types)
+        if (candidate != nullptr && candidate->getTypeName() == saved.deviceType)
+        {
+            type = candidate;
+            break;
+        }
+
+    if (type == nullptr)
+        return false;
+
+    type->scanForDevices();
+
+    if (! audio::deviceSelectionIsAvailable (saved, type->getTypeName(),
+                                             type->getDeviceNames (true),
+                                             type->getDeviceNames (false)))
+        return false;
+
+    deviceManager.setCurrentAudioDeviceType (type->getTypeName(), true);
+
+    auto setup = deviceManager.getAudioDeviceSetup();
+    setup.inputDeviceName = saved.inputDeviceName;
+    setup.outputDeviceName = saved.outputDeviceName;
+    setup.useDefaultInputChannels = true;
+    setup.useDefaultOutputChannels = true;
+
+    if (saved.sampleRate > 0.0)
+        setup.sampleRate = saved.sampleRate;
+
+    if (saved.bufferSize > 0)
+        setup.bufferSize = saved.bufferSize;
+
+    const auto error = deviceManager.setAudioDeviceSetup (setup, true);
+
+    if (error.isNotEmpty() || deviceManager.getCurrentAudioDevice() == nullptr)
+        return false;
+
+    if (! running.load())
+    {
+        deviceManager.addAudioCallback (this);
+        running.store (true);
+    }
+
+    return true;
+}
+
+void AudioEngine::saveCurrentDevice()
+{
+    auto* device = deviceManager.getCurrentAudioDevice();
+
+    // Only a device that is actually open is worth remembering. Leaving the key
+    // untouched when nothing is open keeps a shutdown (which closes the device)
+    // from wiping the choice the student made in Settings.
+    if (device == nullptr)
+        return;
+
+    auto& properties = data::AppSettings::get();
+    const auto setup = deviceManager.getAudioDeviceSetup();
+
+    audio::DeviceSelection selection;
+    selection.deviceType = deviceManager.getCurrentAudioDeviceType();
+    selection.inputDeviceName = setup.inputDeviceName;
+    selection.outputDeviceName = setup.outputDeviceName;
+    selection.sampleRate = device->getCurrentSampleRate();
+    selection.bufferSize = device->getCurrentBufferSizeSamples();
+
+    properties.setValue (deviceSelectionKey, audio::serialiseDeviceSelection (selection));
+    properties.saveIfNeeded();
+}
+
+void AudioEngine::changeListenerCallback (juce::ChangeBroadcaster* source)
+{
+    if (source == &deviceManager)
+        saveCurrentDevice();
 }
 
 juce::String AudioEngine::applyBufferSize (int samplesPerBlock)
