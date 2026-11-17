@@ -38,10 +38,12 @@
 #include <vector>
 
 #include "Audio/AudioEngine.h"
+#include "Audio/DeviceSettings.h"
 #include "Audio/PluginChainModel.h"
 #include "Audio/PluginHost.h"
 #include "Audio/PluginSearchPaths.h"
 #include "Audio/PitchDetector.h"
+#include "Data/AppSettings.h"
 #include "Course/ExerciseEvaluator.h"
 #include "Course/ModuleCatalog.h"
 #include "Course/PracticeSession.h"
@@ -221,6 +223,161 @@ namespace
             cursomusica::audio::pluginchain::selectableIndices (available, chainAfter);
         check (selectableAfter.empty(),
                "depois de adicionar, o plugin saiu do painel superior");
+    }
+
+    // ---- Step 3b: the device chosen in Settings survives a restart --------
+
+    // A minimal backend with two inputs and two outputs, so the test can pick a
+    // non-default device and prove the engine reopens *that* device next launch.
+    class TwoPortDevice final : public juce::AudioIODevice
+    {
+    public:
+        TwoPortDevice (const juce::String& deviceName, const juce::String& type)
+            : juce::AudioIODevice (deviceName, type) {}
+
+        juce::StringArray getOutputChannelNames() override { return { "o1", "o2" }; }
+        juce::StringArray getInputChannelNames()  override { return { "i1", "i2" }; }
+        juce::Array<double> getAvailableSampleRates() override { return { 44100.0, 48000.0 }; }
+        juce::Array<int> getAvailableBufferSizes() override { return { 128, 256 }; }
+        int getDefaultBufferSize() override { return 128; }
+
+        juce::String open (const juce::BigInteger& ins, const juce::BigInteger& outs,
+                           double sr, int bs) override
+        {
+            inChannels = ins;
+            outChannels = outs;
+            sampleRate = sr;
+            blockSize = bs;
+            opened = true;
+            return {};
+        }
+
+        void close() override { opened = false; }
+        bool isOpen() override { return opened; }
+
+        void start (juce::AudioIODeviceCallback* c) override
+        {
+            callback = c;
+            if (c != nullptr)
+                c->audioDeviceAboutToStart (this);
+            playing = true;
+        }
+
+        void stop() override
+        {
+            playing = false;
+            if (callback != nullptr)
+                callback->audioDeviceStopped();
+        }
+
+        bool isPlaying() override { return playing; }
+        juce::String getLastError() override { return {}; }
+        int getCurrentBufferSizeSamples() override { return blockSize; }
+        double getCurrentSampleRate() override { return sampleRate; }
+        int getCurrentBitDepth() override { return 16; }
+        juce::BigInteger getActiveOutputChannels() const override { return outChannels; }
+        juce::BigInteger getActiveInputChannels()  const override { return inChannels; }
+        int getOutputLatencyInSamples() override { return 0; }
+        int getInputLatencyInSamples() override { return 0; }
+
+    private:
+        juce::AudioIODeviceCallback* callback = nullptr;
+        juce::BigInteger inChannels, outChannels;
+        double sampleRate = 0.0;
+        int blockSize = 0;
+        bool opened = false, playing = false;
+    };
+
+    class TwoPortDeviceType final : public juce::AudioIODeviceType
+    {
+    public:
+        TwoPortDeviceType()
+            : juce::AudioIODeviceType ("CursoMusicaTestAudio"),
+              inputs { "TestAudio-inA", "TestAudio-inB" },
+              outputs { "TestAudio-outA", "TestAudio-outB" } {}
+
+        void scanForDevices() override {}
+
+        juce::StringArray getDeviceNames (bool wantInputNames) const override
+        {
+            return wantInputNames ? inputs : outputs;
+        }
+
+        int getDefaultDeviceIndex (bool) const override { return 0; }
+
+        int getIndexOfDevice (juce::AudioIODevice* device, bool asInput) const override
+        {
+            return (asInput ? inputs : outputs).indexOf (device->getName());
+        }
+
+        bool hasSeparateInputsAndOutputs() const override { return true; }
+
+        juce::AudioIODevice* createDevice (const juce::String& outputName,
+                                           const juce::String& inputName) override
+        {
+            if (inputs.contains (inputName) || outputs.contains (outputName))
+                return new TwoPortDevice (inputName, getTypeName());
+
+            return nullptr;
+        }
+
+    private:
+        juce::StringArray inputs, outputs;
+    };
+
+    // The client's bug: choose an input in Settings, leave, open the Tuner — the
+    // engine must still be listening to the chosen input. Reproduced by saving a
+    // selection in one engine, then opening a fresh engine (a new launch) and
+    // checking it reopens the same input.
+    void runDevicePersistenceStep()
+    {
+        step ("3b. Audio: o dispositivo escolhido nas Configuracoes sobrevive ao reinicio");
+
+        const juce::String key = "audio/deviceSelection";
+        cursomusica::data::AppSettings::get().removeValue (key);
+        cursomusica::data::AppSettings::get().saveIfNeeded();
+
+        juce::String restoredInput;
+
+        {
+            cursomusica::AudioEngine engine;
+            engine.getDeviceManager().addAudioDeviceType (std::make_unique<TwoPortDeviceType>());
+            engine.initialise();
+
+            auto setup = engine.getDeviceManager().getAudioDeviceSetup();
+            setup.inputDeviceName = "TestAudio-inB";
+            setup.outputDeviceName = "TestAudio-outB";
+            setup.useDefaultInputChannels = true;
+            setup.useDefaultOutputChannels = true;
+            engine.getDeviceManager().setAudioDeviceSetup (setup, true);
+            engine.getDeviceManager().sendSynchronousChangeMessage();
+
+            auto* device = engine.getDeviceManager().getCurrentAudioDevice();
+            check (device != nullptr && device->getName() == "TestAudio-inB",
+                   "Configuracoes: o aluno escolheu a entrada TestAudio-inB");
+
+            engine.shutdown();
+        }
+
+        {
+            cursomusica::AudioEngine engine;
+            engine.getDeviceManager().addAudioDeviceType (std::make_unique<TwoPortDeviceType>());
+            engine.initialise();
+
+            auto* device = engine.getDeviceManager().getCurrentAudioDevice();
+            restoredInput = device != nullptr ? device->getName() : juce::String();
+
+            check (restoredInput == "TestAudio-inB",
+                   "reinicio: o motor reabre a entrada escolhida (nao a primeira da lista): "
+                   + (restoredInput.isEmpty() ? juce::String ("<nenhum>") : restoredInput));
+            check (device != nullptr && device->isPlaying(),
+                   "reinicio: o dispositivo escolhido esta rodando (afinador recebe sinal)");
+
+            engine.shutdown();
+        }
+
+        cursomusica::data::AppSettings::get().removeValue (key);
+        cursomusica::data::AppSettings::get().saveIfNeeded();
     }
 
     // ---- Step 3: audio devices and tuner ----------------------------------
@@ -457,6 +614,7 @@ int main (int argc, char** argv)
     const std::pair<const char*, std::function<void()>> steps[] = {
         { "1. banco de dados", [&] { runDatabaseStep(); } },
         { "2. VST3",           [&] { runVst3Step (pluginFolder); } },
+        { "3b. dispositivo",   [&] { runDevicePersistenceStep(); } },
         { "3. audio",          [&] { runAudioStep(); } },
         { "4. modulos",        [&] { runModulesStep(); } },
     };

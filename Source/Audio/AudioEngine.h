@@ -26,13 +26,15 @@ namespace cursomusica
 // pushes samples into a lock-free FIFO and a dedicated analysis thread runs
 // YIN on them. This keeps the callback bounded regardless of detector cost.
 class AudioEngine final : public juce::AudioIODeviceCallback,
+                          private juce::ChangeListener,
                           private juce::Thread
 {
 public:
     AudioEngine();
     ~AudioEngine() override;
 
-    // Prepares the device manager and opens the most suitable input device.
+    // Prepares the device manager and opens the device the student last chose,
+    // or the most suitable one when there is no usable saved choice.
     void initialise();
     void shutdown();
 
@@ -83,6 +85,16 @@ private:
     void pushSamplesToFifo (const float* data, int numSamples) noexcept;
     void publishDetectedNote (float frequencyHz) noexcept; // analysis thread
     void run() override; // analysis thread: reads the FIFO, runs YIN
+
+    // Opens the device the student chose in Settings, if it can still be
+    // reopened; returns false when there is no usable saved choice.
+    bool restoreSavedDevice();
+
+    // Records the device now open, so the next launch reopens exactly what
+    // Settings left selected. Does nothing when no device is open.
+    void saveCurrentDevice();
+
+    void changeListenerCallback (juce::ChangeBroadcaster* source) override;
 
     juce::AudioDeviceManager deviceManager;
 
