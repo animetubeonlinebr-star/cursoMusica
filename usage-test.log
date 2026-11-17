@@ -44,5 +44,3 @@ CursoMusica — teste de uso (aceitacao ponta a ponta)
 ----------------------------------------
 31 checagens, 0 falhas, 1 pulos
 TESTE DE USO: OK
-PROCESSO: desligando o JUCE (antes do ScopedJuceInitialiser)
-PROCESSO: JUCE desligado sem erro

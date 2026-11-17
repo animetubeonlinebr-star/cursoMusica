@@ -452,11 +452,6 @@ int main (int argc, char** argv)
 
     out ("CursoMusica — teste de uso (aceitacao ponta a ponta)");
 
-    // A marker on the normal exit path: if the process dies during static
-    // destruction (after main returns), this line proves the run itself
-    // finished, separating "test failed" from "process crashed at shutdown".
-    std::atexit ([] { out ("PROCESSO: main retornou, desligando (atexit)"); });
-
     // Each step runs in its own guard: a step that throws is reported (and
     // counts as a failure) instead of taking the whole run down silently.
     const std::pair<const char*, std::function<void()>> steps[] = {
@@ -489,15 +484,12 @@ int main (int argc, char** argv)
          + " falhas, " + std::to_string (skips) + " pulos");
     out (failures == 0 ? "TESTE DE USO: OK" : "TESTE DE USO: FALHOU");
 
-    out ("PROCESSO: desligando o JUCE (antes do ScopedJuceInitialiser)");
+    // Shut JUCE down explicitly and flush everything written so far. On Windows
+    // this process loads a real VST3 bundle; the crash on exit (0xC0000005)
+    // happens in static/CRT teardown, after every check has already passed, so
+    // the exit status must come from the checks alone and not from that
+    // teardown. _Exit skips it; all output is already flushed per line.
     juceInitialiser.reset();
-    out ("PROCESSO: JUCE desligado sem erro");
-
-    // Exit status must reflect the checks, nothing else. On Windows this process
-    // loads a real VST3 bundle and shuts JUCE down; the crash on exit
-    // (0xC0000005) happens in static/CRT teardown after every check has already
-    // passed, so it must not be reported as a test failure. All output is
-    // flushed per line, so _Exit is safe here.
     std::cout.flush();
     logFile().flush();
     std::_Exit (failures == 0 ? 0 : 1);
