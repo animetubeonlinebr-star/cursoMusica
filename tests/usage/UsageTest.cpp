@@ -435,7 +435,11 @@ namespace
 
 int main (int argc, char** argv)
 {
-    juce::ScopedJuceInitialiser_GUI juceInitialiser;
+    // Owned explicitly (not a stack local) so the JUCE shutdown can be run and
+    // bracketed with markers: the Windows run passes every check yet the
+    // process still dies at teardown, and this tells us whether that is the
+    // JUCE shutdown or something later (loaded plugin / static destructors).
+    auto juceInitialiser = std::make_unique<juce::ScopedJuceInitialiser_GUI>();
 
     juce::File pluginFolder;
 
@@ -484,6 +488,10 @@ int main (int argc, char** argv)
     out (std::to_string (checks) + " checagens, " + std::to_string (failures)
          + " falhas, " + std::to_string (skips) + " pulos");
     out (failures == 0 ? "TESTE DE USO: OK" : "TESTE DE USO: FALHOU");
+
+    out ("PROCESSO: desligando o JUCE (antes do ScopedJuceInitialiser)");
+    juceInitialiser.reset();
+    out ("PROCESSO: JUCE desligado sem erro");
 
     return failures == 0 ? 0 : 1;
 }
