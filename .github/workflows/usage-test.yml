@@ -96,24 +96,40 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install PostgreSQL 17
+      - name: Start a throwaway PostgreSQL on 5432 (trust auth)
         shell: pwsh
         run: |
-          choco install postgresql17 --params '/Password:cursomusica' -y --no-progress
-          # The service starts on 5432; make psql visible to this process.
-          $bin = "C:\Program Files\PostgreSQL\17\bin"
-          echo "$bin" >> $env:GITHUB_PATH
-          Start-Sleep -Seconds 5
-          & "$bin\pg_isready.exe" -h localhost -p 5432
+          # The runner image already ships a PostgreSQL, so installing another
+          # one leaves its superuser password unknown — that is what failed with
+          # "password authentication failed for user postgres". Instead, run a
+          # real server from the binaries already on the image: initdb a fresh
+          # cluster with trust auth on localhost (a throwaway CI database) and
+          # create the role and database. No superuser password is involved, and
+          # there is no 400 MB installer download.
+          $bin = $env:PGBIN
+          if (-not $bin -or -not (Test-Path (Join-Path $bin "initdb.exe"))) {
+            $bin = (Get-ChildItem "C:\Program Files\PostgreSQL" -Directory |
+              Sort-Object Name -Descending |
+              ForEach-Object { Join-Path $_.FullName "bin" } |
+              Where-Object { Test-Path (Join-Path $_ "initdb.exe") } |
+              Select-Object -First 1)
+          }
+          if (-not $bin) { Write-Error "PostgreSQL server binaries not found"; exit 1 }
+          echo $bin >> $env:GITHUB_PATH
+          # The parent of bin\ is the PostgreSQL root CMake needs for libpq.
+          # Forward slashes: they are valid on Windows and survive being written
+          # into the generated staging script (backslashes would break its parser).
+          $root = (Get-Item $bin).Parent.FullName -replace '\\', '/'
+          echo "PGROOT=$root" >> $env:GITHUB_ENV
 
-      - name: Create role, database and schema
-        shell: pwsh
-        env:
-          PGPASSWORD: cursomusica
-        run: |
-          $psql = "C:\Program Files\PostgreSQL\17\bin\psql.exe"
-          & $psql -h localhost -U postgres -c "CREATE ROLE cursomusica LOGIN PASSWORD 'cursomusica';"
-          & $psql -h localhost -U postgres -c "CREATE DATABASE \"curso-musica\" OWNER cursomusica;"
+          $data = Join-Path $env:RUNNER_TEMP "pgdata"
+          $log  = Join-Path $env:RUNNER_TEMP "postgres.log"
+          & "$bin\initdb.exe" -D $data -U postgres --auth=trust --encoding=UTF8 --locale=C | Out-Null
+          & "$bin\pg_ctl.exe" -D $data -o "-p 5432 -c listen_addresses=localhost" -l $log -w start
+          & "$bin\psql.exe" -h localhost -p 5432 -U postgres -v ON_ERROR_STOP=1 `
+            -c "CREATE ROLE cursomusica LOGIN PASSWORD 'cursomusica';"
+          & "$bin\psql.exe" -h localhost -p 5432 -U postgres -v ON_ERROR_STOP=1 `
+            -c 'CREATE DATABASE "curso-musica" OWNER cursomusica;'
 
       - name: Clone JUCE (pinned)
         run: git clone --depth 1 --branch 8.0.4 https://github.com/juce-framework/JUCE.git External/JUCE
@@ -124,7 +140,15 @@ jobs:
           arch: x64
 
       - name: Configure (usage test on)
-        run: cmake -B build-usage -G Ninja -DCMAKE_BUILD_TYPE=Release -DCURSOMUSICA_USAGE_TEST=ON
+        shell: pwsh
+        # CURSOMUSICA_REQUIRE_POSTGRES makes the configure step fail if libpq is
+        # missing, so the database step can never silently degrade to SKIP on the
+        # platform where the .exe ships.
+        run: >
+          cmake -B build-usage -G Ninja -DCMAKE_BUILD_TYPE=Release
+          -DCURSOMUSICA_USAGE_TEST=ON
+          -DCURSOMUSICA_REQUIRE_POSTGRES=ON
+          "-DPostgreSQL_ROOT=$env:PGROOT"
 
       - name: Build (app, test plugin and usage test)
         run: cmake --build build-usage
@@ -144,3 +168,9 @@ jobs:
           if (-not $plugin) { Write-Error "Test plugin bundle not found"; exit 1 }
           $dir = Split-Path $plugin.FullName -Parent
           & "build-usage/CursoMusicaUsageTest_artefacts/Release/CursoMusicaUsageTest.exe" --vst3-folder="$dir"
+          $code = $LASTEXITCODE
+          Write-Host "CursoMusicaUsageTest exit code: $code"
+          # The console output can be lost on an abnormal exit; the program also
+          # writes every line to usage-test.log, so print it either way.
+          if (Test-Path usage-test.log) { Get-Content usage-test.log }
+          exit $code
