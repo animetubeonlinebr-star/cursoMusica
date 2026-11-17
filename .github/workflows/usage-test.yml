@@ -168,3 +168,8 @@ jobs:
           if (-not $plugin) { Write-Error "Test plugin bundle not found"; exit 1 }
           $dir = Split-Path $plugin.FullName -Parent
           & "build-usage/CursoMusicaUsageTest_artefacts/Release/CursoMusicaUsageTest.exe" --vst3-folder="$dir"
+          $code = $LASTEXITCODE
+          # The console output can be lost on an abnormal exit; the program also
+          # writes every line to usage-test.log, so print it either way.
+          if (Test-Path usage-test.log) { Get-Content usage-test.log }
+          exit $code

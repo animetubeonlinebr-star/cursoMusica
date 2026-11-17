@@ -28,8 +28,12 @@
 
 #include <algorithm>
 #include <cmath>
+#include <fstream>
+#include <functional>
 #include <iostream>
 #include <memory>
+#include <string>
+#include <utility>
 #include <vector>
 
 #include "Audio/AudioEngine.h"
@@ -50,10 +54,26 @@ namespace
     int failures = 0;
     int skips = 0;
 
+    // The runner captures stdout through a pipe, so an abnormal termination can
+    // lose the whole buffer and the log shows nothing about where it stopped.
+    // Every line is therefore also written, flushed, to a plain file the runner
+    // prints afterwards, making a crash point visible.
+    std::ofstream& logFile()
+    {
+        static std::ofstream file ("usage-test.log", std::ios::trunc);
+        return file;
+    }
+
+    void out (const std::string& line)
+    {
+        std::cout << line << "\n" << std::flush;
+        logFile() << line << "\n" << std::flush;
+    }
+
     void check (bool condition, const juce::String& what)
     {
         ++checks;
-        std::cout << (condition ? "  [ok]   " : "  [FAIL] ") << what << "\n";
+        out ((condition ? "  [ok]   " : "  [FAIL] ") + what.toStdString());
         if (! condition)
             ++failures;
     }
@@ -61,12 +81,12 @@ namespace
     void skip (const juce::String& what)
     {
         ++skips;
-        std::cout << "  [skip] " << what << "\n";
+        out ("  [skip] " + what.toStdString());
     }
 
     void step (const juce::String& name)
     {
-        std::cout << "\n== " << name << " ==\n";
+        out ("\n== " + name.toStdString() + " ==");
     }
 
     // ---- Step 1: database -------------------------------------------------
@@ -354,8 +374,8 @@ namespace
             return;
 
         const auto& last = *lastImplemented;
-        std::cout << "  (ultimo modulo implementado: " << last.number << " - "
-                  << last.title.toStdString() << ")\n";
+        out ("  (ultimo modulo implementado: " + std::to_string (last.number) + " - "
+             + last.title.toStdString() + ")");
 
         check (! last.lessons.empty(), "o ultimo modulo tem topicos");
 
@@ -425,16 +445,39 @@ int main (int argc, char** argv)
             pluginFolder = juce::File (arg.fromFirstOccurrenceOf ("=", false, false));
     }
 
-    std::cout << "CursoMusica — teste de uso (aceitacao ponta a ponta)\n";
+    out ("CursoMusica — teste de uso (aceitacao ponta a ponta)");
 
-    runDatabaseStep();
-    runVst3Step (pluginFolder);
-    runAudioStep();
-    runModulesStep();
+    // Each step runs in its own guard: a step that throws is reported (and
+    // counts as a failure) instead of taking the whole run down silently.
+    const std::pair<const char*, std::function<void()>> steps[] = {
+        { "1. banco de dados", [&] { runDatabaseStep(); } },
+        { "2. VST3",           [&] { runVst3Step (pluginFolder); } },
+        { "3. audio",          [&] { runAudioStep(); } },
+        { "4. modulos",        [&] { runModulesStep(); } },
+    };
 
-    std::cout << "\n----------------------------------------\n";
-    std::cout << checks << " checagens, " << failures << " falhas, " << skips << " pulos\n";
-    std::cout << (failures == 0 ? "TESTE DE USO: OK\n" : "TESTE DE USO: FALHOU\n");
+    for (const auto& s : steps)
+    {
+        try
+        {
+            s.second();
+        }
+        catch (const std::exception& e)
+        {
+            ++failures;
+            out (std::string ("  [FAIL] excecao no passo ") + s.first + ": " + e.what());
+        }
+        catch (...)
+        {
+            ++failures;
+            out (std::string ("  [FAIL] excecao desconhecida no passo ") + s.first);
+        }
+    }
+
+    out ("\n----------------------------------------");
+    out (std::to_string (checks) + " checagens, " + std::to_string (failures)
+         + " falhas, " + std::to_string (skips) + " pulos");
+    out (failures == 0 ? "TESTE DE USO: OK" : "TESTE DE USO: FALHOU");
 
     return failures == 0 ? 0 : 1;
 }
