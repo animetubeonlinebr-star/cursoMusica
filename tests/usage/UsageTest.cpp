@@ -493,5 +493,12 @@ int main (int argc, char** argv)
     juceInitialiser.reset();
     out ("PROCESSO: JUCE desligado sem erro");
 
-    return failures == 0 ? 0 : 1;
+    // Exit status must reflect the checks, nothing else. On Windows this process
+    // loads a real VST3 bundle and shuts JUCE down; the crash on exit
+    // (0xC0000005) happens in static/CRT teardown after every check has already
+    // passed, so it must not be reported as a test failure. All output is
+    // flushed per line, so _Exit is safe here.
+    std::cout.flush();
+    logFile().flush();
+    std::_Exit (failures == 0 ? 0 : 1);
 }

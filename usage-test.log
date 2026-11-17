@@ -46,4 +46,3 @@ CursoMusica — teste de uso (aceitacao ponta a ponta)
 TESTE DE USO: OK
 PROCESSO: desligando o JUCE (antes do ScopedJuceInitialiser)
 PROCESSO: JUCE desligado sem erro
-PROCESSO: main retornou, desligando (atexit)
