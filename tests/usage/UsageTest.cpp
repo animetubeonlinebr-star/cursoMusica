@@ -28,6 +28,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstdlib>
 #include <fstream>
 #include <functional>
 #include <iostream>
@@ -446,6 +447,11 @@ int main (int argc, char** argv)
     }
 
     out ("CursoMusica — teste de uso (aceitacao ponta a ponta)");
+
+    // A marker on the normal exit path: if the process dies during static
+    // destruction (after main returns), this line proves the run itself
+    // finished, separating "test failed" from "process crashed at shutdown".
+    std::atexit ([] { out ("PROCESSO: main retornou, desligando (atexit)"); });
 
     // Each step runs in its own guard: a step that throws is reported (and
     // counts as a failure) instead of taking the whole run down silently.
