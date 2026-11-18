@@ -153,5 +153,16 @@ std::vector<ContentItem> topic10G();  // Reharmonização
 std::vector<ContentItem> topic10H();  // Harmonia-alvo
 std::vector<ContentItem> topic10I();  // Ferramentas de reharmonização
 std::vector<ContentItem> topic10J();  // Relação entre estilos e sonoridades
+// Module 11 (Etapa 11 — referências de escalas e domínio do braço).
+std::vector<ContentItem> topic11A();  // Desenhos de escalas por regiões
+std::vector<ContentItem> topic11B();  // Escalas ascendentes e descendentes
+std::vector<ContentItem> topic11C();  // Pentatônica menor 7
+std::vector<ContentItem> topic11D();  // Pentatônica menor 6
+std::vector<ContentItem> topic11E();  // Cinco desenhos da pentatônica
+std::vector<ContentItem> topic11F();  // Trilhas abertas e fechadas
+std::vector<ContentItem> topic11G();  // Sistema 5 (CAGED)
+std::vector<ContentItem> topic11H();  // Escala menor harmônica
+std::vector<ContentItem> topic11I();  // Escala menor melódica
+std::vector<ContentItem> topic11J();  // Relação entre escalas e acordes
 
 } // namespace cursomusica::content

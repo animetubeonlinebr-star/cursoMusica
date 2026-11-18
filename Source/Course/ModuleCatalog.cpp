@@ -5129,6 +5129,300 @@ namespace
         return m;
     }
 
+    // Module 11 (Etapa 11 — referências de escalas e domínio do braço). The
+    // module turns scale knowledge into phrase references: every topic teaches a
+    // lick, and the topic's exercises oblige the student to play it. It is the
+    // first module with improvisation evaluation (REQ-011/REQ-012): the rest
+    // notes are the chord/scale tones of the vamp, and a tension outside the
+    // centre is an error. Module 11 has no quizzes — every exercise is played.
+    std::vector<int> midiOf (std::initializer_list<const char*> names)
+    {
+        std::vector<int> out;
+        for (auto* name : names)
+            out.push_back (music::noteNameToMidi (juce::String (name)));
+        return out;
+    }
+
+    Exercise playable (const char* id, const char* title, const char* goal,
+                       std::initializer_list<const char*> noteNames, const char* topic)
+    {
+        auto e = exercise (id, juce::String::fromUTF8 (title), juce::String::fromUTF8 (goal),
+                           juce::String::fromUTF8 ("O app reconhece as notas tocadas e confere a frase "
+                                                   "do lick do tópico, nota a nota (obrigatório usar o lick)."));
+        e.targets = notes (noteNames);
+        e.lessonId = topic;
+        return e;
+    }
+
+    Exercise improvise (const char* id, const char* title, const char* goal,
+                        std::vector<int> chord, std::vector<int> scale,
+                        std::vector<int> tensions, const char* topic)
+    {
+        auto e = exercise (id, juce::String::fromUTF8 (title), juce::String::fromUTF8 (goal),
+                           juce::String::fromUTF8 ("O app classifica cada nota tocada sobre o vamp: "
+                                                   "notas de repouso (acorde/escala), tensões pedidas e "
+                                                   "erros. Repouso e tensões pedidas contam como acerto."));
+        e.restNotes.chordPitchClasses = std::move (chord);
+        e.restNotes.scalePitchClasses = std::move (scale);
+        e.restNotes.solicitedTensions = std::move (tensions);
+        e.lessonId = topic;
+        e.usesGrid = false;   // the improvisation is graded by note role, not the grid
+        return e;
+    }
+
+    CourseModule makeModule11()
+    {
+        CourseModule m;
+        m.number = 11;
+        m.title = juce::String::fromUTF8 ("Referências de escalas e domínio do braço");
+        m.objective = juce::String::fromUTF8 (
+            "Transformar o conhecimento das escalas em referências para a construção "
+            "de frases: desenhos, trilhas, pentatônicas, Sistema 5, menores harmônica "
+            "e melódica, e a relação entre escalas e acordes que sustenta o improviso.");
+        m.level = 5;          // MUSIC.md: módulos 11–14 = nível 5 (blues)
+        m.targetBpm = 100;    // MUSIC.md, módulo 11
+        m.onGridTarget = 0.82f;
+        m.implemented = true;
+
+        m.lessons = {
+            detail (block ("A", juce::String::fromUTF8 ("Desenhos de escalas por regiões"), {
+                "Uma região é um trecho de 4–5 casas onde a escala cabe sob os quatro dedos.",
+                "O desenho é a escala com uma forma fixa; a forma é o vocabulário motor da frase.",
+                "Frases nascem numa região, viajam pela nota comum e voltam para resolver."
+            }), content::topic11A()),
+            detail (block ("B", juce::String::fromUTF8 ("Escalas ascendentes e descendentes"), {
+                "A escala nos dois sentidos é o alicerce da fluência; a descida é onde o aluno trava.",
+                "Subir e descer pedem digitações diferentes, escolhidas pelo conforto da mão.",
+                "A escala parelha no metrônomo é o termômetro da mão antes da frase."
+            }), content::topic11B()),
+            detail (block ("C", juce::String::fromUTF8 ("Pentatônica menor 7"), {
+                "A pentatônica menor 7 acrescenta a sétima maior: 1-b3-4-5-b7-7 (seis notas).",
+                "A sétima fica a um semitom da tônica e cria a tensão que resolve na frase.",
+                "A sétima é tensão, não repouso: use-a para pedir a resolução."
+            }), content::topic11C()),
+            detail (block ("D", juce::String::fromUTF8 ("Pentatônica menor 6"), {
+                "A pentatônica menor 6 acrescenta a sexta maior: 1-b3-4-5-6-b7 (seis notas).",
+                "A sexta maior é a nota característica do som dórico — cor de repouso.",
+                "A sexta estende a frase; a sétima a puxa. Escolha uma direção por frase."
+            }), content::topic11D()),
+            detail (block ("E", juce::String::fromUTF8 ("Cinco desenhos da pentatônica"), {
+                "São cinco posições porque a pentatônica tem cinco notas por oitava.",
+                "Posições vizinhas compartilham notas nas cordas de fronteira.",
+                "A posição 5 (casa 12) é a posição 1 uma oitava acima; juntas cobrem o braço."
+            }), content::topic11E()),
+            detail (block ("F", juce::String::fromUTF8 ("Trilhas abertas e fechadas"), {
+                "Trilha fechada: a escala dentro da posição, mão parada, sem cordas soltas.",
+                "Trilha aberta: a escala ao longo de uma ou duas cordas, mão viajando pelo braço.",
+                "O fraseado maduro alterna as duas: controle na caixa, movimento na corda."
+            }), content::topic11F()),
+            detail (block ("G", juce::String::fromUTF8 ("Sistema 5 (CAGED)"), {
+                "Cinco formas de acorde (C-A-G-E-D), cada uma com um desenho de escala ao redor.",
+                "Cada forma é uma região; a tônica da forma é o alvo da frase.",
+                "Trocar de acorde é trocar de forma: o solo segue a harmonia pelo braço."
+            }), content::topic11G()),
+            detail (block ("H", juce::String::fromUTF8 ("Escala menor harmônica"), {
+                "Menor harmônica: a menor natural com o 7º grau elevado (1-2-b3-4-5-b6-7).",
+                "A elevação do 7º cria a segunda aumentada, a marca sonora da escala.",
+                "O 5º grau vira dominante: a escala dá à frase menor uma resolução forte."
+            }), content::topic11H()),
+            detail (block ("I", juce::String::fromUTF8 ("Escala menor melódica"), {
+                "Menor melódica: a menor natural com o 6º e o 7º graus elevados (1-2-b3-4-5-6-7).",
+                "Elevar o 6º grau elimina a segunda aumentada: a escala sobe por graus conjuntos.",
+                "É a escala menor cantável; serve à melodia, como a harmônica serve à harmonia."
+            }), content::topic11I()),
+            detail (block ("J", juce::String::fromUTF8 ("Relação entre escalas e acordes"), {
+                "A escala vem do acorde: 7M pede maior/lídia; m7 pede menor/dórica; 7 pede mixolídia.",
+                "A escala escolhida define as notas de repouso (acorde e escala) da frase.",
+                "Fora do centro, a nota é tensão não pedida — erro (REQ-012)."
+            }), content::topic11J()),
+        };
+
+        // One lick per topic (client: "cada tópico deve ter um lick"). The topic's
+        // exercise obliges the student to play it. Notes match the audio and the
+        // score drawn in tools/make_diagrams.py.
+        auto lick = [&m] (const char* id, const char* title, const char* guitarist,
+                          const char* patternId, const char* tab, const char* source,
+                          std::initializer_list<const char*> noteNames)
+        {
+            Lick l;
+            l.id = id;
+            l.title = juce::String::fromUTF8 (title);
+            l.guitarist = guitarist;
+            l.patternId = patternId;
+            l.tab = juce::String::fromUTF8 (tab);
+            l.source = source;
+            l.notes = midiOf (noteNames);
+            m.licks.push_back (std::move (l));
+            return l.id;
+        };
+
+        lick ("LK-11.A", "Grupos de três subindo na região", "John Petrucci", "PTN-M-3",
+              "A|--5-7-8-7-8-10-8-10-12-10-12-14-12-14-15-14-15-17--|", "pdf-fraseado-melodico",
+              { "A4", "B4", "C5", "B4", "C5", "D5", "C5", "D5", "E5", "D5", "E5", "F5", "E5", "F5", "G5", "F5", "G5", "A5" });
+        lick ("LK-11.B", "Escala ascendente e descendente", "Guthrie Govan", "PTN-M-3rds",
+              "A|--5-7-8-10-12-13-15-17-15-13-12-10-8-7-5--|", "pdf-fraseado-melodico",
+              { "A4", "B4", "C5", "D5", "E5", "F5", "G5", "A5", "G5", "F5", "E5", "D5", "C5", "B4", "A4" });
+        lick ("LK-11.C", "Pentatônica menor 7 (a sétima resolve)", "Richie Kotzen", "PTN-M-3",
+              "A|--5-8-10-12-15-16-17-15-12-10-8-5--|", "pdf-mozart-mello-improvisacion-pop",
+              { "A4", "C5", "D5", "E5", "G5", "G#5", "A5", "G5", "E5", "D5", "C5", "A4" });
+        lick ("LK-11.D", "Pentatônica menor 6 (a sexta como cor)", "Greg Howe", "PTN-M-3rds",
+              "A|--5-8-10-12-14-12-10-8-5--|", "pdf-desvendando-os-segredos-da-guitarra-fusion",
+              { "A4", "C5", "D5", "E5", "F#5", "E5", "D5", "C5", "A4" });
+        lick ("LK-11.E", "Pentatônica ligando duas posições", "Edu Ardanuy", "PTN-A-TRIAD",
+              "A|--5-8-10-12-15-17-15-12-10-8-5--|", "pdf-mozart-mello-livroestudosdeguitarra4em1",
+              { "A4", "C5", "D5", "E5", "G5", "A5", "G5", "E5", "D5", "C5", "A4" });
+        lick ("LK-11.F", "Trilha aberta na 3ª corda", "Joe Satriani", "PTN-M-3rds",
+              "G|--0-2-4-5-7-9-10-12-14--|", "pdf-fraseado-melodico",
+              { "G3", "A3", "B3", "C4", "D4", "E4", "F4", "G4", "A4" });
+        lick ("LK-11.G", "Escala dentro da forma (Sistema 5)", "Kiko Loureiro", "PTN-A-TRIAD",
+              "A|--5-8-10-12-13-15-17-15-12-8-5--|", "pdf-caged-e-derivaoes-de-acordes-marcelo-mello-apostila-de-violao-e-guitarra-vol1",
+              { "A4", "C5", "D5", "E5", "F5", "G5", "A5", "G5", "E5", "C5", "A4" });
+        lick ("LK-11.H", "Menor harmônica (segunda aumentada)", "Yngwie Malmsteen", "PTN-M-3rds",
+              "A|--5-7-8-10-12-13-16-17-16-13-12-10-8-7-5--|", "pdf-fraseado-melodico",
+              { "A4", "B4", "C5", "D5", "E5", "F5", "G#5", "A5", "G#5", "F5", "E5", "D5", "C5", "B4", "A4" });
+        lick ("LK-11.I", "Menor melódica (6ª e 7ª elevadas)", "Steve Vai", "PTN-M-3rds",
+              "A|--5-7-8-10-12-14-16-17-16-14-12-10-8-7-5--|", "pdf-fraseado-melodico",
+              { "A4", "B4", "C5", "D5", "E5", "F#5", "G#5", "A5", "G#5", "F#5", "E5", "D5", "C5", "B4", "A4" });
+        lick ("LK-11.J", "Frase de repouso e tensão sobre o vamp", "Santana", "PTN-M-3rds",
+              "A|--5-8-10-12-10-8-5-12-10-8-5--|", "pdf-mozart-mello-improvisacion-pop",
+              { "A4", "C5", "D5", "E5", "D5", "C5", "A4", "E5", "D5", "C5", "A4" });
+
+        // Exercises: every one is played on the instrument and verified by the
+        // app (module 11 has no quizzes). The first exercise of each topic plays
+        // the topic's lick (obligatory); the others are variations and
+        // improvisation over the tonal vamp. Ids follow EX-11.<topico>.<n>.
+        auto add = [&m] (Exercise e) { m.exercises.push_back (std::move (e)); return (int) m.exercises.size() - 1; };
+
+        auto amChord = std::vector<int> { 9, 0, 4, 7 };            // Am7: A C E G
+        auto amScale = std::vector<int> { 9, 11, 0, 2, 4, 5, 7 };  // A menor natural
+
+        // --- Topic A — desenhos por região -----------------------------------
+        add (playable ("EX-11.A.1", "Tocar o lick A (grupos de três)", "Tocar o lick do tópico: grupos de três subindo na região de Lá menor.",
+                       { "A4", "B4", "C5", "B4", "C5", "D5", "C5", "D5", "E5", "D5", "E5", "F5", "E5", "F5", "G5", "F5", "G5", "A5" }, "A"));
+        m.exercises.back().lickId = "LK-11.A";
+        add (playable ("EX-11.A.2", "Escala de Lá menor na região", "Subir a escala de Lá menor dentro de uma região, com a digitação fixa do desenho.",
+                       { "A4", "B4", "C5", "D5", "E5", "F5", "G5", "A5" }, "A"));
+        add (improvise ("EX-11.A.3", "Improvisar sobre o vamp de Lá menor", "Improvisar frases curtas sobre Am7, começando e terminando dentro da região.",
+                        amChord, amScale, {}, "A"));
+
+        // --- Topic B — escalas ascendentes e descendentes --------------------
+        add (playable ("EX-11.B.1", "Tocar o lick B (ascendente e descendente)", "Tocar o lick do tópico: a escala sobe até o topo e desce resolvendo na tônica.",
+                       { "A4", "B4", "C5", "D5", "E5", "F5", "G5", "A5", "G5", "F5", "E5", "D5", "C5", "B4", "A4" }, "B"));
+        m.exercises.back().lickId = "LK-11.B";
+        add (playable ("EX-11.B.2", "Escala ascendente", "Subir a escala de Lá menor até a oitava, em tempo parelho.",
+                       { "A4", "B4", "C5", "D5", "E5", "F5", "G5", "A5" }, "B"));
+        add (playable ("EX-11.B.3", "Escala descendente", "Descer a escala de Lá menor do topo até a tônica, sem frear.",
+                       { "A5", "G5", "F5", "E5", "D5", "C5", "B4", "A4" }, "B"));
+
+        // --- Topic C — pentatônica menor 7 -----------------------------------
+        add (playable ("EX-11.C.1", "Tocar o lick C (pentatônica menor 7)", "Tocar o lick do tópico: a sétima aparece no topo e resolve na tônica.",
+                       { "A4", "C5", "D5", "E5", "G5", "G#5", "A5", "G5", "E5", "D5", "C5", "A4" }, "C"));
+        m.exercises.back().lickId = "LK-11.C";
+        add (playable ("EX-11.C.2", "Pentatônica menor 7 completa", "Tocar a pentatônica menor 7 de Lá nos dois sentidos.",
+                       { "A4", "C5", "D5", "E5", "G5", "G#5", "A5", "G#5", "G5", "E5", "D5", "C5", "A4" }, "C"));
+        add (improvise ("EX-11.C.3", "Improvisar com a sétima (tensão pedida)", "Improvisar sobre Am7 usando a sétima (G#) como tensão que resolve na tônica.",
+                        amChord, amScale, { 8 }, "C"));
+
+        // --- Topic D — pentatônica menor 6 -----------------------------------
+        add (playable ("EX-11.D.1", "Tocar o lick D (pentatônica menor 6)", "Tocar o lick do tópico: a sexta maior dá a cor e a frase recolhe na pentatônica.",
+                       { "A4", "C5", "D5", "E5", "F#5", "E5", "D5", "C5", "A4" }, "D"));
+        m.exercises.back().lickId = "LK-11.D";
+        add (playable ("EX-11.D.2", "Pentatônica menor 6 completa", "Tocar a pentatônica menor 6 de Lá nos dois sentidos.",
+                       { "A4", "C5", "D5", "E5", "F#5", "G5", "F#5", "E5", "D5", "C5", "A4" }, "D"));
+        add (improvise ("EX-11.D.3", "Improvisar com a sexta (cor de repouso)", "Improvisar sobre Am7 usando a sexta maior (F#) como cor estável da frase.",
+                        amChord, { 9, 11, 0, 2, 4, 6, 7 }, {}, "D"));
+
+        // --- Topic E — cinco desenhos da pentatônica -------------------------
+        add (playable ("EX-11.E.1", "Tocar o lick E (ligando posições)", "Tocar o lick do tópico: a frase atravessa a nota comum entre duas posições.",
+                       { "A4", "C5", "D5", "E5", "G5", "A5", "G5", "E5", "D5", "C5", "A4" }, "E"));
+        m.exercises.back().lickId = "LK-11.E";
+        add (playable ("EX-11.E.2", "Pentatônica menor subindo e descendo", "Tocar a pentatônica menor de Lá nos dois sentidos, ligando as posições.",
+                       { "A4", "C5", "D5", "E5", "G5", "A5", "G5", "E5", "D5", "C5", "A4" }, "E"));
+        add (improvise ("EX-11.E.3", "Improvisar atravessando as posições", "Improvisar sobre o vamp passando de uma posição da pentatônica para a vizinha.",
+                        amChord, { 9, 0, 2, 4, 7 }, {}, "E"));
+
+        // --- Topic F — trilhas abertas e fechadas ----------------------------
+        add (playable ("EX-11.F.1", "Tocar o lick F (trilha aberta)", "Tocar o lick do tópico: a escala sobe linearmente pela 3ª corda.",
+                       { "G3", "A3", "B3", "C4", "D4", "E4", "F4", "G4", "A4" }, "F"));
+        m.exercises.back().lickId = "LK-11.F";
+        add (playable ("EX-11.F.2", "Trilha aberta na 3ª corda", "Subir a escala de Lá menor ao longo de uma só corda, do grave ao agudo.",
+                       { "G3", "A3", "B3", "C4", "D4", "E4", "F4", "G4", "A4" }, "F"));
+        add (improvise ("EX-11.F.3", "Improvisar alternando caixa e linha", "Improvisar sobre o vamp alternando a trilha fechada e a trilha aberta.",
+                        amChord, amScale, {}, "F"));
+
+        // --- Topic G — Sistema 5 (CAGED) -------------------------------------
+        add (playable ("EX-11.G.1", "Tocar o lick G (dentro da forma)", "Tocar o lick do tópico: o desenho da escala dentro da forma de Lá menor, resolvendo na tônica.",
+                       { "A4", "C5", "D5", "E5", "F5", "G5", "A5", "G5", "E5", "C5", "A4" }, "G"));
+        m.exercises.back().lickId = "LK-11.G";
+        add (playable ("EX-11.G.2", "Escala dentro da forma", "Subir a escala que vive dentro da forma de Lá menor (Sistema 5).",
+                       { "A4", "B4", "C5", "D5", "E5", "F5", "G5", "A5" }, "G"));
+        add (improvise ("EX-11.G.3", "Improvisar resolvendo na tônica da forma", "Improvisar sobre o vamp, resolvendo cada frase numa nota do acorde (tônica da forma).",
+                        amChord, amScale, {}, "G"));
+
+        // --- Topic H — escala menor harmônica --------------------------------
+        add (playable ("EX-11.H.1", "Tocar o lick H (menor harmônica)", "Tocar o lick do tópico: a segunda aumentada marca a tensão e a frase resolve na tônica.",
+                       { "A4", "B4", "C5", "D5", "E5", "F5", "G#5", "A5", "G#5", "F5", "E5", "D5", "C5", "B4", "A4" }, "H"));
+        m.exercises.back().lickId = "LK-11.H";
+        add (playable ("EX-11.H.2", "Menor harmônica ascendente", "Subir a escala menor harmônica de Lá, destacando a sétima elevada (G#).",
+                       { "A4", "B4", "C5", "D5", "E5", "F5", "G#5", "A5" }, "H"));
+        add (improvise ("EX-11.H.3", "Improvisar resolvendo com a segunda aumentada", "Improvisar sobre Am usando a segunda aumentada (F–G#) como gesto de tensão resolvido na tônica.",
+                        amChord, { 9, 11, 0, 2, 4, 5, 8 }, { 5, 8 }, "H"));
+
+        // --- Topic I — escala menor melódica ---------------------------------
+        add (playable ("EX-11.I.1", "Tocar o lick I (menor melódica)", "Tocar o lick do tópico: a sexta e a sétima elevadas dão a fluência e a frase resolve na tônica.",
+                       { "A4", "B4", "C5", "D5", "E5", "F#5", "G#5", "A5", "G#5", "F#5", "E5", "D5", "C5", "B4", "A4" }, "I"));
+        m.exercises.back().lickId = "LK-11.I";
+        add (playable ("EX-11.I.2", "Menor melódica ascendente", "Subir a escala menor melódica de Lá, destacando a sexta (F#) e a sétima (G#) elevadas.",
+                       { "A4", "B4", "C5", "D5", "E5", "F#5", "G#5", "A5" }, "I"));
+        add (improvise ("EX-11.I.3", "Improvisar com a menor melódica", "Improvisar sobre Am7 usando a menor melódica para linhas longas e cantáveis.",
+                        amChord, { 9, 11, 0, 2, 4, 6, 8 }, {}, "I"));
+
+        // --- Topic J — relação entre escalas e acordes -----------------------
+        add (playable ("EX-11.J.1", "Tocar o lick J (repouso e tensão)", "Tocar o lick do tópico: a frase mistura repouso (acorde) e tensão de cor, resolvendo no acorde.",
+                       { "A4", "C5", "D5", "E5", "D5", "C5", "A4", "E5", "D5", "C5", "A4" }, "J"));
+        m.exercises.back().lickId = "LK-11.J";
+        add (playable ("EX-11.J.2", "Arpejo de Am7", "Tocar o arpejo de Am7 (A-C-E-G) subindo e descendo, com a tônica como repouso.",
+                       { "A4", "C5", "E5", "G5", "A5", "G5", "E5", "C5", "A4" }, "J"));
+        add (improvise ("EX-11.J.3", "Improvisar sobre o vamp tonal", "Improvisar sobre o vamp de Lá menor respeitando as notas de repouso (acorde e escala) e as tensões pedidas.",
+                        amChord, amScale, {}, "J"));
+
+        // The gate closes the module: the lick J played on the grid at the target
+        // BPM (REQ-009 accuracy + REQ-015 grid), so the student proves the phrase
+        // and the tempo together.
+        auto& gate = m.exercises.emplace_back (playable (
+            "GATE-11", "Desafio de gate — lick sobre a grade",
+            "Tocar o lick do tópico J (repouso e tensão sobre o vamp de Lá menor) a 100 BPM, na grade do metrônomo.",
+            { "A4", "C5", "D5", "E5", "D5", "C5", "A4", "E5", "D5", "C5", "A4" }, "J"));
+        gate.isGate = true;
+        gate.lickId = "LK-11.J";
+        gate.targetBpm = 100;
+        gate.usesGrid = true;
+
+        m.gateChallenge = juce::String::fromUTF8 (
+            "Tocar o lick do tópico J (uma frase de repouso e tensão sobre o vamp "
+            "de Lá menor) a 100 BPM, na grade do metrônomo, com ≥90% de acerto e "
+            "on_grid_ratio ≥ 0,82. O gate prova a frase e o tempo juntos.");
+
+        // Pattern and links the module must cite (REQ-007, REQ-010).
+        m.practice.patternId = "PTN-M-3";
+        m.practice.patternUse = juce::String::fromUTF8 (
+            "O padrão de grupos de três (PTN-M-3) constrói as frases deste módulo: "
+            "cada grupo sobe um grau, criando movimento contínuo dentro da região. "
+            "Complemento: PTN-M-3rds para ouvir as terças das escalas em movimento.");
+        m.practice.guitarists = { "John Petrucci", "Guthrie Govan", "Kiko Loureiro" };
+
+        // Curated apostilas (REQ-006); see docs/MUSIC.md.
+        m.sources = {
+            "pdf-fraseado-melodico",
+            "pdf-mozart-mello-improvisacion-pop",
+            "pdf-mozart-mello-livroestudosdeguitarra4em1",
+            "pdf-caged-e-derivaoes-de-acordes-marcelo-mello-apostila-de-violao-e-guitarra-vol1",
+            "pdf-desvendando-os-segredos-da-guitarra-fusion",
+        };
+
+        return m;
+    }
+
     // Modules 11..20 exist as placeholders so the list is honest about what is
     // coming (ADR 0005): level, target BPM and alignment come from MUSIC.md.
     CourseModule makePlaceholder (int number, const char* title, int level,
@@ -5161,7 +5455,7 @@ const std::vector<CourseModule>& ModuleCatalog::getModules()
         makeModule8(),
         makeModule9(),
         makeModule10(),
-        makePlaceholder (11, "Blues de 12 compassos",               5, 100,  0.82f),
+        makeModule11(),
         makePlaceholder (12, "Blues menor",                         5, 104,  0.82f),
         makePlaceholder (13, "Blues (variações)",                   5, 108,  0.82f),
         makePlaceholder (14, "Blues (aplicação)",                   5, 112,  0.82f),

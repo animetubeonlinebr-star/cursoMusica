@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "Course/ExerciseEvaluator.h"
+#include "Course/RestNotes.h"
 #include "Course/TempoGrid.h"
 
 namespace cursomusica
@@ -134,6 +135,17 @@ struct Exercise
     // scored like any other exercise (accuracy = correct / answered).
     std::vector<QuizQuestion> quiz;
 
+    // The lick this exercise obliges (client: "no exercício do tópico é
+    // obrigatório o uso do lick apresentado no mesmo tópico"). The student must
+    // play the phrase (verified as a note sequence) for the exercise to pass.
+    juce::String lickId;
+
+    // Rest-note / tension evaluation (REQ-011, REQ-012): when set, the exercise
+    // is graded by classifying every played note against the harmonic context
+    // instead of matching an exact sequence. Used by the improvisation exercises.
+    course::RestNoteSpec restNotes;
+    bool isImprovisation() const noexcept { return ! restNotes.empty(); }
+
     bool isQuiz() const noexcept { return ! quiz.empty(); }
 };
 
@@ -143,6 +155,21 @@ struct PracticeTrack
     juce::String patternId;     // "PTN-R-PALM"
     juce::String patternUse;
     juce::StringArray guitarists; // reference players, cited as links
+};
+
+// A short melodic phrase taught by a topic (client: "cada tópico deve ter um
+// lick"). The student studies it and the topic's exercise obliges its use. The
+// lick may come from a curated apostila or from a reference guitarist; when it
+// does, `source` names it. `notes` are the MIDI notes the app plays and expects.
+struct Lick
+{
+    juce::String id;         // "LK-11.A"
+    juce::String title;
+    juce::String guitarist;  // cited player (REQ-007), when it comes from one
+    juce::String patternId;  // PTN-* the lick illustrates (REQ-010)
+    juce::String tab;        // compact tab/fret reading of the phrase
+    juce::String source;     // curated apostila (REQ-006), when it comes from one
+    std::vector<int> notes;  // MIDI notes of the phrase
 };
 
 // A guitar shape of the CAGED system.
@@ -178,6 +205,7 @@ struct CourseModule
 
     std::vector<LessonBlock> lessons;
     std::vector<Exercise> exercises;
+    std::vector<Lick> licks;    // one per topic (client, from module 11 on)
     juce::String gateChallenge;
     PracticeTrack practice;
     std::vector<CagedShape> caged;

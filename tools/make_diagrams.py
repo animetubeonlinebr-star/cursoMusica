@@ -3516,6 +3516,309 @@ DIAGRAMS.update({
 })
 
 
+
+# --------------------------------------------------------------------------
+# Modulo 11 — referencias de escalas e dominio do braco.
+# --------------------------------------------------------------------------
+def _m11_scale(d, y, label, notes, color=CYAN, per_row=8):
+    """Desenha uma escala como bolinhas com o nome de cada nota."""
+    d.text((MARGIN, y), label, font=font(23, True), fill=ACCENT, anchor="la")
+    top = y + 44
+    for i, name in enumerate(notes):
+        cx = MARGIN + 46 + (i % per_row) * 150
+        cy = top + (i // per_row) * 78
+        d.ellipse([cx - 34, cy - 34, cx + 34, cy + 34], fill=RAISED, outline=color, width=3)
+        d.text((cx, cy), name, font=font(24, True), fill=TXT, anchor="mm")
+    return top + ((len(notes) - 1) // per_row + 1) * 78
+
+
+def d_m11_desenhos_regioes():
+    h = 760
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Desenho por regiao: a escala recortada numa caixa")
+    y = subtitle(d, "Uma regiao cabe em 4 a 5 casas, sem trocar de posicao; a tonica e o ponto de referencia.", y)
+    fretboard(d, MARGIN + 40, y + 40, W - 2 * MARGIN - 80, 300,
+              n_frets=12, start_fret=0, show_notes=True, highlight={9, 0, 2, 4, 7}, root_pc=9)
+    string_labels(d, MARGIN + 10, y + 40, 300)
+    d.text((MARGIN, h - 118), "Destaques: tonica La (roxo) e as notas da pentatonica menor (ciano) dentro da regiao.",
+           font=font(20), fill=TXT2, anchor="la")
+    d.text((MARGIN, h - 76), "Frase nasce na regiao; viaja para a vizinha pela nota comum; volta para resolver.",
+           font=font(20, True), fill=GOLD, anchor="la")
+    return img
+
+
+def d_m11_regioes_transicao():
+    h = 660
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Transitar entre regioes: a nota comum e a ponte")
+    y = subtitle(d, "Troque de regiao no tempo forte ou em nota longa; o deslize cobre a distancia.", y)
+    rows = [("Regiao 1 (casa 5)", "tonica na 6a corda", "sai pela nota comum", ACCENT),
+            ("Nota comum", "pertence as duas regioes", "a ponte entre os desenhos", GOLD),
+            ("Regiao 2 (casa 8)", "tonica na 6a corda", "chega e continua a frase", CYAN)]
+    top = y + 50
+    for i, (name, role, use, color) in enumerate(rows):
+        yy = top + i * 110
+        d.rounded_rectangle([MARGIN, yy, W - MARGIN, yy + 92], radius=12, fill=RAISED)
+        d.text((MARGIN + 24, yy + 24), name, font=font(24, True), fill=color, anchor="la")
+        d.text((MARGIN + 24, yy + 58), role, font=font(20), fill=TXT2, anchor="la")
+        d.text((W - MARGIN - 24, yy + 40), use, font=font(21, True), fill=TXT, anchor="ra")
+        if i < len(rows) - 1:
+            d.text((W / 2, yy + 96), "v", font=font(26, True), fill=TXT_DIS, anchor="mm")
+    return img
+
+
+def d_m11_asc_desc():
+    h = 620
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Escala ascendente e descendente")
+    y = subtitle(d, "O mesmo caminho nos dois sentidos; a descida tem a sua propria digitacao de conforto.", y)
+    mid = y + 120
+    d.line([MARGIN + 80, mid + 60, W - MARGIN - 80, mid - 60], fill=CYAN, width=5)
+    d.text((W / 2, mid - 90), "ascendente (subindo)", font=font(22, True), fill=CYAN, anchor="mm")
+    mid2 = mid + 200
+    d.line([MARGIN + 80, mid2 - 60, W - MARGIN - 80, mid2 + 60], fill=GOLD, width=5)
+    d.text((W / 2, mid2 + 92), "descendente (voltando)", font=font(22, True), fill=GOLD, anchor="mm")
+    d.text((W / 2, h - 52), "Treine a descida tanto quanto a subida: e a metade que voce usa para resolver.",
+           font=font(20, True), fill=TXT2, anchor="mm")
+    return img
+
+
+def d_m11_pent_menor7():
+    h = 520
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Pentatonica menor 7: a setima maior acrescentada")
+    y = subtitle(d, "Em La: A-C-D-E-G + Sol#. A setima fica a um semitom da tonica e resolve nela.", y)
+    _m11_scale(d, y + 30, "Pentatonica menor 7 de La (1 b3 4 5 b7 7)",
+               ["A", "C", "D", "E", "G", "G#"], color=CYAN, per_row=6)
+    d.text((W / 2, h - 52), "A setima (G#) e tensao: puxa para a tonica (A).", font=font(21, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m11_pent_menor6():
+    h = 520
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Pentatonica menor 6: a sexta maior acrescentada")
+    y = subtitle(d, "Em La: A-C-D-E-G + Fa#. A sexta da a cor dorica e estende a frase.", y)
+    _m11_scale(d, y + 30, "Pentatonica menor 6 de La (1 b3 4 5 6 b7)",
+               ["A", "C", "D", "E", "F#", "G"], color=SUCCESS, per_row=6)
+    d.text((W / 2, h - 52), "A sexta (Fa#) e cor de repouso: abre a frase em vez de pedir.", font=font(21, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m11_pent_cinco_desenhos():
+    h = 820
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Os cinco desenhos da pentatonica menor")
+    y = subtitle(d, "Cada posicao comeca numa nota da escala; vizinhas compartilham notas e se ligam.", y)
+    positions = [("Posicao 1 (casa 5)", 5), ("Posicao 2 (casa 8)", 8), ("Posicao 3 (casa 10)", 10)]
+    top = y + 30
+    for i, (label, start) in enumerate(positions):
+        yy = top + i * 150
+        d.text((MARGIN, yy), label, font=font(21, True), fill=ACCENT, anchor="la")
+        fretboard(d, MARGIN + 40, yy + 28, W - 2 * MARGIN - 80, 100,
+                  n_frets=6, start_fret=start, show_notes=False, highlight={9, 0, 2, 4, 7}, root_pc=9)
+    d.text((W / 2, h - 46), "As cinco posicoes cobrem o braco; a posicao 5 (casa 12) e a 1 uma oitava acima.",
+           font=font(20, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m11_trilhas():
+    h = 720
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Trilhas fechadas e abertas")
+    y = subtitle(d, "Fechada: a escala dentro da caixa (mao parada). Aberta: a escala ao longo da corda (mao viajando).", y)
+    d.text((MARGIN, y + 40), "Trilha fechada (posicao)", font=font(22, True), fill=ACCENT, anchor="la")
+    fretboard(d, MARGIN + 40, y + 70, W - 2 * MARGIN - 80, 180,
+              n_frets=6, start_fret=5, show_notes=True, highlight={9, 0, 2, 4, 7}, root_pc=9)
+    d.text((MARGIN, y + 330), "Trilha aberta (3a corda, subindo o braco)", font=font(22, True), fill=CYAN, anchor="la")
+    fretboard(d, MARGIN + 40, y + 360, W - 2 * MARGIN - 80, 180,
+              n_frets=12, start_fret=0, show_notes=True, highlight={7, 9, 11, 0, 2, 4, 5}, root_pc=7)
+    d.text((W / 2, h - 44), "O fraseado maduro alterna as duas: controle na caixa, movimento na corda.",
+           font=font(20, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m11_caged_sistema5():
+    h = 700
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Sistema 5 (CAGED): cinco formas, cinco desenhos")
+    y = subtitle(d, "Cada forma de acorde carrega um desenho de escala ao seu redor; a tonica e o alvo.", y)
+    rows_box(d, y + 30,
+             [["Forma", "Posicao (La)", "Tonica na", "Escala ao redor"],
+              ["E", "casa 5", "6a corda", "desenho 1"],
+              ["D", "casa 5", "4a corda", "desenho 2"],
+              ["C", "casa 8", "5a corda", "desenho 3"],
+              ["A", "casa 12", "5a corda", "desenho 4"],
+              ["G", "casa 12", "6a corda", "desenho 5"]],
+             height=64, gap=8, cols=(0, 300, 620, 900),
+             colors=(ACCENT, TXT, CYAN, GOLD), font_size=21)
+    d.text((W / 2, h - 46), "Trocar de acorde e trocar de forma; a frase viaja de forma em forma com a harmonia.",
+           font=font(20, True), fill=TXT2, anchor="mm")
+    return img
+
+
+def d_m11_menor_harmonica():
+    h = 560
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Escala menor harmonica: o 7o grau elevado")
+    y = subtitle(d, "Em La: A-B-C-D-E-F-G#-A. A elevacao do 7o cria a segunda aumentada (F-G#).", y)
+    _m11_scale(d, y + 30, "Menor harmonica de La (1 2 b3 4 5 b6 7)",
+               ["A", "B", "C", "D", "E", "F", "G#"], color=CYAN, per_row=7)
+    d.text((W / 2, h - 52), "A segunda aumentada (Fa-Sol#) e o gesto de tensao da escala.", font=font(21, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m11_menor_melodica():
+    h = 560
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Escala menor melodica: 6o e 7o graus elevados")
+    y = subtitle(d, "Em La: A-B-C-D-E-F#-G#-A. Sem a segunda aumentada, sobe por graus conjuntos.", y)
+    _m11_scale(d, y + 30, "Menor melodica de La (1 2 b3 4 5 6 7)",
+               ["A", "B", "C", "D", "E", "F#", "G#"], color=SUCCESS, per_row=7)
+    d.text((W / 2, h - 52), "A sexta elevada (Fa#) da a fluencia: a escala e cantavel nos dois sentidos.",
+           font=font(21, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def d_m11_escala_acorde():
+    h = 720
+    img, d = canvas(h, BG)
+    frame(d, h)
+    y = title(d, "Relacao escala-acorde e as notas de repouso")
+    y = subtitle(d, "O acorde escolhe a escala; a escala define onde estao as notas de repouso (REQ-011).", y)
+    rows_box(d, y + 30,
+             [["Acorde", "Escala", "Notas de repouso"],
+              ["C7M", "maior / lídia", "C E G B"],
+              ["Am7", "menor natural / dorica", "A C E G"],
+              ["G7", "mixolidia / alterada", "G B D F"],
+              ["Am7 (vamp)", "pentatonica menor", "A C D E G"]],
+             height=64, gap=8, cols=(0, 300, 700),
+             colors=(ACCENT, TXT, CYAN), font_size=21)
+    d.text((W / 2, h - 92), "Fora do acorde e da escala, a nota e tensao nao pedida: erro (REQ-012).",
+           font=font(20), fill=TXT2, anchor="mm")
+    d.text((W / 2, h - 50), "O improviso deste modulo roda sobre um vamp tonal: repouso = notas do acorde e da escala.",
+           font=font(20, True), fill=GOLD, anchor="mm")
+    return img
+
+
+def _m11_score(name, notes, caption):
+    return _score_image(name, notes, caption)
+
+
+def d_m11_partitura_a():
+    return _m11_score("m11_partitura_a",
+                      [("A", 4, None), ("B", 4, None), ("C", 5, None), ("B", 4, None), ("C", 5, None),
+                       ("D", 5, None), ("C", 5, None), ("D", 5, None), ("E", 5, None), ("D", 5, None),
+                       ("E", 5, None), ("F", 5, None), ("E", 5, None), ("F", 5, None), ("G", 5, None),
+                       ("F", 5, None), ("G", 5, None), ("A", 5, None)],
+                      "Lick A: grupos de tres subindo na regiao")
+
+
+def d_m11_partitura_b():
+    return _m11_score("m11_partitura_b",
+                      [("A", 4, None), ("B", 4, None), ("C", 5, None), ("D", 5, None), ("E", 5, None),
+                       ("F", 5, None), ("G", 5, None), ("A", 5, None), ("G", 5, None), ("F", 5, None),
+                       ("E", 5, None), ("D", 5, None), ("C", 5, None), ("B", 4, None), ("A", 4, None)],
+                      "Lick B: escala ascendente e descendente")
+
+
+def d_m11_partitura_c():
+    return _m11_score("m11_partitura_c",
+                      [("A", 4, None), ("C", 5, None), ("D", 5, None), ("E", 5, None), ("G", 5, None),
+                       ("G", 5, "#"), ("A", 5, None), ("G", 5, None), ("E", 5, None), ("D", 5, None),
+                       ("C", 5, None), ("A", 4, None)],
+                      "Lick C: pentatonica menor 7 (setima resolve)")
+
+
+def d_m11_partitura_d():
+    return _m11_score("m11_partitura_d",
+                      [("A", 4, None), ("C", 5, None), ("D", 5, None), ("E", 5, None), ("F", 5, "#"),
+                       ("E", 5, None), ("D", 5, None), ("C", 5, None), ("A", 4, None)],
+                      "Lick D: pentatonica menor 6 (sexta como cor)")
+
+
+def d_m11_partitura_e():
+    return _m11_score("m11_partitura_e",
+                      [("A", 4, None), ("C", 5, None), ("D", 5, None), ("E", 5, None), ("G", 5, None),
+                       ("A", 5, None), ("G", 5, None), ("E", 5, None), ("D", 5, None), ("C", 5, None),
+                       ("A", 4, None)],
+                      "Lick E: pentatonica ligando duas posicoes")
+
+
+def d_m11_partitura_f():
+    return _m11_score("m11_partitura_f",
+                      [("G", 3, None), ("A", 3, None), ("B", 3, None), ("C", 4, None), ("D", 4, None),
+                       ("E", 4, None), ("F", 4, None), ("G", 4, None), ("A", 4, None)],
+                      "Lick F: trilha aberta na 3a corda")
+
+
+def d_m11_partitura_g():
+    return _m11_score("m11_partitura_g",
+                      [("A", 4, None), ("C", 5, None), ("D", 5, None), ("E", 5, None), ("F", 5, None),
+                       ("G", 5, None), ("A", 5, None), ("G", 5, None), ("E", 5, None), ("C", 5, None),
+                       ("A", 4, None)],
+                      "Lick G: escala dentro da forma (Sistema 5)")
+
+
+def d_m11_partitura_h():
+    return _m11_score("m11_partitura_h",
+                      [("A", 4, None), ("B", 4, None), ("C", 5, None), ("D", 5, None), ("E", 5, None),
+                       ("F", 5, None), ("G", 5, "#"), ("A", 5, None), ("G", 5, "#"), ("F", 5, None),
+                       ("E", 5, None), ("D", 5, None), ("C", 5, None), ("B", 4, None), ("A", 4, None)],
+                      "Lick H: menor harmonica (segunda aumentada)")
+
+
+def d_m11_partitura_i():
+    return _m11_score("m11_partitura_i",
+                      [("A", 4, None), ("B", 4, None), ("C", 5, None), ("D", 5, None), ("E", 5, None),
+                       ("F", 5, "#"), ("G", 5, "#"), ("A", 5, None), ("G", 5, "#"), ("F", 5, "#"),
+                       ("E", 5, None), ("D", 5, None), ("C", 5, None), ("B", 4, None), ("A", 4, None)],
+                      "Lick I: menor melodica (6a e 7a elevadas)")
+
+
+def d_m11_partitura_j():
+    return _m11_score("m11_partitura_j",
+                      [("A", 4, None), ("C", 5, None), ("D", 5, None), ("E", 5, None), ("D", 5, None),
+                       ("C", 5, None), ("A", 4, None), ("E", 5, None), ("D", 5, None), ("C", 5, None),
+                       ("A", 4, None)],
+                      "Lick J: frase de repouso e tensao sobre o vamp")
+
+
+DIAGRAMS.update({
+    "m11_desenhos_regioes": d_m11_desenhos_regioes,
+    "m11_regioes_transicao": d_m11_regioes_transicao,
+    "m11_asc_desc": d_m11_asc_desc,
+    "m11_pent_menor7": d_m11_pent_menor7,
+    "m11_pent_menor6": d_m11_pent_menor6,
+    "m11_pent_cinco_desenhos": d_m11_pent_cinco_desenhos,
+    "m11_trilhas": d_m11_trilhas,
+    "m11_caged_sistema5": d_m11_caged_sistema5,
+    "m11_menor_harmonica": d_m11_menor_harmonica,
+    "m11_menor_melodica": d_m11_menor_melodica,
+    "m11_escala_acorde": d_m11_escala_acorde,
+    "m11_partitura_a": d_m11_partitura_a,
+    "m11_partitura_b": d_m11_partitura_b,
+    "m11_partitura_c": d_m11_partitura_c,
+    "m11_partitura_d": d_m11_partitura_d,
+    "m11_partitura_e": d_m11_partitura_e,
+    "m11_partitura_f": d_m11_partitura_f,
+    "m11_partitura_g": d_m11_partitura_g,
+    "m11_partitura_h": d_m11_partitura_h,
+    "m11_partitura_i": d_m11_partitura_i,
+    "m11_partitura_j": d_m11_partitura_j,
+})
+
+
 def main() -> None:
     out_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                            "Source", "Course", "Content", "Diagrams")
