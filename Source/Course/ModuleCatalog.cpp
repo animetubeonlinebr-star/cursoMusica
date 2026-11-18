@@ -5196,14 +5196,14 @@ namespace
                 "A escala parelha no metrônomo é o termômetro da mão antes da frase."
             }), content::topic11B()),
             detail (block ("C", juce::String::fromUTF8 ("Pentatônica menor 7"), {
-                "A pentatônica menor 7 acrescenta a sétima maior: 1-b3-4-5-b7-7 (seis notas).",
-                "A sétima fica a um semitom da tônica e cria a tensão que resolve na frase.",
-                "A sétima é tensão, não repouso: use-a para pedir a resolução."
+                "A pentatônica menor 7 é a pentatônica menor de sempre: 1-b3-4-5-b7 (cinco notas).",
+                "O 7 do nome é a sétima menor (b7), que já pertence à escala e dá o som do acorde m7.",
+                "Sobre m7, as cinco notas são de repouso: a apostila é a fonte primária."
             }), content::topic11C()),
             detail (block ("D", juce::String::fromUTF8 ("Pentatônica menor 6"), {
-                "A pentatônica menor 6 acrescenta a sexta maior: 1-b3-4-5-6-b7 (seis notas).",
-                "A sexta maior é a nota característica do som dórico — cor de repouso.",
-                "A sexta estende a frase; a sétima a puxa. Escolha uma direção por frase."
+                "A pentatônica menor 6 troca a sétima menor pela sexta maior: 1-b3-4-5-6 (cinco notas).",
+                "O 6 do nome é a sexta maior, que dá o som do acorde m6 (cor dórica).",
+                "Sobre m6, use a menor 6; sobre m7, use a menor 7 — o acorde decide a pentatônica."
             }), content::topic11D()),
             detail (block ("E", juce::String::fromUTF8 ("Cinco desenhos da pentatônica"), {
                 "São cinco posições porque a pentatônica tem cinco notas por oitava.",
@@ -5262,11 +5262,11 @@ namespace
         lick ("LK-11.B", "Escala ascendente e descendente", "Guthrie Govan", "PTN-M-3rds",
               "A|--5-7-8-10-12-13-15-17-15-13-12-10-8-7-5--|", "pdf-fraseado-melodico",
               { "A4", "B4", "C5", "D5", "E5", "F5", "G5", "A5", "G5", "F5", "E5", "D5", "C5", "B4", "A4" });
-        lick ("LK-11.C", "Pentatônica menor 7 (a sétima resolve)", "Richie Kotzen", "PTN-M-3",
-              "A|--5-8-10-12-15-16-17-15-12-10-8-5--|", "pdf-mozart-mello-improvisacion-pop",
-              { "A4", "C5", "D5", "E5", "G5", "G#5", "A5", "G5", "E5", "D5", "C5", "A4" });
+        lick ("LK-11.C", "Pentatônica menor 7 (a sétima menor)", "Richie Kotzen", "PTN-M-3",
+              "A|--5-8-10-12-15-17-15-12-10-8-5--|", "pdf-desvendando-os-segredos-da-guitarra-fusion",
+              { "A4", "C5", "D5", "E5", "G5", "A5", "G5", "E5", "D5", "C5", "A4" });
         lick ("LK-11.D", "Pentatônica menor 6 (a sexta como cor)", "Greg Howe", "PTN-M-3rds",
-              "A|--5-8-10-12-14-12-10-8-5--|", "pdf-desvendando-os-segredos-da-guitarra-fusion",
+              "A|--5-8-10-12-14-12-10-8-5--|", "pdf-mozart-mello-improvisacion-pop",
               { "A4", "C5", "D5", "E5", "F#5", "E5", "D5", "C5", "A4" });
         lick ("LK-11.E", "Pentatônica ligando duas posições", "Edu Ardanuy", "PTN-A-TRIAD",
               "A|--5-8-10-12-15-17-15-12-10-8-5--|", "pdf-mozart-mello-livroestudosdeguitarra4em1",
@@ -5315,22 +5315,22 @@ namespace
                        { "A5", "G5", "F5", "E5", "D5", "C5", "B4", "A4" }, "B"));
 
         // --- Topic C — pentatônica menor 7 -----------------------------------
-        add (playable ("EX-11.C.1", "Tocar o lick C (pentatônica menor 7)", "Tocar o lick do tópico: a sétima aparece no topo e resolve na tônica.",
-                       { "A4", "C5", "D5", "E5", "G5", "G#5", "A5", "G5", "E5", "D5", "C5", "A4" }, "C"));
+        add (playable ("EX-11.C.1", "Tocar o lick C (pentatônica menor 7)", "Tocar o lick do tópico: a pentatônica menor 7 de Lá (A C D E G), com a sétima menor (Sol) como nota de chegada.",
+                       { "A4", "C5", "D5", "E5", "G5", "A5", "G5", "E5", "D5", "C5", "A4" }, "C"));
         m.exercises.back().lickId = "LK-11.C";
-        add (playable ("EX-11.C.2", "Pentatônica menor 7 completa", "Tocar a pentatônica menor 7 de Lá nos dois sentidos.",
-                       { "A4", "C5", "D5", "E5", "G5", "G#5", "A5", "G#5", "G5", "E5", "D5", "C5", "A4" }, "C"));
-        add (improvise ("EX-11.C.3", "Improvisar com a sétima (tensão pedida)", "Improvisar sobre Am7 usando a sétima (G#) como tensão que resolve na tônica.",
-                        amChord, amScale, { 8 }, "C"));
+        add (playable ("EX-11.C.2", "Pentatônica menor 7 completa", "Tocar a pentatônica menor 7 de Lá (cinco notas: A C D E G) nos dois sentidos.",
+                       { "A4", "C5", "D5", "E5", "G5", "A5", "G5", "E5", "D5", "C5", "A4" }, "C"));
+        add (improvise ("EX-11.C.3", "Improvisar com a pentatônica menor 7", "Improvisar sobre Am7 usando as cinco notas da pentatônica menor 7 (A C D E G) — todas de repouso sobre o m7.",
+                        amChord, { 9, 0, 2, 4, 7 }, {}, "C"));
 
         // --- Topic D — pentatônica menor 6 -----------------------------------
-        add (playable ("EX-11.D.1", "Tocar o lick D (pentatônica menor 6)", "Tocar o lick do tópico: a sexta maior dá a cor e a frase recolhe na pentatônica.",
+        add (playable ("EX-11.D.1", "Tocar o lick D (pentatônica menor 6)", "Tocar o lick do tópico: a pentatônica menor 6 de Lá (A C D E F#), com a sexta maior como nota de cor.",
                        { "A4", "C5", "D5", "E5", "F#5", "E5", "D5", "C5", "A4" }, "D"));
         m.exercises.back().lickId = "LK-11.D";
-        add (playable ("EX-11.D.2", "Pentatônica menor 6 completa", "Tocar a pentatônica menor 6 de Lá nos dois sentidos.",
-                       { "A4", "C5", "D5", "E5", "F#5", "G5", "F#5", "E5", "D5", "C5", "A4" }, "D"));
-        add (improvise ("EX-11.D.3", "Improvisar com a sexta (cor de repouso)", "Improvisar sobre Am7 usando a sexta maior (F#) como cor estável da frase.",
-                        amChord, { 9, 11, 0, 2, 4, 6, 7 }, {}, "D"));
+        add (playable ("EX-11.D.2", "Pentatônica menor 6 completa", "Tocar a pentatônica menor 6 de Lá (cinco notas: A C D E F#) nos dois sentidos.",
+                       { "A4", "C5", "D5", "E5", "F#5", "A5", "F#5", "E5", "D5", "C5", "A4" }, "D"));
+        add (improvise ("EX-11.D.3", "Improvisar com a pentatônica menor 6", "Improvisar sobre Am6 usando as cinco notas da pentatônica menor 6 (A C D E F#) — cor de repouso sobre o m6.",
+                        { 9, 0, 4, 6 }, { 9, 0, 2, 4, 6 }, {}, "D"));
 
         // --- Topic E — cinco desenhos da pentatônica -------------------------
         add (playable ("EX-11.E.1", "Tocar o lick E (ligando posições)", "Tocar o lick do tópico: a frase atravessa a nota comum entre duas posições.",

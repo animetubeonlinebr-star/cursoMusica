@@ -3442,6 +3442,47 @@ void testModule11()
         }
     check (improvCount >= 1, "module 11 evaluates improvisation (REQ-011/REQ-012)");
 
+    // The pentatonic topics follow the primary source (the apostila): both the
+    // "pentatônica menor 7" and the "pentatônica menor 6" are FIVE-note scales.
+    // The apostila fusion is explicit: "a escala pentatônica menor 7 é formada
+    // por 5 notas". The menor 7 is 1-b3-4-5-b7 (A C D E G) and the menor 6 is
+    // 1-b3-4-5-6 (A C D E F#) — the sixth replaces the seventh, no extra note.
+    for (const auto& e : m11->exercises)
+    {
+        if (e.id == "EX-11.C.2")
+        {
+            std::vector<int> got;
+            for (const auto& t : e.targets)
+                got.push_back (t.midi);
+            check (got == std::vector<int> { 69, 72, 74, 76, 79, 81, 79, 76, 74, 72, 69 },
+                   "pentatônica menor 7 is the five-note scale A C D E G (apostila)");
+        }
+        if (e.id == "EX-11.D.2")
+        {
+            std::vector<int> got;
+            for (const auto& t : e.targets)
+                got.push_back (t.midi);
+            check (got == std::vector<int> { 69, 72, 74, 76, 78, 81, 78, 76, 74, 72, 69 },
+                   "pentatônica menor 6 is the five-note scale A C D E F# (apostila)");
+        }
+    }
+
+    // The menor 6 improvisation runs over an m6 chord (A C E F#) and the menor 7
+    // over an m7 chord (A C E G): the chord decides which pentatonic is used.
+    for (const auto& e : m11->exercises)
+    {
+        if (e.id == "EX-11.C.3")
+            check (e.restNotes.chordPitchClasses == std::vector<int> { 9, 0, 4, 7 },
+                   "EX-11.C.3 (menor 7) runs over Am7 (A C E G)");
+        if (e.id == "EX-11.D.3")
+        {
+            check (e.restNotes.chordPitchClasses == std::vector<int> { 9, 0, 4, 6 },
+                   "EX-11.D.3 (menor 6) runs over Am6 (A C E F#)");
+            check (e.restNotes.scalePitchClasses == std::vector<int> { 9, 0, 2, 4, 6 },
+                   "EX-11.D.3 (menor 6) uses the five-note scale A C D E F#");
+        }
+    }
+
     // A tonic improvisation over Am7 must accept the chord/scale tones and reject
     // an unsolicited tension — proving the module's exercises are scorable.
     for (const auto& e : m11->exercises)

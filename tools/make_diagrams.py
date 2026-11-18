@@ -3590,11 +3590,11 @@ def d_m11_pent_menor7():
     h = 520
     img, d = canvas(h, BG)
     frame(d, h)
-    y = title(d, "Pentatonica menor 7: a setima maior acrescentada")
-    y = subtitle(d, "Em La: A-C-D-E-G + Sol#. A setima fica a um semitom da tonica e resolve nela.", y)
-    _m11_scale(d, y + 30, "Pentatonica menor 7 de La (1 b3 4 5 b7 7)",
-               ["A", "C", "D", "E", "G", "G#"], color=CYAN, per_row=6)
-    d.text((W / 2, h - 52), "A setima (G#) e tensao: puxa para a tonica (A).", font=font(21, True), fill=GOLD, anchor="mm")
+    y = title(d, "Pentatonica menor 7: as cinco notas (com a setima menor)")
+    y = subtitle(d, "Em La: A-C-D-E-G. O nome 7 vem da setima menor (Sol), que ja pertence a escala e da o som do acorde m7.", y)
+    _m11_scale(d, y + 30, "Pentatonica menor 7 de La (1 b3 4 5 b7)",
+               ["A", "C", "D", "E", "G"], color=CYAN, per_row=6)
+    d.text((W / 2, h - 52), "Cinco notas, como diz a apostila. A setima menor (Sol) da o som do m7.", font=font(21, True), fill=GOLD, anchor="mm")
     return img
 
 
@@ -3602,11 +3602,11 @@ def d_m11_pent_menor6():
     h = 520
     img, d = canvas(h, BG)
     frame(d, h)
-    y = title(d, "Pentatonica menor 6: a sexta maior acrescentada")
-    y = subtitle(d, "Em La: A-C-D-E-G + Fa#. A sexta da a cor dorica e estende a frase.", y)
-    _m11_scale(d, y + 30, "Pentatonica menor 6 de La (1 b3 4 5 6 b7)",
-               ["A", "C", "D", "E", "F#", "G"], color=SUCCESS, per_row=6)
-    d.text((W / 2, h - 52), "A sexta (Fa#) e cor de repouso: abre a frase em vez de pedir.", font=font(21, True), fill=GOLD, anchor="mm")
+    y = title(d, "Pentatonica menor 6: as cinco notas (com a sexta maior)")
+    y = subtitle(d, "Em La: A-C-D-E-Fa#. A sexta maior troca a setima menor e da o som do acorde m6.", y)
+    _m11_scale(d, y + 30, "Pentatonica menor 6 de La (1 b3 4 5 6)",
+               ["A", "C", "D", "E", "F#"], color=SUCCESS, per_row=6)
+    d.text((W / 2, h - 52), "Cinco notas. A sexta maior (Fa#) da a cor do m6 (som dorico).", font=font(21, True), fill=GOLD, anchor="mm")
     return img
 
 
@@ -3735,9 +3735,9 @@ def d_m11_partitura_b():
 def d_m11_partitura_c():
     return _m11_score("m11_partitura_c",
                       [("A", 4, None), ("C", 5, None), ("D", 5, None), ("E", 5, None), ("G", 5, None),
-                       ("G", 5, "#"), ("A", 5, None), ("G", 5, None), ("E", 5, None), ("D", 5, None),
-                       ("C", 5, None), ("A", 4, None)],
-                      "Lick C: pentatonica menor 7 (setima resolve)")
+                       ("A", 5, None), ("G", 5, None), ("E", 5, None), ("D", 5, None), ("C", 5, None),
+                       ("A", 4, None)],
+                      "Lick C: pentatonica menor 7 (a setima menor)")
 
 
 def d_m11_partitura_d():

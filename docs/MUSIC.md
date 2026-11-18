@@ -1080,8 +1080,8 @@ relação entre escalas e acordes que sustenta o **improviso**.
 |---|---|---|---|
 | A | Desenhos de escalas por regiões | LK-11.A (John Petrucci) | `pdf-fraseado-melodico` |
 | B | Escalas ascendentes e descendentes | LK-11.B (Guthrie Govan) | `pdf-fraseado-melodico` |
-| C | Pentatônica menor 7 | LK-11.C (Richie Kotzen) | `pdf-mozart-mello-improvisacion-pop` |
-| D | Pentatônica menor 6 | LK-11.D (Greg Howe) | `pdf-desvendando-os-segredos-da-guitarra-fusion` |
+| C | Pentatônica menor 7 | LK-11.C (Richie Kotzen) | `pdf-desvendando-os-segredos-da-guitarra-fusion` |
+| D | Pentatônica menor 6 | LK-11.D (Greg Howe) | `pdf-mozart-mello-improvisacion-pop` |
 | E | Cinco desenhos da pentatônica | LK-11.E (Edu Ardanuy) | `pdf-mozart-mello-livroestudosdeguitarra4em1` |
 | F | Trilhas abertas e fechadas | LK-11.F (Joe Satriani) | `pdf-fraseado-melodico` |
 | G | Sistema 5 (CAGED) | LK-11.G (Kiko Loureiro) | `pdf-caged-e-derivaoes-de-acordes-marcelo-mello-…-vol1` |
@@ -1097,12 +1097,14 @@ relação entre escalas e acordes que sustenta o **improviso**.
 - **B — Escalas ascendentes e descendentes.** Subir e descer pedem digitações
   diferentes; a descida é o ponto onde a mão trava; a escala parelha no
   metrônomo é o termômetro da mão antes da frase.
-- **C — Pentatônica menor 7.** A pentatônica menor acrescentada da **sétima
-  maior** (1-b3-4-5-b7-7, seis notas em Lá: A C D E G G#); a sétima fica a um
-  semitom da tônica e é **tensão** que resolve na frase.
-- **D — Pentatônica menor 6.** A pentatônica menor acrescentada da **sexta
-  maior** (1-b3-4-5-6-b7, seis notas em Lá: A C D E F# G); a sexta é a nota
-  característica do **dórico** e funciona como **cor de repouso**.
+- **C — Pentatônica menor 7.** É a **própria pentatônica menor** (1-b3-4-5-b7,
+  **cinco notas** em Lá: A C D E G). O "7" nomeia a **sétima menor** que já
+  pertence à escala e dá o som do acorde **m7** — a apostila de fusion é
+  explícita ("a escala pentatônica menor 7 é formada por 5 notas").
+- **D — Pentatônica menor 6.** A pentatônica menor com a **sexta maior no lugar
+  da sétima menor** (1-b3-4-5-6, **cinco notas** em Lá: A C D E F#); a sexta
+  maior é a nota característica do **m6** (som dórico) e é **cor de repouso**.
+  Sobre m7 usa-se a menor 7; sobre m6, a menor 6.
 - **E — Cinco desenhos da pentatônica.** Cinco posições (uma por nota da
   pentatônica); posições vizinhas compartilham notas; a posição 5 é a 1 uma
   oitava acima.
