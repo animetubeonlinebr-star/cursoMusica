@@ -1052,3 +1052,94 @@ nível 3) a **84 BPM** com **≥90% de acerto** de acordes e `on_grid_ratio ≥ 
   modais.
 - **Links (guitarristas de referência — REQ-007):** Joe Satriani, Steve Vai e
   Guthrie Govan (uso de estruturas modais e empilhamentos).
+
+---
+
+# Módulo 11 — Referências de escalas e domínio do braço
+
+**Nível:** 5 (blues) · **BPM meta:** 100 (REQ-015) · **Gate:** 90% (REQ-009) ·
+**`on_grid_ratio`:** 0,82 (faixa de estudo 75–82%)
+**Objetivo:** transformar o conhecimento das escalas em **referências para
+construir frases** — desenhos por região, escalas nos dois sentidos,
+pentatônicas acrescentadas (menor 6 e menor 7), as cinco posições, trilhas
+abertas e fechadas, o Sistema 5 (CAGED), as menores harmônica e melódica, e a
+relação entre escalas e acordes que sustenta o **improviso**.
+
+> **Regra de ouro (REQ-003):** a explicação vem **antes** de qualquer desafio.
+> Nenhum desafio abre sem que o conteúdo abaixo tenha sido apresentado.
+
+> **Dois requisitos do cliente.** (1) **Cada tópico tem um lick** — uma frase
+> que o aluno deve tocar para completar o exercício do tópico. (2) Todo exercício
+> é **tocado no instrumento** e verificado pelo app; não há questionário neste
+> módulo. É também o **primeiro módulo com avaliação de improvisação**
+> (REQ-011/REQ-012): o app classifica cada nota contra o contexto harmônico.
+
+## 11.1 Conteúdo (curadoria — REQ-006)
+
+| Tópico | Tema | Lick (guitarrista) | Apostila de referência |
+|---|---|---|---|
+| A | Desenhos de escalas por regiões | LK-11.A (John Petrucci) | `pdf-fraseado-melodico` |
+| B | Escalas ascendentes e descendentes | LK-11.B (Guthrie Govan) | `pdf-fraseado-melodico` |
+| C | Pentatônica menor 7 | LK-11.C (Richie Kotzen) | `pdf-desvendando-os-segredos-da-guitarra-fusion` |
+| D | Pentatônica menor 6 | LK-11.D (Greg Howe) | `pdf-mozart-mello-improvisacion-pop` |
+| E | Cinco desenhos da pentatônica | LK-11.E (Edu Ardanuy) | `pdf-mozart-mello-livroestudosdeguitarra4em1` |
+| F | Trilhas abertas e fechadas | LK-11.F (Joe Satriani) | `pdf-fraseado-melodico` |
+| G | Sistema 5 (CAGED) | LK-11.G (Kiko Loureiro) | `pdf-caged-e-derivaoes-de-acordes-marcelo-mello-…-vol1` |
+| H | Escala menor harmônica | LK-11.H (Yngwie Malmsteen) | `pdf-fraseado-melodico` |
+| I | Escala menor melódica | LK-11.I (Steve Vai) | `pdf-fraseado-melodico` |
+| J | Relação entre escalas e acordes | LK-11.J (Santana) | `pdf-mozart-mello-improvisacion-pop` |
+
+## 11.2 Teoria apresentada no módulo
+
+- **A — Desenhos de escalas por regiões.** Uma região é um trecho de 4–5 casas
+  onde a escala cabe sob os quatro dedos (um dedo por casa); o desenho é a
+  escala com forma fixa; as regiões se ligam pela nota comum.
+- **B — Escalas ascendentes e descendentes.** Subir e descer pedem digitações
+  diferentes; a descida é o ponto onde a mão trava; a escala parelha no
+  metrônomo é o termômetro da mão antes da frase.
+- **C — Pentatônica menor 7.** É a **própria pentatônica menor** (1-b3-4-5-b7,
+  **cinco notas** em Lá: A C D E G). O "7" nomeia a **sétima menor** que já
+  pertence à escala e dá o som do acorde **m7** — a apostila de fusion é
+  explícita ("a escala pentatônica menor 7 é formada por 5 notas").
+- **D — Pentatônica menor 6.** A pentatônica menor com a **sexta maior no lugar
+  da sétima menor** (1-b3-4-5-6, **cinco notas** em Lá: A C D E F#); a sexta
+  maior é a nota característica do **m6** (som dórico) e é **cor de repouso**.
+  Sobre m7 usa-se a menor 7; sobre m6, a menor 6.
+- **E — Cinco desenhos da pentatônica.** Cinco posições (uma por nota da
+  pentatônica); posições vizinhas compartilham notas; a posição 5 é a 1 uma
+  oitava acima.
+- **F — Trilhas abertas e fechadas.** Trilha fechada: escala dentro da posição
+  (mão parada); trilha aberta: escala ao longo de uma ou duas cordas (mão
+  viajando); o fraseado maduro alterna as duas.
+- **G — Sistema 5 (CAGED).** Cinco formas de acorde (C-A-G-E-D), cada uma com um
+  desenho de escala ao redor; trocar de acorde é trocar de forma e de escala.
+- **H — Escala menor harmônica.** A menor natural com o 7º grau elevado
+  (1-2-b3-4-5-b6-7); a elevação cria a **segunda aumentada** (F–G# em Lá) e
+  transforma o 5º grau em dominante.
+- **I — Escala menor melódica.** A menor natural com o 6º e o 7º graus elevados
+  (1-2-b3-4-5-6-7); sem a segunda aumentada, sobe por graus conjuntos — a escala
+  menor cantável.
+- **J — Relação entre escalas e acordes.** A escala vem do acorde (7M → maior/
+  lídia; m7 → dórica/menor; 7 → mixolídia/alterada; m7(b5) → lócrio); a escala
+  define as **notas de repouso**; fora do centro, a nota é **tensão não pedida**
+  — erro (REQ-012).
+
+## 11.3 Prática (exercícios e desafios — REQ-008)
+
+Cada tópico A–J tem **3 exercícios** (ids `EX-11.<tópico>.<n>`), todos **tocados
+no instrumento** e verificados pelo app — não há questionário neste módulo. O
+**primeiro exercício de cada tópico obriga o lick do tópico** (o aluno toca a
+frase, nota a nota). Os exercícios de **improvisação** (REQ-011/REQ-012) são
+avaliados pela classificação das notas contra o contexto (repouso, tensão pedida
+ou erro) e **não** são presos à grade (`usesGrid = false`).
+
+**Desafio de gate (REQ-009/REQ-015):** tocar o lick do tópico J (frase de
+repouso e tensão sobre o vamp de Lá menor) a **100 BPM** com **≥90% de acerto**
+de notas e `on_grid_ratio ≥ 0,82`.
+
+## 11.4 Patterns e links do módulo (REQ-007, REQ-010)
+
+- **Pattern de escalas:** `PTN-M-3` (grupos de 3: 1-2-3, 2-3-4, 3-4-5…) — o
+  padrão que constrói as frases do módulo; complemento `PTN-M-3rds` (terças).
+- **Links (guitarristas de referência — REQ-007):** John Petrucci, Guthrie Govan
+  e Kiko Loureiro (uso de desenhos de escala e domínio do braço).

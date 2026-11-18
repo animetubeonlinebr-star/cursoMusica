@@ -87,6 +87,7 @@ target_sources(CursoMusica PRIVATE
     Source/Course/TempoGrid.cpp
     Source/Course/PracticeSession.cpp
     Source/Course/QuizSession.cpp
+    Source/Course/RestNotes.cpp
     Source/Course/ProgressStore.cpp
     Source/Course/ModuleCatalog.cpp
     Source/Data/ProgressDatabase.cpp
@@ -185,6 +186,16 @@ target_sources(CursoMusica PRIVATE
     Source/Course/Content/Topic10H.cpp
     Source/Course/Content/Topic10I.cpp
     Source/Course/Content/Topic10J.cpp
+    Source/Course/Content/Topic11A.cpp
+    Source/Course/Content/Topic11B.cpp
+    Source/Course/Content/Topic11C.cpp
+    Source/Course/Content/Topic11D.cpp
+    Source/Course/Content/Topic11E.cpp
+    Source/Course/Content/Topic11F.cpp
+    Source/Course/Content/Topic11G.cpp
+    Source/Course/Content/Topic11H.cpp
+    Source/Course/Content/Topic11I.cpp
+    Source/Course/Content/Topic11J.cpp
     Source/UI/Design/LookAndFeel.cpp
     Source/UI/Design/Panel.cpp
     Source/UI/LevelMeter.cpp
@@ -361,6 +372,7 @@ target_sources(CursoMusicaTests PRIVATE
     Source/Course/TempoGrid.cpp
     Source/Course/PracticeSession.cpp
     Source/Course/QuizSession.cpp
+    Source/Course/RestNotes.cpp
     Source/Course/ModuleCatalog.cpp
     Source/Course/ProgressStore.cpp
     Source/Data/ProgressDatabase.cpp
@@ -459,6 +471,16 @@ target_sources(CursoMusicaTests PRIVATE
     Source/Course/Content/Topic10H.cpp
     Source/Course/Content/Topic10I.cpp
     Source/Course/Content/Topic10J.cpp
+    Source/Course/Content/Topic11A.cpp
+    Source/Course/Content/Topic11B.cpp
+    Source/Course/Content/Topic11C.cpp
+    Source/Course/Content/Topic11D.cpp
+    Source/Course/Content/Topic11E.cpp
+    Source/Course/Content/Topic11F.cpp
+    Source/Course/Content/Topic11G.cpp
+    Source/Course/Content/Topic11H.cpp
+    Source/Course/Content/Topic11I.cpp
+    Source/Course/Content/Topic11J.cpp
     Source/Audio/AudioPortClassifier.cpp
     Source/Audio/DeviceSettings.cpp
     Source/Audio/PitchDetector.cpp
@@ -543,6 +565,7 @@ if(CURSOMUSICA_USAGE_TEST)
         Source/Course/TempoGrid.cpp
         Source/Course/PracticeSession.cpp
         Source/Course/QuizSession.cpp
+        Source/Course/RestNotes.cpp
         Source/Course/ProgressStore.cpp
         Source/Course/ModuleCatalog.cpp
         Source/Data/ProgressDatabase.cpp

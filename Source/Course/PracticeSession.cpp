@@ -64,6 +64,8 @@ void PracticeSession::start (const Exercise& exercise, int moduleTargetBpm, floa
         state.targetCount = (int) exercise.chordProgression.size();
     else if (intervalSpec.semitones > 0)
         state.targetCount = juce::jmax (1, intervalSpec.repeats);
+    else if (exercise.isImprovisation())
+        state.targetCount = 0;   // grows with the notes played (set in recompute())
 }
 
 void PracticeSession::stop()
@@ -132,6 +134,15 @@ void PracticeSession::recompute()
     {
         const auto result = evaluator::evaluateIntervals (intervalSpec, played);
         state.matched = result.matched;
+        state.accuracy = result.accuracy;
+    }
+    else if (current->isImprovisation())
+    {
+        // Rest-note evaluation (REQ-011/REQ-012): every note is classified
+        // against the context; a tension outside the context is an error.
+        const auto result = evaluateImprovisation (played, current->restNotes);
+        state.matched = result.rest + result.tension + result.passing;
+        state.targetCount = result.total;   // the attempt is graded over its own notes
         state.accuracy = result.accuracy;
     }
 

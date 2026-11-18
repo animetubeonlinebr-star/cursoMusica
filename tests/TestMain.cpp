@@ -1198,6 +1198,62 @@ void testIntervalEvaluation()
     check (session.getState().passed, "an interval exercise passes without the grid gate");
 }
 
+// Rest notes and tensions (REQ-011, REQ-012): classify each played note against
+// the harmonic context. Chord tones and scale tones rest; a solicited tension is
+// accepted; a note outside the context is an error unless it is a chromatic
+// passing tone that resolves on the next accepted note.
+void testRestNotes()
+{
+    std::cout << "RestNotes\n";
+    using namespace cursomusica;
+
+    // Am7 context: chord A C E G, scale A menor natural (A B C D E F G).
+    course::RestNoteSpec spec;
+    spec.chordPitchClasses = { 9, 0, 4, 7 };
+    spec.scalePitchClasses = { 9, 11, 0, 2, 4, 5, 7 };
+
+    check (course::classifyNote (9, spec) == course::NoteRole::rest, "A is a chord tone (rest)");
+    check (course::classifyNote (0, spec) == course::NoteRole::rest, "C is a chord tone (rest)");
+    check (course::classifyNote (11, spec) == course::NoteRole::rest, "B is a scale tone (rest)");
+    check (course::classifyNote (2, spec) == course::NoteRole::rest, "D is a scale tone (rest)");
+    check (course::classifyNote (8, spec) == course::NoteRole::error,
+           "G# is outside Am7/A-menor: an unsolicited tension (error)");
+
+    // Solicited tension: the same G# becomes accepted when the exercise asks for it.
+    auto withTension = spec;
+    withTension.solicitedTensions = { 8 };
+    check (course::classifyNote (8, withTension) == course::NoteRole::tension,
+           "G# is accepted when the exercise solicits the tension");
+
+    // A play of all rest notes passes at 100%.
+    const auto note = [] (int midi) { return course::NoteEvent { 0.0, midi, 0.0f }; };
+    std::vector<course::NoteEvent> allRest { note (69), note (72), note (76), note (79) };  // A4 C5 E5 G5
+    auto r = course::evaluateImprovisation (allRest, spec);
+    checkClose (r.accuracy, 1.0, 1e-9, "all rest notes pass at 100%");
+    check (r.passed, "an improvisation of rest notes passes the 90% gate");
+    check (r.errors == 0, "rest notes produce no errors");
+
+    // An unsolicited tension is an error and drags the accuracy below the gate.
+    std::vector<course::NoteEvent> withBad { note (69), note (72), note (80) };  // A4 C5 G#5
+    auto bad = course::evaluateImprovisation (withBad, spec);
+    check (bad.errors == 1, "the unsolicited G# counts as one error");
+    check (! bad.passed, "a phrase with an unsolicited tension fails the 90% gate");
+
+    // Chromatic passing tone: F# (6) resolves up to G (7), both accepted? F# is
+    // outside the context, but it is a semitone below G (a scale tone) and moves
+    // into it — so it is accepted as a passing tone.
+    std::vector<course::NoteEvent> passing { note (66), note (67) };  // F#4 -> G4
+    auto pass = course::evaluateImprovisation (passing, spec);
+    check (pass.passing == 1, "the chromatic approach F# is accepted as a passing tone");
+    check (pass.errors == 0, "a resolving chromatic approach is not an error");
+    check (pass.passed, "a phrase that resolves its chromatic note passes");
+
+    // The same chromatic note, but not resolving, stays an error.
+    std::vector<course::NoteEvent> unresolved { note (67), note (66) };  // G4 -> F#4
+    auto un = course::evaluateImprovisation (unresolved, spec);
+    check (un.errors == 1, "a chromatic note that does not resolve is an error");
+}
+
 // Module 2 — Etapa 2. It must follow the same shape as module 1: explanation
 // (>=5 pages per topic) with images, audio and scores, 3..5 exercises per topic,
 // and part of the exercises played on the instrument and verified by the app.
@@ -3260,6 +3316,283 @@ void testModule10()
                    "no exercise spells Db7 as Db7M (" + e.id + ")");
 }
 
+// Module 11 — Etapa 11 (referências de escalas e domínio do braço). It follows
+// the module pattern (>=5 pages per topic, images, tables, audio and scores with
+// audio) but with two client requirements on top: every topic carries a lick,
+// and the topic's exercises oblige the student to play it. Module 11 has no
+// quizzes — every exercise is played and verified by the app — and it is the
+// first module with improvisation evaluation (REQ-011/REQ-012).
+void testModule11()
+{
+    std::cout << "Module11\n";
+    using namespace cursomusica;
+
+    const auto* m11 = ModuleCatalog::findModule (11);
+    check (m11 != nullptr, "module 11 exists");
+    if (m11 == nullptr)
+        return;
+
+    check (m11->implemented, "module 11 is implemented");
+    check (m11->number == 11, "module 11 has number 11");
+    check (m11->usesTempo, "module 11 uses a BPM target");
+    check (m11->targetBpm == 100, "module 11 target BPM is 100 (MUSIC.md)");
+    check (m11->level == 5, "module 11 is level 5 (MUSIC.md)");
+    check (m11->onGridTarget > 0.81f && m11->onGridTarget < 0.83f,
+           "module 11 on_grid_ratio target is 0.82 (MUSIC.md)");
+    check (m11->lessons.size() == 10, "module 11 has ten topics (A..J)");
+    check (m11->lessons.front().id == "A" && m11->lessons.back().id == "J",
+           "module 11 topics run A..J in order");
+
+    // One lick per topic (client: "cada tópico deve ter um lick"). The lick
+    // carries notes (the app plays and expects them) and cites a guitarist and a
+    // pattern (REQ-007, REQ-010).
+    check (m11->licks.size() == 10, "module 11 has one lick per topic");
+    for (const auto& topic : m11->lessons)
+    {
+        const Lick* found = nullptr;
+        for (const auto& l : m11->licks)
+            if (l.id == juce::String ("LK-11.") + topic.id)
+                found = &l;
+        check (found != nullptr, juce::String ("topic ") + topic.id + " has a lick");
+        if (found != nullptr)
+        {
+            check (! found->notes.empty(),
+                   juce::String ("lick ") + found->id + " carries notes to play");
+            check (found->guitarist.isNotEmpty(),
+                   juce::String ("lick ") + found->id + " cites a guitarist (REQ-007)");
+            check (found->patternId.isNotEmpty(),
+                   juce::String ("lick ") + found->id + " cites a pattern (REQ-010)");
+        }
+    }
+
+    // Every topic has 3..5 exercises, all played (no quizzes in this module), and
+    // the first exercise of each topic obliges the topic's lick.
+    check (m11->exercises.size() >= 30, "module 11 lists a full exercise set");
+    for (const auto& topic : m11->lessons)
+    {
+        int count = 0;
+        bool obligesLick = false;
+        for (const auto& e : m11->exercises)
+            if (e.lessonId == topic.id)
+            {
+                ++count;
+                if (e.lickId == juce::String ("LK-11.") + topic.id)
+                    obligesLick = true;
+            }
+        check (count >= 3, juce::String ("topic ") + topic.id + " has at least three exercises");
+        check (count <= 5, juce::String ("topic ") + topic.id + " has at most five exercises");
+        check (obligesLick,
+               juce::String ("topic ") + topic.id + " obliges its lick in an exercise");
+    }
+
+    // No quizzes: the client asked that module 11's exercises be played on the
+    // instrument. Every exercise must be playable (targets, chord spec, chord
+    // progression or improvisation context) and every one is tied to a topic.
+    for (const auto& e : m11->exercises)
+    {
+        check (e.lessonId.isNotEmpty(), "exercise " + e.id + " is tied to a topic");
+        check (! e.isQuiz(), "exercise " + e.id + " is not a quiz (module 11 is played)");
+        const bool playable = ! e.targets.empty() || ! e.chordPitchClasses.empty()
+                                || ! e.chordProgression.empty() || e.isImprovisation();
+        check (playable, "exercise " + e.id + " is playable/verifiable by the app");
+        if (! e.isGate)
+            check (e.id.startsWith ("EX-11."), "exercise " + e.id + " follows EX-11.<topico>.<n>");
+    }
+
+    // The first exercise of each topic plays the lick: its targets are exactly the
+    // lick notes, so the app obliges the phrase.
+    for (const auto& topic : m11->lessons)
+    {
+        const Exercise* lickExercise = nullptr;
+        for (const auto& e : m11->exercises)
+            if (e.lessonId == topic.id && e.lickId == juce::String ("LK-11.") + topic.id)
+            {
+                lickExercise = &e;
+                break;
+            }
+        if (lickExercise == nullptr)
+            continue;
+
+        const Lick* lk = nullptr;
+        for (const auto& l : m11->licks)
+            if (l.id == lickExercise->lickId)
+                lk = &l;
+        check (lk != nullptr, juce::String ("the lick exercise of topic ") + topic.id + " finds its lick");
+        if (lk != nullptr)
+        {
+            std::vector<int> targetMidi;
+            for (const auto& t : lickExercise->targets)
+                targetMidi.push_back (t.midi);
+            check (targetMidi == lk->notes,
+                   juce::String ("the lick exercise of topic ") + topic.id
+                       + " obliges exactly the lick notes");
+        }
+    }
+
+    // Improvisation exercises (REQ-011/REQ-012) carry a rest-note context and are
+    // not gated by the grid.
+    int improvCount = 0;
+    for (const auto& e : m11->exercises)
+        if (e.isImprovisation())
+        {
+            ++improvCount;
+            check (! e.restNotes.chordPitchClasses.empty(),
+                   "improvisation exercise " + e.id + " defines the chord (rest notes)");
+            check (! e.usesGrid, "improvisation exercise " + e.id + " is not grid-gated");
+        }
+    check (improvCount >= 1, "module 11 evaluates improvisation (REQ-011/REQ-012)");
+
+    // The pentatonic topics follow the primary source (the apostila): both the
+    // "pentatônica menor 7" and the "pentatônica menor 6" are FIVE-note scales.
+    // The apostila fusion is explicit: "a escala pentatônica menor 7 é formada
+    // por 5 notas". The menor 7 is 1-b3-4-5-b7 (A C D E G) and the menor 6 is
+    // 1-b3-4-5-6 (A C D E F#) — the sixth replaces the seventh, no extra note.
+    for (const auto& e : m11->exercises)
+    {
+        if (e.id == "EX-11.C.2")
+        {
+            std::vector<int> got;
+            for (const auto& t : e.targets)
+                got.push_back (t.midi);
+            check (got == std::vector<int> { 69, 72, 74, 76, 79, 81, 79, 76, 74, 72, 69 },
+                   "pentatônica menor 7 is the five-note scale A C D E G (apostila)");
+        }
+        if (e.id == "EX-11.D.2")
+        {
+            std::vector<int> got;
+            for (const auto& t : e.targets)
+                got.push_back (t.midi);
+            check (got == std::vector<int> { 69, 72, 74, 76, 78, 81, 78, 76, 74, 72, 69 },
+                   "pentatônica menor 6 is the five-note scale A C D E F# (apostila)");
+        }
+    }
+
+    // The menor 6 improvisation runs over an m6 chord (A C E F#) and the menor 7
+    // over an m7 chord (A C E G): the chord decides which pentatonic is used.
+    for (const auto& e : m11->exercises)
+    {
+        if (e.id == "EX-11.C.3")
+            check (e.restNotes.chordPitchClasses == std::vector<int> { 9, 0, 4, 7 },
+                   "EX-11.C.3 (menor 7) runs over Am7 (A C E G)");
+        if (e.id == "EX-11.D.3")
+        {
+            check (e.restNotes.chordPitchClasses == std::vector<int> { 9, 0, 4, 6 },
+                   "EX-11.D.3 (menor 6) runs over Am6 (A C E F#)");
+            check (e.restNotes.scalePitchClasses == std::vector<int> { 9, 0, 2, 4, 6 },
+                   "EX-11.D.3 (menor 6) uses the five-note scale A C D E F#");
+        }
+    }
+
+    // A tonic improvisation over Am7 must accept the chord/scale tones and reject
+    // an unsolicited tension — proving the module's exercises are scorable.
+    for (const auto& e : m11->exercises)
+        if (e.id == "EX-11.A.3")
+        {
+            const auto note = [] (int midi) { return course::NoteEvent { 0.0, midi, 0.0f }; };
+            auto ok = course::evaluateImprovisation ({ note (69), note (72), note (76), note (79) },
+                                                     e.restNotes);
+            check (ok.passed, "EX-11.A.3 passes when the student plays the rest notes (A C E G)");
+            auto bad = course::evaluateImprovisation ({ note (69), note (72), note (80) },
+                                                      e.restNotes);
+            check (! bad.passed, "EX-11.A.3 rejects an unsolicited tension (G# over Am7)");
+        }
+
+    // Explanation: >=5 pages per topic, at least one table and one image, and the
+    // media the client asked for (images, audio, scores with audio).
+    auto detailChars = [] (const LessonBlock& topic)
+    {
+        int total = 0;
+        for (const auto& item : topic.detail)
+        {
+            total += item.text.length();
+            for (const auto& cell : item.columns)
+                total += cell.length();
+            for (const auto& row : item.rows)
+                for (const auto& cell : row)
+                    total += cell.length();
+        }
+        return total;
+    };
+
+    bool anyAudio = false;
+    bool anyScore = false;
+    for (const auto& topic : m11->lessons)
+    {
+        const int chars = detailChars (topic);
+        check (chars >= content::minTopicChars,
+               juce::String ("topic ") + topic.id + " has at least "
+                   + juce::String (content::minPages) + " pages (" + juce::String (chars) + " chars)");
+
+        int images = 0, tables = 0, audios = 0, scores = 0;
+        for (const auto& item : topic.detail)
+        {
+            if (item.kind == ContentKind::image) ++images;
+            else if (item.kind == ContentKind::table) ++tables;
+            else if (item.kind == ContentKind::audio) ++audios;
+            else if (item.kind == ContentKind::score) ++scores;
+        }
+        check (images >= 1, juce::String ("topic ") + topic.id + " has at least one image");
+        check (tables >= 1, juce::String ("topic ") + topic.id + " has at least one table");
+        check (audios >= 1, juce::String ("topic ") + topic.id + " demonstrates with audio (REQ-004)");
+        check (scores >= 1, juce::String ("topic ") + topic.id + " has a score with its audio (REQ-004)");
+        anyAudio = anyAudio || audios > 0;
+        anyScore = anyScore || scores > 0;
+    }
+    check (anyAudio, "module 11 demonstrates every example with audio (REQ-004)");
+    check (anyScore, "module 11 has scores with their audio (REQ-004)");
+
+    // Every diagram and score named by the content is embedded in the binary, and
+    // every score plays exactly what its image draws.
+    for (const auto& topic : m11->lessons)
+        for (const auto& item : topic.detail)
+        {
+            if (item.kind == ContentKind::image || item.kind == ContentKind::score)
+                check (content::diagramExists (item.imageName),
+                       juce::String ("topic ") + topic.id + " references the image '"
+                           + item.imageName + "'");
+            if (item.kind == ContentKind::audio || item.kind == ContentKind::score)
+            {
+                check (! item.notes.empty(),
+                       juce::String ("topic ") + topic.id + " has a playable example");
+                for (const int midi : item.notes)
+                    check (midi >= 0 && midi <= 127,
+                           juce::String ("topic ") + topic.id + " example uses a valid MIDI note");
+            }
+            if (item.kind == ContentKind::score)
+            {
+                const content::scoreNotes::Entry* drawn = nullptr;
+                for (const auto& e : content::scoreNotes::all())
+                    if (item.imageName == e.stem)
+                        drawn = &e;
+                check (drawn != nullptr,
+                       juce::String ("score '") + item.imageName + "' has a recorded score image");
+                if (drawn != nullptr)
+                    check (drawn->notes == item.notes,
+                           juce::String ("score '") + item.imageName
+                               + "' plays exactly the notes its image draws");
+            }
+        }
+
+    // The module cites >=1 pattern and >=1 guitarist (REQ-007, REQ-010) and its
+    // curated apostilas (REQ-006).
+    check (m11->practice.patternId.isNotEmpty(), "module 11 cites a pattern");
+    check (! m11->practice.guitarists.isEmpty(), "module 11 cites at least one guitarist");
+    check (! m11->sources.isEmpty(), "module 11 cites its curated apostilas (REQ-006)");
+
+    // The gate closes the module: the topic J lick on the grid at the target BPM
+    // (REQ-009 accuracy + REQ-015 grid).
+    bool hasGate = false;
+    for (const auto& e : m11->exercises)
+        if (e.isGate)
+        {
+            hasGate = true;
+            check (e.lickId == "LK-11.J", "module 11 gate plays the topic J lick");
+            check (e.usesGrid, "module 11 gate is graded against the grid");
+            check (! e.targets.empty(), "module 11 gate has playable targets");
+        }
+    check (hasGate, "module 11 has a gate exercise");
+}
+
 int main()
 {
     testNoteMath();
@@ -3285,6 +3618,8 @@ int main()
     testModule8();
     testModule9();
     testModule10();
+    testModule11();
+    testRestNotes();
     testProgressDatabase();
     testProgressStore();
     testSharedSettings();
