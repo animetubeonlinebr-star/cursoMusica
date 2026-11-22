@@ -5273,34 +5273,34 @@ namespace
         };
 
         lick ("LK-11.A", "Grupos de três subindo na região", "John Petrucci", "PTN-M-3",
-              "A|--5-7-8-7-8-10-8-10-12-10-12-14-12-14-15-14-15-17--|", "pdf-fraseado-melodico",
+              "e|--5-7-8-7-8-10-8-10-12-10-12-13-12-13-15-13-15-17--|", "pdf-fraseado-melodico",
               { "A4", "B4", "C5", "B4", "C5", "D5", "C5", "D5", "E5", "D5", "E5", "F5", "E5", "F5", "G5", "F5", "G5", "A5" });
         lick ("LK-11.B", "Escala ascendente e descendente", "Guthrie Govan", "PTN-M-3rds",
-              "A|--5-7-8-10-12-13-15-17-15-13-12-10-8-7-5--|", "pdf-fraseado-melodico",
+              "e|--5-7-8-10-12-13-15-17-15-13-12-10-8-7-5--|", "pdf-fraseado-melodico",
               { "A4", "B4", "C5", "D5", "E5", "F5", "G5", "A5", "G5", "F5", "E5", "D5", "C5", "B4", "A4" });
         lick ("LK-11.C", "Pentatônica menor 7 (a sétima menor)", "Richie Kotzen", "PTN-M-3",
-              "A|--5-8-10-12-15-17-15-12-10-8-5--|", "pdf-desvendando-os-segredos-da-guitarra-fusion",
+              "e|--5-8-10-12-15-17-15-12-10-8-5--|", "pdf-desvendando-os-segredos-da-guitarra-fusion",
               { "A4", "C5", "D5", "E5", "G5", "A5", "G5", "E5", "D5", "C5", "A4" });
         lick ("LK-11.D", "Pentatônica menor 6 (a sexta como cor)", "Greg Howe", "PTN-M-3rds",
-              "A|--5-8-10-12-14-12-10-8-5--|", "pdf-mozart-mello-improvisacion-pop",
+              "e|--5-8-10-12-14-12-10-8-5--|", "pdf-mozart-mello-improvisacion-pop",
               { "A4", "C5", "D5", "E5", "F#5", "E5", "D5", "C5", "A4" });
         lick ("LK-11.E", "Pentatônica ligando duas posições", "Edu Ardanuy", "PTN-A-TRIAD",
-              "A|--5-8-10-12-15-17-15-12-10-8-5--|", "pdf-mozart-mello-livroestudosdeguitarra4em1",
+              "e|--5-8-10-12-15-17-15-12-10-8-5--|", "pdf-mozart-mello-livroestudosdeguitarra4em1",
               { "A4", "C5", "D5", "E5", "G5", "A5", "G5", "E5", "D5", "C5", "A4" });
         lick ("LK-11.F", "Trilha aberta na 3ª corda", "Joe Satriani", "PTN-M-3rds",
               "G|--0-2-4-5-7-9-10-12-14--|", "pdf-fraseado-melodico",
               { "G3", "A3", "B3", "C4", "D4", "E4", "F4", "G4", "A4" });
         lick ("LK-11.G", "Escala dentro da forma (Sistema 5)", "Kiko Loureiro", "PTN-A-TRIAD",
-              "A|--5-8-10-12-13-15-17-15-12-8-5--|", "pdf-caged-e-derivaoes-de-acordes-marcelo-mello-apostila-de-violao-e-guitarra-vol1",
+              "e|--5-8-10-12-13-15-17-15-12-8-5--|", "pdf-caged-e-derivaoes-de-acordes-marcelo-mello-apostila-de-violao-e-guitarra-vol1",
               { "A4", "C5", "D5", "E5", "F5", "G5", "A5", "G5", "E5", "C5", "A4" });
         lick ("LK-11.H", "Menor harmônica (segunda aumentada)", "Yngwie Malmsteen", "PTN-M-3rds",
-              "A|--5-7-8-10-12-13-16-17-16-13-12-10-8-7-5--|", "pdf-fraseado-melodico",
+              "e|--5-7-8-10-12-13-16-17-16-13-12-10-8-7-5--|", "pdf-fraseado-melodico",
               { "A4", "B4", "C5", "D5", "E5", "F5", "G#5", "A5", "G#5", "F5", "E5", "D5", "C5", "B4", "A4" });
         lick ("LK-11.I", "Menor melódica (6ª e 7ª elevadas)", "Steve Vai", "PTN-M-3rds",
-              "A|--5-7-8-10-12-14-16-17-16-14-12-10-8-7-5--|", "pdf-fraseado-melodico",
+              "e|--5-7-8-10-12-14-16-17-16-14-12-10-8-7-5--|", "pdf-fraseado-melodico",
               { "A4", "B4", "C5", "D5", "E5", "F#5", "G#5", "A5", "G#5", "F#5", "E5", "D5", "C5", "B4", "A4" });
         lick ("LK-11.J", "Frase de repouso e tensão sobre o vamp", "Santana", "PTN-M-3rds",
-              "A|--5-8-10-12-10-8-5-12-10-8-5--|", "pdf-mozart-mello-improvisacion-pop",
+              "e|--5-8-10-12-10-8-5-12-10-8-5--|", "pdf-mozart-mello-improvisacion-pop",
               { "A4", "C5", "D5", "E5", "D5", "C5", "A4", "E5", "D5", "C5", "A4" });
 
         // Simulated listening references (client request, 2026-11-18). Each song

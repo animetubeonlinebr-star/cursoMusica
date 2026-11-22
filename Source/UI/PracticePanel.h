@@ -83,6 +83,8 @@ private:
     void toggleMetronome();
     void toggleBacking();
     void syncBackingFromExercise();
+    void applyChosenBpm();
+    int exerciseGoalBpm() const;
 
     AudioEngine& audioEngine;
     course::PracticeSession session;
@@ -113,6 +115,13 @@ private:
 
     juce::Label topicLabel;
     juce::ComboBox exerciseBox;
+
+    // Metronome tempo of the attempt (client 2026-11-19): the student may
+    // practice slower than the module goal, but only an attempt at or above the
+    // goal concludes the exercise (REQ-015).
+    juce::Label bpmCaption;
+    juce::Slider bpmSlider;
+    int chosenBpm = 0;            // 0 -> follows the exercise/module goal
 
     // Presents the armed exercise as a playable row (play glyph + id/title),
     // matching the mock-up; clicking it asks the centre to demonstrate the

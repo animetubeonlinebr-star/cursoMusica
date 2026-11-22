@@ -89,6 +89,13 @@ PracticePanel::PracticePanel (AudioEngine& engine)
         session = {};
         quiz = {};
         attemptReported = false;
+
+        // Arming a new exercise restarts the tempo at its own goal (the gate
+        // declares a BPM of its own); the student may lower it afterwards.
+        chosenBpm = exerciseGoalBpm();
+        if (chosenBpm > 0)
+            bpmSlider.setValue ((double) chosenBpm, juce::dontSendNotification);
+
         showPreviousResult();
         refreshExerciseRow();
         updateApplication();
@@ -142,6 +149,21 @@ PracticePanel::PracticePanel (AudioEngine& engine)
     bpmLabel.setFont (th::type::makeFont (th::type::caption));
     bpmLabel.setColour (juce::Label::textColourId, th::colour::textSecondary);
     addAndMakeVisible (bpmLabel);
+
+    // Metronome tempo control: the student picks the tempo to practice at, but
+    // the exercise only concludes at or above the goal (REQ-015, client
+    // 2026-11-19).
+    bpmCaption.setFont (th::type::makeFont (th::type::caption));
+    bpmCaption.setColour (juce::Label::textColourId, th::colour::textSecondary);
+    bpmCaption.setText (juce::String::fromUTF8 ("Metrônomo"), juce::dontSendNotification);
+    addAndMakeVisible (bpmCaption);
+
+    bpmSlider.setSliderStyle (juce::Slider::LinearHorizontal);
+    bpmSlider.setTextBoxStyle (juce::Slider::TextBoxRight, false, 56, 20);
+    bpmSlider.setRange (40.0, 200.0, 1.0);
+    bpmSlider.setTextValueSuffix (juce::String::fromUTF8 (" BPM"));
+    bpmSlider.onValueChange = [this] { applyChosenBpm(); };
+    addAndMakeVisible (bpmSlider);
 
     updateApplication();
 }
@@ -262,7 +284,11 @@ void PracticePanel::syncMetronomeFromModule()
     if (currentModule == nullptr)
         return;
 
-    audioEngine.getMetronome().setBpm ((double) currentModule->targetBpm);
+    // A new module resets the tempo to its goal; the student can lower it again
+    // from the slider.
+    chosenBpm = currentModule->targetBpm;
+    bpmSlider.setValue ((double) chosenBpm, juce::dontSendNotification);
+    audioEngine.getMetronome().setBpm ((double) chosenBpm);
     audioEngine.getMetronome().setRunning (metronomeOn);
 
     // Module 1 does not grade against a BPM target (client): it prints a dash,
@@ -304,6 +330,42 @@ bool PracticePanel::isQuizSelected() const
     return exercise != nullptr && exercise->isQuiz();
 }
 
+int PracticePanel::exerciseGoalBpm() const
+{
+    const auto* exercise = selectedExercise();
+    if (exercise == nullptr || currentModule == nullptr)
+        return 0;
+
+    return exercise->targetBpm > 0 ? exercise->targetBpm : currentModule->targetBpm;
+}
+
+// The tempo the student chose becomes the metronome tempo of the attempt. A
+// running attempt is restarted, so the notes already captured (played at the old
+// tempo) do not mix with the new grid.
+void PracticePanel::applyChosenBpm()
+{
+    const int goal = exerciseGoalBpm();
+    if (goal <= 0)
+        return;
+
+    chosenBpm = juce::roundToInt (bpmSlider.getValue());
+    audioEngine.getMetronome().setBpm ((double) chosenBpm);
+    audioEngine.getBackingTrack().setBpm ((double) chosenBpm);
+
+    if (session.isRunning())
+    {
+        startSelectedExercise();
+        return;
+    }
+
+    // The previous verdict no longer describes this tempo: ask for a new run.
+    attemptReported = false;
+    session = {};
+    updateFeedback();
+    updateButtonStates();
+    repaint();
+}
+
 void PracticePanel::updateApplication()
 {
     const auto* exercise = selectedExercise();
@@ -328,6 +390,14 @@ void PracticePanel::updateApplication()
     startButton.setVisible (showPlayControls);
     finishButton.setVisible (showPlayControls);
     bpmLabel.setVisible (showPlayControls);
+
+    // The tempo control only makes sense where the tempo is graded: the module
+    // must use a BPM target (module 1 prints a dash) and the exercise must be
+    // measured against the grid (identification and improvisation are not).
+    const bool showTempo = showPlayControls && currentModule != nullptr
+                             && currentModule->usesTempo && exercise->usesGrid;
+    bpmCaption.setVisible (showTempo);
+    bpmSlider.setVisible (showTempo);
 
     if (quizMode)
     {
@@ -383,7 +453,7 @@ void PracticePanel::syncBackingFromExercise()
         chords.push_back ({ chord.pitchClasses, chord.bassMidi });
 
     backing.setProgression (chords);
-    backing.setBpm ((double) (exercise->targetBpm > 0 ? exercise->targetBpm : currentModule->targetBpm));
+    backing.setBpm ((double) (chosenBpm > 0 ? chosenBpm : exerciseGoalBpm()));
     backing.setRunning (backingOn);
 }
 
@@ -399,11 +469,16 @@ void PracticePanel::startSelectedExercise()
         return;
     }
 
-    session.start (*exercise, currentModule->targetBpm, currentModule->onGridTarget);
+    // No tempo chosen yet (first run of the exercise): practice at the goal.
+    if (chosenBpm <= 0)
+        chosenBpm = exerciseGoalBpm();
+
+    session.start (*exercise, currentModule->targetBpm, currentModule->onGridTarget,
+                   chosenBpm, currentModule->usesTempo);
     attemptReported = false;
     audioEngine.resetNoteCapture();
 
-    audioEngine.getMetronome().setBpm ((double) session.getTargetBpm());
+    audioEngine.getMetronome().setBpm ((double) session.getPracticeBpm());
     audioEngine.getMetronome().setSubdivision (exercise->subdivision);
     audioEngine.getMetronome().setRunning (true);
     metronomeOn = true;
@@ -561,22 +636,39 @@ void PracticePanel::updateFeedback()
                 onExerciseResult (exercise->id, state.accuracy * 100.0);
     }
 
-    measurementLabel.setText (juce::String::fromUTF8 ("Nota: ")
-                                + (state.lastNote.isEmpty() ? juce::String ("--") : state.lastNote)
-                                + juce::String::fromUTF8 ("   ·   acertos ") + juce::String (state.matched)
-                                + "/" + juce::String (state.targetCount)
-                                + juce::String::fromUTF8 ("   ·   grade ") + percent (state.onGridRatio),
-                              juce::dontSendNotification);
+    juce::String measurement = juce::String::fromUTF8 ("Nota: ")
+                                 + (state.lastNote.isEmpty() ? juce::String ("--") : state.lastNote)
+                                 + juce::String::fromUTF8 ("   ·   acertos ") + juce::String (state.matched)
+                                 + "/" + juce::String (state.targetCount)
+                                 + juce::String::fromUTF8 ("   ·   grade ") + percent (state.onGridRatio);
+
+    // The tempo of the attempt is part of the verdict: showing it next to the
+    // grade makes clear why a clean run below the goal did not conclude.
+    if (state.tempoGated && state.practiceBpm > 0)
+        measurement += juce::String::fromUTF8 ("   ·   BPM ") + juce::String (state.practiceBpm)
+                         + "/" + juce::String (state.targetBpm);
+
+    measurementLabel.setText (measurement, juce::dontSendNotification);
 
     guidanceLabel.setColour (juce::Label::textColourId,
                              state.finished
                                ? (state.passed ? th::colour::success : th::colour::danger)
                                : th::colour::textSecondary);
-    guidanceLabel.setText (state.finished
-                               ? state.message
-                               : juce::String::fromUTF8 ("Acerto ")
-                                   + percent (state.accuracy) + juce::String::fromUTF8 (" até agora."),
-                           juce::dontSendNotification);
+
+    juce::String guidance;
+    if (state.finished)
+        guidance = state.message;
+    else if (state.tempoGated && state.practiceBpm < state.targetBpm)
+        guidance = juce::String::fromUTF8 ("Acerto ") + percent (state.accuracy)
+                     + juce::String::fromUTF8 (" até agora. Atenção: a ")
+                     + juce::String (state.practiceBpm)
+                     + juce::String::fromUTF8 (" BPM esta execução não conclui o exercício — o BPM meta é ")
+                     + juce::String (state.targetBpm) + ".";
+    else
+        guidance = juce::String::fromUTF8 ("Acerto ") + percent (state.accuracy)
+                     + juce::String::fromUTF8 (" até agora.");
+
+    guidanceLabel.setText (guidance, juce::dontSendNotification);
 }
 
 void PracticePanel::updateButtonStates()
@@ -655,6 +747,15 @@ void PracticePanel::resized()
     metronomeButton.setBounds (row.removeFromLeft (150));
     row.removeFromLeft (th::spacing::sm);
     backingButton.setBounds (row.removeFromLeft (140));
+
+    // Tempo row: caption + slider, only where the module grades the tempo.
+    if (bpmSlider.isVisible())
+    {
+        bounds.removeFromTop (th::spacing::xs);
+        auto tempoRow = bounds.removeFromTop (24);
+        bpmCaption.setBounds (tempoRow.removeFromLeft (80));
+        bpmSlider.setBounds (tempoRow);
+    }
 
     row = bounds.removeFromTop (30);
     bounds.removeFromTop (th::spacing::xs);
