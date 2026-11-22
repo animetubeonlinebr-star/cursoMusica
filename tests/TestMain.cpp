@@ -21,6 +21,7 @@
 #include "Course/Intervals.h"
 #include "Course/BackingProgression.h"
 #include "Course/ApostilaLabel.h"
+#include "Course/PatternSignature.h"
 #include "Course/ModuleCatalog.h"
 #include "Audio/BackingTrack.h"
 #include "Course/NoteMath.h"
@@ -3488,7 +3489,26 @@ void testModule11()
                    juce::String ("lick ") + found->id + " cites a guitarist (REQ-007)");
             check (found->patternId.isNotEmpty(),
                    juce::String ("lick ") + found->id + " cites a pattern (REQ-010)");
+
+            // The card prints the pattern id beside the phrase, so the phrase
+            // must actually carry that pattern's signature: a lick that cites
+            // thirds while playing stepwise seconds teaches the wrong sound.
+            check (course::patternSignatureHolds (found->patternId, found->notes),
+                   juce::String ("lick ") + found->id + " plays the pattern it cites ("
+                       + found->patternId + ")");
         }
+    }
+
+    // Every pattern id a lick cites exists in the catalogue (docs/MUSIC.md §1),
+    // so the card never names an id the course does not define.
+    {
+        const juce::StringArray catalogue { "PTN-M-3", "PTN-M-4", "PTN-M-SCALE",
+                                            "PTN-M-3rds", "PTN-M-4ths", "PTN-M-TRIQ",
+                                            "PTN-M-P31", "PTN-M-SKIP", "PTN-M-REST",
+                                            "PTN-A-TRIAD", "PTN-A-DROP2", "PTN-A-DROP3" };
+        for (const auto& lick : m11->licks)
+            check (catalogue.contains (lick.patternId),
+                   juce::String ("lick ") + lick.id + " cites a catalogued pattern id");
     }
 
     // The tab is the written reading of the phrase: every fret it names, on the
@@ -3601,6 +3621,24 @@ void testModule11()
             check (targetMidi == lk->notes,
                    juce::String ("the lick exercise of topic ") + topic.id
                        + " obliges exactly the lick notes");
+        }
+    }
+
+    // The topic J lick is the module's rest/tension phrase: its text promises the
+    // sixth as the colour tension, so the phrase must actually sound it. Without
+    // the sixth the lesson names a sound the student never hears.
+    {
+        const Lick* jLick = nullptr;
+        for (const auto& l : m11->licks)
+            if (l.id == "LK-11.J")
+                jLick = &l;
+        check (jLick != nullptr, "module 11 has the topic J lick");
+        if (jLick != nullptr)
+        {
+            // A minor: A=9. The sixth above the root is F (pitch class 5).
+            const bool soundsSixth = std::any_of (jLick->notes.begin(), jLick->notes.end(),
+                                                  [] (int midi) { return midi % 12 == 5; });
+            check (soundsSixth, "the topic J lick sounds the sixth it announces as tension");
         }
     }
 

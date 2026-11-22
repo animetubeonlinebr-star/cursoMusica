@@ -46,9 +46,9 @@ std::vector<ContentItem> topic11J()
         h ("O lick deste tópico"),
         p (
             "O lick abaixo é uma frase que mistura repouso e tensão sobre um vamp de Lá menor: começa na escala (repouso), passa por uma tensão de cor (a sexta) e resolve numa nota do acorde. É um gesto de fraseado sobre vamp modal, na linha de Santana — frases cantáveis que respiram sobre um só centro. Ouça como a frase sabe quando repousar e quando pedir."),
-        aud ({ "A4", "C5", "D5", "E5", "D5", "C5", "A4", "E5", "D5", "C5", "A4" },
+        aud ({ "A4", "C5", "D5", "F5", "D5", "C5", "A4", "E5", "D5", "C5", "A4" },
              "Lick do tópico J: frase sobre o vamp de Lá menor. As notas do acorde repousam; a sexta é tensão de cor; a frase resolve no A."),
-        part ("m11_partitura_j", { "A4", "C5", "D5", "E5", "D5", "C5", "A4", "E5", "D5", "C5", "A4" },
+        part ("m11_partitura_j", { "A4", "C5", "D5", "F5", "D5", "C5", "A4", "E5", "D5", "C5", "A4" },
               "Partitura do lick J: frase de repouso e tensão sobre o vamp. A resolução cai numa nota do acorde."),
 
         h ("O vamp tonal deste módulo"),

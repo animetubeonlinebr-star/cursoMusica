@@ -3788,10 +3788,10 @@ def d_m11_partitura_i():
 
 def d_m11_partitura_j():
     return _m11_score("m11_partitura_j",
-                      [("A", 4, None), ("C", 5, None), ("D", 5, None), ("E", 5, None), ("D", 5, None),
+                      [("A", 4, None), ("C", 5, None), ("D", 5, None), ("F", 5, None), ("D", 5, None),
                        ("C", 5, None), ("A", 4, None), ("E", 5, None), ("D", 5, None), ("C", 5, None),
                        ("A", 4, None)],
-                      "Lick J: frase de repouso e tensao sobre o vamp")
+                      "Lick J: repouso e tensao (a sexta como cor) sobre o vamp")
 
 
 DIAGRAMS.update({

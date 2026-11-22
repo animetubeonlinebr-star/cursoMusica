@@ -5275,38 +5275,39 @@ namespace
         lick ("LK-11.A", "Grupos de três subindo na região", "John Petrucci", "PTN-M-3",
               "e|--5-7-8-7-8-10-8-10-12-10-12-13-12-13-15-13-15-17--|", "pdf-fraseado-melodico",
               { "A4", "B4", "C5", "B4", "C5", "D5", "C5", "D5", "E5", "D5", "E5", "F5", "E5", "F5", "G5", "F5", "G5", "A5" });
-        lick ("LK-11.B", "Escala ascendente e descendente", "Guthrie Govan", "PTN-M-3rds",
+        lick ("LK-11.B", "Escala ascendente e descendente", "Guthrie Govan", "PTN-M-SCALE",
               "e|--5-7-8-10-12-13-15-17-15-13-12-10-8-7-5--|", "pdf-fraseado-melodico",
               { "A4", "B4", "C5", "D5", "E5", "F5", "G5", "A5", "G5", "F5", "E5", "D5", "C5", "B4", "A4" });
-        lick ("LK-11.C", "Pentatônica menor 7 (a sétima menor)", "Richie Kotzen", "PTN-M-3",
+        lick ("LK-11.C", "Pentatônica menor 7 (a sétima menor)", "Richie Kotzen", "PTN-M-SCALE",
               "e|--5-8-10-12-15-17-15-12-10-8-5--|", "pdf-desvendando-os-segredos-da-guitarra-fusion",
               { "A4", "C5", "D5", "E5", "G5", "A5", "G5", "E5", "D5", "C5", "A4" });
-        lick ("LK-11.D", "Pentatônica menor 6 (a sexta como cor)", "Greg Howe", "PTN-M-3rds",
+        lick ("LK-11.D", "Pentatônica menor 6 (a sexta como cor)", "Greg Howe", "PTN-M-SCALE",
               "e|--5-8-10-12-14-12-10-8-5--|", "pdf-mozart-mello-improvisacion-pop",
               { "A4", "C5", "D5", "E5", "F#5", "E5", "D5", "C5", "A4" });
-        lick ("LK-11.E", "Pentatônica ligando duas posições", "Edu Ardanuy", "PTN-A-TRIAD",
+        lick ("LK-11.E", "Pentatônica ligando duas posições", "Edu Ardanuy", "PTN-M-SCALE",
               "e|--5-8-10-12-15-17-15-12-10-8-5--|", "pdf-mozart-mello-livroestudosdeguitarra4em1",
               { "A4", "C5", "D5", "E5", "G5", "A5", "G5", "E5", "D5", "C5", "A4" });
-        lick ("LK-11.F", "Trilha aberta na 3ª corda", "Joe Satriani", "PTN-M-3rds",
+        lick ("LK-11.F", "Trilha aberta na 3ª corda", "Joe Satriani", "PTN-M-SCALE",
               "G|--0-2-4-5-7-9-10-12-14--|", "pdf-fraseado-melodico",
               { "G3", "A3", "B3", "C4", "D4", "E4", "F4", "G4", "A4" });
-        lick ("LK-11.G", "Escala dentro da forma (Sistema 5)", "Kiko Loureiro", "PTN-A-TRIAD",
+        lick ("LK-11.G", "Escala dentro da forma (Sistema 5)", "Kiko Loureiro", "PTN-M-SCALE",
               "e|--5-8-10-12-13-15-17-15-12-8-5--|", "pdf-caged-e-derivaoes-de-acordes-marcelo-mello-apostila-de-violao-e-guitarra-vol1",
               { "A4", "C5", "D5", "E5", "F5", "G5", "A5", "G5", "E5", "C5", "A4" });
-        lick ("LK-11.H", "Menor harmônica (segunda aumentada)", "Yngwie Malmsteen", "PTN-M-3rds",
+        lick ("LK-11.H", "Menor harmônica (segunda aumentada)", "Yngwie Malmsteen", "PTN-M-SCALE",
               "e|--5-7-8-10-12-13-16-17-16-13-12-10-8-7-5--|", "pdf-fraseado-melodico",
               { "A4", "B4", "C5", "D5", "E5", "F5", "G#5", "A5", "G#5", "F5", "E5", "D5", "C5", "B4", "A4" });
-        lick ("LK-11.I", "Menor melódica (6ª e 7ª elevadas)", "Steve Vai", "PTN-M-3rds",
+        lick ("LK-11.I", "Menor melódica (6ª e 7ª elevadas)", "Steve Vai", "PTN-M-SCALE",
               "e|--5-7-8-10-12-14-16-17-16-14-12-10-8-7-5--|", "pdf-fraseado-melodico",
               { "A4", "B4", "C5", "D5", "E5", "F#5", "G#5", "A5", "G#5", "F#5", "E5", "D5", "C5", "B4", "A4" });
-        lick ("LK-11.J", "Frase de repouso e tensão sobre o vamp", "Santana", "PTN-M-3rds",
-              "e|--5-8-10-12-10-8-5-12-10-8-5--|", "pdf-mozart-mello-improvisacion-pop",
-              { "A4", "C5", "D5", "E5", "D5", "C5", "A4", "E5", "D5", "C5", "A4" });
+        lick ("LK-11.J", "Frase de repouso e tensão sobre o vamp", "Santana", "PTN-M-REST",
+              "e|--5-8-10-13-10-8-5-12-10-8-5--|", "pdf-mozart-mello-improvisacion-pop",
+              { "A4", "C5", "D5", "F5", "D5", "C5", "A4", "E5", "D5", "C5", "A4" });
 
-        // Simulated listening references (client request, 2026-11-18). Each song
-        // is a real recording where the cited player uses the same vocabulary as
-        // the topic's lick — never the lick itself, which is original. The UI
-        // labels all of these as "referência simulada (a mapear)".
+        // Listening references (client request, 2026-11-18). Each song is a real
+        // recording, verified track/album/year, where the cited player uses the
+        // same vocabulary as the topic's lick — never the lick itself, which is
+        // original. The UI labels each as "mesmo vocabulário, não a mesma frase"
+        // while the exact excerpt is unmapped (AGENTS.md §10, MUSIC.md §11.5).
         listen ("LK-11.A", "Dream Theater — \"Under a Glass Moon\" (Images and Words, 1992)",
                 "Sequências de grupos de três subindo a escala; mesmo desenho, frase diferente.");
         listen ("LK-11.B", "Guthrie Govan — \"Waves\" (Erotic Cakes, 2006)",
@@ -5325,7 +5326,7 @@ namespace
                 "Corridas ascendentes na menor harmônica, com a segunda aumentada; mesmo vocabulário, frase diferente.");
         listen ("LK-11.I", "Steve Vai — \"For the Love of God\" (Passion and Warfare, 1990)",
                 "Linhas cantáveis com a sexta e a sétima elevadas (menor melódica); mesmo vocabulário, frase diferente.");
-        listen ("LK-11.J", "Santana — \"Black Magic Woman\" (Abraxas, 1970)",
+        listen ("LK-11.J", "Santana — \"Black Magic Woman / Gypsy Queen\" (Abraxas, 1970)",
                 "Frases que alternam repouso no acorde e tensão de cor; mesmo vocabulário, frase diferente.");
 
         // Exercises: every one is played on the instrument and verified by the
@@ -5420,7 +5421,7 @@ namespace
 
         // --- Topic J — relação entre escalas e acordes -----------------------
         add (playable ("EX-11.J.1", "Tocar o lick J (repouso e tensão)", "Tocar o lick do tópico: a frase mistura repouso (acorde) e tensão de cor, resolvendo no acorde.",
-                       { "A4", "C5", "D5", "E5", "D5", "C5", "A4", "E5", "D5", "C5", "A4" }, "J"));
+                       { "A4", "C5", "D5", "F5", "D5", "C5", "A4", "E5", "D5", "C5", "A4" }, "J"));
         m.exercises.back().lickId = "LK-11.J";
         add (playable ("EX-11.J.2", "Arpejo de Am7", "Tocar o arpejo de Am7 (A-C-E-G) subindo e descendo, com a tônica como repouso.",
                        { "A4", "C5", "E5", "G5", "A5", "G5", "E5", "C5", "A4" }, "J"));
@@ -5433,7 +5434,7 @@ namespace
         auto& gate = m.exercises.emplace_back (playable (
             "GATE-11", "Desafio de gate — lick sobre a grade",
             "Tocar o lick do tópico J (repouso e tensão sobre o vamp de Lá menor) a 100 BPM, na grade do metrônomo.",
-            { "A4", "C5", "D5", "E5", "D5", "C5", "A4", "E5", "D5", "C5", "A4" }, "J"));
+            { "A4", "C5", "D5", "F5", "D5", "C5", "A4", "E5", "D5", "C5", "A4" }, "J"));
         gate.isGate = true;
         gate.lickId = "LK-11.J";
         gate.targetBpm = 100;
@@ -5447,9 +5448,11 @@ namespace
         // Pattern and links the module must cite (REQ-007, REQ-010).
         m.practice.patternId = "PTN-M-3";
         m.practice.patternUse = juce::String::fromUTF8 (
-            "O padrão de grupos de três (PTN-M-3) constrói as frases deste módulo: "
+            "O padrão de grupos de três (PTN-M-3) constrói a frase do tópico A: "
             "cada grupo sobe um grau, criando movimento contínuo dentro da região. "
-            "Complemento: PTN-M-3rds para ouvir as terças das escalas em movimento.");
+            "As demais frases correm a escala por graus conjuntos (PTN-M-SCALE), que "
+            "é o material de onde as sequências nascem, e a frase do tópico J alterna "
+            "repouso e tensão (PTN-M-REST).");
         m.practice.guitarists = { "John Petrucci", "Guthrie Govan", "Kiko Loureiro" };
 
         // Curated apostilas (REQ-006); see docs/MUSIC.md.
