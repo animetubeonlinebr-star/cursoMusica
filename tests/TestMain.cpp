@@ -20,6 +20,7 @@
 #include "Course/ExerciseEvaluator.h"
 #include "Course/Intervals.h"
 #include "Course/BackingProgression.h"
+#include "Course/ApostilaLabel.h"
 #include "Course/ModuleCatalog.h"
 #include "Audio/BackingTrack.h"
 #include "Course/NoteMath.h"
@@ -428,6 +429,53 @@ void checkModuleCatalogShape (const std::vector<cursomusica::CourseModule>& modu
                    juce::String ("findModule(") + juce::String (m.number)
                        + ") returns the implemented module");
         }
+}
+
+// Apostila labels — the catalogue stores file stems (REQ-006) and the UI prints
+// them. A stem is not student-facing text: one of them carries a layout artifact
+// from the site the PDF came from. The label must be readable and must never leak
+// the artifact; every cited stem must resolve to a label distinct from itself.
+void testApostilaLabels()
+{
+    std::cout << "ApostilaLabels\n";
+    using namespace cursomusica;
+
+    const juce::String artifact = "pdf-p-classtruncatedtext-module-lineclamped-85ulhh-style-max-lines5"
+                                  "bohumil-med-teoria-da-musica-5-edicao-p";
+    const auto artifactLabel = course::apostilaLabel (artifact);
+    check (! artifactLabel.containsIgnoreCase ("classtruncatedtext"),
+           "the layout artifact never reaches the student");
+    check (! artifactLabel.containsIgnoreCase ("max-lines"),
+           "the layout artifact tail never reaches the student");
+    check (artifactLabel.containsIgnoreCase ("Bohumil"),
+           "the corrupted stem still names the author (Bohumil Med)");
+    check (artifactLabel.containsIgnoreCase ("Teoria"),
+           "the corrupted stem still names the work (Teoria da Música)");
+
+    // Every stem the catalogue cites gets a label; no label is the stem itself
+    // and none keeps the "pdf-" prefix.
+    int cited = 0;
+    for (int n = 1; n <= 20; ++n)
+    {
+        const auto* m = ModuleCatalog::findModule (n);
+        if (m == nullptr)
+            continue;
+        for (const auto& stem : m->sources)
+        {
+            ++cited;
+            const auto label = course::apostilaLabel (stem);
+            check (label.isNotEmpty(), "cited apostila has a label: " + stem);
+            check (label != stem, "label is not the raw stem: " + stem);
+            check (! label.startsWith ("pdf-"), "label drops the file prefix: " + stem);
+            check (! label.containsIgnoreCase ("classtruncatedtext"),
+                   "label has no layout artifact: " + stem);
+        }
+    }
+    check (cited > 0, "the catalogue cites at least one apostila");
+
+    // Unknown stems still degrade to words, never to the artifact.
+    const auto unknown = course::apostilaLabel ("pdf-algum-material-novo");
+    check (unknown == "algum material novo", "unknown stem is read as words");
 }
 
 void testModuleCatalog()
@@ -3968,6 +4016,7 @@ int main()
     testPitchDetector();
     testIntervals();
     testIntervalEvaluation();
+    testApostilaLabels();
     testModuleCatalog();
     testModule2();
     testModule3();

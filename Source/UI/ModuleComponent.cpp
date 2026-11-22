@@ -1,5 +1,6 @@
 #include "UI/ModuleComponent.h"
 
+#include "Course/ApostilaLabel.h"
 #include "Course/ModuleCatalog.h"
 #include "Course/QuizSession.h"
 #include "Course/Content/Diagrams.h"
@@ -573,7 +574,8 @@ private:
             g.setColour (th::colour::textSecondary);
             g.setFont (th::type::makeFont (th::type::caption));
             for (const auto& source : m.sources)
-                g.drawText (source, bounds.removeFromTop (18), juce::Justification::centredLeft, false);
+                g.drawText (course::apostilaLabel (source), bounds.removeFromTop (18),
+                            juce::Justification::centredLeft, false);
         }
     }
 
