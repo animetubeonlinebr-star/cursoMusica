@@ -24,6 +24,15 @@ struct PracticeState
     double onGridRatio = 0.0;
     bool accuracyPassed = false;
     bool gridPassed = false;
+    bool tempoPassed = false;
+
+    // Tempo of the attempt: `practiceBpm` is the metronome tempo the student
+    // chose, `targetBpm` is the module's goal. The attempt only counts when the
+    // student practices at or above the goal (REQ-015, client 2026-11-19).
+    int practiceBpm = 0;
+    int targetBpm = 0;
+    bool tempoGated = false;
+
     bool passed = false;
     juce::String lastNote;   // last note heard, for live feedback
     juce::String message;    // human-readable verdict
@@ -35,8 +44,11 @@ class PracticeSession
 {
 public:
     // Starts a fresh attempt for `exercise`, inheriting module defaults when the
-    // exercise does not override the BPM or the alignment target.
-    void start (const Exercise& exercise, int moduleTargetBpm, float moduleOnGridTarget);
+    // exercise does not override the BPM or the alignment target. `chosenBpm`
+    // is the metronome tempo the student set; 0 uses the exercise's goal.
+    // `moduleUsesTempo` false disables the tempo gate (module 1).
+    void start (const Exercise& exercise, int moduleTargetBpm, float moduleOnGridTarget,
+                int chosenBpm = 0, bool moduleUsesTempo = true);
 
     void stop();
     bool isRunning() const noexcept { return state.running; }
@@ -52,6 +64,7 @@ public:
 
     const TempoGrid& getGrid() const noexcept { return grid; }
     int getTargetBpm() const noexcept { return targetBpm; }
+    int getPracticeBpm() const noexcept { return practiceBpm; }
     float getOnGridTarget() const noexcept { return onGridTarget; }
 
 private:
@@ -60,6 +73,7 @@ private:
     const Exercise* current = nullptr;
     TempoGrid grid { 60.0, TempoGrid::Subdivision::quarter };
     int targetBpm = 60;
+    int practiceBpm = 60;
     float onGridTarget = 0.75f;
 
     std::vector<TargetNote> target;
@@ -68,6 +82,7 @@ private:
     std::vector<NoteEvent> played;
     evaluator::IntervalSpec intervalSpec;
     bool gridGated = true;
+    bool tempoGated = true;
 
     PracticeState state;
 };

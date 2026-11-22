@@ -425,6 +425,7 @@ Avança na escala em blocos repetitivos.
 |---|---|---|
 | PTN-M-3 | Grupos de 3 (tercinas) | 1-2-3, 2-3-4, 3-4-5, 4-5-6… |
 | PTN-M-4 | Grupos de 4 (semicolcheias) | 1-2-3-4, 2-3-4-5, 3-4-5-6, 4-5-6-7… |
+| PTN-M-SCALE | Corrida de escala | 1-2-3-4-5-6-7-8 por graus conjuntos, sem salto; a frase sobe e desce |
 
 ### 1.B Salto de intervalos
 
@@ -449,6 +450,16 @@ Muda a direção a cada grupo de notas.
 |---|---|---|
 | PTN-M-P31 | Pattern 3-1 (em 5 posições) | sobe 3 notas, volta 1, retoma a subida |
 | PTN-M-SKIP | String skipping | toca na 6ª corda, pula para a 4ª, toca na 5ª, pula para a 3ª… |
+
+### 1.E Frase de repouso e tensão
+
+Não é uma sequência numérica: a frase alterna notas do acorde (repouso) com uma
+tensão de cor e resolve. A assinatura é a presença das duas classes, não um
+desenho de intervalos.
+
+| ID | Pattern | Característica |
+|---|---|---|
+| PTN-M-REST | repouso e tensão | notas do acorde como repouso, uma tensão de cor (6ª, 9ª…) e resolução numa nota do acorde |
 
 ## 2. Patterns rítmicos e de acompanhamento (base/groove)
 
@@ -1163,7 +1174,7 @@ vocabulário** que está estudando, não para conferir a transcrição.
 | LK-11.G | Kiko Loureiro — *No Gravity* (No Gravity, 2005) | Escala desenhada dentro da forma do acorde (Sistema 5) |
 | LK-11.H | Yngwie Malmsteen — *Far Beyond the Sun* (Rising Force, 1984) | Corridas ascendentes na menor harmônica |
 | LK-11.I | Steve Vai — *For the Love of God* (Passion and Warfare, 1990) | Linhas cantáveis com a 6ª e a 7ª elevadas |
-| LK-11.J | Santana — *Black Magic Woman* (Abraxas, 1970) | Frases que alternam repouso no acorde e tensão de cor |
+| LK-11.J | Santana — *Black Magic Woman / Gypsy Queen* (Abraxas, 1970) | Frases que alternam repouso no acorde e tensão de cor |
 
 Todas as músicas e álbuns acima foram conferidos (faixa ↔ álbum ↔ ano). A UI
 rotula cada uma como **"Referência de escuta — mesmo vocabulário, não a mesma

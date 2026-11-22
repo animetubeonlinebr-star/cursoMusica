@@ -20,6 +20,8 @@
 #include "Course/ExerciseEvaluator.h"
 #include "Course/Intervals.h"
 #include "Course/BackingProgression.h"
+#include "Course/ApostilaLabel.h"
+#include "Course/PatternSignature.h"
 #include "Course/ModuleCatalog.h"
 #include "Audio/BackingTrack.h"
 #include "Course/NoteMath.h"
@@ -247,6 +249,82 @@ namespace
         sloppy.finish();
         check (! sloppy.getState().accuracyPassed, "detuned note fails the accuracy gate");
     }
+
+    // The student may choose the metronome tempo, but a run below the goal does
+    // not conclude the exercise (REQ-015, client 2026-11-19).
+    void testTempoGate()
+    {
+        std::cout << "PracticeSession tempo gate\n";
+        using namespace cursomusica::course;
+
+        cursomusica::Exercise sequence;
+        sequence.id = "EX-11.B.2";
+        sequence.targets = { { 40, "E2" }, { 45, "A2" } };
+        sequence.usesGrid = true;    // the tempo gate only applies where the grid does
+
+        // Practicing at the goal concludes the exercise.
+        PracticeSession atGoal;
+        atGoal.start (sequence, 100, 0.82f, 100);
+        check (atGoal.getTargetBpm() == 100, "target BPM comes from the module");
+        check (atGoal.getPracticeBpm() == 100, "the chosen tempo is the practice tempo");
+        atGoal.consume ({ { 0.0, 40, 0.0f }, { 0.6, 45, 0.0f } });
+        atGoal.finish();
+        check (atGoal.getState().tempoPassed, "practicing at the goal passes the tempo gate");
+        check (atGoal.getState().passed, "a clean run at the goal concludes the exercise");
+
+        // Practicing slower is allowed, but it does not conclude the exercise.
+        PracticeSession slower;
+        slower.start (sequence, 100, 0.82f, 80);
+        slower.consume ({ { 0.0, 40, 0.0f }, { 0.75, 45, 0.0f } });
+        slower.finish();
+        const auto& slowState = slower.getState();
+        checkClose (slowState.accuracy, 1.0, 1e-9, "the slow run is still 100% accurate");
+        check (slowState.accuracyPassed, "the slow run passes the accuracy gate");
+        check (! slowState.tempoPassed, "practicing below the goal fails the tempo gate");
+        check (! slowState.passed, "a slow run does not conclude the exercise");
+        check (slowState.practiceBpm == 80 && slowState.targetBpm == 100,
+               "the verdict carries both tempos");
+        check (slowState.message.containsIgnoreCase ("BPM"),
+               "the message explains the tempo shortfall");
+
+        // Above the goal is fine: the goal is a floor, not a ceiling.
+        PracticeSession faster;
+        faster.start (sequence, 100, 0.82f, 120);
+        faster.consume ({ { 0.0, 40, 0.0f }, { 0.5, 45, 0.0f } });
+        faster.finish();
+        check (faster.getState().tempoPassed, "practicing above the goal passes");
+        check (faster.getState().passed, "a run above the goal concludes the exercise");
+
+        // Module 1 does not grade tempo: the dash in the header is not a gate.
+        PracticeSession noTempoModule;
+        noTempoModule.start (sequence, 60, 0.75f, 40, false);
+        noTempoModule.consume ({ { 0.0, 40, 0.0f }, { 1.0, 45, 0.0f } });
+        noTempoModule.finish();
+        check (! noTempoModule.getState().tempoGated, "module 1 disables the tempo gate");
+        check (noTempoModule.getState().tempoPassed, "no tempo gate means the tempo passes");
+
+        // An exercise the app does not measure against the grid (interval
+        // identification, improvisation) has no tempo to hold: grading it would
+        // make it impossible to conclude.
+        cursomusica::Exercise offGrid = sequence;
+        offGrid.usesGrid = false;
+        PracticeSession offGridSession;
+        offGridSession.start (offGrid, 100, 0.82f, 50);
+        offGridSession.consume ({ { 0.0, 40, 0.0f }, { 2.0, 45, 0.0f } });
+        offGridSession.finish();
+        check (! offGridSession.getState().tempoGated,
+               "an exercise outside the grid is not tempo gated");
+        check (offGridSession.getState().tempoPassed,
+               "an off-grid exercise passes the tempo gate whatever the tempo");
+
+        // A quiz has no tempo: it is answered, not played.
+        cursomusica::Exercise quiz;
+        quiz.id = "EX-11.QUIZ";
+        quiz.quiz = { { "Q1", { "a", "b" }, 0 } };
+        PracticeSession quizSession;
+        quizSession.start (quiz, 100, 0.82f, 60);
+        check (! quizSession.getState().tempoGated, "a quiz is not tempo gated");
+    }
 }
 
 void testProgression()
@@ -352,6 +430,53 @@ void checkModuleCatalogShape (const std::vector<cursomusica::CourseModule>& modu
                    juce::String ("findModule(") + juce::String (m.number)
                        + ") returns the implemented module");
         }
+}
+
+// Apostila labels — the catalogue stores file stems (REQ-006) and the UI prints
+// them. A stem is not student-facing text: one of them carries a layout artifact
+// from the site the PDF came from. The label must be readable and must never leak
+// the artifact; every cited stem must resolve to a label distinct from itself.
+void testApostilaLabels()
+{
+    std::cout << "ApostilaLabels\n";
+    using namespace cursomusica;
+
+    const juce::String artifact = "pdf-p-classtruncatedtext-module-lineclamped-85ulhh-style-max-lines5"
+                                  "bohumil-med-teoria-da-musica-5-edicao-p";
+    const auto artifactLabel = course::apostilaLabel (artifact);
+    check (! artifactLabel.containsIgnoreCase ("classtruncatedtext"),
+           "the layout artifact never reaches the student");
+    check (! artifactLabel.containsIgnoreCase ("max-lines"),
+           "the layout artifact tail never reaches the student");
+    check (artifactLabel.containsIgnoreCase ("Bohumil"),
+           "the corrupted stem still names the author (Bohumil Med)");
+    check (artifactLabel.containsIgnoreCase ("Teoria"),
+           "the corrupted stem still names the work (Teoria da Música)");
+
+    // Every stem the catalogue cites gets a label; no label is the stem itself
+    // and none keeps the "pdf-" prefix.
+    int cited = 0;
+    for (int n = 1; n <= 20; ++n)
+    {
+        const auto* m = ModuleCatalog::findModule (n);
+        if (m == nullptr)
+            continue;
+        for (const auto& stem : m->sources)
+        {
+            ++cited;
+            const auto label = course::apostilaLabel (stem);
+            check (label.isNotEmpty(), "cited apostila has a label: " + stem);
+            check (label != stem, "label is not the raw stem: " + stem);
+            check (! label.startsWith ("pdf-"), "label drops the file prefix: " + stem);
+            check (! label.containsIgnoreCase ("classtruncatedtext"),
+                   "label has no layout artifact: " + stem);
+        }
+    }
+    check (cited > 0, "the catalogue cites at least one apostila");
+
+    // Unknown stems still degrade to words, never to the artifact.
+    const auto unknown = course::apostilaLabel ("pdf-algum-material-novo");
+    check (unknown == "algum material novo", "unknown stem is read as words");
 }
 
 void testModuleCatalog()
@@ -3364,6 +3489,74 @@ void testModule11()
                    juce::String ("lick ") + found->id + " cites a guitarist (REQ-007)");
             check (found->patternId.isNotEmpty(),
                    juce::String ("lick ") + found->id + " cites a pattern (REQ-010)");
+
+            // The card prints the pattern id beside the phrase, so the phrase
+            // must actually carry that pattern's signature: a lick that cites
+            // thirds while playing stepwise seconds teaches the wrong sound.
+            check (course::patternSignatureHolds (found->patternId, found->notes),
+                   juce::String ("lick ") + found->id + " plays the pattern it cites ("
+                       + found->patternId + ")");
+        }
+    }
+
+    // Every pattern id a lick cites exists in the catalogue (docs/MUSIC.md §1),
+    // so the card never names an id the course does not define.
+    {
+        const juce::StringArray catalogue { "PTN-M-3", "PTN-M-4", "PTN-M-SCALE",
+                                            "PTN-M-3rds", "PTN-M-4ths", "PTN-M-TRIQ",
+                                            "PTN-M-P31", "PTN-M-SKIP", "PTN-M-REST",
+                                            "PTN-A-TRIAD", "PTN-A-DROP2", "PTN-A-DROP3" };
+        for (const auto& lick : m11->licks)
+            check (catalogue.contains (lick.patternId),
+                   juce::String ("lick ") + lick.id + " cites a catalogued pattern id");
+    }
+
+    // The tab is the written reading of the phrase: every fret it names, on the
+    // string it names, must be exactly the note the app plays and expects. A tab
+    // that disagrees with the audio teaches the wrong position.
+    {
+        const auto openStringMidi = [] (juce::juce_wchar name) -> int
+        {
+            switch (name)
+            {
+                case 'e': return 64;   // 1st string, high E
+                case 'B': return 59;
+                case 'G': return 55;
+                case 'D': return 50;
+                case 'A': return 45;
+                case 'E': return 40;   // 6th string, low E
+                default:  return -1;
+            }
+        };
+
+        for (const auto& lick : m11->licks)
+        {
+            const auto tab = lick.tab.trim();
+            check (tab.length() > 4 && tab[1] == '|',
+                   juce::String ("lick ") + lick.id + " writes a single-string tab");
+            if (tab.length() <= 4 || tab[1] != '|')
+                continue;
+
+            const int openMidi = openStringMidi (tab[0]);
+            check (openMidi > 0, juce::String ("lick ") + lick.id + " names a real string");
+
+            // "e|--5-7-8--|" -> { 5, 7, 8 }
+            std::vector<int> frets;
+            for (const auto& token : juce::StringArray::fromTokens (
+                     tab.fromFirstOccurrenceOf ("|", false, false).replace ("|", "-"), "-", ""))
+                if (token.isNotEmpty())
+                    frets.push_back (token.getIntValue());
+
+            check ((int) frets.size() == (int) lick.notes.size(),
+                   juce::String ("lick ") + lick.id + " tab has one fret per note ("
+                       + juce::String ((int) frets.size()) + " frets, "
+                       + juce::String ((int) lick.notes.size()) + " notes)");
+
+            if ((int) frets.size() == (int) lick.notes.size())
+                for (size_t i = 0; i < frets.size(); ++i)
+                    check (openMidi + frets[i] == lick.notes[i],
+                           juce::String ("lick ") + lick.id + " tab fret "
+                               + juce::String ((int) i) + " is the note the app plays");
         }
     }
 
@@ -3428,6 +3621,24 @@ void testModule11()
             check (targetMidi == lk->notes,
                    juce::String ("the lick exercise of topic ") + topic.id
                        + " obliges exactly the lick notes");
+        }
+    }
+
+    // The topic J lick is the module's rest/tension phrase: its text promises the
+    // sixth as the colour tension, so the phrase must actually sound it. Without
+    // the sixth the lesson names a sound the student never hears.
+    {
+        const Lick* jLick = nullptr;
+        for (const auto& l : m11->licks)
+            if (l.id == "LK-11.J")
+                jLick = &l;
+        check (jLick != nullptr, "module 11 has the topic J lick");
+        if (jLick != nullptr)
+        {
+            // A minor: A=9. The sixth above the root is F (pitch class 5).
+            const bool soundsSixth = std::any_of (jLick->notes.begin(), jLick->notes.end(),
+                                                  [] (int midi) { return midi % 12 == 5; });
+            check (soundsSixth, "the topic J lick sounds the sixth it announces as tension");
         }
     }
 
@@ -3834,6 +4045,7 @@ int main()
     testTempoGrid();
     testQuizSession();
     testPracticeSession();
+    testTempoGate();
     testProgression();
     testAudioPortClassifier();
     testPluginSearchPaths();
@@ -3842,6 +4054,7 @@ int main()
     testPitchDetector();
     testIntervals();
     testIntervalEvaluation();
+    testApostilaLabels();
     testModuleCatalog();
     testModule2();
     testModule3();
