@@ -80,6 +80,7 @@ target_sources(CursoMusica PRIVATE
     Source/Audio/TuningSettings.cpp
     Source/Audio/Metronome.cpp
     Source/Audio/TonePlayer.cpp
+    Source/Audio/BackingTrack.cpp
     Source/Audio/AudioPortClassifier.cpp
     Source/Course/NoteMath.cpp
     Source/Course/Intervals.cpp
@@ -88,6 +89,7 @@ target_sources(CursoMusica PRIVATE
     Source/Course/PracticeSession.cpp
     Source/Course/QuizSession.cpp
     Source/Course/RestNotes.cpp
+    Source/Course/BackingProgression.cpp
     Source/Course/ProgressStore.cpp
     Source/Course/ModuleCatalog.cpp
     Source/Data/ProgressDatabase.cpp
@@ -373,6 +375,8 @@ target_sources(CursoMusicaTests PRIVATE
     Source/Course/PracticeSession.cpp
     Source/Course/QuizSession.cpp
     Source/Course/RestNotes.cpp
+    Source/Course/BackingProgression.cpp
+    Source/Audio/BackingTrack.cpp
     Source/Course/ModuleCatalog.cpp
     Source/Course/ProgressStore.cpp
     Source/Data/ProgressDatabase.cpp
@@ -505,6 +509,7 @@ target_link_libraries(CursoMusicaTests
         CursoMusicaDiagrams
         juce::juce_core
         juce::juce_data_structures
+        juce::juce_audio_basics
     PUBLIC
         juce::juce_recommended_config_flags
         juce::juce_recommended_warning_flags)
@@ -559,6 +564,7 @@ if(CURSOMUSICA_USAGE_TEST)
         Source/Audio/PluginSearchPaths.cpp
         Source/Audio/Metronome.cpp
         Source/Audio/TonePlayer.cpp
+        Source/Audio/BackingTrack.cpp
         Source/Course/NoteMath.cpp
         Source/Course/Intervals.cpp
         Source/Course/ExerciseEvaluator.cpp
@@ -566,6 +572,7 @@ if(CURSOMUSICA_USAGE_TEST)
         Source/Course/PracticeSession.cpp
         Source/Course/QuizSession.cpp
         Source/Course/RestNotes.cpp
+        Source/Course/BackingProgression.cpp
         Source/Course/ProgressStore.cpp
         Source/Course/ModuleCatalog.cpp
         Source/Data/ProgressDatabase.cpp

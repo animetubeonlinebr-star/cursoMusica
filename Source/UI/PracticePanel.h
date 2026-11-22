@@ -81,6 +81,8 @@ private:
     void startSelectedExercise();
     void finishExercise();
     void toggleMetronome();
+    void toggleBacking();
+    void syncBackingFromExercise();
 
     AudioEngine& audioEngine;
     course::PracticeSession session;
@@ -93,6 +95,7 @@ private:
     std::vector<int> filteredIndices;
     int selectedExerciseIndex = 0;
     bool metronomeOn = false;
+    bool backingOn = false;       // backing track under the exercise (client, 2026-11-18)
 
     // Last stored accuracy (percent) of the armed exercise, -1 when never
     // attempted. Shown until a new attempt produces a fresh verdict.
@@ -135,6 +138,7 @@ private:
 
     // Playable-exercise controls.
     juce::TextButton metronomeButton { "Metronome" };
+    juce::TextButton backingButton { "Base" };
     juce::TextButton startButton { "Start" };
     juce::TextButton finishButton { "Finish" };
     juce::Label bpmLabel;

@@ -1143,3 +1143,44 @@ de notas e `on_grid_ratio ≥ 0,82`.
   padrão que constrói as frases do módulo; complemento `PTN-M-3rds` (terças).
 - **Links (guitarristas de referência — REQ-007):** John Petrucci, Guthrie Govan
   e Kiko Loureiro (uso de desenhos de escala e domínio do braço).
+
+## 11.5 Referência de escuta dos licks (pedido do cliente, 2026-11-18)
+
+**Decisão A (acordada com o cliente):** a referência é **algo parecido** — mesma
+linguagem, mesma escala, mesmo gesto — e **nunca** o lick literal. O lick de cada
+tópico é uma frase **original** do curso, escrita "no estilo de" um guitarrista;
+nenhuma gravação contém essa frase. A referência serve para o aluno **ouvir o
+vocabulário** que está estudando, não para conferir a transcrição.
+
+| Lick | Referência de escuta | O que ouvir |
+|---|---|---|
+| LK-11.A | Dream Theater — *Under a Glass Moon* (Images and Words, 1992) | Sequências de grupos de três subindo a escala |
+| LK-11.B | Guthrie Govan — *Waves* (Erotic Cakes, 2006) | Corridas ascendentes e descendentes na mesma posição |
+| LK-11.C | Richie Kotzen — *Mother Head's Family Reunion* (1994) | Pentatônica menor como base melódica sobre m7 |
+| LK-11.D | Greg Howe — *Jump Start* (Introspection, 1993) | Pentatônica com a sexta maior como cor sobre acorde menor |
+| LK-11.E | Edu Ardanuy (Dr. Sin) — *Dr. Sin* (Dr. Sin, 1993) | Pentatônica ligando posições vizinhas pela nota comum |
+| LK-11.F | Joe Satriani — *Flying in a Blue Dream* (1989) | Linhas longas ao longo de uma corda, mão viajando |
+| LK-11.G | Kiko Loureiro — *No Gravity* (No Gravity, 2005) | Escala desenhada dentro da forma do acorde (Sistema 5) |
+| LK-11.H | Yngwie Malmsteen — *Far Beyond the Sun* (Rising Force, 1984) | Corridas ascendentes na menor harmônica |
+| LK-11.I | Steve Vai — *For the Love of God* (Passion and Warfare, 1990) | Linhas cantáveis com a 6ª e a 7ª elevadas |
+| LK-11.J | Santana — *Black Magic Woman* (Abraxas, 1970) | Frases que alternam repouso no acorde e tensão de cor |
+
+Todas as músicas e álbuns acima foram conferidos (faixa ↔ álbum ↔ ano). A UI
+rotula cada uma como **"Referência de escuta — mesmo vocabulário, não a mesma
+frase"** enquanto o `musician` não validar o **trecho exato** (minutagem) a
+indicar ao aluno; mapeado o trecho, `Lick::referenceExcerptPending` passa a
+`false` e o rótulo de ressalva sai. Pendência registrada em `AGENTS.md` §10 e no
+Registro de decisões.
+
+## 11.6 Base de acompanhamento ("Base", pedido do cliente, 2026-11-18)
+
+O exercício armado oferece o botão **Base**, que liga uma base de acompanhamento
+tocada pelo próprio app: bumbo, chimbal, baixo e um acorde em bloco (pad) de
+quatro vozes, na **harmonia do exercício** e no **BPM meta** do módulo. A
+progressão vem do próprio exercício (`chordProgression` quando existe;
+`chordPitchClasses` do improviso; o vamp do gate do módulo quando o exercício não
+declara harmonia; e, sem gate com vamp, o centro do módulo — Lá menor no Módulo
+11), derivada pela função pura `course::backingProgressionFor()` e publicada no
+motor de áudio por `PracticePanel::syncBackingFromExercise()`. Armar outro
+exercício republica a harmonia; trocar de módulo ou de tópico desliga a base. A base é **RT-safe** (sem
+alocação, lock ou I/O no callback) e sai **desligada** por padrão.

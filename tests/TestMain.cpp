@@ -19,7 +19,9 @@
 #include "Course/Content/ScoreNotes.h"
 #include "Course/ExerciseEvaluator.h"
 #include "Course/Intervals.h"
+#include "Course/BackingProgression.h"
 #include "Course/ModuleCatalog.h"
+#include "Audio/BackingTrack.h"
 #include "Course/NoteMath.h"
 #include "Course/PracticeSession.h"
 #include "Course/ProgressionRule.h"
@@ -3591,6 +3593,238 @@ void testModule11()
             check (! e.targets.empty(), "module 11 gate has playable targets");
         }
     check (hasGate, "module 11 has a gate exercise");
+
+    // Listening references (client request, 2026-11-18, Decision A). The licks
+    // are original phrases, so the reference is representative listening — the
+    // same vocabulary, never the same phrase. The song/album/year are verified
+    // facts; what is still missing is the excerpt (time range), flagged so the UI
+    // never presents the reference as the lick's source (AGENTS.md §10).
+    for (const auto& lick : m11->licks)
+    {
+        check (lick.referenceSong.isNotEmpty(),
+               juce::String ("lick ") + lick.id + " names a listening reference");
+        check (lick.referenceNote.isNotEmpty(),
+               juce::String ("lick ") + lick.id + " says what to listen for");
+        check (lick.referenceSong.contains ("(") && lick.referenceSong.contains (")"),
+               juce::String ("lick ") + lick.id
+                   + " names the album/year of the reference (verified fact)");
+        check (lick.referenceExcerptPending,
+               juce::String ("lick ") + lick.id
+                   + " is flagged while the exact excerpt is not mapped yet");
+        check (lick.referenceNote.containsIgnoreCase ("mesmo vocabul")
+                   || lick.referenceNote.containsIgnoreCase ("mesmo desenho"),
+               juce::String ("lick ") + lick.id
+                   + " states it is the same vocabulary, not the same phrase");
+    }
+
+    // The backing track must play the harmony the exercise runs over (client
+    // request, 2026-11-18). A progression exercise keeps its own chords; an
+    // improvisation exercise plays its chord in force; a drill falls back to the
+    // module's gate vamp.
+    for (const auto& e : m11->exercises)
+    {
+        const auto progression = course::backingProgressionFor (*m11, e);
+        check (! progression.empty(), juce::String ("exercise ") + e.id + " has a backing progression");
+
+        if (! e.chordProgression.empty())
+        {
+            check (progression.size() == e.chordProgression.size(),
+                   juce::String ("exercise ") + e.id + " backing follows its own chord count");
+            for (size_t i = 0; i < e.chordProgression.size(); ++i)
+            {
+                std::vector<int> normalised;
+                for (int pc : e.chordProgression[i])
+                    normalised.push_back (((pc % 12) + 12) % 12);
+                check (progression[i].pitchClasses == normalised,
+                       juce::String ("exercise ") + e.id + " backing chord "
+                           + juce::String ((int) i) + " matches the exercise chord");
+            }
+        }
+        else if (! e.restNotes.chordPitchClasses.empty())
+        {
+            check (progression.size() == 1,
+                   juce::String ("exercise ") + e.id + " improvisation plays one chord");
+            std::vector<int> normalised;
+            for (int pc : e.restNotes.chordPitchClasses)
+                normalised.push_back (((pc % 12) + 12) % 12);
+            check (progression.front().pitchClasses == normalised,
+                   juce::String ("exercise ") + e.id + " backing plays the chord in force");
+        }
+
+        for (const auto& chord : progression)
+        {
+            check (! chord.pitchClasses.empty(),
+                   juce::String ("exercise ") + e.id + " backing chord has notes");
+            for (int pc : chord.pitchClasses)
+                check (pc >= 0 && pc < 12,
+                       juce::String ("exercise ") + e.id + " backing pitch class is normalised");
+            check (chord.bassMidi >= 33 && chord.bassMidi <= 48,
+                   juce::String ("exercise ") + e.id + " bass sits below the pad");
+            if (! chord.pitchClasses.empty())
+                check ((((chord.bassMidi % 12) + 12) % 12) == chord.pitchClasses.front(),
+                       juce::String ("exercise ") + e.id + " bass plays a chord tone");
+        }
+    }
+
+    // A drill declares no harmony of its own, so the bed falls back to the
+    // module's harmonic centre. Module 11's gate is a lick on the grid, so it
+    // declares no vamp either: the bed must be A minor, the centre the licks
+    // live in — never silence.
+    const Exercise* drill = nullptr;
+    for (const auto& e : m11->exercises)
+        if (e.chordProgression.empty() && e.restNotes.chordPitchClasses.empty()
+            && ! e.isGate && ! e.targets.empty())
+        {
+            drill = &e;
+            break;
+        }
+    check (drill != nullptr, "module 11 has a drill with no harmony of its own");
+
+    if (drill != nullptr)
+    {
+        const auto fallback = course::backingProgressionFor (*m11, *drill);
+        check (fallback.size() == 1, "a drill's bed is a single chord");
+        check (fallback.front().pitchClasses == std::vector<int> { 9, 0, 4 },
+               "a module 11 drill plays over A minor, the module's centre");
+    }
+
+    // The gate-declares-a-vamp branch: a drill then plays the gate's own chords,
+    // not the fallback. Built here so the branch cannot regress silently.
+    CourseModule gated;
+    gated.number = 98;
+    Exercise gatedGate;
+    gatedGate.id = "GATE-98";
+    gatedGate.isGate = true;
+    gatedGate.chordProgression = { { 9, 0, 4, 7 }, { 2, 5, 9, 0 } };
+    Exercise gatedDrill;
+    gatedDrill.id = "EX-98.A.1";
+    gatedDrill.targets = { { 60, "C4" } };
+    gated.exercises = { gatedGate, gatedDrill };
+
+    const auto fromGate = course::backingProgressionFor (gated, gated.exercises.back());
+    check (fromGate.size() == gatedGate.chordProgression.size(),
+           "a drill's bed follows the gate vamp when the gate declares one");
+    if (fromGate.size() == gatedGate.chordProgression.size())
+        for (size_t i = 0; i < fromGate.size(); ++i)
+        {
+            std::vector<int> expected;
+            for (int pc : gatedGate.chordProgression[i])
+                expected.push_back (((pc % 12) + 12) % 12);
+            check (fromGate[i].pitchClasses == expected,
+                   juce::String ("drill bed chord ") + juce::String ((int) i) + " is the gate chord");
+        }
+
+    // A module with neither a gate vamp nor a gate chord still gets a bed: A
+    // minor, the centre of the module 11 licks.
+    CourseModule gateless;
+    gateless.number = 99;
+    Exercise bare;
+    bare.id = "EX-99.A.1";
+    bare.targets = { { 60, "C4" }, { 62, "D4" } };
+    gateless.exercises.push_back (bare);
+
+    const auto lastResort = course::backingProgressionFor (gateless, gateless.exercises.front());
+    check (lastResort.size() == 1, "a module without a gate still gets a one-chord bed");
+    check (lastResort.front().pitchClasses == std::vector<int> { 9, 0, 4 },
+           "the last-resort bed is A minor");
+}
+
+// The backing track is a real-time audio component, so it is exercised on the
+// real code path (no mocks): render blocks through process() and inspect the
+// samples it produces.
+void testBackingTrack()
+{
+    std::cout << "BackingTrack\n";
+    using namespace cursomusica;
+
+    constexpr double sampleRate = 48000.0;
+    constexpr int blockSize = 256;
+
+    BackingTrack backing;
+    backing.prepare (sampleRate);
+    backing.setGain (1.0f);
+
+    juce::AudioBuffer<float> buffer (2, blockSize);
+
+    auto render = [&] (int blocks)
+    {
+        float peak = 0.0f;
+        for (int b = 0; b < blocks; ++b)
+        {
+            buffer.clear();
+            backing.process (buffer, blockSize);
+            peak = juce::jmax (peak, buffer.getMagnitude (0, blockSize));
+        }
+        return peak;
+    };
+
+    // Stopped: must stay silent, even with a progression loaded.
+    backing.setProgression ({ { { 9, 0, 4, 7 }, 45 } });
+    check (backing.hasProgression(), "backing track accepts a progression");
+    check (render (4) <= 1.0e-6f, "backing track is silent while stopped");
+
+    // Running: must produce audible signal.
+    backing.setRunning (true);
+    const float peak = render (20);
+    check (peak > 0.001f, "backing track produces signal while running");
+    check (peak <= 1.0f, "backing track does not clip at unity gain");
+
+    // An empty progression stops the sound.
+    backing.setProgression ({});
+    backing.reset();
+    check (! backing.hasProgression(), "backing track drops an empty progression");
+    check (render (4) <= 1.0e-6f, "backing track is silent without a progression");
+
+    // The tempo reaches the component and the chord advances one bar at a time.
+    backing.setProgression ({ { { 9, 0, 4, 7 }, 45 }, { { 2, 5, 9, 0 }, 50 } });
+    backing.setBpm (120.0);
+    checkClose (backing.getBpm(), 120.0, 0.001, "backing track takes the exercise BPM");
+
+    backing.reset();
+    backing.setRunning (true);
+    render (2);
+    check (backing.getCurrentChordIndex() == 0, "backing track starts on the first chord");
+
+    // At 120 BPM a bar is 2 s = 96000 samples; render past it and the chord must
+    // have moved to the second.
+    render ((int) (sampleRate * 2.2 / blockSize));
+    check (backing.getCurrentChordIndex() == 1, "backing track advances to the next chord after a bar");
+
+    backing.setRunning (false);
+    check (render (4) <= 1.0e-6f, "backing track stops when turned off");
+
+    // Faster tempo advances the chord sooner: 240 BPM halves the bar.
+    backing.setBpm (240.0);
+    backing.reset();
+    backing.setRunning (true);
+    render ((int) (sampleRate * 1.2 / blockSize));
+    check (backing.getCurrentChordIndex() == 1, "backing track follows the BPM for the bar length");
+
+    // Swapping to a progression with the same chord count must still reach the
+    // audio thread: two different 4-chord vamps are different harmony. The
+    // sounding mask proves which chord the callback actually adopted (the index
+    // alone would match even if the swap were dropped).
+    backing.setBpm (120.0);
+    backing.setProgression ({ { { 9, 0, 4, 7 }, 45 }, { { 2, 5, 9, 0 }, 50 },
+                              { { 5, 9, 0, 4 }, 43 }, { { 7, 11, 2, 5 }, 47 } });
+    backing.reset();
+    render (2);
+    check (backing.getCurrentChordIndex() == 0, "backing track restarts on the first chord");
+    check (backing.getCurrentChordMask() == ((1u << 9) | (1u << 0) | (1u << 4) | (1u << 7)),
+           "backing track sounds the first chord of the first vamp");
+
+    backing.setProgression ({ { { 0, 4, 7 }, 48 }, { { 5, 9, 0 }, 41 },
+                              { { 7, 11, 2 }, 43 }, { { 0, 4, 7 }, 48 } });
+    render (2);
+    check (backing.getCurrentChordMask() == ((1u << 0) | (1u << 4) | (1u << 7)),
+           "backing track adopts a new progression with the same chord count");
+    render ((int) (sampleRate * 2.2 / blockSize));
+    check (backing.getCurrentChordIndex() == 1,
+           "backing track keeps advancing after adopting the new progression");
+    check (backing.getCurrentChordMask() == ((1u << 5) | (1u << 9) | (1u << 0)),
+           "backing track sounds the second chord of the adopted vamp");
+
+    backing.setRunning (false);
 }
 
 int main()
@@ -3619,6 +3853,7 @@ int main()
     testModule9();
     testModule10();
     testModule11();
+    testBackingTrack();
     testRestNotes();
     testProgressDatabase();
     testProgressStore();

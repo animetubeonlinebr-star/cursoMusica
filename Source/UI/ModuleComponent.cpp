@@ -215,12 +215,148 @@ private:
         int height = 28 + th::spacing::sm; // topic title
         for (const auto& item : currentTopic->detail)
             height += itemHeight (item, width);
+        height += lickCardHeight (currentLick(), width);
         return height;
+    }
+
+    // The topic's lick (client: "cada tópico deve ter um lick"). It is shown
+    // after the explanation, so the student reads the theory and then sees the
+    // phrase it produces. Returns nullptr when the module has no lick for it.
+    const Lick* lickForId (const juce::String& id) const
+    {
+        if (current == nullptr || id.isEmpty())
+            return nullptr;
+
+        for (const auto& lick : current->licks)
+            if (lick.id == id)
+                return &lick;
+
+        return nullptr;
+    }
+
+    const Lick* currentLick() const
+    {
+        if (current == nullptr || currentTopic == nullptr)
+            return nullptr;
+
+        return lickForId ("LK-" + juce::String (current->number) + "." + currentTopic->id);
+    }
+
+    // The lick an exercise obliges the student to play (Exercise::lickId).
+    const Lick* exerciseLick() const
+    {
+        return currentExercise != nullptr ? lickForId (currentExercise->lickId) : nullptr;
+    }
+
+    // Shown above the reference song. While the excerpt is not mapped, the label
+    // must warn that the song illustrates the vocabulary, not the lick itself.
+    static juce::String referenceLabel (const Lick& lick)
+    {
+        return lick.referenceExcerptPending
+                   ? juce::String::fromUTF8 ("Referência de escuta — mesmo vocabulário, não a mesma frase")
+                   : juce::String::fromUTF8 ("Referência de escuta");
+    }
+
+    // Interior of the card: title, title text, guitarist line, tab, optional
+    // reference block and the "Ouvir exemplo" button.
+    int lickCardInteriorHeight (const Lick* lick, int width) const
+    {
+        if (lick == nullptr)
+            return 0;
+
+        int height = 22;                                   // card title
+        height += textHeight (th::type::makeFont (th::type::body, true), lick->title, width - 20);
+        height += 22;                                   // guitarist line
+        height += 26;                                   // tab line
+        if (lick->referenceSong.isNotEmpty())
+        {
+            height += th::spacing::sm;
+            height += textHeight (th::type::makeFont (th::type::caption, true), referenceLabel (*lick), width - 20);
+            height += textHeight (th::type::makeFont (th::type::caption), lick->referenceSong, width - 20);
+            height += textHeight (th::type::makeFont (th::type::caption), lick->referenceNote, width - 20);
+        }
+        height += 30;                                   // audio button
+        return height;
+    }
+
+    // Card height as painted: the gap above, the interior plus the 8px vertical
+    // padding of the rounded box, and the gap below. paintLickCard consumes
+    // exactly this, so the scroll height never drifts from the drawing.
+    int lickCardHeight (const Lick* lick, int width) const
+    {
+        if (lick == nullptr)
+            return 0;
+
+        return th::spacing::md + lickCardInteriorHeight (lick, width) + 16 + th::spacing::sm;
+    }
+
+    void paintLickCard (juce::Graphics& g, juce::Rectangle<int>& bounds, const Lick* lick)
+    {
+        if (lick == nullptr)
+            return;
+
+        bounds.removeFromTop (th::spacing::md);
+
+        auto card = bounds.removeFromTop (lickCardInteriorHeight (lick, bounds.getWidth()) + 16);
+        g.setColour (th::colour::surfaceRaised);
+        g.fillRoundedRectangle (card.toFloat(), th::radius::sm);
+        card.reduce (10, 8);
+
+        g.setColour (th::colour::accent);
+        g.setFont (th::type::makeFont (th::type::caption, true));
+        g.drawText (juce::String::fromUTF8 ("Lick do tópico  ·  ") + lick->id,
+                    card.removeFromTop (22), juce::Justification::centredLeft, false);
+
+        g.setColour (th::colour::textPrimary);
+        g.setFont (th::type::makeFont (th::type::body, true));
+        g.drawFittedText (lick->title, card.removeFromTop (textHeight (th::type::makeFont (th::type::body, true),
+                                                                      lick->title, card.getWidth())),
+                          juce::Justification::topLeft, 2);
+
+        g.setColour (th::colour::textSecondary);
+        g.setFont (th::type::makeFont (th::type::caption));
+        g.drawText (juce::String::fromUTF8 ("Referência: ") + lick->guitarist
+                        + juce::String::fromUTF8 ("  ·  padrão ") + lick->patternId,
+                    card.removeFromTop (22), juce::Justification::centredLeft, false);
+
+        g.setColour (th::colour::accentAlt);
+        g.setFont (juce::Font (juce::FontOptions (juce::Font::getDefaultMonospacedFontName(), 13.0f,
+                                                  juce::Font::plain)));
+        g.drawFittedText (lick->tab, card.removeFromTop (26), juce::Justification::centredLeft, 1);
+
+        if (lick->referenceSong.isNotEmpty())
+        {
+            card.removeFromTop (th::spacing::sm);
+            g.setColour (th::colour::textPrimary);
+            g.setFont (th::type::makeFont (th::type::caption, true));
+            g.drawFittedText (referenceLabel (*lick),
+                              card.removeFromTop (textHeight (th::type::makeFont (th::type::caption, true),
+                                                              referenceLabel (*lick), card.getWidth())),
+                              juce::Justification::topLeft, 2);
+
+            g.setColour (th::colour::textSecondary);
+            g.setFont (th::type::makeFont (th::type::caption));
+            g.drawFittedText (lick->referenceSong,
+                              card.removeFromTop (textHeight (th::type::makeFont (th::type::caption),
+                                                              lick->referenceSong, card.getWidth())),
+                              juce::Justification::topLeft, 2);
+            g.drawFittedText (lick->referenceNote,
+                              card.removeFromTop (textHeight (th::type::makeFont (th::type::caption),
+                                                              lick->referenceNote, card.getWidth())),
+                              juce::Justification::topLeft, 2);
+        }
+
+        paintAudioButton (g, card.removeFromTop (30), (int) audioButtonBounds.size(), lick->notes);
+        bounds.removeFromTop (th::spacing::sm);
     }
 
     int exerciseDetailHeight (int width) const
     {
         int height = 0; // the id/title sits on the meta line, not in the card
+
+        // An exercise that obliges a lick shows that lick right here: the student
+        // must play it, so it has to be on screen (client request, 2026-11-18).
+        height += lickCardHeight (exerciseLick(), width);
 
         if (currentExercise->isQuiz())
         {
@@ -451,6 +587,8 @@ private:
 
         for (const auto& item : topic.detail)
             paintItem (g, bounds, item);
+
+        paintLickCard (g, bounds, currentLick());
     }
 
     void paintItem (juce::Graphics& g, juce::Rectangle<int>& bounds, const ContentItem& item)
@@ -639,6 +777,10 @@ private:
 
     void paintExercise (juce::Graphics& g, juce::Rectangle<int> bounds, const Exercise& exercise)
     {
+        // An exercise that obliges a lick shows it first: the student must play
+        // the phrase, so it has to be visible (client request, 2026-11-18).
+        paintLickCard (g, bounds, exerciseLick());
+
         // A quiz goes straight to the question: the module header above already
         // states the context, so no goal/check card is repeated here (REQ-021).
         if (exercise.isQuiz())

@@ -170,6 +170,17 @@ struct Lick
     juce::String tab;        // compact tab/fret reading of the phrase
     juce::String source;     // curated apostila (REQ-006), when it comes from one
     std::vector<int> notes;  // MIDI notes of the phrase
+
+    // Listening reference (client request, 2026-11-18): a real, verified song in
+    // which the cited player uses the same vocabulary. The lick itself is an
+    // original phrase of the course, so the reference is *representative
+    // listening*, never the origin of the lick. `referenceExcerptPending` marks
+    // the one thing still missing: the exact excerpt (time range) the student
+    // should listen to. The song/album/year are already checked; the UI must not
+    // present the reference as the lick's source (AGENTS.md §10, MUSIC.md §11.5).
+    juce::String referenceSong;
+    juce::String referenceNote;
+    bool referenceExcerptPending = true;
 };
 
 // A guitar shape of the CAGED system.

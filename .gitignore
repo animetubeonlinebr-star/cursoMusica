@@ -1,4 +1,5 @@
 build/
+build-*/
 build-usage/
 usage-test.log
 External/JUCE/

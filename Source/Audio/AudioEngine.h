@@ -8,6 +8,7 @@
 
 #include "Audio/PitchDetector.h"
 #include "Audio/PluginChain.h"
+#include "Audio/BackingTrack.h"
 #include "Audio/Metronome.h"
 #include "Audio/TonePlayer.h"
 #include "Course/ExerciseEvaluator.h"
@@ -42,6 +43,7 @@ public:
     PluginChain& getPluginChain() noexcept { return pluginChain; }
     Metronome& getMetronome() noexcept { return metronome; }
     TonePlayer& getTonePlayer() noexcept { return tonePlayer; }
+    BackingTrack& getBackingTrack() noexcept { return backingTrack; }
 
     // Drains the detected-note queue into `out` (message thread only). Each
     // event carries the time (seconds since the last reset) it was detected.
@@ -115,6 +117,7 @@ private:
     PluginChain pluginChain;
     Metronome metronome;
     TonePlayer tonePlayer;
+    BackingTrack backingTrack;
 
     // Detected-note queue. Single-producer (analysis thread) / single-consumer
     // (message thread), so the atomic indices are enough.
