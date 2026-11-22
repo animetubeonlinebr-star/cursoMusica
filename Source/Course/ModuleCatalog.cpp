@@ -5252,8 +5252,24 @@ namespace
             l.tab = juce::String::fromUTF8 (tab);
             l.source = source;
             l.notes = midiOf (noteNames);
+            l.referenceExcerptPending = true; // excerpt (time range) pending, AGENTS.md §10
             m.licks.push_back (std::move (l));
             return l.id;
+        };
+
+        // Representative listening (client request, 2026-11-18, Decision A): a
+        // real song where the cited player uses the same scale/gesture — similar
+        // vocabulary, never the same phrase, since the lick is an original
+        // phrase of the course. Song, album and year are verified; the exact
+        // excerpt (time range) is still pending (docs/MUSIC.md §11.5).
+        auto listen = [&m] (const char* lickId, const char* song, const char* note)
+        {
+            for (auto& l : m.licks)
+                if (l.id == lickId)
+                {
+                    l.referenceSong = juce::String::fromUTF8 (song);
+                    l.referenceNote = juce::String::fromUTF8 (note);
+                }
         };
 
         lick ("LK-11.A", "Grupos de três subindo na região", "John Petrucci", "PTN-M-3",
@@ -5286,6 +5302,31 @@ namespace
         lick ("LK-11.J", "Frase de repouso e tensão sobre o vamp", "Santana", "PTN-M-3rds",
               "A|--5-8-10-12-10-8-5-12-10-8-5--|", "pdf-mozart-mello-improvisacion-pop",
               { "A4", "C5", "D5", "E5", "D5", "C5", "A4", "E5", "D5", "C5", "A4" });
+
+        // Simulated listening references (client request, 2026-11-18). Each song
+        // is a real recording where the cited player uses the same vocabulary as
+        // the topic's lick — never the lick itself, which is original. The UI
+        // labels all of these as "referência simulada (a mapear)".
+        listen ("LK-11.A", "Dream Theater — \"Under a Glass Moon\" (Images and Words, 1992)",
+                "Sequências de grupos de três subindo a escala; mesmo desenho, frase diferente.");
+        listen ("LK-11.B", "Guthrie Govan — \"Waves\" (Erotic Cakes, 2006)",
+                "Corridas ascendentes e descendentes na mesma posição; mesmo vocabulário, frase diferente.");
+        listen ("LK-11.C", "Richie Kotzen — \"Mother Head's Family Reunion\" (1994)",
+                "Pentatônica menor usada como base melódica sobre acorde m7; mesmo vocabulário, frase diferente.");
+        listen ("LK-11.D", "Greg Howe — \"Jump Start\" (Introspection, 1993)",
+                "Pentatônica com a sexta maior como cor sobre acorde menor; mesmo vocabulário, frase diferente.");
+        listen ("LK-11.E", "Edu Ardanuy (Dr. Sin) — \"Dr. Sin\" (Dr. Sin, 1993)",
+                "Pentatônica ligando posições vizinhas pela nota comum; mesmo vocabulário, frase diferente.");
+        listen ("LK-11.F", "Joe Satriani — \"Flying in a Blue Dream\" (1989)",
+                "Linhas longas ao longo de uma corda, com a mão viajando pelo braço; mesmo vocabulário, frase diferente.");
+        listen ("LK-11.G", "Kiko Loureiro — \"No Gravity\" (No Gravity, 2005)",
+                "Escala desenhada dentro da forma do acorde (Sistema 5); mesmo vocabulário, frase diferente.");
+        listen ("LK-11.H", "Yngwie Malmsteen — \"Far Beyond the Sun\" (Rising Force, 1984)",
+                "Corridas ascendentes na menor harmônica, com a segunda aumentada; mesmo vocabulário, frase diferente.");
+        listen ("LK-11.I", "Steve Vai — \"For the Love of God\" (Passion and Warfare, 1990)",
+                "Linhas cantáveis com a sexta e a sétima elevadas (menor melódica); mesmo vocabulário, frase diferente.");
+        listen ("LK-11.J", "Santana — \"Black Magic Woman\" (Abraxas, 1970)",
+                "Frases que alternam repouso no acorde e tensão de cor; mesmo vocabulário, frase diferente.");
 
         // Exercises: every one is played on the instrument and verified by the
         // app (module 11 has no quizzes). The first exercise of each topic plays

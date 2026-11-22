@@ -1,5 +1,7 @@
 #include "UI/PracticePanel.h"
 
+#include "Course/BackingProgression.h"
+
 #include "Course/ExerciseFilter.h"
 #include "Course/NoteMath.h"
 #include "UI/Design/Theme.h"
@@ -91,6 +93,10 @@ PracticePanel::PracticePanel (AudioEngine& engine)
         refreshExerciseRow();
         updateApplication();
 
+        // Switching exercises must republish the harmony, or the bed keeps
+        // playing the previous exercise's chords while the student plays the new one.
+        syncBackingFromExercise();
+
         // Arming another exercise also demonstrates it in the centre.
         if (onExerciseSelected != nullptr)
             onExerciseSelected (selectedExercise());
@@ -123,6 +129,9 @@ PracticePanel::PracticePanel (AudioEngine& engine)
     // Playable-exercise controls (the quiz runs in the centre pane).
     metronomeButton.onClick = [this] { toggleMetronome(); };
     addAndMakeVisible (metronomeButton);
+
+    backingButton.onClick = [this] { toggleBacking(); };
+    addAndMakeVisible (backingButton);
 
     startButton.onClick = [this] { startSelectedExercise(); };
     addAndMakeVisible (startButton);
@@ -167,6 +176,11 @@ void PracticePanel::setModule (const CourseModule* module)
     attemptReported = false;
     refreshExerciseList();
     syncMetronomeFromModule();
+
+    // Leaving the exercise behind also drops the bed: nothing is armed, so the
+    // old progression must not keep sounding under the new topic.
+    backingOn = false;
+    syncBackingFromExercise();
 }
 
 void PracticePanel::setTopicFilter (const juce::String& lessonId)
@@ -180,6 +194,9 @@ void PracticePanel::setTopicFilter (const juce::String& lessonId)
     previousAccuracy = -1;
     attemptReported = false;
     refreshExerciseList();
+
+    backingOn = false;
+    syncBackingFromExercise();
 }
 
 void PracticePanel::setModuleAndTopic (const CourseModule* module, const juce::String& lessonId)
@@ -307,6 +324,7 @@ void PracticePanel::updateApplication()
     // the question and the options; this pane keeps only the scoreboard).
     const bool showPlayControls = exerciseArmed && exercise != nullptr && ! quizMode;
     metronomeButton.setVisible (showPlayControls);
+    backingButton.setVisible (showPlayControls);
     startButton.setVisible (showPlayControls);
     finishButton.setVisible (showPlayControls);
     bpmLabel.setVisible (showPlayControls);
@@ -335,6 +353,40 @@ void PracticePanel::toggleMetronome()
     repaint();
 }
 
+void PracticePanel::toggleBacking()
+{
+    backingOn = ! backingOn;
+    audioEngine.getBackingTrack().setRunning (backingOn);
+    updateButtonStates();
+    repaint();
+}
+
+// Publishes the exercise's harmony to the backing track, so the bed matches the
+// chords the exercise actually runs over (client request, 2026-11-18).
+void PracticePanel::syncBackingFromExercise()
+{
+    auto& backing = audioEngine.getBackingTrack();
+
+    const auto* exercise = selectedExercise();
+    if (exercise == nullptr || currentModule == nullptr)
+    {
+        backing.setProgression ({});
+        backing.setRunning (false);
+        return;
+    }
+
+    const auto progression = course::backingProgressionFor (*currentModule, *exercise);
+
+    std::vector<BackingTrack::Chord> chords;
+    chords.reserve (progression.size());
+    for (const auto& chord : progression)
+        chords.push_back ({ chord.pitchClasses, chord.bassMidi });
+
+    backing.setProgression (chords);
+    backing.setBpm ((double) (exercise->targetBpm > 0 ? exercise->targetBpm : currentModule->targetBpm));
+    backing.setRunning (backingOn);
+}
+
 void PracticePanel::startSelectedExercise()
 {
     const auto* exercise = selectedExercise();
@@ -356,6 +408,10 @@ void PracticePanel::startSelectedExercise()
     audioEngine.getMetronome().setRunning (true);
     metronomeOn = true;
 
+    // The bed runs with the exercise: the student plays the phrase over it.
+    backingOn = true;
+    syncBackingFromExercise();
+
     updateButtonStates();
     repaint();
 }
@@ -365,6 +421,9 @@ void PracticePanel::finishExercise()
     session.finish();
     audioEngine.getMetronome().setRunning (false);
     metronomeOn = false;
+
+    audioEngine.getBackingTrack().setRunning (false);
+    backingOn = false;
 
     // Publish the verdict: updateFeedback paints the message and reports the
     // accuracy for persistence. Without it the finished attempt would be lost
@@ -534,6 +593,8 @@ void PracticePanel::updateButtonStates()
     finishButton.setEnabled (running);
     metronomeButton.setButtonText (metronomeOn ? juce::String::fromUTF8 ("Metrônomo: ligado")
                                                : juce::String::fromUTF8 ("Metrônomo: desligado"));
+    backingButton.setButtonText (backingOn ? juce::String::fromUTF8 ("Base: ligada")
+                                           : juce::String::fromUTF8 ("Base: desligada"));
 }
 
 void PracticePanel::paint (juce::Graphics& g)
@@ -588,12 +649,18 @@ void PracticePanel::resized()
     if (isQuizSelected())
         return;
 
+    // Two rows: four buttons and their labels do not fit side by side in the
+    // panel width, so the metronome/backing pair sits above start/finish.
     auto row = bounds.removeFromTop (30);
     metronomeButton.setBounds (row.removeFromLeft (150));
     row.removeFromLeft (th::spacing::sm);
-    startButton.setBounds (row.removeFromLeft (80));
+    backingButton.setBounds (row.removeFromLeft (140));
+
+    row = bounds.removeFromTop (30);
+    bounds.removeFromTop (th::spacing::xs);
+    startButton.setBounds (row.removeFromLeft (100));
     row.removeFromLeft (th::spacing::sm);
-    finishButton.setBounds (row.removeFromLeft (80));
+    finishButton.setBounds (row.removeFromLeft (100));
     bounds.removeFromTop (th::spacing::xs);
     bpmLabel.setBounds (bounds.removeFromTop (18));
 }
