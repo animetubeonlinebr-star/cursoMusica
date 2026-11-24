@@ -4036,6 +4036,70 @@ void testBackingTrack()
            "backing track sounds the second chord of the adopted vamp");
 
     backing.setRunning (false);
+
+    // The client heard "sem acordes na harmonia": the keyboard sat 5x below the
+    // kick and its envelope died before beat 3, so the bed sounded like drums
+    // alone. The harmony must now be audible AND last the whole bar.
+    {
+        BackingTrack harmony;
+        harmony.prepare (sampleRate);
+        harmony.setGain (1.0f);
+        harmony.setBpm (100.0);
+        harmony.setProgression ({ { { 9, 0, 4, 7 }, 45 } }); // Am7
+        harmony.setRunning (true);
+
+        const double beatSamples = sampleRate * 60.0 / 100.0;
+        float firstBeatPeak = 0.0f, lastBeatPeak = 0.0f, overallPeak = 0.0f;
+        const int blocksPerBeat = (int) (beatSamples / blockSize);
+        const int beats = 4;
+
+        for (int beat = 0; beat < beats; ++beat)
+        {
+            float beatPeak = 0.0f;
+            for (int b = 0; b < blocksPerBeat; ++b)
+            {
+                buffer.clear();
+                harmony.process (buffer, blockSize);
+                beatPeak = juce::jmax (beatPeak, harmony.takePadPeak());
+                overallPeak = juce::jmax (overallPeak, buffer.getMagnitude (0, blockSize));
+            }
+            if (beat == 0) firstBeatPeak = beatPeak;
+            if (beat == beats - 1) lastBeatPeak = beatPeak;
+        }
+
+        check (firstBeatPeak > 0.05f, "backing track: the chord is audible on the downbeat");
+        // Before the fix the chord was at 0,25% of its level by the end of the
+        // bar; holding it means beat 4 is within 25% of beat 1.
+        check (lastBeatPeak > firstBeatPeak * 0.75f,
+               "backing track: the chord sustains to the last beat of the bar");
+        check (firstBeatPeak < overallPeak,
+               "backing track: the chord sits under the peak of the full mix");
+
+        // One pool per part: a held 4-note pad must never take a drum voice.
+        // Rendering many bars at a fast tempo used to drop up to 19% of the notes.
+        for (double fastBpm : { 180.0, 240.0 })
+        {
+            BackingTrack fast;
+            fast.prepare (sampleRate);
+            fast.setGain (1.0f);
+            fast.setBpm (fastBpm);
+            fast.setProgression ({ { { 9, 0, 4, 7 }, 45 } });
+            fast.setRunning (true);
+
+            float padPeak = 0.0f;
+            const int fastBlocks = (int) (sampleRate * (240.0 / fastBpm) / blockSize);
+            for (int b = 0; b < fastBlocks; ++b)
+            {
+                buffer.clear();
+                fast.process (buffer, blockSize);
+                padPeak = juce::jmax (padPeak, fast.takePadPeak());
+            }
+
+            check (padPeak > 0.05f,
+                   juce::String ("backing track: the chord still sounds at ")
+                       + juce::String (fastBpm) + " BPM");
+        }
+    }
 }
 
 int main()

@@ -4,6 +4,7 @@
 
 #include <array>
 #include <atomic>
+#include <cstdint>
 #include <vector>
 
 namespace cursomusica
@@ -18,13 +19,10 @@ namespace cursomusica
 // lock, exactly like TonePlayer; the audio thread only takes the lock when it is
 // free, so a concurrent request can never stall the callback.
 //
-// The rhythm is a fixed study groove (one chord per bar, four beats):
-//   drums    — kick on 1 and 3, snare on 2 and 4, hi-hat on every eighth
-//   bass     — root on 1 and 3, fifth on 2 and 4 (an octave below the pad)
-//   keyboard — the chord's notes held as a soft pad, re-struck each bar
-//
-// All three voices are synthesised (sine partials with a short envelope), so no
-// sample data is needed and the module stays dependency-free.
+// Each part owns a fixed slice of the voice pool, so a chord held across the bar
+// can never take the voice a drum needs. The keyboard holds the chord until the
+// next downbeat instead of decaying away, which is what makes the harmony
+// audible under the drums (client: "sem acordes na harmonia").
 class BackingTrack
 {
 public:
@@ -58,13 +56,25 @@ public:
     // audio thread actually adopted. 0 when nothing is playing.
     unsigned getCurrentChordMask() const noexcept { return currentChordMask.load(); }
 
+    // Peak level of the pad part since the last call, so a test can prove the
+    // harmony is audible and not buried under the drums. Resets the reading.
+    float takePadPeak() noexcept { return padPeak.exchange (0.0f); }
+
     // Adds the backing track into the output buffer. Audio thread.
     void process (juce::AudioBuffer<float>& output, int numSamples) noexcept;
 
 private:
     static constexpr int maxChords = 16;
     static constexpr int maxPitchClasses = 6;
-    static constexpr int maxVoices = 16;
+
+    // One slice per part: a held chord can never starve the drums.
+    static constexpr int drumFirst = 0;
+    static constexpr int drumVoices = 8;
+    static constexpr int bassFirst = drumFirst + drumVoices;
+    static constexpr int bassVoices = 4;
+    static constexpr int padFirst = bassFirst + bassVoices;
+    static constexpr int padVoices = 12;
+    static constexpr int maxVoices = padFirst + padVoices;
 
     struct StoredChord
     {
@@ -73,7 +83,44 @@ private:
         int bassMidi = 45;
     };
 
-    void triggerVoice (int midi, float velocity, double decaySeconds) noexcept;
+    enum class Stage { attack, hold, release };
+
+    // Everything needed to start one voice. `count` voices sound `midi`,
+    // `midi + 1`, … so a chord or a drum hit is a single call.
+    struct VoiceSpec
+    {
+        int midi = 60;
+        int count = 1;
+        float velocity = 0.5f;
+        double attackSeconds = 0.005;   // ramp up to full level
+        double holdSeconds = 0.0;       // stay at full level, then release
+        double releaseSeconds = 0.20;   // decay time constant is this / 4
+        float harmonic = 0.0f;          // level of the 2nd partial
+        float noiseMix = 0.0f;          // 0 = pure tone, 1 = pure noise
+        float highpass = 0.0f;          // one-pole high-pass on the noise
+    };
+
+    struct Voice
+    {
+        bool active = false;
+        Stage stage = Stage::attack;
+        double phase = 0.0;
+        double increment = 0.0;
+        float envelope = 0.0f;
+        float attackInc = 0.0f;
+        float releaseMul = 0.0f;
+        int holdSamples = 0;
+        float level = 0.0f;
+        float harmonic = 0.0f;
+        float noiseMix = 0.0f;
+        float highpass = 0.0f;
+        float hpPrevIn = 0.0f;
+        float hpPrevOut = 0.0f;
+    };
+
+    // Starts `spec.count` voices from the pool slice starting at `first`.
+    void trigger (int first, int sliceSize, const VoiceSpec& spec) noexcept;
+    float nextNoise() noexcept;
 
     double sampleRate = 44100.0;
 
@@ -90,6 +137,7 @@ private:
     std::atomic<double> bpm { 100.0 };
     std::atomic<bool> running { false };
     std::atomic<float> gain { 0.5f };
+    std::atomic<float> padPeak { 0.0f };
 
     // Audio-thread-only state.
     std::array<StoredChord, maxChords> chords {};
@@ -100,12 +148,8 @@ private:
     int stepInBar = 0; // eighth-note step within the bar (0..7)
     bool started = false;
 
-    std::array<double, maxVoices> voicePhase {};
-    std::array<double, maxVoices> voiceIncrement {};
-    std::array<float, maxVoices> voiceEnvelope {};
-    std::array<float, maxVoices> voiceDecay {};
-    std::array<float, maxVoices> voiceLevel {};
-    std::array<bool, maxVoices> voiceActive {};
+    std::array<Voice, maxVoices> voices {};
+    std::uint32_t rngState = 0x9e3779b9u;
 };
 
 } // namespace cursomusica
