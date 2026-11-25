@@ -27,7 +27,7 @@ PGUSER="${PGUSER:-postgres}"
 ROLE="${CURSOMUSICA_ROLE:-cursomusica}"
 ROLE_PASSWORD="${CURSOMUSICA_ROLE_PASSWORD:-cursomusica}"
 DB="${CURSOMUSICA_DB:-curso-musica}"
-SCHEMA="${CURSOMUSICA_PG_SCHEMA:-curso-musica}"
+SCHEMA="${CURSOMUSICA_PG_SCHEMA:-curso}"
 
 say() { printf '%s\n' "$*"; }
 die() { printf 'erro: %s\n' "$*" >&2; exit 1; }

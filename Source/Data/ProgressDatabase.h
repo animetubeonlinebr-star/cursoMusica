@@ -21,7 +21,7 @@ struct PostgresConfig
     juce::String user;
     juce::String password;
     juce::String dbname;
-    juce::String schema { "curso-musica" };
+    juce::String schema { "curso" };
     juce::String student { "local" };
     bool disabled = false;
 
@@ -45,7 +45,7 @@ struct PostgresConfig
 };
 
 // Thin wrapper over libpq that stores the student's progress in a PostgreSQL
-// schema (default "curso-musica"). Three tables (ADR 0006, docs/DATA.md v5):
+// schema (default "curso"). Three tables (ADR 0006, docs/DATA.md v5):
 //
 //   progress         one row per student: highest_passed_module (monotonic)
 //   module_result    append-only history of gate results, for audit/BI

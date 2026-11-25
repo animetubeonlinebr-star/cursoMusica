@@ -445,14 +445,20 @@ void PracticePanel::syncBackingFromExercise()
         return;
     }
 
-    const auto progression = course::backingProgressionFor (*currentModule, *exercise);
+    const auto arrangement = course::backingArrangementFor (*currentModule, *exercise);
 
     std::vector<BackingTrack::Chord> chords;
-    chords.reserve (progression.size());
-    for (const auto& chord : progression)
+    chords.reserve (arrangement.chords.size());
+    for (const auto& chord : arrangement.chords)
         chords.push_back ({ chord.pitchClasses, chord.bassMidi });
 
     backing.setProgression (chords);
+    // The bed sounds like the style the topic teaches, with a density that grows
+    // with the module level (client, 2026-11-18).
+    backing.setStyle (arrangement.style == course::BackingStyle::samba
+                          ? BackingTrack::Style::samba
+                          : BackingTrack::Style::rock);
+    backing.setLevel (currentModule->level);
     backing.setBpm ((double) (chosenBpm > 0 ? chosenBpm : exerciseGoalBpm()));
     backing.setRunning (backingOn);
 }
@@ -486,6 +492,11 @@ void PracticePanel::startSelectedExercise()
     // The bed runs with the exercise: the student plays the phrase over it.
     backingOn = true;
     syncBackingFromExercise();
+
+    // Same tempo on both parts, then one restart so beat 1 and the first chord
+    // land together (the bed follows the metronome's andamento).
+    audioEngine.getBackingTrack().setBpm ((double) session.getPracticeBpm());
+    audioEngine.restartTransport();
 
     updateButtonStates();
     repaint();

@@ -34,8 +34,23 @@ public:
         int bassMidi = 45; // A2 by default
     };
 
+    // The two arrangements the course needs so far: a rock/pop bed (keyboard,
+    // guitar riff, bass groove, drums) and a samba bed (cavaquinho, 7-string
+    // guitar, surdo/pandeiro/rebolo). Client, 2026-11-18: the bed must sound like
+    // the style the topic teaches, not the same vamp everywhere.
+    enum class Style { rock, samba };
+
     void prepare (double sampleRate) noexcept;
     void reset() noexcept;
+
+    void setStyle (Style newStyle) noexcept { style.store ((int) newStyle); }
+    Style getStyle() const noexcept { return (Style) style.load(); }
+
+    // Module level (1..4). Higher levels get a denser arrangement — a pickup
+    // kick, sixteenth hi-hats and a bass answer on the fifth (client: complexity
+    // proportional to the level).
+    void setLevel (int newLevel) noexcept { level.store (juce::jlimit (1, 4, newLevel)); }
+    int getLevel() const noexcept { return level.load(); }
 
     // Publishes the progression to play. Message thread. An empty progression
     // stops the track.
@@ -60,6 +75,10 @@ public:
     // harmony is audible and not buried under the drums. Resets the reading.
     float takePadPeak() noexcept { return padPeak.exchange (0.0f); }
 
+    // Peak level of the plucked part (guitar riff / cavaquinho) since the last
+    // call, so a test can prove the style actually plays a second instrument.
+    float takeGuitarPeak() noexcept { return guitarPeak.exchange (0.0f); }
+
     // Adds the backing track into the output buffer. Audio thread.
     void process (juce::AudioBuffer<float>& output, int numSamples) noexcept;
 
@@ -74,7 +93,11 @@ private:
     static constexpr int bassVoices = 4;
     static constexpr int padFirst = bassFirst + bassVoices;
     static constexpr int padVoices = 12;
-    static constexpr int maxVoices = padFirst + padVoices;
+    static constexpr int guitarFirst = padFirst + padVoices;
+    static constexpr int guitarVoices = 10;
+    static constexpr int percFirst = guitarFirst + guitarVoices;
+    static constexpr int percVoices = 8;
+    static constexpr int maxVoices = percFirst + percVoices;
 
     struct StoredChord
     {
@@ -137,7 +160,10 @@ private:
     std::atomic<double> bpm { 100.0 };
     std::atomic<bool> running { false };
     std::atomic<float> gain { 0.5f };
+    std::atomic<int> style { (int) Style::rock };
+    std::atomic<int> level { 1 };
     std::atomic<float> padPeak { 0.0f };
+    std::atomic<float> guitarPeak { 0.0f };
 
     // Audio-thread-only state.
     std::array<StoredChord, maxChords> chords {};
@@ -145,7 +171,7 @@ private:
     int chordIndex = 0;
 
     double samplesToNextStep = 0.0;
-    int stepInBar = 0; // eighth-note step within the bar (0..7)
+    int stepInBar = 0; // sixteenth-note step within the bar (0..15)
     bool started = false;
 
     std::array<Voice, maxVoices> voices {};

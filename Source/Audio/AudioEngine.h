@@ -73,6 +73,22 @@ public:
     bool isRunning() const noexcept { return running.load(); }
     juce::String getActiveBackendName() const;
 
+    // Monitoring: whether the captured (plugin-processed) input is also sent to
+    // the output, so the student hears what they play (client, 2026-11-18: "o
+    // aluno precisa ouvir o que está tocando"). On by default; the switch exists
+    // so speakers can be used without feedback. Message thread.
+    void setMonitoring (bool shouldMonitor) noexcept { monitoring.store (shouldMonitor); }
+    bool isMonitoring() const noexcept { return monitoring.load(); }
+    void setMonitorGain (float linearGain) noexcept { monitorGain.store (juce::jlimit (0.0f, 2.0f, linearGain)); }
+    float getMonitorGain() const noexcept { return monitorGain.load(); }
+
+    // Restarts the metronome and the backing track together, on the same sample,
+    // so beat 1 and the first chord always land on the same instant. Without it
+    // each kept its own phase from the previous run and the chord changes did
+    // not fall on the click (client: "as bases precisam acompanhar o andamento
+    // do metrônomo"). Message thread; applied at the top of the next callback.
+    void restartTransport() noexcept { transportRestart.store (true); }
+
     void audioDeviceIOCallbackWithContext (const float* const* inputChannelData,
                                            int numInputChannels,
                                            float* const* outputChannelData,
@@ -107,6 +123,9 @@ private:
     std::atomic<int> currentBlockSize { 0 };
     std::atomic<double> estimatedLatencyMs { 0.0 };
     std::atomic<bool> running { false };
+    std::atomic<bool> monitoring { true };
+    std::atomic<bool> transportRestart { false };
+    std::atomic<float> monitorGain { 0.8f };
 
     // Lock-free handoff of input audio to the UI/analysis side.
     static constexpr int fifoSize = 1 << 14;

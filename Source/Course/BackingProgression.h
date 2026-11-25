@@ -30,4 +30,27 @@ struct BackingChord
 std::vector<BackingChord> backingProgressionFor (const CourseModule& module,
                                                 const Exercise& exercise);
 
+// Instrumentation the bed should use. The client asked for the bed to sound like
+// the style the topic teaches (2026-11-18): a rock/pop bed (keyboard, guitar
+// riff, bass groove, drums) by default, and the samba bed (cavaquinho, 7-string
+// guitar, surdo/pandeiro/rebolo) when the exercise is about samba/bossa.
+enum class BackingStyle { rock, samba };
+
+// The full bed for an exercise: which chords and which instrumentation.
+struct BackingArrangement
+{
+    std::vector<BackingChord> chords;
+    BackingStyle style = BackingStyle::rock;
+};
+
+// Chooses the harmony and the style for `exercise`. The harmony comes from, in
+// order: the exercise's own progression, the chord it holds for improvisation,
+// the chord-shaped examples of its topic (so each topic sounds like what it
+// teaches instead of the same generic vamp), the module gate, A minor.
+BackingArrangement backingArrangementFor (const CourseModule& module,
+                                          const Exercise& exercise);
+
+// The style of `exercise`, by its own wording. Pure and testable.
+BackingStyle backingStyleFor (const Exercise& exercise);
+
 } // namespace cursomusica::course
