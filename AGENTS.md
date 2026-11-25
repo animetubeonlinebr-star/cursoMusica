@@ -440,6 +440,16 @@ cmake --build build --config Release
 
 ## 10. Pendências e armadilhas conhecidas
 
+**Fora de escopo por decisão do cliente (2026-11-17) — não reabrir:**
+
+- **Download de áudio (yt-dlp + MP3) e comparação tablatura × áudio**: o cliente
+  decidiu adiar e depois encerrou o assunto ("pode ignorar, não vamos fazer").
+  Não existe código para isso no repositório e não deve ser criado.
+- **Tela com 2 campos de entrada e 2 de retorno de áudio**: encerrado pelo
+  cliente ("pode ignorar, não vamos fazer"). A janela de Configurações só tem os
+  campos de banco (`DatabaseSettingsComponent`), que permanecem.
+
+
 - O ASIO SDK **não** acompanha o JUCE; não existe `JUCE_ASIO_SDK_PATH`. O CMake
   detecta em `ASIO_SDK_DIR`, `External/asio` ou variável de ambiente. Guia:
   `docs/ASIO-Windows.md`.
@@ -460,6 +470,8 @@ cmake --build build --config Release
   só o **trecho** (minutagem) por lick, a validar pelo `musician`; ao ser feito,
   `Lick::referenceExcerptPending` passa a `false` e o rótulo de ressalva sai.
   **Nunca** apresentar a referência como origem do lick.
+
+| 2026-11-17 | orquestrador + pm | **Encerramento de dois pedidos do cliente: download de áudio (yt-dlp + MP3) com comparação tablatura × áudio, e a tela com 2 entradas + 2 retornos de áudio.** O cliente mandou ignorar ambos ("não vamos fazer"). Registrados como **fora de escopo** na §10 para que nenhum agente os reabra; nada de código é adicionado por eles | Escopo do produto fecha em: módulos, medição, afinador, VST3, base por tópico, PostgreSQL e instalador |
 
 ## 11. Disciplina de branches, backup e push (regra do usuário)
 
