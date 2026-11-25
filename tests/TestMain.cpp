@@ -10,6 +10,8 @@
 
 #include "Audio/AudioPortClassifier.h"
 #include "Audio/DeviceSettings.h"
+#include "Audio/Metronome.h"
+#include "Audio/MonitorMix.h"
 #include "Audio/PitchDetector.h"
 #include "Audio/PluginChainModel.h"
 #include "Audio/PluginSearchPaths.h"
@@ -669,7 +671,7 @@ void testProgressDatabase()
 
     const auto config = PostgresConfig::fromEnvironment();
     check (config.port == "5432", "default PostgreSQL port is 5432");
-    check (config.schema == "curso-musica", "default schema is curso-musica");
+    check (config.schema == "curso", "default schema is curso");
     check (config.student.isNotEmpty(), "a student id is always present");
 
     ProgressDatabase database;
@@ -893,7 +895,7 @@ void testDatabaseConfigPersistence()
     saved.port   = "5433";
     saved.user   = "cursomusica";
     saved.dbname = "curso-musica";
-    saved.schema = "curso-musica";
+    saved.schema = "curso";
     saved.disabled = false;
     saved.saveToSettings();
 
@@ -902,7 +904,7 @@ void testDatabaseConfigPersistence()
     check (loaded.host == "db.example", "the host round-trips");
     check (loaded.port == "5433", "the port round-trips");
     check (loaded.user == "cursomusica", "the user round-trips");
-    check (loaded.schema == "curso-musica", "the schema round-trips");
+    check (loaded.schema == "curso", "the schema round-trips");
 
     // The password must never be written to the settings file (docs/SECURITY.md).
     const auto text = settings.getFile().loadFileAsString();
@@ -3893,11 +3895,14 @@ void testModule11()
 
     if (drill != nullptr)
     {
+        // A drill always gets a bed: its topic's own chord example when there is
+        // one, otherwise the gate, otherwise A minor (never silence).
         const auto fallback = course::backingProgressionFor (*m11, *drill);
-        check (fallback.size() == 1, "a drill's bed is a single chord");
-        check (fallback.front().pitchClasses == std::vector<int> { 9, 0, 4 },
-               "a module 11 drill plays over A minor, the module's centre");
+        check (! fallback.empty(), "a drill always gets a bed to play over");
+        for (const auto& chord : fallback)
+            check (! chord.pitchClasses.empty(), "every fallback chord has notes");
     }
+
 
     // The gate-declares-a-vamp branch: a drill then plays the gate's own chords,
     // not the fallback. Built here so the branch cannot regress silently.
@@ -3938,6 +3943,284 @@ void testModule11()
     check (lastResort.size() == 1, "a module without a gate still gets a one-chord bed");
     check (lastResort.front().pitchClasses == std::vector<int> { 9, 0, 4 },
            "the last-resort bed is A minor");
+}
+
+// Monitoring: the captured input must reach the output, otherwise the student
+// plays and hears nothing (client, 2026-11-18). Exercises the real mixing helper.
+void testMonitorMix()
+{
+    std::cout << "Monitor mix (input -> output)\n";
+    using namespace cursomusica;
+
+    constexpr int numSamples = 8;
+
+    // Input carries a known ramp; the metronome/backing already occupy the
+    // outputs, so monitoring must ADD to what is there, never replace it.
+    float input[numSamples] = { 0.10f, -0.20f, 0.30f, -0.40f, 0.50f, -0.60f, 0.70f, -0.80f };
+    float left[numSamples] = {};
+    float right[numSamples] = {};
+    for (int i = 0; i < numSamples; ++i)
+        left[i] = right[i] = 0.05f; // the metronome click already in the buffer
+
+    float* outputs[2] = { left, right };
+    monitor::addToOutputs (outputs, 2, input, numSamples, 1.0f);
+
+    bool leftOk = true, rightOk = true;
+    for (int i = 0; i < numSamples; ++i)
+    {
+        const float expected = 0.05f + input[i];
+        if (std::abs (left[i] - expected) > 1.0e-6f) leftOk = false;
+        if (std::abs (right[i] - expected) > 1.0e-6f) rightOk = false;
+    }
+
+    check (leftOk, "monitor: the input is added to the left output");
+    check (rightOk, "monitor: the input is added to the right output");
+
+    // The gain scales the monitored signal only.
+    float scaled[numSamples] = {};
+    float* one[1] = { scaled };
+    monitor::addToOutputs (one, 1, input, numSamples, 0.5f);
+    check (std::abs (scaled[2] - 0.30f * 0.5f) < 1.0e-6f,
+           "monitor: the gain scales the monitored signal");
+
+    // Silence must stay silent, and a null input must be a no-op (no crash).
+    float untouched[numSamples] = {};
+    float* nullOut[1] = { untouched };
+    monitor::addToOutputs (nullOut, 1, nullptr, numSamples, 1.0f);
+    bool untouchedOk = true;
+    for (float value : untouched)
+        if (std::abs (value) > 1.0e-9f) untouchedOk = false;
+    check (untouchedOk, "monitor: a null input leaves the output untouched");
+
+    // Zero gain is a no-op (monitoring muted without changing the mix).
+    float muted[numSamples] = {};
+    float* mutedOut[1] = { muted };
+    monitor::addToOutputs (mutedOut, 1, input, numSamples, 0.0f);
+    bool mutedOk = true;
+    for (float value : muted)
+        if (std::abs (value) > 1.0e-9f) mutedOk = false;
+    check (mutedOk, "monitor: zero gain leaves the output untouched");
+
+    // A null output channel is skipped while the others still receive audio.
+    float present[numSamples] = {};
+    float* mixed[2] = { nullptr, present };
+    monitor::addToOutputs (mixed, 2, input, numSamples, 1.0f);
+    check (std::abs (present[0] - input[0]) < 1.0e-6f,
+           "monitor: a null output channel is skipped, the other still receives audio");
+}
+
+// The backing bed must follow the metronome's andamento (client, 2026-11-18).
+// Both are clocked parts; started together they must agree on where the beat is.
+// Four clicks per chord change is the observable proof that they share a clock.
+void testTransportAlignment()
+{
+    std::cout << "Transport alignment (metronome <-> backing)\n";
+    using namespace cursomusica;
+
+    constexpr double sampleRate = 48000.0;
+    constexpr int blockSize = 256;
+
+    Metronome metronome;
+    metronome.prepare (sampleRate);
+    metronome.setBpm (120.0);
+    metronome.setBeatsPerBar (4);
+    metronome.setSubdivision (course::TempoGrid::Subdivision::quarter);
+    metronome.setGain (1.0f);
+
+    BackingTrack backing;
+    backing.prepare (sampleRate);
+    backing.setGain (1.0f);
+    backing.setProgression ({ { { 9, 0, 4, 7 }, 45 }, { { 2, 5, 9, 0 }, 50 } });
+    backing.setBpm (120.0);
+
+    juce::AudioBuffer<float> buffer (2, blockSize);
+
+    auto renderBoth = [&] (double seconds)
+    {
+        const int blocks = (int) (sampleRate * seconds / blockSize);
+        for (int b = 0; b < blocks; ++b)
+        {
+            buffer.clear();
+            metronome.process (buffer, blockSize);
+            backing.process (buffer, blockSize);
+        }
+    };
+
+    // Started together, both must begin on the very first sample: one click in
+    // the first block and the first chord already sounding.
+    metronome.reset();
+    backing.reset();
+    metronome.setRunning (true);
+    backing.setRunning (true);
+
+    buffer.clear();
+    metronome.process (buffer, blockSize);
+    backing.process (buffer, blockSize);
+    check (metronome.getBeatCount() == 1, "transport: the metronome clicks on the first sample after a restart");
+    check (backing.getCurrentChordIndex() == 0, "transport: the backing starts on the first chord after a restart");
+    check (buffer.getMagnitude (0, blockSize) > 0.001f, "transport: both parts sound from the first block");
+
+    // Just before the bar ends: 4 clicks (0, 0.5, 1.0, 1.5 s), still the first
+    // chord. 4 clicks per bar is exactly the 4/4 the backing assumes.
+    renderBoth (1.9);
+    check (metronome.getBeatCount() == 4, "transport: four clicks fit one bar");
+    check (backing.getCurrentChordIndex() == 0, "transport: the chord holds for the whole bar");
+
+    // Past the bar line: the fifth click and the chord change land together.
+    renderBoth (0.2);
+    check (metronome.getBeatCount() == 5, "transport: the fifth click opens the second bar");
+    check (backing.getCurrentChordIndex() == 1, "transport: the chord changes on the downbeat, with the click");
+
+    metronome.setRunning (false);
+    backing.setRunning (false);
+}
+
+// The bed must sound like the harmony and the style the topic teaches instead of
+// the same generic vamp in every topic (client, 2026-11-18). Both choices are
+// pure functions, so they are asserted directly; the audio side is asserted by
+// rendering the real BackingTrack.
+void testBackingArrangement()
+{
+    std::cout << "Backing arrangement (topic harmony + style)\n";
+    using namespace cursomusica;
+    using namespace cursomusica::course;
+
+    // Module 8 topic F is the modal-borrowing topic: its example plays a borrowed
+    // Fm over C, so the bed must not fall back to the module gate vamp.
+    const auto* module8 = ModuleCatalog::findModule (8);
+    check (module8 != nullptr, "arrangement: module 8 exists");
+    if (module8 == nullptr)
+        return;
+
+    const Exercise* borrowed = nullptr;
+    for (const auto& e : module8->exercises)
+        if (e.lessonId == "F" && e.chordProgression.empty()
+            && e.restNotes.chordPitchClasses.empty() && ! e.isQuiz())
+        {
+            borrowed = &e;
+            break;
+        }
+
+    check (borrowed != nullptr, "arrangement: module 8 topic F has an exercise without its own chords");
+    if (borrowed != nullptr)
+    {
+        const auto arrangement = backingArrangementFor (*module8, *borrowed);
+
+        auto hasChord = [&] (std::initializer_list<int> pcs)
+        {
+            for (const auto& chord : arrangement.chords)
+            {
+                bool all = true;
+                for (int pc : pcs)
+                    if (std::find (chord.pitchClasses.begin(), chord.pitchClasses.end(), pc)
+                        == chord.pitchClasses.end())
+                    {
+                        all = false;
+                        break;
+                    }
+                if (all)
+                    return true;
+            }
+            return false;
+        };
+
+        check (! arrangement.chords.empty(), "arrangement: the bed always has harmony");
+        check (hasChord ({ 5, 8, 0 }),
+               "arrangement: module 8 topic F gets the borrowed Fm from its own example");
+        check (arrangement.style == BackingStyle::rock,
+               "arrangement: a harmony topic uses the rock/pop bed");
+    }
+
+    // A bossa/samba exercise asks for the samba bed, by its own wording.
+    Exercise bossa;
+    bossa.title = "Tocar o ii-V-I em estilo de bossa";
+    check (backingStyleFor (bossa) == BackingStyle::samba,
+           "arrangement: a bossa exercise selects the samba bed");
+
+    Exercise rock;
+    rock.title = "Tocar a escala maior ascendente";
+    check (backingStyleFor (rock) == BackingStyle::rock,
+           "arrangement: a plain exercise keeps the rock/pop bed");
+
+    // A topic with no chord example falls back to the module gate vamp, so the
+    // bed still has harmony (never empty).
+    if (const auto* module1 = ModuleCatalog::findModule (1))
+        for (const auto& e : module1->exercises)
+            if (e.chordProgression.empty() && e.restNotes.chordPitchClasses.empty()
+                && ! e.isQuiz() && e.targets.size() > 3)
+            {
+                const auto arrangement = backingArrangementFor (*module1, e);
+                check (! arrangement.chords.empty(),
+                       "arrangement: a melodic exercise still gets a harmony to play over");
+                break;
+            }
+}
+
+// Both styles must actually play their instruments: the rock bed a keyboard pad
+// plus a guitar riff, the samba bed a violao/cavaquinho plus percussion. The peak
+// of the plucked pool proves the second instrument is not silent.
+void testBackingStyles()
+{
+    std::cout << "Backing styles (rock / samba)\n";
+    using namespace cursomusica;
+
+    constexpr double sampleRate = 48000.0;
+    constexpr int blockSize = 256;
+
+    BackingTrack backing;
+    backing.prepare (sampleRate);
+    backing.setGain (1.0f);
+    backing.setBpm (100.0);
+    backing.setProgression ({ { { 9, 0, 4, 7 }, 45 }, { { 2, 5, 9, 0 }, 50 } });
+
+    juce::AudioBuffer<float> buffer (2, blockSize);
+    auto render = [&] (int blocks)
+    {
+        float peak = 0.0f;
+        for (int b = 0; b < blocks; ++b)
+        {
+            buffer.clear();
+            backing.process (buffer, blockSize);
+            peak = juce::jmax (peak, buffer.getMagnitude (0, blockSize));
+        }
+        return peak;
+    };
+
+    check (backing.getStyle() == BackingTrack::Style::rock, "style: the bed defaults to rock/pop");
+
+    backing.setStyle (BackingTrack::Style::rock);
+    backing.setRunning (true);
+    const float rockPeak = render (40);
+    const float rockPad = backing.takePadPeak();
+    const float rockGuitar = backing.takeGuitarPeak();
+    check (rockPeak > 0.001f && rockPeak <= 1.0f, "style: the rock bed sounds and does not clip");
+    check (rockPad > 0.0f, "style: the rock bed plays the keyboard pad");
+    check (rockGuitar > 0.0f, "style: the rock bed plays a guitar riff");
+
+    backing.setRunning (false);
+    backing.setStyle (BackingTrack::Style::samba);
+    check (backing.getStyle() == BackingTrack::Style::samba, "style: the samba bed can be selected");
+    backing.reset();
+    backing.setRunning (true);
+    const float sambaPeak = render (40);
+    const float sambaViolao = backing.takePadPeak();
+    const float sambaCavaquinho = backing.takeGuitarPeak();
+    check (sambaPeak > 0.001f && sambaPeak <= 1.0f, "style: the samba bed sounds and does not clip");
+    check (sambaViolao > 0.0f, "style: the samba bed plays the violao 7 voicing");
+    check (sambaCavaquinho > 0.0f, "style: the samba bed plays the cavaquinho");
+
+    // Level raises the density but must never push the mix into clipping.
+    backing.setRunning (false);
+    backing.reset();
+    backing.setLevel (4);
+    backing.setRunning (true);
+    const float loudPeak = render (40);
+    check (backing.getLevel() == 4, "style: the bed takes the module level");
+    check (loudPeak <= 1.0f, "style: the densest level still does not clip");
+
+    backing.setLevel (0);
+    check (backing.getLevel() == 1, "style: the level is clamped to 1..4");
+    backing.setRunning (false);
 }
 
 // The backing track is a real-time audio component, so it is exercised on the
@@ -4036,6 +4319,70 @@ void testBackingTrack()
            "backing track sounds the second chord of the adopted vamp");
 
     backing.setRunning (false);
+
+    // The client heard "sem acordes na harmonia": the keyboard sat 5x below the
+    // kick and its envelope died before beat 3, so the bed sounded like drums
+    // alone. The harmony must now be audible AND last the whole bar.
+    {
+        BackingTrack harmony;
+        harmony.prepare (sampleRate);
+        harmony.setGain (1.0f);
+        harmony.setBpm (100.0);
+        harmony.setProgression ({ { { 9, 0, 4, 7 }, 45 } }); // Am7
+        harmony.setRunning (true);
+
+        const double beatSamples = sampleRate * 60.0 / 100.0;
+        float firstBeatPeak = 0.0f, lastBeatPeak = 0.0f, overallPeak = 0.0f;
+        const int blocksPerBeat = (int) (beatSamples / blockSize);
+        const int beats = 4;
+
+        for (int beat = 0; beat < beats; ++beat)
+        {
+            float beatPeak = 0.0f;
+            for (int b = 0; b < blocksPerBeat; ++b)
+            {
+                buffer.clear();
+                harmony.process (buffer, blockSize);
+                beatPeak = juce::jmax (beatPeak, harmony.takePadPeak());
+                overallPeak = juce::jmax (overallPeak, buffer.getMagnitude (0, blockSize));
+            }
+            if (beat == 0) firstBeatPeak = beatPeak;
+            if (beat == beats - 1) lastBeatPeak = beatPeak;
+        }
+
+        check (firstBeatPeak > 0.05f, "backing track: the chord is audible on the downbeat");
+        // Before the fix the chord was at 0,25% of its level by the end of the
+        // bar; holding it means beat 4 is within 25% of beat 1.
+        check (lastBeatPeak > firstBeatPeak * 0.75f,
+               "backing track: the chord sustains to the last beat of the bar");
+        check (firstBeatPeak < overallPeak,
+               "backing track: the chord sits under the peak of the full mix");
+
+        // One pool per part: a held 4-note pad must never take a drum voice.
+        // Rendering many bars at a fast tempo used to drop up to 19% of the notes.
+        for (double fastBpm : { 180.0, 240.0 })
+        {
+            BackingTrack fast;
+            fast.prepare (sampleRate);
+            fast.setGain (1.0f);
+            fast.setBpm (fastBpm);
+            fast.setProgression ({ { { 9, 0, 4, 7 }, 45 } });
+            fast.setRunning (true);
+
+            float padPeak = 0.0f;
+            const int fastBlocks = (int) (sampleRate * (240.0 / fastBpm) / blockSize);
+            for (int b = 0; b < fastBlocks; ++b)
+            {
+                buffer.clear();
+                fast.process (buffer, blockSize);
+                padPeak = juce::jmax (padPeak, fast.takePadPeak());
+            }
+
+            check (padPeak > 0.05f,
+                   juce::String ("backing track: the chord still sounds at ")
+                       + juce::String (fastBpm) + " BPM");
+        }
+    }
 }
 
 int main()
@@ -4066,6 +4413,10 @@ int main()
     testModule9();
     testModule10();
     testModule11();
+    testMonitorMix();
+    testTransportAlignment();
+    testBackingArrangement();
+    testBackingStyles();
     testBackingTrack();
     testRestNotes();
     testProgressDatabase();

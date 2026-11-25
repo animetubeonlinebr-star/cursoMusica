@@ -15,7 +15,7 @@
 #   CURSOMUSICA_ROLE              papel da aplicacao        (cursomusica)
 #   CURSOMUSICA_ROLE_PASSWORD     senha da aplicacao        (cursomusica)
 #   CURSOMUSICA_DB                banco                     (curso-musica)
-#   CURSOMUSICA_PG_SCHEMA         schema                    (curso-musica)
+#   CURSOMUSICA_PG_SCHEMA         schema                    (curso)
 #
 # Ao final, imprime os `export` que o app le (ver docs/POSTGRESQL.md).
 
@@ -27,7 +27,7 @@ PGUSER="${PGUSER:-postgres}"
 ROLE="${CURSOMUSICA_ROLE:-cursomusica}"
 ROLE_PASSWORD="${CURSOMUSICA_ROLE_PASSWORD:-cursomusica}"
 DB="${CURSOMUSICA_DB:-curso-musica}"
-SCHEMA="${CURSOMUSICA_PG_SCHEMA:-curso-musica}"
+SCHEMA="${CURSOMUSICA_PG_SCHEMA:-curso}"
 
 say() { printf '%s\n' "$*"; }
 die() { printf 'erro: %s\n' "$*" >&2; exit 1; }

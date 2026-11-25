@@ -376,6 +376,7 @@ target_sources(CursoMusicaTests PRIVATE
     Source/Course/QuizSession.cpp
     Source/Course/RestNotes.cpp
     Source/Course/BackingProgression.cpp
+    Source/Audio/Metronome.cpp
     Source/Audio/BackingTrack.cpp
     Source/Course/ModuleCatalog.cpp
     Source/Course/ProgressStore.cpp

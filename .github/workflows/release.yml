@@ -89,7 +89,8 @@ jobs:
           # backslashes: on Windows NSIS matches the pattern with FindFirstFile,
           # which rejects forward slashes ("no files found").
           $runtime = Join-Path $PWD "build/runtime"
-          $defines = @("-DAPPEXE=$app", "-DOUTFILE=$out", "-DAPPICON=$icon", "-DRUNTIMEDIR=$runtime")
+          $dbCheck = Join-Path $PWD "deploy/windows/ensure-database.ps1"
+          $defines = @("-DAPPEXE=$app", "-DOUTFILE=$out", "-DAPPICON=$icon", "-DRUNTIMEDIR=$runtime", "-DDBCHECKSCRIPT=$dbCheck")
           if (Test-Path "build/runtime") {
             $defines += "-DRUNTIME"
           }

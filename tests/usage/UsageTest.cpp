@@ -102,7 +102,7 @@ namespace
 
         const auto config = PostgresConfig::fromEnvironment();
         check (config.port == "5432", "porta padrao do PostgreSQL e 5432");
-        check (config.schema == "curso-musica", "schema padrao e curso-musica");
+        check (config.schema == "curso", "schema padrao e curso");
         check (config.dbname == "curso-musica" || config.dbname.isEmpty(),
                "banco configurado e curso-musica (ou o default do ambiente)");
 
@@ -121,7 +121,7 @@ namespace
         }
 
         check (db.isConnected(), "conectou ao PostgreSQL");
-        check (db.ensureSchema(), "criou o schema curso-musica e as 3 tabelas");
+        check (db.ensureSchema(), "criou o schema curso e as 3 tabelas");
 
         check (db.saveHighestPassedModule (2), "gravou highest_passed_module = 2");
         check (db.loadHighestPassedModule() == 2, "leu de volta highest_passed_module = 2");

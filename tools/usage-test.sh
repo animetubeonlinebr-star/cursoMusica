@@ -73,7 +73,7 @@ cp -r "$PLUGIN_SRC" "$PLUGIN_DIR/"
 
 log "4/4 Teste de uso"
 export PGHOST=localhost PGPORT="$PG_PORT" PGUSER=cursomusica PGPASSWORD=cursomusica
-export PGDATABASE=curso-musica CURSOMUSICA_PG_SCHEMA=curso-musica
+export PGDATABASE=curso-musica CURSOMUSICA_PG_SCHEMA=curso
 export XDG_CONFIG_HOME="$(mktemp -d)"
 
 "$BUILD_DIR/CursoMusicaUsageTest_artefacts/Release/CursoMusicaUsageTest" \

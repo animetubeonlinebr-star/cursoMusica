@@ -9,6 +9,7 @@
 
 Unicode true
 !include "MUI2.nsh"
+!include "LogicLib.nsh"
 
 ; NSIS resolves File/OutFile relative to different directories depending on the
 ; platform (the script's directory on Linux, the current directory on Windows),
@@ -25,6 +26,9 @@ Unicode true
 !endif
 !ifndef APPICON
 !define APPICON "Assets/AppIcon.ico"
+!endif
+!ifndef DBCHECKSCRIPT
+!define DBCHECKSCRIPT "deploy/windows/ensure-database.ps1"
 !endif
 
 ; Installer/uninstaller icon and the icon the shortcuts point at. NSIS resolves
@@ -92,11 +96,27 @@ Section "CursoMusica" SecMain
     CreateDirectory "$SMPROGRAMS\${APP_NAME}"
     CreateShortCut "$SMPROGRAMS\${APP_NAME}\${APP_NAME}.lnk" "$INSTDIR\${APP_EXE}" "" "$INSTDIR\${APP_ICON}"
     CreateShortCut "$DESKTOP\${APP_NAME}.lnk" "$INSTDIR\${APP_EXE}" "" "$INSTDIR\${APP_ICON}"
+
+    ; Verify the progress database: the "curso-musica" database on port 5432 and
+    ; the "curso" schema (client, 2026-11-18). The check creates whichever is
+    ; missing when the PostgreSQL user is allowed to. The database is optional
+    ; (ADR 0006: the app runs local-only without it), so a failure only informs
+    ; the student and writes the reason to %TEMP%\cursomusica-db-check.log — it
+    ; never aborts the installation.
+    File "${DBCHECKSCRIPT}"
+    nsExec::ExecToStack 'powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$INSTDIR\ensure-database.ps1"'
+    Pop $0
+    Pop $1
+    DetailPrint "Verificacao do banco: $0"
+    ${If} $0 != "0"
+        MessageBox MB_ICONINFORMATION|MB_OK "Nao foi possivel confirmar o banco de progresso (curso-musica / schema curso). O app funciona normalmente sem ele e tenta criar o schema ao abrir. Detalhes: %TEMP%\cursomusica-db-check.log"
+    ${EndIf}
 SectionEnd
 
 Section "Uninstall"
     Delete "$INSTDIR\${APP_EXE}"
     Delete "$INSTDIR\${APP_ICON}"
+    Delete "$INSTDIR\ensure-database.ps1"
     Delete "$INSTDIR\uninstall.exe"
     RMDir /r "$INSTDIR"
     Delete "$SMPROGRAMS\${APP_NAME}\${APP_NAME}.lnk"

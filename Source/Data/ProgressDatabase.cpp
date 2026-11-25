@@ -34,8 +34,8 @@ PostgresConfig PostgresConfig::fromEnvironment()
     config.port     = envOr ("PGPORT", "5432");
     config.user     = envOr ("PGUSER", {});
     config.password = envOr ("PGPASSWORD", {});
-    config.dbname   = envOr ("PGDATABASE", {});
-    config.schema   = envOr ("CURSOMUSICA_PG_SCHEMA", "curso-musica");
+    config.dbname   = envOr ("PGDATABASE", "curso-musica");
+    config.schema   = envOr ("CURSOMUSICA_PG_SCHEMA", "curso");
     config.student  = envOr ("CURSOMUSICA_PG_STUDENT", "local");
     config.disabled = envFlag ("CURSOMUSICA_PG_DISABLE");
     return config;
@@ -59,8 +59,8 @@ PostgresConfig PostgresConfig::fromSettings()
     config.host   = settings.getValue (pgHostKey);
     config.port   = settings.getValue (pgPortKey, "5432");
     config.user   = settings.getValue (pgUserKey);
-    config.dbname = settings.getValue (pgDatabaseKey);
-    config.schema = settings.getValue (pgSchemaKey, "curso-musica");
+    config.dbname = settings.getValue (pgDatabaseKey, "curso-musica");
+    config.schema = settings.getValue (pgSchemaKey, "curso");
 
     // The password is deliberately not persisted; it is supplied by the
     // environment at runtime (docs/SECURITY.md).

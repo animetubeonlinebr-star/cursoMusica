@@ -1,5 +1,7 @@
 #include "Audio/AudioEngine.h"
 
+#include "Audio/MonitorMix.h"
+
 #include "Audio/DeviceSettings.h"
 #include "Data/AppSettings.h"
 
@@ -318,6 +320,14 @@ void AudioEngine::audioDeviceIOCallbackWithContext (const float* const* inputCha
         if (outputChannelData[ch] != nullptr)
             juce::FloatVectorOperations::clear (outputChannelData[ch], numSamples);
 
+    // A transport restart applies to both clocked parts at the same sample, so
+    // beat 1 and the first chord coincide.
+    if (transportRestart.exchange (false))
+    {
+        metronome.reset();
+        backingTrack.reset();
+    }
+
     // Metronome plays on its own, independent of the input signal.
     if (outputChannelData[0] != nullptr && numOutputChannels > 0)
     {
@@ -358,6 +368,14 @@ void AudioEngine::audioDeviceIOCallbackWithContext (const float* const* inputCha
     }
 
     const float* analysed = pluginChannel != nullptr ? pluginChannel : in;
+
+    // Monitor: send the captured (plugin-processed) signal to the output, so the
+    // student hears what they play. This was missing entirely — the callback
+    // cleared the output, mixed the metronome/tone/backing into it and sent the
+    // input only to analysis, so the guitar was never audible.
+    if (monitoring.load())
+        monitor::addToOutputs (outputChannelData, numOutputChannels,
+                               analysed, numSamples, monitorGain.load());
 
     // Peak level in dB, smoothed, no allocation.
     float peak = 0.0f;
