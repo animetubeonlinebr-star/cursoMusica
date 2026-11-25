@@ -473,6 +473,8 @@ cmake --build build --config Release
 
 | 2026-11-17 | orquestrador + pm | **Encerramento de dois pedidos do cliente: download de áudio (yt-dlp + MP3) com comparação tablatura × áudio, e a tela com 2 entradas + 2 retornos de áudio.** O cliente mandou ignorar ambos ("não vamos fazer"). Registrados como **fora de escopo** na §10 para que nenhum agente os reabra; nada de código é adicionado por eles | Escopo do produto fecha em: módulos, medição, afinador, VST3, base por tópico, PostgreSQL e instalador |
 
+| 2026-11-25 | orquestrador + devops | **Merge do PR #32 em `test` (monitoração, transporte, base por tópico, banco no instalador).** CI #63 (Linux + Windows) e usage-test #30 (Linux + Windows em instalação limpa) **verdes** no head `a77bff9`; a árvore mesclada é idêntica a esse head (diff vazio), então a verificação local também vale para o merge: build Linux **0 avisos** e **8671/8671 checagens verdes**. Merge commit `29f9aa1` com `--no-ff` (histórico preservado); backup `backup/pre-merge-monitoracao-test` em `cc08089`. O PR estava em *draft* e o ambiente não tem token de API (só credencial git), então o merge foi feito por `git merge` + push em `test`, sem o botão do GitHub | `test` passa a ter monitoração, transporte alinhado, base por tópico e a verificação de banco/schema no instalador; falta só o `workflow_dispatch` com `commit_installer=true` para publicar o `.exe` |
+
 ## 11. Disciplina de branches, backup e push (regra do usuário)
 
 Pode-se criar quantas branches forem necessárias, mas **antes de qualquer push**:
