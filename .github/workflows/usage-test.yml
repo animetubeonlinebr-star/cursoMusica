@@ -75,7 +75,7 @@ jobs:
           PGUSER: cursomusica
           PGPASSWORD: cursomusica
           PGDATABASE: curso-musica
-          CURSOMUSICA_PG_SCHEMA: curso-musica
+          CURSOMUSICA_PG_SCHEMA: curso
           JACK_NO_AUDIO_RESERVATION: "1"
         run: |
           plugin_dir="$(mktemp -d)"
@@ -161,7 +161,7 @@ jobs:
           PGUSER: cursomusica
           PGPASSWORD: cursomusica
           PGDATABASE: curso-musica
-          CURSOMUSICA_PG_SCHEMA: curso-musica
+          CURSOMUSICA_PG_SCHEMA: curso
         run: |
           $plugin = Get-ChildItem -Recurse -Directory -Filter "CursoMusica Test Plugin.vst3" build-usage |
             Select-Object -First 1

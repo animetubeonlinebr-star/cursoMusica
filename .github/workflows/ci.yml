@@ -60,7 +60,7 @@ jobs:
           PGPASSWORD: cursomusica
         run: |
           psql -h localhost -U cursomusica -d curso-musica \
-            -c 'CREATE SCHEMA IF NOT EXISTS "curso-musica" AUTHORIZATION cursomusica;'
+            -c 'CREATE SCHEMA IF NOT EXISTS "curso" AUTHORIZATION cursomusica;'
 
       - name: Run tests
         env:
@@ -69,7 +69,7 @@ jobs:
           PGUSER: cursomusica
           PGPASSWORD: cursomusica
           PGDATABASE: curso-musica
-          CURSOMUSICA_PG_SCHEMA: curso-musica
+          CURSOMUSICA_PG_SCHEMA: curso
         # -V so the integration evidence (online vs offline path) is visible
         # in the CI log, not only on failure.
         run: ctest --test-dir build -V

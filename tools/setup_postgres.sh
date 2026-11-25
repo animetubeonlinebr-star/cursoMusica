@@ -15,7 +15,7 @@
 #   CURSOMUSICA_ROLE              papel da aplicacao        (cursomusica)
 #   CURSOMUSICA_ROLE_PASSWORD     senha da aplicacao        (cursomusica)
 #   CURSOMUSICA_DB                banco                     (curso-musica)
-#   CURSOMUSICA_PG_SCHEMA         schema                    (curso-musica)
+#   CURSOMUSICA_PG_SCHEMA         schema                    (curso)
 #
 # Ao final, imprime os `export` que o app le (ver docs/POSTGRESQL.md).
 
