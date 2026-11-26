@@ -5,6 +5,7 @@
 #include "Audio/AudioEngine.h"
 #include "Course/Module.h"
 #include "Course/PracticeSession.h"
+#include "Course/Transposition.h"
 #include "Course/QuizSession.h"
 
 #include <vector>
@@ -83,6 +84,14 @@ private:
     void toggleMetronome();
     void toggleBacking();
     void syncBackingFromExercise();
+
+    // Key of the bed (client, 2026-11-25): the student may move the material to
+    // any of the twelve keys. `chosenKeyPc` is the pitch class the student
+    // picked; -1 follows the exercise's own key.
+    void setChosenKey (int pitchClass);
+    void updateKeyBox();
+    int keyOffsetSemitones() const;
+    void publishBackingChords();
     void applyChosenBpm();
     int exerciseGoalBpm() const;
 
@@ -98,6 +107,12 @@ private:
     int selectedExerciseIndex = 0;
     bool metronomeOn = false;
     bool backingOn = false;       // backing track under the exercise (client, 2026-11-18)
+
+    // Harmony of the armed exercise in its own key, kept untransposed so the
+    // key selector can move it again without compounding offsets.
+    std::vector<course::BackingChord> baseChords;
+    int baseTonicPc = -1;
+    int chosenKeyPc = -1;         // -1 -> follow the exercise's key
 
     // Last stored accuracy (percent) of the armed exercise, -1 when never
     // attempted. Shown until a new attempt produces a fresh verdict.
@@ -148,6 +163,11 @@ private:
     // Playable-exercise controls.
     juce::TextButton metronomeButton { "Metronome" };
     juce::TextButton backingButton { "Base" };
+
+    // Key of the bed: "Tom" + the twelve keys. Moving the key moves the exercise
+    // with it, so the student practises the same material in every key.
+    juce::Label keyCaption;
+    juce::ComboBox keyBox;
     juce::TextButton startButton { "Start" };
     juce::TextButton finishButton { "Finish" };
     juce::Label bpmLabel;

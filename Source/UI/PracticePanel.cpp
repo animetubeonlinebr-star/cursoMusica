@@ -140,6 +140,28 @@ PracticePanel::PracticePanel (AudioEngine& engine)
     backingButton.onClick = [this] { toggleBacking(); };
     addAndMakeVisible (backingButton);
 
+    // Key of the bed: the twelve keys, so the student practises the same
+    // material moved to every key (client, 2026-11-25).
+    static const char* const keyNames[12] =
+        { "Dó", "Dó#/Réb", "Ré", "Ré#/Mib", "Mi", "Fá",
+          "Fá#/Solb", "Sol", "Sol#/Láb", "Lá", "Lá#/Sib", "Si" };
+
+    for (int pc = 0; pc < 12; ++pc)
+        keyBox.addItem (juce::String::fromUTF8 (keyNames[pc]), pc + 1);
+
+    keyBox.onChange = [this]
+    {
+        const int selected = keyBox.getSelectedId();
+        if (selected > 0)
+            setChosenKey (selected - 1);
+    };
+    addAndMakeVisible (keyBox);
+
+    keyCaption.setText (juce::String::fromUTF8 ("Tom:"), juce::dontSendNotification);
+    keyCaption.setFont (th::type::makeFont (th::type::caption));
+    keyCaption.setColour (juce::Label::textColourId, th::colour::textSecondary);
+    addAndMakeVisible (keyCaption);
+
     startButton.onClick = [this] { startSelectedExercise(); };
     addAndMakeVisible (startButton);
 
@@ -387,6 +409,8 @@ void PracticePanel::updateApplication()
     const bool showPlayControls = exerciseArmed && exercise != nullptr && ! quizMode;
     metronomeButton.setVisible (showPlayControls);
     backingButton.setVisible (showPlayControls);
+    keyCaption.setVisible (showPlayControls);
+    keyBox.setVisible (showPlayControls);
     startButton.setVisible (showPlayControls);
     finishButton.setVisible (showPlayControls);
     bpmLabel.setVisible (showPlayControls);
@@ -440,27 +464,76 @@ void PracticePanel::syncBackingFromExercise()
     const auto* exercise = selectedExercise();
     if (exercise == nullptr || currentModule == nullptr)
     {
+        baseChords.clear();
+        baseTonicPc = -1;
         backing.setProgression ({});
         backing.setRunning (false);
+        updateKeyBox();
         return;
     }
 
     const auto arrangement = course::backingArrangementFor (*currentModule, *exercise);
 
-    std::vector<BackingTrack::Chord> chords;
-    chords.reserve (arrangement.chords.size());
-    for (const auto& chord : arrangement.chords)
-        chords.push_back ({ chord.pitchClasses, chord.bassMidi });
+    // Keep the harmony in the exercise's own key. The key selector re-derives
+    // the sounding chords from this copy, so moving the key twice never
+    // compounds the offset.
+    baseChords = arrangement.chords;
+    baseTonicPc = course::tonicPitchClass (baseChords);
 
-    backing.setProgression (chords);
     // The bed sounds like the style the topic teaches, with a density that grows
     // with the module level (client, 2026-11-18).
     backing.setStyle (arrangement.style == course::BackingStyle::samba
                           ? BackingTrack::Style::samba
                           : BackingTrack::Style::rock);
     backing.setLevel (currentModule->level);
+    publishBackingChords();
     backing.setBpm ((double) (chosenBpm > 0 ? chosenBpm : exerciseGoalBpm()));
     backing.setRunning (backingOn);
+
+    updateKeyBox();
+}
+
+// Semitones from the exercise's own key to the key the student picked.
+int PracticePanel::keyOffsetSemitones() const
+{
+    if (chosenKeyPc < 0 || baseTonicPc < 0)
+        return 0;
+
+    return course::semitonesUpTo (baseTonicPc, chosenKeyPc);
+}
+
+// Publishes the bed in the chosen key. The chords are transposed from the
+// exercise's own harmony every time, never from the previous transposition.
+void PracticePanel::publishBackingChords()
+{
+    const int semitones = keyOffsetSemitones();
+
+    std::vector<BackingTrack::Chord> chords;
+    chords.reserve (baseChords.size());
+    for (const auto& chord : baseChords)
+    {
+        const auto moved = course::transposedChord (chord, semitones);
+        chords.push_back ({ moved.pitchClasses, moved.bassMidi });
+    }
+
+    audioEngine.getBackingTrack().setProgression (chords);
+}
+
+void PracticePanel::setChosenKey (int pitchClass)
+{
+    chosenKeyPc = course::wrapPitchClass (pitchClass);
+    publishBackingChords();
+    repaint();
+}
+
+void PracticePanel::updateKeyBox()
+{
+    // Shows the key the bed is in: the student's choice, or the exercise's own.
+    // Without harmony there is no key to read, so the box stays blank and
+    // disabled instead of naming a key it would not apply.
+    const int current = baseTonicPc < 0 ? -1
+                                        : (chosenKeyPc >= 0 ? chosenKeyPc : baseTonicPc);
+    keyBox.setSelectedId (current >= 0 ? current + 1 : 0, juce::dontSendNotification);
 }
 
 void PracticePanel::startSelectedExercise()
@@ -479,13 +552,17 @@ void PracticePanel::startSelectedExercise()
     if (chosenBpm <= 0)
         chosenBpm = exerciseGoalBpm();
 
-    session.start (*exercise, currentModule->targetBpm, currentModule->onGridTarget,
+    // The attempt runs in the chosen key: the expected notes move with the bed,
+    // otherwise a student who plays the new key correctly would be failed.
+    const Exercise forPractice = course::transposedExercise (*exercise, keyOffsetSemitones());
+
+    session.start (forPractice, currentModule->targetBpm, currentModule->onGridTarget,
                    chosenBpm, currentModule->usesTempo);
     attemptReported = false;
     audioEngine.resetNoteCapture();
 
     audioEngine.getMetronome().setBpm ((double) session.getPracticeBpm());
-    audioEngine.getMetronome().setSubdivision (exercise->subdivision);
+    audioEngine.getMetronome().setSubdivision (forPractice.subdivision);
     audioEngine.getMetronome().setRunning (true);
     metronomeOn = true;
 
@@ -694,6 +771,9 @@ void PracticePanel::updateButtonStates()
     const bool running = session.isRunning();
     startButton.setEnabled (! running);
     finishButton.setEnabled (running);
+    // Changing the key restarts the harmony on beat 1; doing that in the middle
+    // of a graded attempt would move the beat under the student's playing.
+    keyBox.setEnabled (! running && baseTonicPc >= 0);
     metronomeButton.setButtonText (metronomeOn ? juce::String::fromUTF8 ("Metrônomo: ligado")
                                                : juce::String::fromUTF8 ("Metrônomo: desligado"));
     backingButton.setButtonText (backingOn ? juce::String::fromUTF8 ("Base: ligada")
@@ -758,6 +838,12 @@ void PracticePanel::resized()
     metronomeButton.setBounds (row.removeFromLeft (150));
     row.removeFromLeft (th::spacing::sm);
     backingButton.setBounds (row.removeFromLeft (140));
+
+    // Key row: caption + the twelve keys.
+    bounds.removeFromTop (th::spacing::xs);
+    auto keyRow = bounds.removeFromTop (24);
+    keyCaption.setBounds (keyRow.removeFromLeft (44));
+    keyBox.setBounds (keyRow.removeFromLeft (130));
 
     // Tempo row: caption + slider, only where the module grades the tempo.
     if (bpmSlider.isVisible())

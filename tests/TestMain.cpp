@@ -32,6 +32,7 @@
 #include "Course/QuizSession.h"
 #include "Course/TempoGrid.h"
 #include "Course/ExerciseFilter.h"
+#include "Course/Transposition.h"
 #include "Course/ProgressStore.h"
 #include "Data/AppSettings.h"
 #include "Data/ProgressDatabase.h"
@@ -4075,6 +4076,140 @@ void testTransportAlignment()
     backing.setRunning (false);
 }
 
+// The student must be able to practise the same material in all twelve keys
+// (client, 2026-11-25). Transposing the bed alone would be a trap: the expected
+// notes have to move with it, otherwise a student who plays the new key
+// correctly is failed. Everything below is the pure helper the panel uses.
+void testKeyTransposition()
+{
+    std::cout << "Key transposition (12 keys)\n";
+    using namespace cursomusica;
+    using namespace cursomusica::course;
+
+    // Distances wrap into 0..11 and pitch classes stay in range.
+    check (semitonesUpTo (9, 0) == 3, "key: A up to C is 3 semitones");
+    check (semitonesUpTo (0, 11) == 11, "key: C up to B is 11 semitones");
+    check (semitonesUpTo (4, 4) == 0, "key: the same key is 0 semitones");
+    check (transposedPitchClasses ({ 9, 0, 4, 7 }, 3) == std::vector<int> { 0, 3, 7, 10 },
+           "key: Am7 moved up 3 semitones is Cm7");
+    check (wrapPitchClass (-1) == 11 && wrapPitchClass (12) == 0,
+           "key: pitch classes wrap both ways");
+
+    // The bed moves its bass with the chord, and the tonic comes from the bed.
+    BackingChord am7;
+    am7.pitchClasses = { 9, 0, 4, 7 };
+    am7.bassMidi = 45;
+
+    const auto cm7 = transposedChord (am7, 3);
+    check (cm7.bassMidi == 48, "key: the bass moves with the chord");
+    check (cm7.pitchClasses == std::vector<int> { 0, 3, 7, 10 }, "key: the chord tones move");
+    check (tonicPitchClass ({ am7 }) == 9, "key: the tonic is the bass of the first chord");
+    check (tonicPitchClass ({}) == -1, "key: no harmony has no tonic");
+
+    const auto* m11 = ModuleCatalog::findModule (11);
+    check (m11 != nullptr, "key: module 11 exists");
+    if (m11 == nullptr)
+        return;
+
+    // A played exercise: the notes the student must produce move, the identity
+    // of the exercise does not.
+    const Exercise* played = nullptr;
+    for (const auto& e : m11->exercises)
+        if (! e.isQuiz() && ! e.targets.empty() && ! e.isImprovisation())
+        {
+            played = &e;
+            break;
+        }
+
+    check (played != nullptr, "key: module 11 has a played exercise with targets");
+    if (played != nullptr)
+    {
+        // One semitone so the old key cannot accidentally share a note with the
+        // new one; the check below relies on that.
+        const int semitones = 1;
+        const auto moved = transposedExercise (*played, semitones);
+
+        check (moved.targets.size() == played->targets.size(), "key: the target count is kept");
+        bool allMoved = true;
+        for (std::size_t i = 0; i < moved.targets.size(); ++i)
+            if (moved.targets[i].midi != played->targets[i].midi + semitones)
+                allMoved = false;
+        check (allMoved, "key: every target note moves by the transposition");
+        check (moved.id == played->id && moved.title == played->title,
+               "key: the exercise keeps its identity");
+
+        auto asPlayed = [] (const std::vector<TargetNote>& notes)
+        {
+            std::vector<NoteEvent> events;
+            events.reserve (notes.size());
+            for (const auto& note : notes)
+            {
+                NoteEvent event;
+                event.midi = note.midi;
+                events.push_back (event);
+            }
+            return events;
+        };
+
+        const auto inNewKey = evaluator::evaluateSequence (moved.targets,
+                                                           asPlayed (moved.targets));
+        check (inNewKey.passed, "key: playing the material in the new key passes");
+
+        const auto inOldKey = evaluator::evaluateSequence (moved.targets,
+                                                           asPlayed (played->targets));
+        check (! inOldKey.passed, "key: playing the old key against the new key fails");
+    }
+
+    // An improvisation context moves its chord and its scale together, so the
+    // rest notes stay rest notes in the new key.
+    const Exercise* improv = nullptr;
+    for (const auto& e : m11->exercises)
+        if (e.isImprovisation())
+        {
+            improv = &e;
+            break;
+        }
+
+    check (improv != nullptr, "key: module 11 has an improvisation exercise");
+    if (improv != nullptr)
+    {
+        const int semitones = 5;
+        const auto moved = transposedExercise (*improv, semitones);
+
+        check (moved.restNotes.chordPitchClasses
+                   == transposedPitchClasses (improv->restNotes.chordPitchClasses, semitones),
+               "key: the improvisation chord moves");
+        check (moved.restNotes.scalePitchClasses
+                   == transposedPitchClasses (improv->restNotes.scalePitchClasses, semitones),
+               "key: the improvisation scale moves with it");
+        check (moved.restNotes.scalePitchClasses.size()
+                   == improv->restNotes.scalePitchClasses.size(),
+               "key: the scale keeps every degree");
+        check (moved.isImprovisation(), "key: the moved exercise is still an improvisation");
+    }
+
+    // An interval is a distance, not a pitch: it must not transpose, or the
+    // module 2 exercises would ask for a different interval in each key.
+    if (const auto* m2 = ModuleCatalog::findModule (2))
+        for (const auto& e : m2->exercises)
+            if (e.interval.semitones > 0)
+            {
+                const auto moved = transposedExercise (e, 7);
+                check (moved.interval.semitones == e.interval.semitones,
+                       "key: an interval does not transpose");
+                break;
+            }
+
+    // Zero semitones is the identity, so the default path changes nothing.
+    if (played != nullptr)
+    {
+        const auto same = transposedExercise (*played, 0);
+        check (same.targets.size() == played->targets.size()
+                   && (same.targets.empty() || same.targets.front().midi == played->targets.front().midi),
+               "key: 0 semitones leaves the exercise untouched");
+    }
+}
+
 // The bed must sound like the harmony and the style the topic teaches instead of
 // the same generic vamp in every topic (client, 2026-11-18). Both choices are
 // pure functions, so they are asserted directly; the audio side is asserted by
@@ -4415,6 +4550,7 @@ int main()
     testModule11();
     testMonitorMix();
     testTransportAlignment();
+    testKeyTransposition();
     testBackingArrangement();
     testBackingStyles();
     testBackingTrack();
