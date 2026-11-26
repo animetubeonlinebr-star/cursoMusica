@@ -128,6 +128,11 @@ PracticePanel::PracticePanel (AudioEngine& engine)
     addAndMakeVisible (measurementLabel);
 
     // Guidance box: what the student must do in the armed exercise.
+    harmonicLabel.setFont (th::type::makeFont (th::type::caption));
+    harmonicLabel.setColour (juce::Label::textColourId, th::colour::accent);
+    harmonicLabel.setJustificationType (juce::Justification::topLeft);
+    addAndMakeVisible (harmonicLabel);
+
     guidanceLabel.setFont (th::type::makeFont (th::type::body));
     guidanceLabel.setColour (juce::Label::textColourId, th::colour::textSecondary);
     guidanceLabel.setJustificationType (juce::Justification::topLeft);
@@ -267,8 +272,11 @@ void PracticePanel::refreshExerciseList()
         for (size_t slot = 0; slot < filteredIndices.size(); ++slot)
         {
             const auto& e = currentModule->exercises[(size_t) filteredIndices[slot]];
-            const bool playable = e.isQuiz() || ! e.targets.empty() || ! e.chordPitchClasses.empty()
-                                    || ! e.chordProgression.empty() || e.interval.semitones > 0;
+            // An improvisation exercise over a declared form is playable too: the
+            // app listens and grades every note against the chord in force.
+            const bool playable = e.isQuiz() || e.isImprovisation() || ! e.targets.empty()
+                                    || ! e.chordPitchClasses.empty() || ! e.chordProgression.empty()
+                                    || e.interval.semitones > 0;
             exerciseBox.addItem (e.id + " — " + e.title
                                    + (playable ? juce::String()
                                                : juce::String::fromUTF8 ("  (leitura)")),
@@ -299,6 +307,40 @@ void PracticePanel::refreshExerciseRow()
     demoButton.setExerciseText (exercise != nullptr
                                     ? exercise->id + " — " + exercise->title
                                     : juce::String());
+
+    harmonicLabel.setText (describeHarmony (exercise), juce::dontSendNotification);
+}
+
+// "Base H4 · Dm7 – G7 · P2 (vamp de 2 acordes) · C15": what the app plays and
+// what it judges the student's notes against.
+juce::String PracticePanel::describeHarmony (const Exercise* exercise)
+{
+    if (exercise == nullptr || exercise->bedModelId.isEmpty())
+        return {};
+
+    juce::String text = juce::String::fromUTF8 ("Base ") + exercise->bedModelId;
+
+    if (auto* model = course::harmony::findModel (exercise->bedModelId))
+    {
+        juce::StringArray chords;
+        for (const auto& chord : model->chords)
+            if (! chords.contains (chord.label))
+                chords.add (chord.label);
+
+        // A twelve-bar blues has three distinct chords: the label shows the
+        // vocabulary of the form, not twelve repetitions of it.
+        text += juce::String::fromUTF8 (" · ") + chords.joinIntoString (juce::String::fromUTF8 (" – "));
+    }
+
+    if (exercise->harmonicLevel >= 1)
+        text += juce::String::fromUTF8 (" · ") + course::harmony::levelCode (exercise->harmonicLevel)
+                  + juce::String::fromUTF8 (" (")
+                  + course::harmony::levelName (exercise->harmonicLevel) + ")";
+
+    if (exercise->cadenceId.isNotEmpty())
+        text += juce::String::fromUTF8 (" · ") + exercise->cadenceId;
+
+    return text;
 }
 
 void PracticePanel::syncMetronomeFromModule()
@@ -401,6 +443,8 @@ void PracticePanel::updateApplication()
     topicLink.setVisible (topicChosen && topicFilter.isNotEmpty());
 
     demoButton.setVisible (exerciseArmed && exercise != nullptr);
+    harmonicLabel.setVisible (exerciseArmed && exercise != nullptr
+                              && exercise->bedModelId.isNotEmpty());
     measurementLabel.setVisible (exerciseArmed && exercise != nullptr);
     guidanceLabel.setVisible (exerciseArmed && exercise != nullptr);
 
@@ -823,6 +867,12 @@ void PracticePanel::resized()
     // Scoreboard (Acertos x/y · aproveitamento z%), always present.
     measurementLabel.setBounds (bounds.removeFromTop (20));
     bounds.removeFromTop (th::spacing::xs);
+
+    if (harmonicLabel.isVisible())
+    {
+        harmonicLabel.setBounds (bounds.removeFromTop (32));
+        bounds.removeFromTop (th::spacing::xs);
+    }
 
     // Guidance box: what the student must do in the armed exercise.
     guidanceLabel.setBounds (bounds.removeFromTop (72));

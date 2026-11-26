@@ -1138,15 +1138,44 @@ relação entre escalas e acordes que sustenta o **improviso**.
 ## 11.3 Prática (exercícios e desafios — REQ-008)
 
 Cada tópico A–J tem **3 exercícios** (ids `EX-11.<tópico>.<n>`), todos **tocados
-no instrumento** e verificados pelo app — não há questionário neste módulo. O
-**primeiro exercício de cada tópico obriga o lick do tópico** (o aluno toca a
-frase, nota a nota). Os exercícios de **improvisação** (REQ-011/REQ-012) são
-avaliados pela classificação das notas contra o contexto (repouso, tensão pedida
-ou erro) e **não** são presos à grade (`usesGrid = false`).
+no instrumento** e verificados pelo app — não há questionário neste módulo.
+
+**Programa de improvisação (reestruturação de 2026-11-26).** A partir do Módulo
+11 o curso segue o *Programa de estudo de improvisação*: os três exercícios de
+cada tópico sobem um degrau de dificuldade harmônica e **nenhum exercício roda
+sobre uma escala isolada** — todos declaram a base sobre a qual são tocados.
+
+| Exercício | Papel | Nível | O que o app verifica |
+|---|---|---|---|
+| `n = 1` | reconhecimento e controle | **P1** | o lick do tópico (obrigatório) sobre um centro estático (H1/H2/H3) |
+| `n = 2` | aplicação e conexão | **P2** | os **arpejos de cada acorde** da base, na ordem em que a harmonia muda |
+| `n = 3` | integração e autonomia | **P3+** | improvisação livre sobre a **forma declarada**, nota a nota contra o acorde em vigor |
+
+Cada exercício carrega no modelo os campos que a UI mostra ao aluno
+(`Base H7 · Am7 – Fmaj7 · P3 (célula harmônica) · C18`):
+
+- `bedModelId` — o modelo de acompanhamento (`H1`..`H20`) que o app **toca**;
+- `cadenceId` — a cadência (`C01`..`C31`) que o tópico ensina;
+- `harmonicLevel` — o nível harmônico (`P1`..`P7`, §11.7);
+- `harmony` — a **forma** (`HarmonicSegment` por compasso, com acorde e escala),
+  que é o contexto contra o qual cada nota tocada é classificada.
+
+A avaliação de improvisação (REQ-011/REQ-012) passou a ser **por acorde em
+vigor**: `evaluateImprovisationOverTimeline()` mapeia o instante de cada nota
+para o compasso da forma e classifica contra aquele acorde (repouso = nota do
+acorde ou da escala; tensão = tensão pedida; passagem = cromatismo que resolve;
+resto = erro). Assim, tocar as mudanças passa e ignorá-las não passa — e a
+transposição de tom (`Tom`) move forma e expectativa juntas. Os exercícios de
+improvisação continuam **fora da grade** (`usesGrid = false`).
+
+A escala esperada é a **declarada pelo tópico** quando ele ensina uma escala
+específica (menor natural, harmônica, melódica, pentatônicas); sem declaração, o
+app usa a escala do acorde (maj7 → maior, 7 → mixolídia, m7 → dórica, m7(b5) →
+lócria, º7 → diminuta).
 
 **Desafio de gate (REQ-009/REQ-015):** tocar o lick do tópico J (frase de
-repouso e tensão sobre o vamp de Lá menor) a **100 BPM** com **≥90% de acerto**
-de notas e `on_grid_ratio ≥ 0,82`.
+repouso e tensão) sobre o vamp de Lá menor (H1, C02) a **100 BPM** com **≥90% de
+acerto** de notas e `on_grid_ratio ≥ 0,82`.
 
 ## 11.4 Patterns e links do módulo (REQ-007, REQ-010)
 
@@ -1188,10 +1217,61 @@ Registro de decisões.
 O exercício armado oferece o botão **Base**, que liga uma base de acompanhamento
 tocada pelo próprio app: bumbo, chimbal, baixo e um acorde em bloco (pad) de
 quatro vozes, na **harmonia do exercício** e no **BPM meta** do módulo. A
-progressão vem do próprio exercício (`chordProgression` quando existe;
-`chordPitchClasses` do improviso; o vamp do gate do módulo quando o exercício não
-declara harmonia; e, sem gate com vamp, o centro do módulo — Lá menor no Módulo
-11), derivada pela função pura `course::backingProgressionFor()` e publicada no
+progressão vem, **em primeiro lugar**, do modelo declarado pelo exercício
+(`bedModelId` → `H1`..`H20`): o que o aluno ouve é exatamente o que o app usa
+para corrigir. Sem modelo declarado, cai na ordem antiga (`chordProgression` quando
+existe; `chordPitchClasses` do improviso; o vamp do gate do módulo quando o
+exercício não declara harmonia; e, sem gate com vamp, o centro do módulo — Lá menor no Módulo
+11), derivada pela função pura `course::backingArrangementFor()` e publicada no
 motor de áudio por `PracticePanel::syncBackingFromExercise()`. Armar outro
 exercício republica a harmonia; trocar de módulo ou de tópico desliga a base. A base é **RT-safe** (sem
 alocação, lock ou I/O no callback) e sai **desligada** por padrão.
+
+## 11.7 Biblioteca harmônica do programa de improvisação (2026-11-26)
+
+Fonte única de verdade no código: `Source/Course/Harmony.h` (dados puros) e
+`Source/Course/RestNotes.h` (`HarmonicSegment` e a avaliação por forma). A UI, o
+backing e os testes leem daqui; nenhum acorde é escrito duas vezes.
+
+**Níveis harmônicos (P1–P7)** — a dificuldade sobe pela harmonia, não só pela
+velocidade:
+
+| Nível | Contexto | Finalidade |
+|---|---|---|
+| P1 | vamp de 1 acorde | estatismo modal; cor, notas características, repousos |
+| P2 | vamp de 2 acordes | movimento interno; o que muda e o que permanece |
+| P3 | célula harmônica | conduzir notas-alvo entre acordes |
+| P4 | turnaround | frases sobre ciclos repetitivos |
+| P5 | blues de 12 compassos | forma, I–IV–V, blue notes |
+| P6 | standard / forma musical | seções, temas, ciclos completos |
+| P7 | standard com modulação | novos centros tonais no meio da forma |
+
+**31 cadências (`C01`..`C31`)** em oito famílias (F1 estáticas, F2 cadenciais,
+F3 blues, F4 plagais e empréstimos, F5 circulares e modais, F6 tonal expandida,
+F7 funcional avançada, F8 harmonia expandida) — catálogo em
+`harmony::cadences()`.
+
+**20 modelos de acompanhamento (`H1`..`H20`)** — os backing tracks operacionais,
+em `harmony::models()`; `harmony::compatibleCadences()` registra a relação C↔H do
+programa.
+
+**Tabela da Etapa 11** (tópico → base de cada exercício), verificada por teste:
+
+| Tópico | Exercício 1 (P1) | Exercício 2 (P2) | Exercício 3 (P3) |
+|---|---|---|---|
+| A · desenhos por regiões | H1 · C02 | H5 · C16 | H7 · C18 |
+| B · escalas asc./desc. | H1 · C02 | H4 · C15 | H6 · C13 |
+| C · pentatônica menor 7 | H1 · C02 | H5 · C16 | H13 · C10 (blues menor) |
+| D · pentatônica menor 6 | H1 · C02 | H5 · C16 | H12 · C10 (blues maior) |
+| E · cinco desenhos | H1 | H4 | H17 · C21 |
+| F · trilhas abertas e fechadas | H2 | H4 | H6 · C18 |
+| G · Sistema 5 (CAGED) | H2 · C01 | H6 · C05 | H10 · C24 |
+| H · menor harmônica | H1 · C17 | H9 · C23 | H19 · C27 |
+| I · menor melódica | H1 · C06 | H9 · C23 | H16 · C27 (modulação) |
+| J · escalas × acordes | H2 · C01 | H5 · C16 | H8 · C22 |
+
+As **Etapas 12–24** seguem a mesma diretriz quando forem implementadas: três
+exercícios por tópico (P1 → P2 → P3+), base declarada, cadência declarada e
+avaliação contra o acorde em vigor. A infraestrutura (biblioteca C/H, níveis P,
+forma por compasso, avaliação por timeline, transposição de tom) já está pronta e
+testada; cada Etapa nova passa a ser, sobretudo, conteúdo.

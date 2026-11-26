@@ -67,4 +67,26 @@ ImprovisationResult evaluateImprovisation (const std::vector<NoteEvent>& played,
                                            const RestNoteSpec& spec,
                                            double passThreshold = 0.90);
 
+// One stretch of a form under improvisation: `bars` bars of one context. A form
+// with more than one chord is a sequence of segments, and each played note is
+// judged against the segment in force when it sounded (docs/MUSIC.md,
+// "Programa de estudo de improvisação": no exercise runs on a bare scale, and
+// no student is failed for playing the chord that is actually sounding).
+struct HarmonicSegment
+{
+    int bars = 1;
+    RestNoteSpec context;
+};
+
+// Scores an improvisation over a declared form. Each note is classified against
+// the chord in force when it sounded, so a phrase that follows the changes is
+// accepted and a phrase that ignores them is not. `bpm` and `beatsPerBar` map the
+// note times to bars; the form loops, exactly like the backing bed does.
+ImprovisationResult evaluateImprovisationOverTimeline (
+    const std::vector<NoteEvent>& played,
+    const std::vector<HarmonicSegment>& timeline,
+    double bpm,
+    int beatsPerBar = 4,
+    double passThreshold = 0.90);
+
 } // namespace cursomusica::course

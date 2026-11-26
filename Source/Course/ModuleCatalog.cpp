@@ -5143,33 +5143,6 @@ namespace
         return out;
     }
 
-    Exercise playable (const char* id, const char* title, const char* goal,
-                       std::initializer_list<const char*> noteNames, const char* topic)
-    {
-        auto e = exercise (id, juce::String::fromUTF8 (title), juce::String::fromUTF8 (goal),
-                           juce::String::fromUTF8 ("O app reconhece as notas tocadas e confere a frase "
-                                                   "do lick do tópico, nota a nota (obrigatório usar o lick)."));
-        e.targets = notes (noteNames);
-        e.lessonId = topic;
-        return e;
-    }
-
-    Exercise improvise (const char* id, const char* title, const char* goal,
-                        std::vector<int> chord, std::vector<int> scale,
-                        std::vector<int> tensions, const char* topic)
-    {
-        auto e = exercise (id, juce::String::fromUTF8 (title), juce::String::fromUTF8 (goal),
-                           juce::String::fromUTF8 ("O app classifica cada nota tocada sobre o vamp: "
-                                                   "notas de repouso (acorde/escala), tensões pedidas e "
-                                                   "erros. Repouso e tensões pedidas contam como acerto."));
-        e.restNotes.chordPitchClasses = std::move (chord);
-        e.restNotes.scalePitchClasses = std::move (scale);
-        e.restNotes.solicitedTensions = std::move (tensions);
-        e.lessonId = topic;
-        e.usesGrid = false;   // the improvisation is graded by note role, not the grid
-        return e;
-    }
-
     CourseModule makeModule11()
     {
         CourseModule m;
@@ -5329,114 +5302,267 @@ namespace
         listen ("LK-11.J", "Santana — \"Black Magic Woman / Gypsy Queen\" (Abraxas, 1970)",
                 "Frases que alternam repouso no acorde e tensão de cor; mesmo vocabulário, frase diferente.");
 
-        // Exercises: every one is played on the instrument and verified by the
-        // app (module 11 has no quizzes). The first exercise of each topic plays
-        // the topic's lick (obligatory); the others are variations and
-        // improvisation over the tonal vamp. Ids follow EX-11.<topico>.<n>.
         auto add = [&m] (Exercise e) { m.exercises.push_back (std::move (e)); return (int) m.exercises.size() - 1; };
 
-        auto amChord = std::vector<int> { 9, 0, 4, 7 };            // Am7: A C E G
-        auto amScale = std::vector<int> { 9, 11, 0, 2, 4, 5, 7 };  // A menor natural
+        // --- Harmonic programme of the improvisation track -------------------
+        // docs/MUSIC.md, "Programa de estudo de improvisação" (Etapa 11).
+        //
+        // Central rule of the programme: no exercise runs on a bare scale. Every
+        // exercise declares the bed it plays over (`bedModelId`), the cadence the
+        // topic teaches (`cadenceId`) and its harmonic level (`harmonicLevel`).
+        // The three exercises of a topic walk P1 -> P2 -> P3: control over a
+        // static centre, connection across two chords, integration over a form.
+        auto bedOf = [] (const char* code) -> const course::harmony::BackingModelDef&
+        {
+            if (auto* found = course::harmony::findModel (juce::String (code)))
+                return *found;
 
-        // --- Topic A — desenhos por região -----------------------------------
-        add (playable ("EX-11.A.1", "Tocar o lick A (grupos de três)", "Tocar o lick do tópico: grupos de três subindo na região de Lá menor.",
-                       { "A4", "B4", "C5", "B4", "C5", "D5", "C5", "D5", "E5", "D5", "E5", "F5", "E5", "F5", "G5", "F5", "G5", "A5" }, "A"));
-        m.exercises.back().lickId = "LK-11.A";
-        add (playable ("EX-11.A.2", "Escala de Lá menor na região", "Subir a escala de Lá menor dentro de uma região, com a digitação fixa do desenho.",
-                       { "A4", "B4", "C5", "D5", "E5", "F5", "G5", "A5" }, "A"));
-        add (improvise ("EX-11.A.3", "Improvisar sobre o vamp de Lá menor", "Improvisar frases curtas sobre Am7, começando e terminando dentro da região.",
-                        amChord, amScale, {}, "A"));
+            static const course::harmony::BackingModelDef none { "H0", "sem base", {}, {}, false };
+            return none;
+        };
 
-        // --- Topic B — escalas ascendentes e descendentes --------------------
-        add (playable ("EX-11.B.1", "Tocar o lick B (ascendente e descendente)", "Tocar o lick do tópico: a escala sobe até o topo e desce resolvendo na tônica.",
-                       { "A4", "B4", "C5", "D5", "E5", "F5", "G5", "A5", "G5", "F5", "E5", "D5", "C5", "B4", "A4" }, "B"));
-        m.exercises.back().lickId = "LK-11.B";
-        add (playable ("EX-11.B.2", "Escala ascendente", "Subir a escala de Lá menor até a oitava, em tempo parelho.",
-                       { "A4", "B4", "C5", "D5", "E5", "F5", "G5", "A5" }, "B"));
-        add (playable ("EX-11.B.3", "Escala descendente", "Descer a escala de Lá menor do topo até a tônica, sem frear.",
-                       { "A5", "G5", "F5", "E5", "D5", "C5", "B4", "A4" }, "B"));
+        auto declareBed = [bedOf] (Exercise e, const char* modelCode, const char* cadenceCode, int level)
+        {
+            e.bedModelId = modelCode;
+            e.cadenceId = cadenceCode;
+            e.harmonicLevel = level;
+            e.harmony = course::harmony::timelineFor (bedOf (modelCode));
+            return e;
+        };
 
-        // --- Topic C — pentatônica menor 7 -----------------------------------
-        add (playable ("EX-11.C.1", "Tocar o lick C (pentatônica menor 7)", "Tocar o lick do tópico: a pentatônica menor 7 de Lá (A C D E G), com a sétima menor (Sol) como nota de chegada.",
-                       { "A4", "C5", "D5", "E5", "G5", "A5", "G5", "E5", "D5", "C5", "A4" }, "C"));
-        m.exercises.back().lickId = "LK-11.C";
-        add (playable ("EX-11.C.2", "Pentatônica menor 7 completa", "Tocar a pentatônica menor 7 de Lá (cinco notas: A C D E G) nos dois sentidos.",
-                       { "A4", "C5", "D5", "E5", "G5", "A5", "G5", "E5", "D5", "C5", "A4" }, "C"));
-        add (improvise ("EX-11.C.3", "Improvisar com a pentatônica menor 7", "Improvisar sobre Am7 usando as cinco notas da pentatônica menor 7 (A C D E G) — todas de repouso sobre o m7.",
-                        amChord, { 9, 0, 2, 4, 7 }, {}, "C"));
+        auto lickNotes = [&m] (const char* lickId)
+        {
+            for (const auto& l : m.licks)
+                if (l.id == juce::String (lickId))
+                    return l.notes;
+            return std::vector<int> {};
+        };
 
-        // --- Topic D — pentatônica menor 6 -----------------------------------
-        add (playable ("EX-11.D.1", "Tocar o lick D (pentatônica menor 6)", "Tocar o lick do tópico: a pentatônica menor 6 de Lá (A C D E F#), com a sexta maior como nota de cor.",
-                       { "A4", "C5", "D5", "E5", "F#5", "E5", "D5", "C5", "A4" }, "D"));
-        m.exercises.back().lickId = "LK-11.D";
-        add (playable ("EX-11.D.2", "Pentatônica menor 6 completa", "Tocar a pentatônica menor 6 de Lá (cinco notas: A C D E F#) nos dois sentidos.",
-                       { "A4", "C5", "D5", "E5", "F#5", "A5", "F#5", "E5", "D5", "C5", "A4" }, "D"));
-        add (improvise ("EX-11.D.3", "Improvisar com a pentatônica menor 6", "Improvisar sobre Am6 usando as cinco notas da pentatônica menor 6 (A C D E F#) — cor de repouso sobre o m6.",
-                        { 9, 0, 4, 6 }, { 9, 0, 2, 4, 6 }, {}, "D"));
+        // Exercise A — recognition and control (P1): the topic's lick, which the
+        // exercise obliges, played over a static centre.
+        // The scale the topic teaches, when it is not the one the chord
+        // would suggest (the module's centre is A minor, so its licks use the
+        // natural minor over the m7 vamp). The declaration wins over the
+        // chord-scale default: the app must expect what the lesson teaches.
+        auto control = [lickNotes, declareBed] (const char* id, const char* title, const char* goal,
+                                                const char* lickId, const char* topic,
+                                                const char* modelCode, const char* cadenceCode,
+                                                std::initializer_list<int> scale = {})
+        {
+            auto e = exercise (id, juce::String::fromUTF8 (title), juce::String::fromUTF8 (goal),
+                               juce::String::fromUTF8 ("O app reconhece as notas do lick sobre a base "
+                                                       "declarada, nota a nota."));
+            for (auto midi : lickNotes (lickId))
+                e.targets.push_back ({ midi, music::midiToNoteName (midi) });
+            e.lessonId = topic;
+            e.lickId = lickId;
+            auto declared = declareBed (std::move (e), modelCode, cadenceCode, 1);
 
-        // --- Topic E — cinco desenhos da pentatônica -------------------------
-        add (playable ("EX-11.E.1", "Tocar o lick E (ligando posições)", "Tocar o lick do tópico: a frase atravessa a nota comum entre duas posições.",
-                       { "A4", "C5", "D5", "E5", "G5", "A5", "G5", "E5", "D5", "C5", "A4" }, "E"));
-        m.exercises.back().lickId = "LK-11.E";
-        add (playable ("EX-11.E.2", "Pentatônica menor subindo e descendo", "Tocar a pentatônica menor de Lá nos dois sentidos, ligando as posições.",
-                       { "A4", "C5", "D5", "E5", "G5", "A5", "G5", "E5", "D5", "C5", "A4" }, "E"));
-        add (improvise ("EX-11.E.3", "Improvisar atravessando as posições", "Improvisar sobre o vamp passando de uma posição da pentatônica para a vizinha.",
-                        amChord, { 9, 0, 2, 4, 7 }, {}, "E"));
+            if (scale.size() > 0)
+                for (auto& segment : declared.harmony)
+                    segment.context.scalePitchClasses = std::vector<int> (scale);
 
-        // --- Topic F — trilhas abertas e fechadas ----------------------------
-        add (playable ("EX-11.F.1", "Tocar o lick F (trilha aberta)", "Tocar o lick do tópico: a escala sobe linearmente pela 3ª corda.",
-                       { "G3", "A3", "B3", "C4", "D4", "E4", "F4", "G4", "A4" }, "F"));
-        m.exercises.back().lickId = "LK-11.F";
-        add (playable ("EX-11.F.2", "Trilha aberta na 3ª corda", "Subir a escala de Lá menor ao longo de uma só corda, do grave ao agudo.",
-                       { "G3", "A3", "B3", "C4", "D4", "E4", "F4", "G4", "A4" }, "F"));
-        add (improvise ("EX-11.F.3", "Improvisar alternando caixa e linha", "Improvisar sobre o vamp alternando a trilha fechada e a trilha aberta.",
-                        amChord, amScale, {}, "F"));
+            return declared;
+        };
 
-        // --- Topic G — Sistema 5 (CAGED) -------------------------------------
-        add (playable ("EX-11.G.1", "Tocar o lick G (dentro da forma)", "Tocar o lick do tópico: o desenho da escala dentro da forma de Lá menor, resolvendo na tônica.",
-                       { "A4", "C5", "D5", "E5", "F5", "G5", "A5", "G5", "E5", "C5", "A4" }, "G"));
-        m.exercises.back().lickId = "LK-11.G";
-        add (playable ("EX-11.G.2", "Escala dentro da forma", "Subir a escala que vive dentro da forma de Lá menor (Sistema 5).",
-                       { "A4", "B4", "C5", "D5", "E5", "F5", "G5", "A5" }, "G"));
-        add (improvise ("EX-11.G.3", "Improvisar resolvendo na tônica da forma", "Improvisar sobre o vamp, resolvendo cada frase numa nota do acorde (tônica da forma).",
-                        amChord, amScale, {}, "G"));
+        // Exercise B — application and connection (P2): the arpeggios of the bed,
+        // chord by chord. The expected notes *are* the harmony, so the student
+        // has to move the target when the chord changes.
+        auto connection = [declareBed, bedOf] (const char* id, const char* title, const char* goal,
+                                        const char* topic, const char* modelCode, const char* cadenceCode)
+        {
+            auto e = exercise (id, juce::String::fromUTF8 (title), juce::String::fromUTF8 (goal),
+                               juce::String::fromUTF8 ("O app confere as notas do arpejo de cada acorde "
+                                                       "da base, na ordem em que a harmonia muda."));
+            e.lessonId = topic;
 
-        // --- Topic H — escala menor harmônica --------------------------------
-        add (playable ("EX-11.H.1", "Tocar o lick H (menor harmônica)", "Tocar o lick do tópico: a segunda aumentada marca a tensão e a frase resolve na tônica.",
-                       { "A4", "B4", "C5", "D5", "E5", "F5", "G#5", "A5", "G#5", "F5", "E5", "D5", "C5", "B4", "A4" }, "H"));
-        m.exercises.back().lickId = "LK-11.H";
-        add (playable ("EX-11.H.2", "Menor harmônica ascendente", "Subir a escala menor harmônica de Lá, destacando a sétima elevada (G#).",
-                       { "A4", "B4", "C5", "D5", "E5", "F5", "G#5", "A5" }, "H"));
-        add (improvise ("EX-11.H.3", "Improvisar resolvendo com a segunda aumentada", "Improvisar sobre Am usando a segunda aumentada (F–G#) como gesto de tensão resolvido na tônica.",
-                        amChord, { 9, 11, 0, 2, 4, 5, 8 }, { 5, 8 }, "H"));
+            for (const auto& chord : bedOf (modelCode).chords)
+            {
+                auto tones = chord.pitchClasses;
+                std::sort (tones.begin(), tones.end(), [&chord] (int a, int b)
+                {
+                    return ((a - chord.rootPitchClass + 12) % 12)
+                             < ((b - chord.rootPitchClass + 12) % 12);
+                });
 
-        // --- Topic I — escala menor melódica ---------------------------------
-        add (playable ("EX-11.I.1", "Tocar o lick I (menor melódica)", "Tocar o lick do tópico: a sexta e a sétima elevadas dão a fluência e a frase resolve na tônica.",
-                       { "A4", "B4", "C5", "D5", "E5", "F#5", "G#5", "A5", "G#5", "F#5", "E5", "D5", "C5", "B4", "A4" }, "I"));
-        m.exercises.back().lickId = "LK-11.I";
-        add (playable ("EX-11.I.2", "Menor melódica ascendente", "Subir a escala menor melódica de Lá, destacando a sexta (F#) e a sétima (G#) elevadas.",
-                       { "A4", "B4", "C5", "D5", "E5", "F#5", "G#5", "A5" }, "I"));
-        add (improvise ("EX-11.I.3", "Improvisar com a menor melódica", "Improvisar sobre Am7 usando a menor melódica para linhas longas e cantáveis.",
-                        amChord, { 9, 11, 0, 2, 4, 6, 8 }, {}, "I"));
+                for (int pc : tones)
+                {
+                    const int midi = 60 + chord.rootPitchClass
+                                       + ((pc - chord.rootPitchClass + 12) % 12);
+                    e.targets.push_back ({ midi, music::midiToNoteName (midi) });
+                }
+            }
 
-        // --- Topic J — relação entre escalas e acordes -----------------------
-        add (playable ("EX-11.J.1", "Tocar o lick J (repouso e tensão)", "Tocar o lick do tópico: a frase mistura repouso (acorde) e tensão de cor, resolvendo no acorde.",
-                       { "A4", "C5", "D5", "F5", "D5", "C5", "A4", "E5", "D5", "C5", "A4" }, "J"));
-        m.exercises.back().lickId = "LK-11.J";
-        add (playable ("EX-11.J.2", "Arpejo de Am7", "Tocar o arpejo de Am7 (A-C-E-G) subindo e descendo, com a tônica como repouso.",
-                       { "A4", "C5", "E5", "G5", "A5", "G5", "E5", "C5", "A4" }, "J"));
-        add (improvise ("EX-11.J.3", "Improvisar sobre o vamp tonal", "Improvisar sobre o vamp de Lá menor respeitando as notas de repouso (acorde e escala) e as tensões pedidas.",
-                        amChord, amScale, {}, "J"));
+            return declareBed (std::move (e), modelCode, cadenceCode, 2);
+        };
+
+        // Exercise C — integration and autonomy (P3): free improvisation over the
+        // declared form. Each note is judged against the chord in force when it
+        // sounded, so following the changes passes and ignoring them does not.
+        auto integration = [declareBed] (const char* id, const char* title, const char* goal,
+                                         const char* topic, const char* modelCode, const char* cadenceCode)
+        {
+            auto e = exercise (id, juce::String::fromUTF8 (title), juce::String::fromUTF8 (goal),
+                               juce::String::fromUTF8 ("O app classifica cada nota tocada contra o "
+                                                       "acorde em vigor: repouso (acorde ou escala), "
+                                                       "tensão pedida, passagem cromática ou erro."));
+            e.lessonId = topic;
+            e.usesGrid = false;   // graded by note role against the form, not by the grid
+            auto declared = declareBed (std::move (e), modelCode, cadenceCode, 3);
+
+            // The opening context is also the single-chord fallback; the form
+            // itself (declared above) is what the attempt is graded against.
+            if (! declared.harmony.empty())
+                declared.restNotes = declared.harmony.front().context;
+
+            return declared;
+        };
+
+        // --- Topic A — desenhos por regiões (11.1) ---------------------------
+        add (control ("EX-11.A.1", "Tocar o lick A sobre o vamp (controle)",
+                      "Tocar o lick do tópico — grupos de três subindo dentro de uma região — sobre o vamp de Am7 (H1). "
+                      "O centro é estático: o trabalho é de reconhecimento e controle, sem mudança de acorde.",
+                      "LK-11.A", "A", "H1", "C02", { 9, 11, 0, 2, 4, 5, 7 }));
+        add (connection ("EX-11.A.2", "Arpejos de Am7 e D7 (conexão)",
+                         "Tocar o arpejo de cada acorde da base H5 (Am7 – D7), na ordem em que a harmonia muda: "
+                         "a nota-alvo tem de acompanhar o acorde, não ficar na posição.",
+                         "A", "H5", "C16"));
+        add (integration ("EX-11.A.3", "Improvisar sobre a célula Am7 – Fmaj7 (integração)",
+                          "Improvisar sobre a célula H7 (Am7 – Fmaj7) usando os desenhos do tópico e ligando as "
+                          "regiões pela nota comum; as notas de repouso mudam quando o acorde muda.",
+                          "A", "H7", "C18"));
+
+        // --- Topic B — escalas ascendentes e descendentes (11.2) -------------
+        add (control ("EX-11.B.1", "Tocar o lick B sobre o vamp (controle)",
+                      "Tocar o lick do tópico — a escala sobe até o topo e desce resolvendo na tônica — sobre o vamp de Am7 (H1).",
+                      "LK-11.B", "B", "H1", "C02", { 9, 11, 0, 2, 4, 5, 7 }));
+        add (connection ("EX-11.B.2", "Arpejos de Dm7 e G7 (conexão)",
+                         "Tocar o arpejo de cada acorde da base H4 (Dm7 – G7) na ordem da harmonia: "
+                         "subir e descer a escala passa a servir a duas notas-alvo diferentes.",
+                         "B", "H4", "C15"));
+        add (integration ("EX-11.B.3", "Improvisar sobre Cmaj7 – Fmaj7 (integração)",
+                          "Improvisar sobre a célula H6 (Cmaj7 – Fmaj7) alternando movimento ascendente e "
+                          "descendente, com a escala do acorde em vigor.",
+                          "B", "H6", "C13"));
+
+        // --- Topic C — pentatônica menor 7 (11.3) ----------------------------
+        add (control ("EX-11.C.1", "Tocar o lick C sobre Am7 (controle)",
+                      "Tocar o lick do tópico — a pentatônica menor 7 de Lá, com a sétima menor como chegada — "
+                      "sobre o vamp de Am7 (H1), onde as cinco notas são de repouso.",
+                      "LK-11.C", "C", "H1", "C02", { 9, 0, 2, 4, 7 }));
+        add (connection ("EX-11.C.2", "Arpejos de Am7 e D7 (conexão)",
+                         "Tocar o arpejo de Am7 e de D7 (base H5): a pentatônica de Lá cobre o Am7, e o D7 pede "
+                         "a terça maior (F#) — a nota-alvo muda com o acorde.",
+                         "C", "H5", "C16"));
+        add (integration ("EX-11.C.3", "Improvisar sobre o blues menor (integração)",
+                          "Improvisar sobre o blues menor de 12 compassos em Lá (H13), mantendo a pentatônica "
+                          "como espinha e resolvendo em cada mudança de acorde.",
+                          "C", "H13", "C10"));
+
+        // --- Topic D — pentatônica menor 6 (11.4) ----------------------------
+        add (control ("EX-11.D.1", "Tocar o lick D sobre Am7 (controle)",
+                      "Tocar o lick do tópico — a pentatônica menor 6 de Lá, com a sexta maior como cor — "
+                      "sobre o vamp de Am7 (H1).",
+                      "LK-11.D", "D", "H1", "C02", { 9, 0, 2, 4, 6 }));
+        add (connection ("EX-11.D.2", "Arpejos de Am7 e D7 (conexão)",
+                         "Tocar o arpejo de Am7 e de D7 (base H5): a sexta maior (F#) é cor sobre o Am7 e "
+                         "terça do D7 — a mesma nota muda de função quando o acorde muda.",
+                         "D", "H5", "C16"));
+        add (integration ("EX-11.D.3", "Improvisar sobre o blues maior (integração)",
+                          "Improvisar sobre o blues de 12 compassos em Lá (H12): a pentatônica menor 6 funciona "
+                          "sobre os dominantes e a blue note resolve na terça.",
+                          "D", "H12", "C10"));
+
+        // --- Topic E — cinco desenhos da pentatônica (11.5) ------------------
+        add (control ("EX-11.E.1", "Tocar o lick E sobre o vamp (controle)",
+                      "Tocar o lick do tópico — a frase atravessa a nota comum entre duas posições — sobre o vamp de Am7 (H1).",
+                      "LK-11.E", "E", "H1", "C02", { 9, 0, 2, 4, 7 }));
+        add (connection ("EX-11.E.2", "Arpejos de Dm7 e G7 (conexão)",
+                         "Tocar o arpejo de Dm7 e de G7 (base H4) passando de uma posição da pentatônica para a "
+                         "vizinha: a mão viaja enquanto a harmonia muda.",
+                         "E", "H4", "C15"));
+        add (integration ("EX-11.E.3", "Improvisar sobre a progressão fusion (integração)",
+                          "Improvisar sobre H17 (Am9 – D13 – Gmaj9 – Cmaj9): quatro centros de cor, cada um "
+                          "com a sua escala, atravessando as cinco posições.",
+                          "E", "H17", "C21"));
+
+        // --- Topic F — trilhas abertas e fechadas (11.6) ---------------------
+        add (control ("EX-11.F.1", "Tocar o lick F sobre Cmaj7 (controle)",
+                      "Tocar o lick do tópico — a escala sobe linearmente pela 3ª corda, trilha aberta — "
+                      "sobre o vamp de Cmaj7 (H2).",
+                      "LK-11.F", "F", "H2", "C02"));
+        add (connection ("EX-11.F.2", "Arpejos de Dm7 e G7 (conexão)",
+                         "Tocar o arpejo de Dm7 e de G7 (base H4) em trilha aberta: a mão percorre o braço "
+                         "acompanhando cada acorde.",
+                         "F", "H4", "C15"));
+        add (integration ("EX-11.F.3", "Improvisar alternando caixa e linha (integração)",
+                          "Improvisar sobre H6 (Cmaj7 – Fmaj7) alternando trilha fechada e trilha aberta, "
+                          "mantendo a nota-alvo do acorde em vigor.",
+                          "F", "H6", "C18"));
+
+        // --- Topic G — Sistema 5 / CAGED (11.7) -----------------------------
+        add (control ("EX-11.G.1", "Tocar o lick G dentro da forma (controle)",
+                      "Tocar o lick do tópico — o desenho da escala dentro da forma do acorde, resolvendo na tônica — "
+                      "sobre o vamp de Cmaj7 (H2).",
+                      "LK-11.G", "G", "H2", "C01"));
+        add (connection ("EX-11.G.2", "Arpejos de Cmaj7 e Fmaj7 (conexão)",
+                         "Tocar o arpejo de Cmaj7 e de Fmaj7 (base H6): trocar de acorde é trocar de forma, "
+                         "e a tônica da forma é a nota-alvo.",
+                         "G", "H6", "C05"));
+        add (integration ("EX-11.G.3", "Improvisar sobre o turnaround (integração)",
+                          "Improvisar sobre o turnaround H10 (Cmaj7 – Am7 – Dm7 – G7), resolvendo cada frase "
+                          "numa nota do acorde em vigor e seguindo a harmonia pelo braço.",
+                          "G", "H10", "C24"));
+
+        // --- Topic H — escala menor harmônica (11.8) ------------------------
+        add (control ("EX-11.H.1", "Tocar o lick H sobre o vamp (controle)",
+                      "Tocar o lick do tópico — a segunda aumentada marca a tensão e a frase resolve na tônica — "
+                      "sobre o vamp de Am7 (H1).",
+                      "LK-11.H", "H", "H1", "C17", { 9, 11, 0, 2, 4, 5, 8 }));
+        add (connection ("EX-11.H.2", "Arpejos de Bm7(b5), E7 e Am7 (conexão)",
+                         "Tocar o arpejo de cada acorde de H9 (Bm7(b5) – E7 – Am7): o ii–V–i menor é onde a "
+                         "menor harmônica nasce, e a sétima elevada é a terça do dominante.",
+                         "H", "H9", "C23"));
+        add (integration ("EX-11.H.3", "Improvisar sobre Am – Bb – E7 (integração)",
+                          "Improvisar sobre H19 (Am – Bb – E7), adaptando a escala a cada acorde e resolvendo "
+                          "a segunda aumentada na tônica quando o E7 chega.",
+                          "H", "H19", "C27"));
+
+        // --- Topic I — escala menor melódica (11.9) -------------------------
+        add (control ("EX-11.I.1", "Tocar o lick I sobre o vamp (controle)",
+                      "Tocar o lick do tópico — a sexta e a sétima elevadas dão fluência e a frase resolve na tônica — "
+                      "sobre o vamp de Am7 (H1).",
+                      "LK-11.I", "I", "H1", "C06", { 9, 11, 0, 2, 4, 6, 8 }));
+        add (connection ("EX-11.I.2", "Arpejos de Bm7(b5), E7 e Am7 (conexão)",
+                         "Tocar o arpejo de cada acorde de H9: sobre o ii–V–i menor a menor melódica é a escala "
+                         "do centro, e a nota-alvo muda a cada acorde.",
+                         "I", "H9", "C23"));
+        add (integration ("EX-11.I.3", "Improvisar sobre II–V–I em dois tons (integração)",
+                          "Improvisar sobre H16 (Dm7 – G7 – Cmaj7 – Em7 – A7 – Dmaj7): o centro tonal muda no "
+                          "meio da forma, e as notas-alvo têm de mudar com ele.",
+                          "I", "H16", "C27"));
+
+        // --- Topic J — relação entre escalas e acordes (11.10) --------------
+        add (control ("EX-11.J.1", "Tocar o lick J sobre Cmaj7 (controle)",
+                      "Tocar o lick do tópico — repouso no acorde e tensão de cor — sobre o vamp de Cmaj7 (H2).",
+                      "LK-11.J", "J", "H2", "C01"));
+        add (connection ("EX-11.J.2", "Arpejos de Am7 e D7 (conexão)",
+                         "Tocar o arpejo de Am7 e de D7 (base H5): a escala vem do acorde, então a mesma nota "
+                         "é repouso num acorde e tensão no outro.",
+                         "J", "H5", "C16"));
+        add (integration ("EX-11.J.3", "Improvisar sobre o II–V–I maior (integração)",
+                          "Improvisar sobre H8 (Dm7 – G7 – Cmaj7) escolhendo a escala de cada acorde e "
+                          "resolvendo as tensões no acorde em vigor.",
+                          "J", "H8", "C22"));
 
         // The gate closes the module: the lick J played on the grid at the target
         // BPM (REQ-009 accuracy + REQ-015 grid), so the student proves the phrase
-        // and the tempo together.
-        auto& gate = m.exercises.emplace_back (playable (
+        // and the tempo together over the module's own vamp.
+        auto& gate = m.exercises.emplace_back (control (
             "GATE-11", "Desafio de gate — lick sobre a grade",
-            "Tocar o lick do tópico J (repouso e tensão sobre o vamp de Lá menor) a 100 BPM, na grade do metrônomo.",
-            { "A4", "C5", "D5", "F5", "D5", "C5", "A4", "E5", "D5", "C5", "A4" }, "J"));
+            "Tocar o lick do tópico J (repouso e tensão) sobre o vamp de Am7 (H1) a 100 BPM, na grade do metrônomo.",
+            "LK-11.J", "J", "H1", "C02", { 9, 11, 0, 2, 4, 5, 7 }));
         gate.isGate = true;
-        gate.lickId = "LK-11.J";
         gate.targetBpm = 100;
         gate.usesGrid = true;
 

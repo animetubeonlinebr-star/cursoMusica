@@ -77,4 +77,103 @@ ImprovisationResult evaluateImprovisation (const std::vector<NoteEvent>& played,
     return result;
 }
 
+
+namespace
+{
+    // The context in force at `barOfForm` (the form loops, like the bed).
+    const RestNoteSpec* contextAtBar (const std::vector<HarmonicSegment>& timeline, int bar)
+    {
+        int bars = 0;
+        for (const auto& segment : timeline)
+            bars += segment.bars;
+        if (bars <= 0)
+            return nullptr;
+
+        int wrapped = ((bar % bars) + bars) % bars;
+        for (const auto& segment : timeline)
+        {
+            if (wrapped < segment.bars)
+                return &segment.context;
+            wrapped -= segment.bars;
+        }
+        return &timeline.back().context;
+    }
+
+    bool acceptedIn (const RestNoteSpec& spec, int pitchClass)
+    {
+        return classifyNote (pitchClass, spec) != NoteRole::error;
+    }
+
+    // A chromatic passing tone against the context of its own moment: a semitone
+    // from the next note, which must be accepted in that same context.
+    bool isPassingToneIn (const std::vector<NoteEvent>& played, std::size_t index,
+                          const std::vector<HarmonicSegment>& timeline, double secondsPerBar)
+    {
+        if (index + 1 >= played.size())
+            return false;
+
+        const int barNext = (int) (played[index + 1].timeSeconds / secondsPerBar);
+        auto* nextContext = contextAtBar (timeline, barNext);
+        if (nextContext == nullptr)
+            return false;
+
+        const int pc = music::pitchClassOf (played[index].midi);
+        const int nextPc = music::pitchClassOf (played[index + 1].midi);
+        if (! acceptedIn (*nextContext, nextPc))
+            return false;
+
+        const int step = ((nextPc - pc) % 12 + 12) % 12;
+        return step == 1 || step == 11;
+    }
+}
+
+ImprovisationResult evaluateImprovisationOverTimeline (const std::vector<NoteEvent>& played,
+                                                       const std::vector<HarmonicSegment>& timeline,
+                                                       double bpm,
+                                                       int beatsPerBar,
+                                                       double passThreshold)
+{
+    ImprovisationResult result;
+
+    // Without a form there is no context to judge against: grade nothing rather
+    // than invent a harmony.
+    if (timeline.empty() || bpm <= 0.0)
+        return result;
+
+    result.total = (int) played.size();
+
+    const double beatsPerBarSafe = beatsPerBar > 0 ? (double) beatsPerBar : 4.0;
+    const double secondsPerBar = 60.0 / bpm * beatsPerBarSafe;
+
+    if (secondsPerBar <= 0.0)
+        return result;
+
+    for (std::size_t i = 0; i < played.size(); ++i)
+    {
+        const int bar = (int) (played[i].timeSeconds / secondsPerBar);
+        auto* context = contextAtBar (timeline, bar);
+        if (context == nullptr)
+            continue;
+
+        auto role = classifyNote (music::pitchClassOf (played[i].midi), *context);
+
+        if (role == NoteRole::error && context->allowPassing
+            && isPassingToneIn (played, i, timeline, secondsPerBar))
+            role = NoteRole::passing;
+
+        switch (role)
+        {
+            case NoteRole::rest:    ++result.rest; break;
+            case NoteRole::tension: ++result.tension; break;
+            case NoteRole::passing: ++result.passing; break;
+            case NoteRole::error:   ++result.errors; break;
+        }
+    }
+
+    const int accepted = result.rest + result.tension + result.passing;
+    result.accuracy = evaluator::accuracyOf (accepted, result.total);
+    result.passed = result.total > 0 && result.accuracy >= passThreshold;
+    return result;
+}
+
 } // namespace cursomusica::course
