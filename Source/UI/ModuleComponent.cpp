@@ -1110,24 +1110,41 @@ public:
                                     th::radius::sm);
         }
 
+        // One right-aligned tag per row. A module still being written says "em
+        // preparação" (it is not playable at all, so "bloqueado" would be
+        // redundant); the others say "bloqueado" until the previous gate is
+        // passed. The tag lives in its own slot so the long label never wraps
+        // over the title line.
+        const juce::String tag = implemented ? (unlocked ? juce::String()
+                                                         : juce::String::fromUTF8 ("bloqueado"))
+                                             : juce::String::fromUTF8 ("em preparação");
+        const auto tagFont = th::type::makeFont (th::type::caption, true);
+        int tagWidth = 0;
+
+        if (tag.isNotEmpty())
+        {
+            juce::GlyphArrangement glyphs;
+            glyphs.addLineOfText (tagFont, tag, 0.0f, 0.0f);
+            tagWidth = (int) std::ceil (glyphs.getBoundingBox (0, glyphs.getNumGlyphs(), true).getWidth()) + 6;
+        }
+
         g.setColour (isSel ? th::colour::textPrimary
                             : (unlocked ? th::colour::textSecondary : th::colour::textDisabled));
         g.setFont (th::type::makeFont (th::type::body, true));
-        g.drawText (juce::String::fromUTF8 ("Módulo ") + juce::String (number)
-                        + (implemented ? juce::String() : juce::String::fromUTF8 ("  ·  em preparação")),
-                    8, 4, width - 16, 20, juce::Justification::centredLeft, false);
+        g.drawText (juce::String::fromUTF8 ("Módulo ") + juce::String (number),
+                    8, 4, width - 16 - tagWidth, 20, juce::Justification::centredLeft, true);
+
+        if (tag.isNotEmpty())
+        {
+            g.setColour (implemented ? th::colour::textDisabled : th::colour::accentMuted);
+            g.setFont (tagFont);
+            g.drawText (tag, width - 8 - tagWidth, 4, tagWidth, 20,
+                        juce::Justification::centredRight, true);
+        }
 
         g.setColour (implemented ? th::colour::textSecondary : th::colour::accentMuted);
         g.setFont (th::type::makeFont (th::type::caption));
         g.drawFittedText (title, 8, 24, width - 16, 20, juce::Justification::centredLeft, 1);
-
-        if (! unlocked)
-        {
-            g.setColour (th::colour::textDisabled);
-            g.setFont (th::type::makeFont (th::type::caption, true));
-            g.drawText (juce::String::fromUTF8 ("bloqueado"), width - 90, 4, 78, 20,
-                        juce::Justification::centredRight, false);
-        }
     }
 
 private:

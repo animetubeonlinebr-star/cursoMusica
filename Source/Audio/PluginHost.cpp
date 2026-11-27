@@ -150,8 +150,20 @@ void PluginHost::loadKnownPlugins()
 
 void PluginHost::saveKnownPlugins()
 {
-    if (auto xml = knownList.createXml())
-        properties.setValue (pluginListXmlKey, xml->toString());
+    auto xml = knownList.createXml();
+    if (xml == nullptr)
+        return;
+
+    const auto text = xml->toString();
+    const auto stored = properties.getValue (pluginListXmlKey);
+
+    // The list only goes to disk when it differs from what is stored, or when an
+    // existing list has to be emptied: the shutdown save used to rewrite the
+    // settings file on every exit, even for a session that only read the cache.
+    if (text == stored || (stored.isEmpty() && knownList.getNumTypes() == 0))
+        return;
+
+    properties.setValue (pluginListXmlKey, text);
 
     // Flush now: the shared instance is not torn down at exit, so a scan that
     // finishes just before the app closes must not wait for the properties timer.
@@ -165,6 +177,7 @@ void PluginHost::saveSearchPaths()
     // closed before the properties timer fires.
     properties.saveIfNeeded();
     prunePluginsOutsideSearchPaths();
+    saveKnownPlugins();   // the prune dropped types: persist the shorter list now
 }
 
 void PluginHost::prunePluginsOutsideSearchPaths()

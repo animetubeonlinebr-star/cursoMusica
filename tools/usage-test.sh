@@ -56,8 +56,11 @@ else
 fi
 
 log "2/4 Build (app + plugin de teste + teste de uso)"
-cmake -B "$BUILD_DIR" -G Ninja -DCMAKE_BUILD_TYPE=Release -DCURSOMUSICA_USAGE_TEST=ON
-cmake --build "$BUILD_DIR"
+cmake -B "$BUILD_DIR" -G Ninja -DCMAKE_BUILD_TYPE=Release -DCURSOMUSICA_USAGE_TEST=ON \
+    || { echo "FALHOU: o configure do build de uso falhou"; exit 1; }
+# A failed build must stop the run: without this the script fell through and
+# reported OK on the previous binary.
+cmake --build "$BUILD_DIR" || { echo "FALHOU: o build de uso falhou"; exit 1; }
 
 log "3/4 JACK (dummy) e pasta de plugins"
 pkill -9 -f "jackd -d dummy" 2>/dev/null || true

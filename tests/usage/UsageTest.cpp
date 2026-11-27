@@ -223,6 +223,34 @@ namespace
             cursomusica::audio::pluginchain::selectableIndices (available, chainAfter);
         check (selectableAfter.empty(),
                "depois de adicionar, o plugin saiu do painel superior");
+
+        // A session that only read the cache must not rewrite the settings file
+        // when it closes: the old shutdown save wrote an empty <KNOWNPLUGINS/>
+        // element and flushed the whole file on every exit.
+        auto& settings = cursomusica::data::AppSettings::get();
+        const auto storedList = settings.getValue ("knownVst3Plugins");
+        settings.removeValue ("knownVst3Plugins");
+        settings.setValue ("usage/save-guard", "1");
+        settings.saveIfNeeded();
+        juce::Thread::sleep (10);
+
+        {
+            cursomusica::PluginHost fresh;
+            fresh.loadKnownPlugins();   // nothing cached, nothing to write
+
+            fresh.saveKnownPlugins();   // exactly what ~PluginHost() calls
+
+            const auto text = settings.getFile().loadFileAsString();
+            check (! text.contains ("KNOWNPLUGINS"),
+                   "fechar o app nao grava a lista de plugins quando ela nao mudou");
+            check (text.contains ("usage/save-guard"),
+                   "as configuracoes existentes continuam intactas");
+        }
+
+        if (storedList.isNotEmpty())
+            settings.setValue ("knownVst3Plugins", storedList);
+        settings.removeValue ("usage/save-guard");
+        settings.saveIfNeeded();
     }
 
     // ---- Step 3b: the device chosen in Settings survives a restart --------
