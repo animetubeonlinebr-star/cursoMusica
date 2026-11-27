@@ -155,6 +155,17 @@ void PracticeSession::recompute()
         state.matched = result.matched;
         state.accuracy = result.accuracy;
     }
+    else if (current->isImprovisation() && ! current->harmony.empty())
+    {
+        // Declared form (improvisation programme): every note is classified
+        // against the chord in force when it sounded, so following the changes
+        // passes and ignoring them does not.
+        const double bpm = practiceBpm > 0.0 ? practiceBpm : (double) targetBpm;
+        const auto result = evaluateImprovisationOverTimeline (played, current->harmony, bpm);
+        state.matched = result.rest + result.tension + result.passing;
+        state.targetCount = result.total;
+        state.accuracy = result.accuracy;
+    }
     else if (current->isImprovisation())
     {
         // Rest-note evaluation (REQ-011/REQ-012): every note is classified

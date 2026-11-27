@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "Course/ExerciseEvaluator.h"
+#include "Course/Harmony.h"
 #include "Course/RestNotes.h"
 #include "Course/TempoGrid.h"
 
@@ -145,6 +146,16 @@ struct Exercise
     // instead of matching an exact sequence. Used by the improvisation exercises.
     course::RestNoteSpec restNotes;
     bool isImprovisation() const noexcept { return ! restNotes.empty(); }
+
+    // Harmonic context declared by the improvisation programme (docs/MUSIC.md):
+    // the cadence the topic teaches, the backing model the app plays, the
+    // harmonic level of the exercise (P1..P7) and the form under improvisation.
+    // Declaring the bed and the form in the same place is what keeps the audio
+    // the student hears and the notes the app accepts from drifting apart.
+    juce::String cadenceId;   // "C22"
+    juce::String bedModelId;  // "H8"
+    int harmonicLevel = 0;    // 1..7 (P1..P7); 0 = not declared
+    std::vector<course::HarmonicSegment> harmony;
 
     bool isQuiz() const noexcept { return ! quiz.empty(); }
 };

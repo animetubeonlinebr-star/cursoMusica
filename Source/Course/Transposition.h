@@ -63,6 +63,25 @@ inline Exercise transposedExercise (const Exercise& exercise, int semitones)
         transposedPitchClasses (exercise.restNotes.chordPitchClasses, semitones);
     result.restNotes.scalePitchClasses =
         transposedPitchClasses (exercise.restNotes.scalePitchClasses, semitones);
+    result.restNotes.solicitedTensions =
+        transposedPitchClasses (exercise.restNotes.solicitedTensions, semitones);
+
+    // The declared form moves with the bed: judging the student against the
+    // original changes while the audio plays the new key would fail a correct
+    // performance.
+    result.harmony.clear();
+    result.harmony.reserve (exercise.harmony.size());
+    for (const auto& segment : exercise.harmony)
+    {
+        auto moved = segment;
+        moved.context.chordPitchClasses =
+            transposedPitchClasses (segment.context.chordPitchClasses, semitones);
+        moved.context.scalePitchClasses =
+            transposedPitchClasses (segment.context.scalePitchClasses, semitones);
+        moved.context.solicitedTensions =
+            transposedPitchClasses (segment.context.solicitedTensions, semitones);
+        result.harmony.push_back (std::move (moved));
+    }
 
     // `interval` is a distance, not a pitch, so it does not transpose.
     return result;

@@ -1332,6 +1332,175 @@ void testIntervalEvaluation()
 // the harmonic context. Chord tones and scale tones rest; a solicited tension is
 // accepted; a note outside the context is an error unless it is a chromatic
 // passing tone that resolves on the next accepted note.
+void testHarmonyLibrary()
+{
+    std::cout << "Harmony library\n";
+    using namespace cursomusica;
+    using namespace cursomusica::course;
+
+    // Doc §2.1: 31 cadences, C01..C31, each with a family and chords.
+    check (harmony::cadences().size() == 31, "the catalogue lists the 31 cadences");
+    for (int i = 1; i <= 31; ++i)
+    {
+        const auto code = "C" + juce::String (i).paddedLeft ('0', 2);
+        const auto* found = harmony::findCadence (code);
+        check (found != nullptr, "cadence " + code + " exists");
+        if (found == nullptr)
+            continue;
+
+        check (! found->chords.empty(), "cadence " + code + " declares chords");
+        check (found->family.startsWith ("F"), "cadence " + code + " belongs to a family");
+        check (found->name.isNotEmpty() && found->degrees.isNotEmpty(),
+               "cadence " + code + " names its degrees");
+        for (const auto& chord : found->chords)
+            check (! chord.pitchClasses.empty() && chord.pitchClasses.size() <= 5,
+                   "cadence " + code + " chord " + chord.label + " has 3..5 tones");
+    }
+
+    // Doc §3: 20 backing models, H1..H20, each with chords.
+    check (harmony::models().size() == 20, "the catalogue lists the 20 backing models");
+    for (int i = 1; i <= 20; ++i)
+    {
+        const auto code = "H" + juce::String (i);
+        const auto* found = harmony::findModel (code);
+        check (found != nullptr, "backing model " + code + " exists");
+        if (found == nullptr)
+            continue;
+
+        check (! found->chords.empty(), "backing model " + code + " declares chords");
+        check (found->name.isNotEmpty(), "backing model " + code + " has a name");
+        for (const auto& chord : found->chords)
+            check (! chord.pitchClasses.empty(), "model " + code + " chord has tones");
+    }
+
+    // The blues models are twelve bars (doc: "blues de 12 compassos").
+    for (auto code : { "H12", "H13", "H14" })
+        if (auto* model = harmony::findModel (code))
+            check ((int) model->chords.size() == 12,
+                   juce::String (code) + " is a twelve-bar blues");
+
+    // Doc §1.1: the seven harmonic levels, in order.
+    check (harmony::levelCode (1) == "P1" && harmony::levelCode (7) == "P7",
+           "the harmonic levels are coded P1..P7");
+    for (int level = 1; level <= 7; ++level)
+        check (harmony::levelName (level).isNotEmpty(),
+               "harmonic level " + harmony::levelCode (level) + " has a name");
+    check (harmony::levelName (0).isEmpty(), "there is no harmonic level 0");
+
+    // Chord scales (doc: "Relação entre escalas e acordes").
+    const auto* doric = harmony::findModel ("H1");   // Am7
+    if (doric != nullptr)
+    {
+        const auto scale = harmony::chordScaleFor (doric->chords.front());
+        check (scale == std::vector<int> { 0, 2, 4, 6, 7, 9, 11 },
+               "m7 takes the dorian scale (A B C D E F# G)");
+    }
+
+    const auto* dominant = harmony::findModel ("H3");  // E7#9
+    if (dominant != nullptr)
+    {
+        const auto scale = harmony::chordScaleFor (dominant->chords.front());
+        check (std::find (scale.begin(), scale.end(), 2) != scale.end(),
+               "the dominant scale of E7 contains D (the flat seventh)");
+        check (std::find (scale.begin(), scale.end(), 8) != scale.end(),
+               "the dominant scale of E7 contains G# (the major third)");
+    }
+
+    // A model becomes a form: one bar per chord, looping.
+    const auto* h4 = harmony::findModel ("H4");   // Dm7 - G7
+    check (h4 != nullptr, "H4 (two-chord vamp) exists");
+    if (h4 != nullptr)
+    {
+        const auto timeline = harmony::timelineFor (*h4);
+        check ((int) timeline.size() == 2, "H4 becomes a two-segment form");
+        check (harmony::totalBars (timeline) == 2, "H4 lasts two bars");
+
+        const auto* first = harmony::segmentAtBar (timeline, 0);
+        const auto* second = harmony::segmentAtBar (timeline, 1);
+        const auto* third = harmony::segmentAtBar (timeline, 2);
+        check (first != nullptr && first->context.chordPitchClasses
+                   == std::vector<int> { 0, 2, 5, 9 },
+               "bar 1 of H4 is Dm7");
+        check (second != nullptr && second->context.chordPitchClasses
+                   == std::vector<int> { 2, 5, 7, 11 },
+               "bar 2 of H4 is G7");
+        check (third != nullptr && third->context.chordPitchClasses
+                   == std::vector<int> { 0, 2, 5, 9 },
+               "the form loops back to Dm7 on bar 3");
+    }
+
+    // Every model's cadences (doc §3.1) exist in the catalogue.
+    for (const auto& model : harmony::models())
+    {
+        const auto allowed = harmony::compatibleCadences (model.code);
+        check (! allowed.empty(), "model " + model.code + " relates to cadences (doc 3.1)");
+        for (const auto& code : allowed)
+            check (harmony::findCadence (code) != nullptr,
+                   "model " + model.code + " cites the catalogued cadence " + code);
+    }
+}
+
+void testImprovisationTimeline()
+{
+    std::cout << "Improvisation over a form\n";
+    using namespace cursomusica;
+    using namespace cursomusica::course;
+
+    const auto* h4 = harmony::findModel ("H4");   // Dm7 - G7
+    check (h4 != nullptr, "H4 exists for the form test");
+    if (h4 == nullptr)
+        return;
+
+    const auto timeline = harmony::timelineFor (*h4);
+
+    // 120 BPM in 4/4: one bar is two seconds. Bar 1 is Dm7, bar 2 is G7.
+    std::vector<NoteEvent> followsTheChanges {
+        { 0.0, 62 }, { 0.5, 65 }, { 1.0, 69 }, { 1.5, 72 },    // D F A C over Dm7
+        { 2.0, 67 }, { 2.5, 71 }, { 3.0, 74 }, { 3.5, 77 } };  // G B D F over G7
+    const auto good = evaluateImprovisationOverTimeline (followsTheChanges, timeline, 120.0);
+    check (good.total == 8, "every played note is graded");
+    check (good.errors == 0, "following the changes produces no error");
+    check (good.passed, "a phrase that follows the changes passes");
+
+    // The same Dm7 phrase played over the G7 bar is not the same thing: those
+    // notes are in the G scale, so the regression must be checked with notes
+    // foreign to the chord in force (C#, G#, Eb over G7).
+    std::vector<NoteEvent> ignoresTheChange {
+        { 0.0, 62 }, { 0.5, 65 }, { 1.0, 69 }, { 1.5, 72 },    // D F A C over Dm7
+        { 2.0, 61 }, { 2.5, 68 }, { 3.0, 63 }, { 3.5, 58 } };  // C# G# Eb Bb over G7
+    const auto bad = evaluateImprovisationOverTimeline (ignoresTheChange, timeline, 120.0);
+    check (bad.errors == 4, "notes foreign to the chord in force are errors");
+    check (! bad.passed, "ignoring the change does not pass");
+
+    // The bar the note falls in is what decides the context: the very same note
+    // is accepted in one bar and rejected in the other.
+    const std::vector<NoteEvent> fInBarOne { { 0.5, 65 } };    // F over Dm7 (minor 3rd)
+    const std::vector<NoteEvent> fInBarTwo { { 2.5, 65 } };    // F over G7 (flat 7th, accepted)
+    check (evaluateImprovisationOverTimeline (fInBarOne, timeline, 120.0).errors == 0,
+           "F is a chord tone of Dm7");
+    check (evaluateImprovisationOverTimeline (fInBarTwo, timeline, 120.0).errors == 0,
+           "F is the flat seventh of G7");
+
+    // The form loops, exactly like the bed: bar 3 is bar 1 again.
+    const std::vector<NoteEvent> afterTheForm { { 4.5, 63 } };  // Eb over Dm7 (bar 3)
+    check (evaluateImprovisationOverTimeline (afterTheForm, timeline, 120.0).errors == 1,
+           "after the form ends the harmony starts over");
+
+    // A single-chord model is still a form (P1): every bar is the same context.
+    if (const auto* h1 = harmony::findModel ("H1"))
+    {
+        const auto vamp = harmony::timelineFor (*h1);
+        const std::vector<NoteEvent> overTheVamp { { 0.0, 69 }, { 2.0, 72 }, { 4.0, 76 } };
+        const auto result = evaluateImprovisationOverTimeline (overTheVamp, vamp, 120.0);
+        check (result.errors == 0, "a one-chord vamp accepts its own chord tones anywhere");
+        check (result.passed, "a one-chord vamp passes a phrase in its harmony");
+    }
+
+    // No form, no grading: an empty timeline cannot invent a context.
+    const auto empty = evaluateImprovisationOverTimeline (followsTheChanges, {}, 120.0);
+    check (empty.total == 0, "an empty form grades nothing");
+}
+
 void testRestNotes()
 {
     std::cout << "RestNotes\n";
@@ -3645,73 +3814,200 @@ void testModule11()
         }
     }
 
-    // Improvisation exercises (REQ-011/REQ-012) carry a rest-note context and are
-    // not gated by the grid.
+    // --- Improvisation programme (docs/MUSIC.md, Etapa 11) ----------------
+    //
+    // Central rule: no exercise runs on a bare scale. Every exercise declares the
+    // bed it plays over, the cadence the topic teaches and its harmonic level.
+    {
+        int declared = 0;
+        for (const auto& e : m11->exercises)
+        {
+            check (e.bedModelId.isNotEmpty(),
+                   "exercise " + e.id + " declares its backing model (no bare scale)");
+            check (course::harmony::findModel (e.bedModelId) != nullptr,
+                   "exercise " + e.id + " declares a catalogued backing model ("
+                       + e.bedModelId + ")");
+            check (course::harmony::findCadence (e.cadenceId) != nullptr,
+                   "exercise " + e.id + " declares a catalogued cadence (" + e.cadenceId + ")");
+            check (e.harmonicLevel >= 1 && e.harmonicLevel <= 7,
+                   "exercise " + e.id + " declares a harmonic level P1..P7");
+            check (! e.harmony.empty(),
+                   "exercise " + e.id + " carries the form it is judged against");
+
+            if (e.bedModelId.isNotEmpty() && e.harmonicLevel >= 1)
+                ++declared;
+
+            // The bed the student hears *is* the declared model: same chords, in
+            // the same order. A bed that drifts from the declaration would grade
+            // the student against harmony that is not playing.
+            const auto bed = course::backingArrangementFor (*m11, e);
+            const auto* model = course::harmony::findModel (e.bedModelId);
+            if (model != nullptr)
+            {
+                bool same = bed.chords.size() == model->chords.size();
+                if (same)
+                    for (std::size_t i = 0; i < model->chords.size(); ++i)
+                    {
+                        auto played = bed.chords[i].pitchClasses;
+                        auto declaredChord = model->chords[i].pitchClasses;
+                        std::sort (played.begin(), played.end());
+                        std::sort (declaredChord.begin(), declaredChord.end());
+                        if (played != declaredChord)
+                            same = false;
+                    }
+                check (same, "exercise " + e.id + " plays exactly the bed it declares ("
+                                 + e.bedModelId + ")");
+            }
+
+            // The form the app grades against is the same model, chord by chord.
+            if (model != nullptr)
+            {
+                bool sameForm = e.harmony.size() == model->chords.size();
+                if (sameForm)
+                    for (std::size_t i = 0; i < model->chords.size(); ++i)
+                        if (e.harmony[i].context.chordPitchClasses
+                                != model->chords[i].pitchClasses)
+                            sameForm = false;
+                check (sameForm, "exercise " + e.id + " grades against the declared form ("
+                                     + e.bedModelId + ")");
+            }
+        }
+        check (declared == (int) m11->exercises.size(),
+               "every module 11 exercise declares bed, cadence and level");
+    }
+
+    // Harmonic levels progress P1 -> P2 -> P3 inside each topic (doc §4, Etapa
+    // 11: "Progressão harmônica da etapa: P1 → P2 → P3"), so the third exercise
+    // is never easier than the first.
+    for (const auto& topic : m11->lessons)
+    {
+        std::vector<int> levels;
+        for (const auto& e : m11->exercises)
+            if (e.lessonId == topic.id && ! e.isGate)
+                levels.push_back (e.harmonicLevel);
+
+        check (levels.size() == 3, juce::String ("topic ") + topic.id + " has three exercises");
+        if (levels.size() == 3)
+        {
+            check (levels[0] == 1 && levels[1] == 2 && levels[2] == 3,
+                   juce::String ("topic ") + topic.id + " walks P1 -> P2 -> P3");
+        }
+    }
+
+    // The (bed, cadence) pairs follow the Etapa 11 table of the programme. The
+    // cells list alternatives ("H4/H5, C15/C16"); an empty cadence list means the
+    // table prescribes only the bed for that exercise.
+    {
+        struct Cell { const char* topic; const char* bed; const char* cadence; };
+        const std::vector<Cell> cells {
+            { "A", "H1", "C02" }, { "A", "H5", "C16" }, { "A", "H7", "C18" },
+            { "B", "H1", "C02" }, { "B", "H4", "C15" }, { "B", "H6", "C13" },
+            { "C", "H1", "C02" }, { "C", "H5", "C16" }, { "C", "H13", "C10" },
+            { "D", "H1", "C02" }, { "D", "H5", "C16" }, { "D", "H12", "C10" },
+            { "E", "H1", "" },    { "E", "H4", "" },    { "E", "H17", "" },
+            { "F", "H2", "" },    { "F", "H4", "" },    { "F", "H6", "" },
+            { "G", "H2", "C01" }, { "G", "H6", "C05" }, { "G", "H10", "C24" },
+            { "H", "H1", "C17" }, { "H", "H9", "C23" }, { "H", "H19", "C27" },
+            { "I", "H1", "C06" }, { "I", "H9", "C23" }, { "I", "H16", "C27" },
+            { "J", "H2", "" },    { "J", "H5", "" },    { "J", "H8", "C22" },
+        };
+
+        for (const auto& cell : cells)
+        {
+            const Exercise* chosen = nullptr;
+            for (const auto& e : m11->exercises)
+                if (e.lessonId == cell.topic && e.bedModelId == cell.bed)
+                    chosen = &e;
+
+            check (chosen != nullptr,
+                   juce::String ("topic ") + cell.topic + " uses the bed " + cell.bed
+                       + " the programme prescribes");
+
+            if (chosen != nullptr && juce::String (cell.cadence).isNotEmpty())
+                check (chosen->cadenceId == cell.cadence,
+                       juce::String ("topic ") + cell.topic + " exercise over " + cell.bed
+                           + " cites the cadence " + cell.cadence);
+        }
+    }
+
+    // The expected notes of a played exercise have to fit the harmony under them:
+    // a lick that names notes outside every chord scale of the bed teaches a
+    // phrase the student cannot use there.
+    for (const auto& e : m11->exercises)
+    {
+        if (e.targets.empty())
+            continue;
+
+        std::vector<int> allowed;
+        for (const auto& segment : e.harmony)
+            for (int pc : segment.context.scalePitchClasses)
+                allowed.push_back (pc);
+
+        bool fits = true;
+        for (const auto& target : e.targets)
+            if (std::find (allowed.begin(), allowed.end(), target.midi % 12) == allowed.end())
+                fits = false;
+
+        check (fits, "exercise " + e.id + " plays only notes the bed's harmony accepts");
+    }
+
+    // Improvisation exercises (REQ-011/REQ-012) are graded by note role against
+    // the form and are not gated by the grid.
     int improvCount = 0;
     for (const auto& e : m11->exercises)
         if (e.isImprovisation())
         {
             ++improvCount;
             check (! e.restNotes.chordPitchClasses.empty(),
-                   "improvisation exercise " + e.id + " defines the chord (rest notes)");
+                   "improvisation exercise " + e.id + " defines the opening context");
             check (! e.usesGrid, "improvisation exercise " + e.id + " is not grid-gated");
         }
-    check (improvCount >= 1, "module 11 evaluates improvisation (REQ-011/REQ-012)");
+    check (improvCount >= 10, "every topic ends with an improvisation over its form");
 
-    // The pentatonic topics follow the primary source (the apostila): both the
-    // "pentatônica menor 7" and the "pentatônica menor 6" are FIVE-note scales.
-    // The apostila fusion is explicit: "a escala pentatônica menor 7 é formada
-    // por 5 notas". The menor 7 is 1-b3-4-5-b7 (A C D E G) and the menor 6 is
-    // 1-b3-4-5-6 (A C D E F#) — the sixth replaces the seventh, no extra note.
-    for (const auto& e : m11->exercises)
+    // The pentatonic topics keep the apostila's definition: both pentatonics are
+    // FIVE-note scales, and the topic's lick is where that sounds (the exercises
+    // now carry them over a bed instead of a bare scale).
+    for (const auto& lick : m11->licks)
     {
-        if (e.id == "EX-11.C.2")
+        auto pitchClasses = [&lick]
         {
-            std::vector<int> got;
-            for (const auto& t : e.targets)
-                got.push_back (t.midi);
-            check (got == std::vector<int> { 69, 72, 74, 76, 79, 81, 79, 76, 74, 72, 69 },
+            std::vector<int> out;
+            for (int midi : lick.notes)
+                out.push_back (midi % 12);
+            std::sort (out.begin(), out.end());
+            out.erase (std::unique (out.begin(), out.end()), out.end());
+            return out;
+        }();
+
+        if (lick.id == "LK-11.C")
+            check (pitchClasses == std::vector<int> { 0, 2, 4, 7, 9 },
                    "pentatônica menor 7 is the five-note scale A C D E G (apostila)");
-        }
-        if (e.id == "EX-11.D.2")
-        {
-            std::vector<int> got;
-            for (const auto& t : e.targets)
-                got.push_back (t.midi);
-            check (got == std::vector<int> { 69, 72, 74, 76, 78, 81, 78, 76, 74, 72, 69 },
+        if (lick.id == "LK-11.D")
+            check (pitchClasses == std::vector<int> { 0, 2, 4, 6, 9 },
                    "pentatônica menor 6 is the five-note scale A C D E F# (apostila)");
-        }
     }
 
-    // The menor 6 improvisation runs over an m6 chord (A C E F#) and the menor 7
-    // over an m7 chord (A C E G): the chord decides which pentatonic is used.
+    // The pentatonic topics end on the blues (doc, Etapa 11 row 2): the menor 7
+    // over the minor blues, the menor 6 over the major blues.
     for (const auto& e : m11->exercises)
     {
         if (e.id == "EX-11.C.3")
-            check (e.restNotes.chordPitchClasses == std::vector<int> { 9, 0, 4, 7 },
-                   "EX-11.C.3 (menor 7) runs over Am7 (A C E G)");
+        {
+            check (e.bedModelId == "H13", "EX-11.C.3 (menor 7) runs over the minor blues");
+            check (e.harmony.size() == 12, "EX-11.C.3 keeps the twelve-bar form");
+            check (e.harmony.front().context.chordPitchClasses
+                       == std::vector<int> { 0, 4, 7, 9 },
+                   "EX-11.C.3 opens on Am7 (A C E G)");
+        }
         if (e.id == "EX-11.D.3")
         {
-            check (e.restNotes.chordPitchClasses == std::vector<int> { 9, 0, 4, 6 },
-                   "EX-11.D.3 (menor 6) runs over Am6 (A C E F#)");
-            check (e.restNotes.scalePitchClasses == std::vector<int> { 9, 0, 2, 4, 6 },
-                   "EX-11.D.3 (menor 6) uses the five-note scale A C D E F#");
+            check (e.bedModelId == "H12", "EX-11.D.3 (menor 6) runs over the major blues");
+            check (e.harmony.size() == 12, "EX-11.D.3 keeps the twelve-bar form");
+            check (e.harmony.front().context.chordPitchClasses
+                       == std::vector<int> { 1, 4, 7, 9 },
+                   "EX-11.D.3 opens on A7 (A C# E G)");
         }
     }
-
-    // A tonic improvisation over Am7 must accept the chord/scale tones and reject
-    // an unsolicited tension — proving the module's exercises are scorable.
-    for (const auto& e : m11->exercises)
-        if (e.id == "EX-11.A.3")
-        {
-            const auto note = [] (int midi) { return course::NoteEvent { 0.0, midi, 0.0f }; };
-            auto ok = course::evaluateImprovisation ({ note (69), note (72), note (76), note (79) },
-                                                     e.restNotes);
-            check (ok.passed, "EX-11.A.3 passes when the student plays the rest notes (A C E G)");
-            auto bad = course::evaluateImprovisation ({ note (69), note (72), note (80) },
-                                                      e.restNotes);
-            check (! bad.passed, "EX-11.A.3 rejects an unsolicited tension (G# over Am7)");
-        }
 
     // Explanation: >=5 pages per topic, at least one table and one image, and the
     // media the client asked for (images, audio, scores with audio).
@@ -3853,6 +4149,17 @@ void testModule11()
                        juce::String ("exercise ") + e.id + " backing chord "
                            + juce::String ((int) i) + " matches the exercise chord");
             }
+        }
+        else if (! e.harmony.empty())
+        {
+            // A declared form (improvisation programme): the bed plays the form,
+            // chord by chord, and the first chord is the opening context.
+            check (progression.size() == e.harmony.size(),
+                   juce::String ("exercise ") + e.id + " plays the whole declared form");
+            for (std::size_t i = 0; i < progression.size() && i < e.harmony.size(); ++i)
+                check (progression[i].pitchClasses == e.harmony[i].context.chordPitchClasses,
+                       juce::String ("exercise ") + e.id + " backing chord "
+                           + juce::String ((int) i) + " is the declared form's chord");
         }
         else if (! e.restNotes.chordPitchClasses.empty())
         {
@@ -4555,6 +4862,8 @@ int main()
     testBackingStyles();
     testBackingTrack();
     testRestNotes();
+    testHarmonyLibrary();
+    testImprovisationTimeline();
     testProgressDatabase();
     testProgressStore();
     testSharedSettings();

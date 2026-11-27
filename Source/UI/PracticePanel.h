@@ -69,6 +69,9 @@ public:
 
 private:
     void refreshExerciseList();
+
+    // Text of the harmonic context line (see refreshExerciseRow).
+    static juce::String describeHarmony (const Exercise* exercise);
     void refreshExerciseRow();
     void syncMetronomeFromModule();
     void updateButtonStates();
@@ -156,6 +159,11 @@ private:
 
     // Scoreboard (Acertos x/y · aproveitamento z%), always shown.
     juce::Label measurementLabel;
+
+    // Harmonic context the exercise declares (improvisation programme): the bed
+    // model, its chords, the harmonic level and the cadence. The student sees the
+    // harmony the app is judging against.
+    juce::Label harmonicLabel;
 
     // Guidance box: what the student must do in the armed exercise.
     juce::Label guidanceLabel;

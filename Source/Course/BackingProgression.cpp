@@ -160,6 +160,17 @@ namespace
     {
         std::vector<BackingChord> progression;
 
+        // A declared backing model wins over every heuristic: the improvisation
+        // programme fixes the bed each exercise runs over, and the student's
+        // notes are judged against that same form (exercise.harmony).
+        if (exercise.bedModelId.isNotEmpty())
+            if (auto* model = harmony::findModel (exercise.bedModelId))
+            {
+                for (const auto& chord : model->chords)
+                    progression.push_back (toBackingChord (chord.pitchClasses));
+                return progression;
+            }
+
         if (! exercise.chordProgression.empty())
         {
             for (const auto& chord : exercise.chordProgression)
@@ -212,6 +223,10 @@ std::vector<BackingChord> backingProgressionFor (const CourseModule& module,
 
 BackingStyle backingStyleFor (const Exercise& exercise)
 {
+    if (exercise.bedModelId.isNotEmpty())
+        if (auto* model = harmony::findModel (exercise.bedModelId))
+            return model->sambaBed ? BackingStyle::samba : BackingStyle::rock;
+
     const juce::String text = (exercise.title + " " + exercise.goal + " " + exercise.check).toLowerCase();
 
     if (text.contains ("samba") || text.contains ("bossa") || text.contains ("partido")
